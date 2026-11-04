@@ -468,10 +468,17 @@ function showHomeText(i, instant = false) {
 }
 
 /* =========================================================================
-   The hand-drawn circle
+   Marks: the hand-made gesture around the selected poster.
+   ?mark=circle (default) | grease | hang | tape. ?marks also shows a chooser;
+   the M key cycles through them.
    ========================================================================= */
-const scrA = $('.scribble__a'), scrB = $('.scribble__b');
-let scribbleOn = false;
+const SVGNS = 'http://www.w3.org/2000/svg';
+const markLayer = $('#marks');
+const MARK_NAMES = ['circle', 'grease', 'hang', 'tape', 'hangtape'];
+const params = new URLSearchParams(location.search);
+let markName = MARK_NAMES.includes(params.get('mark')) ? params.get('mark') : 'circle';
+let scribbleOn = false, markTrack = null, markToken = 0;
+
 function projectCorners(sheet) {
   const a = sheet.aspect;
   return [[-a / 2, -0.5], [a / 2, -0.5], [a / 2, 0.5], [-a / 2, 0.5]].map(([x, y]) => {
@@ -480,22 +487,32 @@ function projectCorners(sheet) {
     return [(v.x + 1) / 2 * VW, (1 - v.y) / 2 * VH];
   });
 }
+function rectCorners(r, pad = 0) {
+  return [[r.left - pad, r.bottom + pad], [r.right + pad, r.bottom + pad], [r.right + pad, r.top - pad], [r.left - pad, r.top - pad]];
+}
+const add = (p, q) => [p[0] + q[0], p[1] + q[1]];
+const sub = (p, q) => [p[0] - q[0], p[1] - q[1]];
+const mul = (p, k) => [p[0] * k, p[1] * k];
+const len2 = (v) => Math.hypot(v[0], v[1]);
+const unit = (v) => mul(v, 1 / (len2(v) || 1));
+const pt = (p) => `${p[0].toFixed(1)},${p[1].toFixed(1)}`;
+
 function smoothPath(pts) {
-  let d = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+  let d = `M${pt(pts[0])}`;
   for (let i = 0; i < pts.length - 1; i++) {
     const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(pts.length - 1, i + 2)];
     const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
     const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
-    d += `C${c1[0].toFixed(1)},${c1[1].toFixed(1)} ${c2[0].toFixed(1)},${c2[1].toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
+    d += `C${pt(c1)} ${pt(c2)} ${pt(p2)}`;
   }
   return d;
 }
-function loopPath(c, seed, turns, grow) {
+function loopPoints(c, seed, turns, grow) {
   const mid = (p, q) => [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
   const L = mid(c[0], c[3]), R = mid(c[1], c[2]), B = mid(c[0], c[1]), T = mid(c[3], c[2]);
   const cx = (L[0] + R[0] + B[0] + T[0]) / 4, cy = (L[1] + R[1] + B[1] + T[1]) / 4;
-  const rx = Math.hypot(R[0] - L[0], R[1] - L[1]) / 2 * 1.2 * grow + 16;
-  const ry = Math.hypot(T[0] - B[0], T[1] - B[1]) / 2 * 1.08 * grow + 16;
+  const rx = len2(sub(R, L)) / 2 * 1.2 * grow + 16;
+  const ry = len2(sub(T, B)) / 2 * 1.08 * grow + 16;
   const rot = Math.atan2(R[1] - L[1], R[0] - L[0]);
   const n = 70, a0 = -Math.PI * 0.6 + seed, span = Math.PI * 2 * turns;
   const pts = [];
@@ -506,36 +523,142 @@ function loopPath(c, seed, turns, grow) {
     const x = rx * wob * g * Math.cos(a), y = ry * wob * g * Math.sin(a);
     pts.push([cx + x * Math.cos(rot) - y * Math.sin(rot), cy + x * Math.sin(rot) + y * Math.cos(rot)]);
   }
-  return smoothPath(pts);
+  return pts;
 }
-function drawStroke(el, d, dur, delay) {
-  el.setAttribute('d', d);
-  const len = el.getTotalLength();
-  el.dataset.len = len;
-  el.style.transition = 'none';
-  el.style.strokeDasharray = `${len}`;
-  el.style.strokeDashoffset = `${len}`;
-  el.getBoundingClientRect();
-  el.style.transition = `stroke-dashoffset ${dur}s cubic-bezier(.62,.05,.28,1) ${delay}s`;
-  el.style.strokeDashoffset = '0';
+const loopPath = (c, seed, turns, grow) => smoothPath(loopPoints(c, seed, turns, grow));
+
+function svg(tag, attrs = {}, parent = markLayer) {
+  const e = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  parent.appendChild(e);
+  return e;
 }
-function rectCorners(r, pad = 0) {
-  return [[r.left - pad, r.bottom + pad], [r.right + pad, r.bottom + pad], [r.right + pad, r.top - pad], [r.left - pad, r.top - pad]];
+function drawPath(d, cls, dur, delay, ease = 'cubic-bezier(.62,.05,.28,1)') {
+  const p = svg('path', { d, class: `mk ${cls}` });
+  const len = p.getTotalLength();
+  p.dataset.len = len;
+  p.style.strokeDasharray = `${len}`;
+  p.style.strokeDashoffset = `${len}`;
+  p.getBoundingClientRect();
+  p.style.transition = `stroke-dashoffset ${dur}s ${ease} ${delay}s`;
+  p.style.strokeDashoffset = '0';
+  return p;
 }
+// screen "up" relative to a poster's top edge
+function edgeFrame(c) {
+  const [BL, BR, TR, TL] = c;
+  const along = unit(sub(TR, TL));
+  let up = [along[1], -along[0]];
+  if (up[1] > 0) up = mul(up, -1);
+  return { BL, BR, TR, TL, along, up, w: len2(sub(TR, TL)), h: len2(sub(TL, BL)) };
+}
+
+const MARKS = {
+  // A fan circling their pick with a marker (the A24 gesture).
+  circle(c) {
+    drawPath(loopPath(c, 0.35, 1.13, 1), 'mk--marker', 0.8, 0);
+    drawPath(loopPath(c, 1.7, 0.78, 1.05), 'mk--marker-thin', 0.6, 0.18);
+  },
+  // A picture editor's china marker circling the select on a contact sheet:
+  // one fast, heavy, waxy loop that overshoots and flicks off.
+  grease(c) {
+    const pts = loopPoints(c, 0.9, 1.07, 1.0);
+    const a = pts[pts.length - 2], b = pts[pts.length - 1];
+    const dir = unit(sub(b, a));
+    pts.push(add(b, add(mul(dir, 26), [6, 10])));
+    drawPath(smoothPath(pts), 'mk--grease', 0.55, 0, 'cubic-bezier(.35,.55,.2,1)');
+  },
+  // An installer marking the wall before hanging: hand-ruled corner guides,
+  // a level line with a centre tick, and crosses where the nails go.
+  hang(c) {
+    const f = edgeFrame(c);
+    const o = Math.max(10, f.w * 0.045);
+    const s = Math.max(12, f.w * 0.07);
+    const corners = [
+      [f.TL, mul(f.along, 1), mul(f.up, -1)], [f.TR, mul(f.along, -1), mul(f.up, -1)],
+      [f.BR, mul(f.along, -1), f.up], [f.BL, f.along, f.up],
+    ];
+    corners.forEach(([p, dx, dy], i) => {
+      const out = add(add(p, mul(dx, -o)), mul(dy, -o));
+      drawPath(`M${pt(add(out, mul(dx, s)))}L${pt(out)}L${pt(add(out, mul(dy, s)))}`, 'mk--pencil', 0.18, 0.04 + i * 0.07);
+    });
+    const lineY = mul(f.up, o + Math.max(14, f.h * 0.05));
+    const a = add(add(f.TL, lineY), mul(f.along, -f.w * 0.16)), b = add(add(f.TR, lineY), mul(f.along, f.w * 0.16));
+    drawPath(`M${pt(a)}L${pt(b)}`, 'mk--pencil', 0.42, 0.3, 'cubic-bezier(.5,0,.2,1)');
+    const m = add(mul(add(a, b), 0.5), [0, 0]);
+    drawPath(`M${pt(add(m, mul(f.up, 9)))}L${pt(add(m, mul(f.up, -9)))}`, 'mk--pencil', 0.12, 0.66);
+    [0.24, 0.76].forEach((t, k) => {
+      const p = add(add(f.TL, mul(sub(f.TR, f.TL), t)), lineY);
+      const r = 5;
+      drawPath(`M${pt(add(p, [-r, -r]))}L${pt(add(p, [r, r]))}`, 'mk--pencil-thin', 0.08, 0.72 + k * 0.1);
+      drawPath(`M${pt(add(p, [r, -r]))}L${pt(add(p, [-r, r]))}`, 'mk--pencil-thin', 0.08, 0.77 + k * 0.1);
+    });
+  },
+  // Two strips of masking tape pressed onto the top corners: put up on the wall.
+  tape(c) {
+    const pieces = [0, 1].map((k) => {
+      const outer = svg('g');
+      const inner = svg('g', { class: 'tape' }, outer);
+      const L = 1, H = 0.27;
+      const jag = (side) => Array.from({ length: 6 }, (_, i) => [side * (L / 2 + (Math.random() - 0.5) * 0.05), -H / 2 + (H * i) / 5]);
+      const left = jag(-1), right = jag(1).reverse();
+      svg('polygon', { class: 'tape__body', points: [...left, ...right].map(([x, y]) => `${x.toFixed(3)},${y.toFixed(3)}`).join(' ') }, inner);
+      inner.style.opacity = '0';
+      inner.style.transform = 'scale(1.3)';
+      inner.getBoundingClientRect();
+      inner.style.transition = `transform .36s cubic-bezier(.2,1.6,.4,1) ${0.05 + k * 0.12}s, opacity .14s linear ${0.05 + k * 0.12}s`;
+      inner.style.transform = 'scale(1)';
+      inner.style.opacity = '1';
+      return outer;
+    });
+    const tilt = [-36 + (Math.random() - 0.5) * 8, 34 + (Math.random() - 0.5) * 8];
+    markTrack = (c2) => {
+      const f = edgeFrame(c2);
+      const ang = (Math.atan2(f.along[1], f.along[0]) * 180) / Math.PI;
+      const size = Math.max(40, f.w * 0.3);
+      [f.TL, f.TR].forEach((p, k) => {
+        pieces[k].setAttribute('transform', `translate(${pt(p)}) rotate(${(ang + tilt[k]).toFixed(1)}) scale(${size.toFixed(1)})`);
+      });
+    };
+    markTrack(c);
+  },
+  // Both: the installer's marks, then the tape.
+  hangtape(c) {
+    MARKS.hang(c);
+    MARKS.tape(c);
+  },
+};
+
 function showScribble(sheet, corners) {
   if (reduced) return;
+  const token = ++markToken;
+  markLayer.replaceChildren();
+  markTrack = null;
   const c = corners || projectCorners(sheet);
-  drawStroke(scrA, loopPath(c, 0.35, 1.13, 1), 0.8, 0);
-  drawStroke(scrB, loopPath(c, 1.7, 0.78, 1.05), 0.6, 0.18);
-  scribbleOn = true;
+  MARKS[markName](c);
+  scribbleOn = token;
+  markLayer.dataset.sheet = sheet ? sheets.indexOf(sheet) : '';
 }
 function hideScribble() {
   if (!scribbleOn) return;
   scribbleOn = false;
-  for (const el of [scrA, scrB]) {
-    el.style.transition = 'stroke-dashoffset .35s cubic-bezier(.55,0,.75,0)';
-    el.style.strokeDashoffset = `${-(+el.dataset.len || 0)}`;
+  markTrack = null;
+  const token = ++markToken;
+  for (const p of markLayer.querySelectorAll('path')) {
+    p.style.transition = 'stroke-dashoffset .35s cubic-bezier(.55,0,.75,0)';
+    p.style.strokeDashoffset = `${-(+p.dataset.len || 0)}`;
   }
+  for (const t of markLayer.querySelectorAll('.tape')) {
+    t.style.transition = 'transform .25s ease-in, opacity .2s ease-in';
+    t.style.transform = 'scale(1.12)';
+    t.style.opacity = '0';
+  }
+  setTimeout(() => { if (token === markToken) markLayer.replaceChildren(); }, 420);
+}
+function setMark(name) {
+  if (!MARK_NAMES.includes(name)) return;
+  markName = name;
+  hideScribble();
 }
 
 /* =========================================================================
@@ -547,14 +670,15 @@ const programView = $('.program');
 const aboutView = $('.about');
 const state = { p: 0, target: 0, mode: 'loading', active: 0, hoverWanted: false, ready: false };
 let sheets = [], portrait = null;
+let tiltK = 1, storyTone = 'night', loaderOn = true;
 
 function layout() {
   const mobile = VW < 760;
   if (mobile) {
     const H = Math.min(Hv * 0.4, Wv * 0.82);
-    return { H, cx: 0, cy: -Hv * 0.01, sx: Wv * 0.62, sy: Hv * 0.04, sz: 1.1, rx: -0.14, ry: -0.34, rz: -0.05 };
+    return { H, cx: 0, cy: -Hv * 0.01, sx: Wv * 0.62, sy: Hv * 0.04, sz: 1.1, rx: -0.14 * tiltK, ry: -0.34 * tiltK, rz: -0.05 * tiltK };
   }
-  return { H: Hv * 0.56, cx: Wv * 0.02, cy: -Hv * 0.03, sx: Wv * 0.33, sy: Hv * 0.19, sz: 2.3, rx: -0.2, ry: -0.42, rz: -0.07 };
+  return { H: Hv * 0.56, cx: Wv * 0.02, cy: -Hv * 0.03, sx: Wv * 0.33, sy: Hv * 0.19, sz: 2.3, rx: -0.2 * tiltK, ry: -0.42 * tiltK, rz: -0.07 * tiltK };
 }
 function carouselTarget(sheet, d, out = sheet.tgt) {
   const l = layout();
@@ -686,7 +810,7 @@ function programHTML(i) {
     <dl class="specs p-specs">${rows(g.specs, 0.42, 0.08)}<div class="specs__row" style="padding:0"><i class="rule" style="--d:${(0.42 + g.specs.length * 0.08).toFixed(2)}s"></i></div></dl>
     <div class="slot slot--hero" data-slot="hero" style="--ar:${sheets[i].aspect}"></div>
   </div>
-  <div class="p-story" data-tone="night" style="--rows:${g.logline.length}">
+  <div class="p-story" data-tone="${storyTone}" style="--rows:${g.logline.length}">
     <div class="p-story__sticky">
       <ol class="p-logline">${g.logline.map((t) => `<li><i class="rule"></i><span class="ln"><span class="ln__i">${t}</span></span></li>`).join('')}</ol>
       <div class="slot slot--story" data-slot="story" style="--ar:${sheets[i].aspect}"></div>
@@ -920,9 +1044,100 @@ function frame(now) {
   camera.lookAt(0, 0, 0);
   sheets.forEach((s) => s.update(dt, now));
   if (portrait) portrait.update(dt, now);
+  if (markTrack && state.mode === 'home') markTrack(projectCorners(sheets[state.active]));
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }
+
+/* =========================================================================
+   Lab: try alternatives without touching the defaults.
+   Every choice lives in the link (?mark=tape&paper=cream ...), so any
+   combination can be sent to someone. ?lab shows the panel; Shift+L toggles it.
+   "Copy link" copies the current version without the panel.
+   ========================================================================= */
+const root = document.documentElement;
+const TYPES = {
+  zodiak: { family: "'Zodiak'" },
+  gambetta: { family: "'Gambetta'", css: 'https://api.fontshare.com/v2/css?f[]=gambetta@300,400,401&display=swap' },
+  caslon: { family: "'Libre Caslon Display'", css: 'https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&display=swap' },
+  instrument: { family: "'Instrument Serif'", css: 'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap' },
+};
+const PAPERS = { warm: '#eeece8', cream: '#f2ebe0', white: '#f3f3f1', stone: '#e3dfd8' };
+const ACCENTS = { oxblood: '#470000', brick: '#891a20', ink: '#121110' };
+const GRAINS = { off: 0, soft: 0.11, strong: 0.22 };
+const TILTS = { flat: 0.35, soft: 1, strong: 1.6 };
+
+const LAB = {
+  mark: { label: 'Selection mark', def: 'circle', options: [['circle', 'Circle'], ['grease', 'Grease pencil'], ['hang', 'Hanging marks'], ['tape', 'Tape'], ['hangtape', 'Tape + marks']], apply: (v) => setMark(v) },
+  type: { label: 'Title type', def: 'zodiak', options: [['zodiak', 'Zodiak'], ['gambetta', 'Gambetta'], ['caslon', 'Libre Caslon'], ['instrument', 'Instrument Serif']], apply: (v) => {
+    const t = TYPES[v];
+    if (t.css && !document.querySelector(`link[data-type="${v}"]`)) {
+      const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = t.css; l.dataset.type = v; document.head.appendChild(l);
+    }
+    root.style.setProperty('--serif', `${t.family}, 'Times New Roman', Georgia, serif`);
+    root.dataset.type = v;
+  } },
+  paper: { label: 'Paper', def: 'warm', options: [['warm', 'Warm grey'], ['cream', 'Cream'], ['white', 'Cool white'], ['stone', 'Stone']], apply: (v) => root.style.setProperty('--paper', PAPERS[v]) },
+  accent: { label: 'Accent', def: 'oxblood', options: [['oxblood', 'Oxblood'], ['brick', 'Brick red'], ['ink', 'Ink']], apply: (v) => root.style.setProperty('--oxblood', ACCENTS[v]) },
+  grain: { label: 'Grain', def: 'soft', options: [['off', 'Off'], ['soft', 'Soft'], ['strong', 'Strong']], apply: (v) => root.style.setProperty('--grain', GRAINS[v]) },
+  tilt: { label: 'Poster tilt', def: 'soft', options: [['flat', 'Flat'], ['soft', 'Soft'], ['strong', 'Strong']], apply: (v) => { tiltK = TILTS[v]; } },
+  story: { label: 'Program story section', def: 'night', options: [['night', 'Night'], ['stone', 'Stone'], ['paper', 'Paper']], apply: (v) => {
+    storyTone = v;
+    const st = $('.p-story', programView);
+    if (st) st.dataset.tone = v;
+  } },
+  loader: { label: 'Loader', def: 'on', options: [['on', 'On'], ['off', 'Off']], apply: (v) => { loaderOn = v === 'on'; } },
+};
+const lab = {};
+for (const k in LAB) {
+  const v = params.get(k);
+  lab[k] = LAB[k].options.some(([o]) => o === v) ? v : LAB[k].def;
+  LAB[k].apply(lab[k]);
+}
+
+const labEl = $('.lab');
+function labLink(withPanel) {
+  const u = new URL(location.href);
+  for (const k in LAB) { if (lab[k] === LAB[k].def) u.searchParams.delete(k); else u.searchParams.set(k, lab[k]); }
+  if (withPanel) u.searchParams.set('lab', ''); else u.searchParams.delete('lab');
+  return `${u.origin}${u.pathname}${u.search.replace(/=(?=&|$)/g, '')}${u.hash}`;
+}
+function setLab(k, v) {
+  lab[k] = v;
+  LAB[k].apply(v);
+  labEl.querySelectorAll(`[data-k="${k}"]`).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+  history.replaceState(null, '', labLink(!labEl.hidden));
+}
+function buildLab() {
+  labEl.innerHTML =
+    `<div class="lab__head"><button type="button" class="lab__title" data-act="min" aria-expanded="true">Lab</button><span class="lab__actions"><button type="button" data-act="copy">Copy link</button><button type="button" data-act="reset">Reset</button><button type="button" data-act="close" aria-label="Close the lab">×</button></span></div>` +
+    Object.entries(LAB).map(([k, d]) => `<div class="lab__row"><span class="lab__label">${d.label}</span><div class="lab__opts" role="group" aria-label="${d.label}">${d.options.map(([v, l]) => `<button type="button" data-k="${k}" data-v="${v}" aria-pressed="${lab[k] === v}">${l}${v === d.def ? '<i class="lab__live" title="The live site uses this"></i>' : ''}</button>`).join('')}</div></div>`).join('') +
+    `<p class="lab__note">A dot marks what the live site uses. Every change is kept in the link; "Copy link" copies this exact version without the panel. Shift+L hides the lab.</p>`;
+}
+function toggleLab(on = labEl.hidden) {
+  if (on && !labEl.innerHTML) {
+    buildLab();
+    if (VW < 760) { labEl.classList.add('is-min'); $('.lab__title', labEl).setAttribute('aria-expanded', 'false'); }
+  }
+  labEl.hidden = !on;
+  history.replaceState(null, '', labLink(on));
+}
+labEl.addEventListener('click', async (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  if (b.dataset.k) setLab(b.dataset.k, b.dataset.v);
+  else if (b.dataset.act === 'close') toggleLab(false);
+  else if (b.dataset.act === 'min') { const min = labEl.classList.toggle('is-min'); b.setAttribute('aria-expanded', String(!min)); }
+  else if (b.dataset.act === 'reset') { for (const k in LAB) setLab(k, LAB[k].def); }
+  else if (b.dataset.act === 'copy') {
+    const link = labLink(false);
+    try { await navigator.clipboard.writeText(link); b.textContent = 'Copied'; }
+    catch { prompt('Copy this link', link); }
+    setTimeout(() => (b.textContent = 'Copy link'), 1600);
+  }
+});
+addEventListener('keydown', (e) => { if (e.shiftKey && (e.key === 'L' || e.key === 'l')) toggleLab(); });
+if (params.has('lab')) toggleLab(true);
 
 /* =========================================================================
    Boot: load, count, hang the posters
@@ -963,10 +1178,10 @@ async function boot() {
   // start edge-on, far back, then hang one by one
   sheets.forEach((s, i) => {
     carouselTarget(s, i);
-    Object.assign(s.cur, s.tgt, { z: s.tgt.z - 5, ry: s.tgt.ry + Math.PI * 0.5, y: s.tgt.y - 0.6, o: 0 });
-    s.rate = 3.2;
+    Object.assign(s.cur, s.tgt, loaderOn ? { z: s.tgt.z - 5, ry: s.tgt.ry + Math.PI * 0.5, y: s.tgt.y - 0.6, o: 0 } : { o: 0 });
+    s.rate = loaderOn ? 3.2 : 6;
   });
-  const wait = Math.max(0, 1450 - (performance.now() - t0));
+  const wait = loaderOn ? Math.max(0, 1450 - (performance.now() - t0)) : 0;
   await new Promise((r) => setTimeout(r, wait));
   counter.textContent = '100';
   body.classList.remove('is-loading');
