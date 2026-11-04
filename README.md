@@ -2,6 +2,8 @@
 
 Portfolio site for Vanessa Espín, built with Astro 7 from the approved Oct 29 design. [CHARTER.md](CHARTER.md) holds the scope, the facts the site may state, the design spec and the writing rules; read it before changing anything. `design-reference/` holds the approved mocks (reference only, never published) and `docs/design-enhancements.md` the polish spec built on top of them.
 
+> **What GitHub Pages shows right now:** the "printed matter" prototype in [`prototype/printed-matter/`](prototype/printed-matter/README.md), the new design direction (Nov 4), at **https://pkollias.github.io/Vanessa-Espin-website/**. It is static and deploys on every push to `main`; the Astro site below is not deployed there for now (see the comment at the top of `.github/workflows/pages.yml` to switch back).
+
 ## See it on your Mac
 
 Open Terminal and run:

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vanessa Espín</title>
+<meta name="description" content="Vanessa Espín produces and designs exhibitions and events in New York.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#eeece8">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Vanessa Espín">
+<meta property="og:title" content="Vanessa Espín">
+<meta property="og:description" content="Vanessa Espín produces and designs exhibitions and events in New York.">
+<meta property="og:url" content="https://pkollias.github.io/Vanessa-Espin-website/">
+<meta property="og:image" content="https://pkollias.github.io/Vanessa-Espin-website/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Iyuana poster as a printed sheet on paper, circled in hand-drawn red, beside the Ayazamana poster.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://api.fontshare.com">
+<link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=zodiak@300,400,401&f[]=switzer@400,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js" } }</script>
+<script type="module" src="app.js"></script>
+</head>
+<body class="is-loading">
+<div class="page-bg" aria-hidden="true"></div>
+<canvas id="gl" aria-hidden="true"></canvas>
+
+<svg class="scribble" aria-hidden="true">
+  <defs>
+    <filter id="rough" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+  <path class="scribble__a" filter="url(#rough)"/>
+  <path class="scribble__b" filter="url(#rough)"/>
+</svg>
+
+<nav class="nav" aria-label="Main">
+  <a class="nav__mark" href="#/" aria-label="Vanessa Espín, programs">
+    <svg viewBox="0 0 64 64" aria-hidden="true"><text x="32" y="44" text-anchor="middle">VE</text></svg>
+  </a>
+  <a class="nav__link is-current" href="#/" data-nav="programs">Programs</a>
+  <a class="nav__link" href="#/about" data-nav="about">About</a>
+  <div class="nav__index">
+    <button class="nav__link nav__index-btn" type="button" aria-expanded="false" aria-controls="index-panel">
+      <span class="nav__status">Index</span>
+      <svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
+    </button>
+    <div class="index" id="index-panel" hidden>
+      <ul class="index__list" role="list"></ul>
+    </div>
+  </div>
+</nav>
+
+<div class="loader" aria-hidden="true">
+  <span class="loader__edge loader__edge--l">Vanessa Espín</span>
+  <span class="loader__count">0</span>
+  <span class="loader__edge loader__edge--r">New York</span>
+</div>
+
+<main id="main">
+  <section class="home" data-view="home" aria-label="Programs">
+    <div class="home__info">
+      <h2 class="home__title"></h2>
+      <dl class="specs home__specs"></dl>
+    </div>
+    <div class="home__blurbs"></div>
+    <p class="home__corner home__corner--l"><span class="ln"><span class="ln__i">I produce and design exhibitions and events in New York.</span></span></p>
+    <p class="home__corner home__corner--r"><span class="ln"><span class="ln__i"><span class="home__count">01 / 04</span><span class="home__hint">Scroll, drag or use the arrow keys</span></span></span></p>
+    <a class="home__open" href="#/iyuana">Open program</a>
+  </section>
+
+  <section class="program" data-view="program" hidden></section>
+  <section class="about" data-view="about" hidden></section>
+</main>
+
+<div class="grain" aria-hidden="true"></div>
+</body>
+</html>

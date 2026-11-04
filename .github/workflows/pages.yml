@@ -1,4 +1,8 @@
-# Builds the showcase and publishes it to GitHub Pages on every push to main.
+# Publishes the "printed matter" prototype (prototype/printed-matter) to GitHub Pages
+# on every push to main. It is static, so there is no build step.
+# The Astro site in src/ is not deployed here for now. To publish it again, restore
+# the build steps from commit b476bd8 (npm ci, then npm run build:showcase with
+# SITE_URL and BASE_PATH from configure-pages, then upload dist).
 # One-time setup: repository Settings → Pages → Build and deployment → Source: "GitHub Actions".
 name: GitHub Pages
 
@@ -21,21 +25,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-      - id: pages
-        uses: actions/configure-pages@v6
-      - run: npm ci
-      # A project site lives under /<repository>/; GitHub reports the address and base path.
-      - run: npm run build:showcase
-        env:
-          SITE_URL: ${{ steps.pages.outputs.origin }}
-          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+      - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
-          path: dist
+          path: prototype/printed-matter
 
   deploy:
     needs: build
