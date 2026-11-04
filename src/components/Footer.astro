@@ -1,0 +1,82 @@
+---
+import { getSite } from '../lib/content';
+import { SHOW_TODOS, unit } from '../lib/todo';
+
+const site = await getSite();
+const year = new Date().getFullYear();
+const instagram = unit(site.instagram);
+---
+
+<footer class="site-footer">
+  <p class="credit-line">© {year} {site.name}&nbsp;· {site.city}</p>
+  <p class="links">
+    <a class="hit" href={`mailto:${site.email}`}>{site.email}</a>
+    {
+      instagram && (
+        <>
+          <span class="sep" aria-hidden="true">&nbsp;·</span>{' '}
+          <a class="hit" href={instagram}>Instagram</a>
+        </>
+      )
+    }
+    {
+      !instagram && SHOW_TODOS && (
+        <>
+          <span class="sep" aria-hidden="true">&nbsp;·</span> Instagram <span class="todo">[@handle]</span>
+        </>
+      )
+    }
+  </p>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--rule);
+    padding: clamp(24px, 22.27px + 0.4624vw, 28px) 0 clamp(32px, 28.53px + 0.9249vw, 40px);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 1rem;
+    color: var(--muted);
+  }
+
+  a {
+    color: var(--muted);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    a:hover {
+      color: var(--oxblood);
+    }
+  }
+
+  /* Phone: centred, with each link a full tap-height row. */
+  @media (max-width: 639.98px) {
+    .site-footer {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 6px;
+    }
+
+    .links {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .links a {
+      display: inline-block;
+      padding: 12px 4px;
+    }
+
+    .links .sep {
+      display: none;
+    }
+
+    .hit::after {
+      content: none;
+    }
+  }
+</style>

@@ -1,0 +1,146 @@
+---
+// Header (CHARTER §8.3.1): nav left, logo centred, social links right. The logo
+// comes first in the DOM so phones can stack it on top; the grid keeps the
+// desktop layout of the mock.
+import { getSite } from '../lib/content';
+import { withBase } from '../lib/paths';
+import { SHOW_TODOS, unit } from '../lib/todo';
+
+export type Section = 'programs' | 'brand-work' | 'about' | 'contact' | undefined;
+
+interface Props {
+  section?: Section;
+  /** True on the section's own index page, where the link is the current page. */
+  atIndex?: boolean;
+}
+
+const { section, atIndex = false } = Astro.props;
+const site = await getSite();
+
+const nav = [
+  { key: 'programs', href: '/', label: 'Programs' },
+  { key: 'brand-work', href: '/brand-work', label: 'Brand Work' },
+  { key: 'about', href: '/about', label: 'About' },
+  { key: 'contact', href: '/contact', label: 'Contact' },
+] as const;
+
+const instagram = unit(site.instagram);
+---
+
+<header class="site-header">
+  <a class="logo" href={withBase('/')}>{site.name}</a>
+  <nav class="site-nav" aria-label="Main">
+    <ul role="list">
+      {
+        nav.map((item) => (
+          <li>
+            <a class="hit" href={withBase(item.href)} aria-current={section === item.key ? (atIndex ? 'page' : 'true') : undefined}>
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+  <ul class="social" role="list" aria-label="Elsewhere">
+    {instagram && <li><a class="hit" href={instagram}>Instagram</a></li>}
+    {!instagram && SHOW_TODOS && <li><span class="todo">[Instagram]</span></li>}
+    <li><a class="hit" href={site.linkedin}>LinkedIn</a></li>
+    <li><a class="hit" href={`mailto:${site.email}`}>Email</a></li>
+  </ul>
+</header>
+
+<style>
+  .site-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-areas: 'nav logo social';
+    align-items: center;
+    gap: 12px 24px;
+    padding: clamp(20px, 13.93px + 1.6185vw, 34px) 0 clamp(16px, 11.665px + 1.1561vw, 26px);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .logo {
+    grid-area: logo;
+    justify-self: center;
+    white-space: nowrap;
+    font-size: 1.875rem;
+    letter-spacing: 0.0067em;
+    color: var(--oxblood);
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .logo:hover {
+    color: var(--oxblood);
+  }
+
+  .site-nav {
+    grid-area: nav;
+  }
+
+  .site-nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    font-size: 1.125rem;
+  }
+
+  .site-nav [aria-current] {
+    color: var(--oxblood);
+    font-weight: 600;
+  }
+
+  .social {
+    grid-area: social;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 18px;
+    font-size: 1rem;
+    color: var(--muted);
+  }
+
+  .social a {
+    color: var(--muted);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .social a:hover {
+      color: var(--oxblood);
+    }
+  }
+
+  /* Tablet: the logo on its own row, nav and socials below it. */
+  @media (max-width: 959.98px) {
+    .site-header {
+      grid-template-columns: 1fr auto;
+      grid-template-areas: 'logo logo' 'nav social';
+      row-gap: 14px;
+    }
+  }
+
+  /* Phone: logo, then the nav on one row, then the socials. Nothing is hidden. */
+  @media (max-width: 639.98px) {
+    .site-header {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas: 'logo' 'nav' 'social';
+      row-gap: 16px;
+    }
+
+    .site-nav ul {
+      flex-wrap: nowrap;
+      justify-content: space-between;
+      gap: 0 8px;
+      font-size: clamp(16px, 11.6px + 1.5vw, 18px);
+    }
+
+    .social {
+      justify-content: center;
+      gap: 28px;
+      font-size: 0.9375rem;
+      margin-top: 8px;
+    }
+  }
+</style>

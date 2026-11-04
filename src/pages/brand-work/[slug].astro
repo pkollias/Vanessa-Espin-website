@@ -1,0 +1,26 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import ProjectPage from '../../components/ProjectPage.astro';
+import { getBrandWork, getPrograms } from '../../lib/content';
+import { cardFor, ogPath } from '../../lib/og';
+import { clean } from '../../lib/todo';
+
+export const getStaticPaths = (async () => {
+  const work = await getBrandWork();
+  const programs = await getPrograms();
+  // A brand work page ends on the programs, which lead the site.
+  return work.map((entry) => ({ params: { slug: entry.id }, props: { entry, more: programs } }));
+}) satisfies GetStaticPaths;
+
+const { entry, more } = Astro.props;
+const { Content } = await render(entry);
+const card = await cardFor(entry);
+---
+
+<Base title={entry.data.title} description={clean(entry.data.description)} ogImage={ogPath(card)} section="brand-work">
+  <ProjectPage entry={entry} more={more} moreLabel="Programs">
+    <Content />
+  </ProjectPage>
+</Base>

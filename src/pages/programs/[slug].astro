@@ -1,0 +1,28 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import ProjectPage from '../../components/ProjectPage.astro';
+import { getPrograms } from '../../lib/content';
+import { cardFor, ogPath } from '../../lib/og';
+import { clean } from '../../lib/todo';
+
+export const getStaticPaths = (async () => {
+  const programs = await getPrograms();
+  return programs.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry, more: programs.filter((p) => p.id !== entry.id) },
+  }));
+}) satisfies GetStaticPaths;
+
+const { entry, more } = Astro.props;
+const { Content } = await render(entry);
+const card = await cardFor(entry);
+const shareAlt = card.kind === 'program' ? `${entry.data.title} poster` : undefined;
+---
+
+<Base title={entry.data.title} description={clean(entry.data.description)} ogImage={ogPath(card)} ogImageAlt={shareAlt} section="programs">
+  <ProjectPage entry={entry} more={more} moreLabel="More programs">
+    <Content />
+  </ProjectPage>
+</Base>

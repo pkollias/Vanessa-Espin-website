@@ -1,0 +1,28 @@
+# Until launch, the Netlify site shows the showcase: open notes and empty photo
+# slots are left out, and every page carries noindex.
+#
+# AT LAUNCH (CHARTER §12, before adding the domain): change the command below to
+# "npm run build". That build refuses to run while any {{TODO note remains, so
+# nothing unverified reaches vanessaespin.com, and it is the only build search
+# engines may index. Node version comes from .nvmrc.
+[build]
+  command = "npm run build:showcase"
+  publish = "dist"
+
+# Deploy previews and branch deploys: the finished-looking showcase, with open
+# notes and empty photo slots left out.
+[context.deploy-preview]
+  command = "npm run build:showcase"
+
+[context.branch-deploy]
+  command = "npm run build:showcase"
+
+# A branch named "review" shows every open note and photo placeholder, for
+# going through the gaps with Vanessa.
+[context.review]
+  command = "npm run build:review"
+
+[[headers]]
+  for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

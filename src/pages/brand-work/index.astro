@@ -1,0 +1,51 @@
+---
+import Base from '../../layouts/Base.astro';
+import CoverBand from '../../components/CoverBand.astro';
+import Text from '../../components/Text.astro';
+import { getBrandWork, getSite } from '../../lib/content';
+
+const site = await getSite();
+const work = await getBrandWork();
+---
+
+<Base
+  title="Brand Work"
+  description="Vanessa Espín’s brand and ecommerce work, including four years of art direction at the digital commerce agency Flywheel."
+  section="brand-work"
+  atIndex
+  preloadItalic
+>
+  <section class="masthead">
+    <h1><Text value={site.brandLink} /></h1>
+  </section>
+
+  <div class="bands">
+    {work.map((entry, index) => <CoverBand entry={entry} index={index} priority={index === 0} />)}
+  </div>
+</Base>
+
+<style>
+  .masthead {
+    padding: var(--sp-60) 0 var(--sp-52);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  h1 {
+    max-width: 820px;
+    font-size: var(--fs-statement);
+    line-height: 1.35;
+    font-weight: 400;
+    color: var(--ink);
+    text-wrap: balance;
+  }
+
+  .bands {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-bottom: var(--sp-72);
+  }
+</style>

@@ -1,0 +1,93 @@
+---
+import Base from '../layouts/Base.astro';
+import MetaLine from '../components/MetaLine.astro';
+import OpenItems from '../components/OpenItems.astro';
+import { getSite } from '../lib/content';
+import { withBase } from '../lib/paths';
+import { unit } from '../lib/todo';
+
+const site = await getSite();
+const instagram = unit(site.instagram);
+---
+
+<Base title="Contact" description={`Email Vanessa Espín at ${site.email}.`} section="contact" atIndex>
+  <header class="title-block">
+    <h1>Contact</h1>
+    <MetaLine class="subtitle" parts={[site.city, site.languages]} />
+  </header>
+
+  <section class="contact-band">
+    {site.openTo && <p class="open-to">{site.openTo}</p>}
+    <a class="email" href={`mailto:${site.email}`}>{site.email}</a>
+    <div class="btns">
+      <a class="btn btn--solid on-dark" href={`mailto:${site.email}`}>Email</a>
+      <a class="btn" href={withBase(site.resume)}>Résumé (PDF)</a>
+      <a class="btn" href={site.linkedin}>LinkedIn</a>
+      {instagram && <a class="btn" href={instagram}>Instagram</a>}
+    </div>
+  </section>
+
+  <OpenItems file="src/content/site.yaml" />
+</Base>
+
+<style>
+  .title-block {
+    container: tb / inline-size;
+    padding: var(--sp-64) 0 var(--sp-40);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+  }
+
+  h1 {
+    font-size: var(--fs-project-title);
+    line-height: 1.08;
+    font-weight: 500;
+    color: var(--oxblood);
+  }
+
+  .title-block :global(.subtitle) {
+    font-size: var(--fs-subtitle);
+    color: var(--text-2);
+  }
+
+  .contact-band {
+    background-color: var(--cream);
+    min-height: 260px;
+    padding: 32px;
+    margin-bottom: var(--sp-72);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    text-align: center;
+  }
+
+  .open-to {
+    max-width: 560px;
+    font-size: 1.25rem;
+    line-height: 1.55;
+  }
+
+  .email {
+    font-size: clamp(22px, 6.2vw, 30px);
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
+  .btns {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  @media (max-width: 480px) {
+    .contact-band {
+      padding: 32px 16px;
+    }
+  }
+</style>

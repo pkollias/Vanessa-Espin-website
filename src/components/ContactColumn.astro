@@ -1,0 +1,59 @@
+---
+// The contact column from the About mock (CHARTER §8.5.3).
+import MetaLine from './MetaLine.astro';
+import { getSite } from '../lib/content';
+import { withBase } from '../lib/paths';
+import { SHOW_TODOS, unit } from '../lib/todo';
+
+const site = await getSite();
+const instagram = unit(site.instagram);
+---
+
+<div class="contact">
+  <h2 class="label">Contact</h2>
+  <p class="lines">
+    <a href={`mailto:${site.email}`}>{site.email}</a>
+    {
+      instagram && (
+        <>
+          <br />
+          <a href={instagram}>Instagram</a>
+        </>
+      )
+    }
+    {
+      !instagram && SHOW_TODOS && (
+        <>
+          <br />
+          Instagram <span class="todo">[@handle]</span>
+        </>
+      )
+    }
+    <br />
+    <MetaLine as="span" parts={[site.city, site.languages]} />
+  </p>
+  <div class="buttons">
+    <a class="btn" href={withBase(site.resume)}>Résumé (PDF)</a>
+    <a class="btn" href={site.linkedin}>LinkedIn</a>
+  </div>
+</div>
+
+<style>
+  .contact {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .lines {
+    font-size: var(--fs-lower);
+    line-height: 1.6;
+  }
+
+  .buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 8px;
+  }
+</style>

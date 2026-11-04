@@ -1,0 +1,29 @@
+# Site-wide copy and links. Every line follows CHARTER §10 and the fact base in §7.
+site:
+  name: Vanessa Espín
+  city: New York
+  description: Vanessa Espín produces and designs exhibitions and events in New York.
+  masthead: I produce and design exhibitions and events in New York.
+  # Approved copy. The year range only holds if the Enchante page ships.
+  brandLink: "Brand and ecommerce work, 2020–2025 {{TODO: confirm the 2020 start: keep it only if the Enchante page ships}}"
+  # {{TODO: confirm this is the address you want public (it is the one in the mocks and on the résumé)}}
+  email: vanessa.s.espin@gmail.com
+  # Full URL once known, e.g. https://www.instagram.com/handle
+  instagram: "{{TODO: Instagram handle}}"
+  # {{TODO: confirm the LinkedIn URL (taken from the résumé header)}}
+  linkedin: https://www.linkedin.com/in/vanessaespin
+  languages: "English and Spanish {{TODO: confirm}}"
+  resume: /Vanessa_Espin_Resume.pdf
+  # Optional "open to" line for Contact. Leave null unless she wants to say it.
+  openTo: null
+  # Short third-person bio for press, partners and programs (Appendix A).
+  bio: >-
+    Vanessa Espín is a designer and producer in New York. In 2026 she produced
+    Iyuana: El Retorno de los Sueños, a film and photography exhibition about the
+    Sápara Nation of the Ecuadorian Amazon; curated Herencia Viva: Threads of Memory,
+    painter Luis Medina’s exhibition of Ecuadorian magic realism, at three venues
+    including Flushing Town Hall; and planned Ayazamana, a night of live music and
+    traditional dance, with the Ecuadorian American Cultural Center, where she was
+    Creative & Community Coordinator. She previously spent four years at the digital
+    commerce agency Flywheel, art-directing ecommerce for health, beauty and consumer
+    brands. She studied Communication Design at City Tech, CUNY.

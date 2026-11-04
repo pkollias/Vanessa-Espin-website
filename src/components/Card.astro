@@ -1,0 +1,135 @@
+---
+// A "More programs" card (CHARTER §8.4.8): poster thumb, title and date, the
+// whole card one link. Without a poster or grid image it is a text card.
+import { Picture } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Text from './Text.astro';
+import { projectHref, type Project } from '../lib/content';
+import { slot } from '../lib/slots';
+import { SHOW_TODOS, isPending, type Pending } from '../lib/todo';
+
+interface Props {
+  entry: Project;
+}
+
+const { entry } = Astro.props;
+const d = entry.data;
+const key = `${entry.collection}-${entry.id}`;
+const firstGrid = d.cover.images.map((i) => i.image as Pending<ImageMetadata>).find((i): i is ImageMetadata => !isPending(i));
+const thumb = d.poster ?? firstGrid;
+---
+
+<a
+  class:list={['card', { 'card--text': !thumb && !SHOW_TODOS }]}
+  href={projectHref(entry)}
+  style={`--panel: ${d.cover.panelColor}; --vt-name: poster-${key}`}
+>
+  {
+    thumb ? (
+      <Picture src={thumb} alt="" formats={['avif']} fallbackFormat="webp" {...slot('thumb', thumb)} class="card__thumb" />
+    ) : (
+      SHOW_TODOS && <span class="card__thumb card__thumb--empty" aria-hidden="true" />
+    )
+  }
+  <span class="card__text">
+    <span class="card__title-text" lang={d.titleLang === 'es' ? 'es' : undefined}>{d.title}</span>
+    <span class="card__date"><Text value={d.dateShort} /></span>
+  </span>
+</a>
+
+<style>
+  .card,
+  .card:hover {
+    position: relative;
+    flex: 1 1 260px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    background-color: var(--cream);
+    padding: 12px;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .card:focus-visible {
+    outline-offset: 6px;
+  }
+
+  .card--text {
+    min-height: 114px;
+  }
+
+  .card :global(picture) {
+    display: contents;
+  }
+
+  .card :global(.card__thumb) {
+    display: block;
+    width: 72px;
+    height: 90px;
+    flex-shrink: 0;
+    object-fit: cover;
+    transition: transform var(--t-lift-out) var(--ease-out);
+  }
+
+  .card__thumb--empty {
+    background-color: var(--ph-light);
+  }
+
+  .card__text {
+    display: flex;
+    flex-direction: column;
+    font-size: 1.125rem;
+  }
+
+  .card__title-text {
+    align-self: flex-start;
+    padding-bottom: 1px;
+    background: linear-gradient(currentColor, currentColor) 0 100% / 0% 1px no-repeat;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    text-wrap: balance;
+    transition:
+      color var(--t-color) ease,
+      background-size var(--t-line-out) var(--ease-out);
+  }
+
+  .card__date {
+    font-size: 0.9375rem;
+    font-style: italic;
+    color: var(--muted);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .card:hover .card__title-text {
+      color: var(--oxblood);
+      background-size: 100% 1px;
+      transition-duration: var(--t-color), var(--t-line-in);
+    }
+  }
+
+  .card:focus-visible .card__title-text {
+    color: var(--oxblood);
+    background-size: 100% 1px;
+  }
+
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .card:hover :global(.card__thumb) {
+      transform: scale(1.04);
+      transition-duration: var(--t-lift-in);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .card:focus-visible :global(.card__thumb) {
+      transform: scale(1.04);
+      transition-duration: var(--t-lift-in);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card__title-text {
+      transition: color var(--t-color) ease;
+    }
+  }
+</style>

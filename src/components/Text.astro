@@ -1,0 +1,18 @@
+---
+// Inline text from a content field. In review mode, TODO notes render as
+// [bracketed] text in the surrounding type, like the mocks; in the showcase a
+// CHECK note is dropped and a GAP removes the whole field.
+import { SHOW_TODOS, splitTodo, unit } from '../lib/todo';
+
+interface Props {
+  value?: string | null;
+}
+
+const value = Astro.props.value ?? '';
+---
+
+{
+  SHOW_TODOS
+    ? splitTodo(value).map((part) => ('note' in part ? <span class="todo">[{part.note || 'to come'}]</span> : part.text))
+    : (unit(value) ?? '')
+}

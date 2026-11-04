@@ -1,0 +1,74 @@
+---
+import Base from '../layouts/Base.astro';
+import Card from '../components/Card.astro';
+import { getPrograms } from '../lib/content';
+
+const programs = await getPrograms();
+---
+
+<Base title="Page not found" description="There is no page at this address.">
+  <header class="title-block">
+    <h1>Page not found</h1>
+    <p class="subtitle">There is no page at this address.</p>
+  </header>
+
+  <nav class="more" aria-labelledby="programs-heading">
+    <h2 id="programs-heading" class="more__label">Programs</h2>
+    <div class="more__cards">
+      {programs.map((entry) => <Card entry={entry} />)}
+    </div>
+  </nav>
+</Base>
+
+<style>
+  .title-block {
+    padding: var(--sp-64) 0 var(--sp-40);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+  }
+
+  h1 {
+    font-size: var(--fs-project-title);
+    line-height: 1.08;
+    font-weight: 500;
+    color: var(--oxblood);
+  }
+
+  .subtitle {
+    font-size: var(--fs-subtitle);
+    color: var(--text-2);
+  }
+
+  .more {
+    border-top: 1px solid var(--rule);
+    padding: var(--sp-40) 0 var(--sp-56);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .more__label {
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+
+  .more__cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  @container page (width < 812px) {
+    .more__cards {
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .more__cards > :global(*) {
+      flex: none;
+    }
+  }
+</style>

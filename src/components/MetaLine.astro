@@ -1,0 +1,39 @@
+---
+// A " · " line of facts (type · role, place · date, credits). Each part is its
+// own segment: at desktop widths the line wraps exactly like the mocks; below
+// that a fact never breaks in the middle, and narrow containers can set one
+// fact per line (see .seg rules in the components that use it).
+import Text from './Text.astro';
+import { segments } from '../lib/todo';
+
+interface Props {
+  parts: Array<string | null | undefined>;
+  class?: string;
+  id?: string;
+  as?: 'p' | 'span' | 'div';
+}
+
+const { parts, class: className, id, as: Tag = 'p' } = Astro.props;
+const segs = segments(...parts);
+---
+
+{
+  segs.length > 0 && (
+    <Tag class:list={['meta', className]} id={id}>
+      {segs.map((seg, i) =>
+        i < segs.length - 1 ? (
+          <>
+            <span class="seg">
+              <Text value={seg} />
+              <span class="sep">&nbsp;·</span>
+            </span>{' '}
+          </>
+        ) : (
+          <span class="seg">
+            <Text value={seg} />
+          </span>
+        ),
+      )}
+    </Tag>
+  )
+}

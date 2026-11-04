@@ -1,0 +1,115 @@
+---
+// Review mode only: every open note in a content file, in file order, so a
+// review with Vanessa can go page by page. Never rendered in the showcase or
+// at launch.
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { SHOW_TODOS, splitTodo } from '../lib/todo';
+
+interface Props {
+  /** Content file path relative to the project root, e.g. src/content/programs/iyuana.md */
+  file?: string;
+}
+
+// Plain words for the fields a note can sit in.
+const FIELDS: Record<string, string> = {
+  title: 'title', type: 'type', role: 'role', place: 'place', dateLabel: 'dates', dateShort: 'dates',
+  description: 'share description', poster: 'poster', posterAlt: 'poster description', photo: 'photo',
+  photoAlt: 'photo description', venues: 'where', artists: 'artists', partners: 'partners', facts: 'facts',
+  gallery: 'photos', image: 'photo', caption: 'photos', embed: 'video', quote: 'quote', credit: 'credit',
+  cover: 'cover', statement: 'statement', portrait: 'portrait', email: 'email', instagram: 'Instagram',
+  linkedin: 'LinkedIn', languages: 'languages', brandLink: 'brand work link', note: 'artists', name: 'artists',
+};
+
+type Item = { note: string; field: string };
+
+function itemsIn(path: string): Item[] {
+  const lines = readFileSync(join(process.cwd(), path), 'utf-8').split('\n');
+  const items: Item[] = [];
+  let inFrontmatter = path.endsWith('.yaml');
+  let fences = 0;
+  lines.forEach((line, i) => {
+    if (line.trim() === '---') {
+      fences += 1;
+      inFrontmatter = fences === 1;
+      return;
+    }
+    const notes = splitTodo(line).flatMap((p) => ('note' in p ? [p.note] : []));
+    if (notes.length === 0) return;
+    let field = 'text';
+    if (inFrontmatter) {
+      // The key on this line, or the next key below a comment, or the parent key above a list item.
+      const own = line.match(/^\s*-?\s*([A-Za-z]+):/);
+      if (own) field = own[1];
+      else if (line.trim().startsWith('#')) field = lines.slice(i + 1).find((l) => /^\s*-?\s*[A-Za-z]+:/.test(l))?.match(/^\s*-?\s*([A-Za-z]+):/)?.[1] ?? 'text';
+      else field = lines.slice(0, i).reverse().find((l) => /^\s*[A-Za-z]+:/.test(l))?.match(/^\s*([A-Za-z]+):/)?.[1] ?? 'text';
+    }
+    // A bare note on a gallery image takes its caption from the next line.
+    const caption = lines[i + 1]?.match(/^\s*caption:\s*"?([^"]+)"?\s*$/)?.[1];
+    for (const note of notes) {
+      items.push({ note: note || (caption ? `${caption}` : 'to come'), field: FIELDS[field] ?? field });
+    }
+  });
+  return items;
+}
+
+const { file } = Astro.props;
+const items = SHOW_TODOS && file ? itemsIn(file) : [];
+---
+
+{
+  items.length > 0 && (
+    <section class="open-items" aria-labelledby="open-items-heading">
+      <div class="open-items__head">
+        <h2 class="label" id="open-items-heading">Open items</h2>
+        <p class="open-items__note">Review copy. Not shown on the live site.</p>
+      </div>
+      <ol class="open-items__list">
+        {items.map((item) => (
+          <li>
+            {item.note}
+            <span class="open-items__field"> · {item.field}</span>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )
+}
+
+<style>
+  .open-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px 56px;
+    padding: 40px 0 48px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .open-items__head {
+    flex: 1 1 260px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .open-items__note {
+    font-size: 0.9375rem;
+    font-style: italic;
+    color: var(--muted);
+  }
+
+  .open-items__list {
+    flex: 2.4 1 420px;
+    margin: 0;
+    padding-left: 1.4em;
+    font-size: 1.0625rem;
+    line-height: 1.45;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .open-items__field {
+    color: var(--muted);
+  }
+</style>

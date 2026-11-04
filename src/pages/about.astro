@@ -1,0 +1,169 @@
+---
+import { Picture } from 'astro:assets';
+import { getEntry, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import ContactColumn from '../components/ContactColumn.astro';
+import OpenItems from '../components/OpenItems.astro';
+import Text from '../components/Text.astro';
+import { aboutCard, ogPath } from '../lib/og';
+import { slot } from '../lib/slots';
+import { shown } from '../lib/todo';
+
+const about = await getEntry('pages', 'about');
+if (!about) throw new Error('Missing src/content/pages/about.md');
+const d = about.data;
+const { Content } = await render(about);
+
+// One running paragraph: artists, then partners, the two groups joined by a semicolon.
+const groups = [d.artists.filter(shown), d.partners.filter(shown)].filter((g) => g.length > 0);
+---
+
+<Base
+  title={d.title}
+  description={d.description}
+  ogImage={ogPath(await aboutCard())}
+  ogImageAlt={d.portraitAlt}
+  section="about"
+  atIndex
+  preloadItalic
+>
+  <section class="statement">
+    <Picture
+      src={d.portrait}
+      alt={d.portraitAlt}
+      formats={['avif']}
+      fallbackFormat="webp"
+      {...slot('portrait', d.portrait)}
+      class="portrait"
+      loading="eager"
+      fetchpriority="high"
+    />
+    <div class="text prose">
+      <h1>{d.statement}</h1>
+      <Content />
+    </div>
+  </section>
+
+  <section class="lower">
+    <div class="partners">
+      <h2 class="label">Artists and partners</h2>
+      <p>
+        {
+          groups.map((group, g) => (
+            <>
+              {group.map((name, i) => (
+                <>
+                  <Text value={name} />
+                  {i < group.length - 1 && ', '}
+                </>
+              ))}
+              {g < groups.length - 1 && '; '}
+            </>
+          ))
+        }
+      </p>
+    </div>
+    <ContactColumn />
+  </section>
+
+  <OpenItems file={about.filePath} />
+</Base>
+
+<style>
+  .statement {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px 56px;
+    padding: var(--sp-64) 0 var(--sp-48);
+    align-items: flex-start;
+  }
+
+  .statement :global(picture) {
+    display: contents;
+  }
+
+  .statement :global(.portrait) {
+    flex: 2 1 320px;
+    min-width: 0;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 24 / 25;
+    object-fit: cover;
+  }
+
+  .text {
+    flex: 3 1 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    font-size: var(--fs-body);
+    line-height: 1.58;
+  }
+
+  h1 {
+    margin: 0 0 6px;
+    font-size: var(--fs-statement);
+    line-height: 1.35;
+    font-weight: 400;
+    color: var(--ink);
+    text-wrap: pretty;
+  }
+
+  .text :global(p) {
+    text-wrap: pretty;
+  }
+
+  .lower {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px 56px;
+    padding: var(--sp-40) 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .partners {
+    flex: 2 1 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .partners p {
+    font-size: var(--fs-lower);
+    line-height: 1.6;
+    text-wrap: pretty;
+  }
+
+  .lower :global(.contact) {
+    flex: 1 1 300px;
+  }
+
+  @container page (700px <= width < 796px) {
+    .statement {
+      flex-wrap: nowrap;
+    }
+  }
+
+  @container page (width < 700px) {
+    .statement {
+      row-gap: 32px;
+    }
+
+    .statement :global(.portrait) {
+      max-width: 440px;
+    }
+  }
+
+  @container page (700px <= width < 776px) {
+    .lower {
+      flex-wrap: nowrap;
+    }
+  }
+
+  @container page (width < 560px) {
+    .lower :global(.btn) {
+      flex: 1 1 0;
+      text-align: center;
+    }
+  }
+</style>

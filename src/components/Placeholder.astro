@@ -1,0 +1,52 @@
+---
+// Review mode only: marks where photography goes, in the mocks' style
+// (CHARTER §8.6). Showcase and launch builds never render this.
+interface Props {
+  caption: string;
+  tone?: 'dark' | 'light' | 'mid' | 'deep';
+  class?: string;
+}
+
+const { caption, tone = 'light', class: className } = Astro.props;
+---
+
+<div
+  class:list={['placeholder', `placeholder--${tone}`, { 'on-dark': tone === 'dark' }, className]}
+  role="img"
+  aria-label={caption ? `Placeholder: ${caption}` : 'Placeholder'}
+>
+  {caption && <span>[{caption}]</span>}
+</div>
+
+<style>
+  .placeholder {
+    display: flex;
+    align-items: flex-end;
+    padding: 14px;
+    font-size: 1rem;
+    font-style: italic;
+    color: var(--ph-ink);
+  }
+
+  .placeholder--light {
+    background-color: var(--ph-light);
+  }
+
+  .placeholder--mid {
+    background-color: var(--ph-mid);
+  }
+
+  .placeholder--deep {
+    background-color: var(--ph-deep);
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 10px;
+    font-size: 0.9375rem;
+  }
+
+  .placeholder--dark {
+    background-color: var(--ph-dark);
+    color: var(--ph-dark-ink);
+  }
+</style>

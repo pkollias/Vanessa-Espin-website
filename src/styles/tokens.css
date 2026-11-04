@@ -1,0 +1,74 @@
+/* Design tokens (CHARTER §8.1). Values come from the approved Oct 29 mocks in
+   design-reference/. Change them in the charter first (§18).
+
+   Fluid sizes: every clamp() reaches the mock's value at viewports of 1240px and
+   up, so the 1280 comparison is exact; below that, sizes and spacing ease down
+   to their phone values at 375px. Layout switches are container queries on
+   main (container "page"), measured on the content box: viewport minus 48px.
+     bands stack            page < 720     cover photo hidden   media < 524
+     one fact per line      info < 420, title block < 560, credit < 600
+     project lead row       stacked < 480, side by side and unwrapped 480–735
+     facts two columns      560–735        facts and body stack page < 736
+     gallery                3 across ≥ 932, 2 across 480–931, 1 below 480
+     more programs as list  page < 812
+     about statement        side by side 700–795, stacked < 700
+     about lower band       side by side 700–775
+     header and footer      viewport media queries at 960 and 640 */
+:root {
+  --paper: #ffffff;
+  --ink: #1f1a19;
+  --oxblood: #470000;
+  --cream: #f5efe8;
+  --text-2: #4a403c;
+  --muted: #6b605b;
+  --rule: #e6ded7;
+
+  /* Review-mode placeholders only. Never shipped (CHARTER §17). */
+  --ph-light: #d6cbc2;
+  --ph-mid: #cbbeb4;
+  --ph-deep: #bfb1a6;
+  --ph-ink: #3e3530;
+  --ph-dark: #3a302b;
+  --ph-dark-ink: #e2d9d2;
+  --ph-band-ink: #d9cfc8;
+
+  /* One family throughout. --font-garamond is defined by Astro's font API. */
+  --serif: var(--font-garamond, 'EB Garamond', Garamond, Georgia, serif);
+
+  --container: 1240px;
+  --gutter: 24px;
+
+  /* Type: fluid where the mock value would crowd a phone */
+  --fs-statement: clamp(1.625rem, 1.5166rem + 0.4624vw, 1.875rem);
+  --fs-project-title: clamp(2.25rem, 1.8707rem + 1.6185vw, 3.125rem);
+  --fs-subtitle: clamp(1.0625rem, 0.9812rem + 0.3468vw, 1.25rem);
+  --fs-body: clamp(1.125rem, 1.0708rem + 0.2312vw, 1.25rem);
+  --fs-quote: clamp(1.5rem, 1.3374rem + 0.6936vw, 1.875rem);
+  --fs-cover-title: clamp(1.5rem, 1.4458rem + 0.2312vw, 1.625rem);
+  --fs-lower: clamp(1.125rem, 1.0979rem + 0.1156vw, 1.1875rem);
+
+  /* Space: named after the mock value each one reaches */
+  --sp-72: clamp(44px, 31.86px + 3.237vw, 72px);
+  --sp-64: clamp(40px, 29.6px + 2.7746vw, 64px);
+  --sp-60: clamp(36px, 25.6px + 2.7746vw, 60px);
+  --sp-56: clamp(36px, 27.33px + 2.3121vw, 56px);
+  --sp-52: clamp(32px, 23.33px + 2.3121vw, 52px);
+  --sp-48: clamp(32px, 25.06px + 1.8497vw, 48px);
+  --sp-40: clamp(28px, 22.8px + 1.3873vw, 40px);
+
+  /* Motion: one set of timings for every state (design spec A14) */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-std: cubic-bezier(0.4, 0, 0.2, 1);
+  --t-color: 160ms;
+  --t-line-in: 380ms;
+  --t-line-out: 220ms;
+  --t-lift-in: 700ms;
+  --t-lift-out: 450ms;
+  --t-ring: 180ms;
+}
+
+@media (max-width: 374.98px) {
+  :root {
+    --fs-statement: 1.5rem;
+  }
+}

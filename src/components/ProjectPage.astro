@@ -1,0 +1,587 @@
+---
+// Project page template (CHARTER §8.4), shared by programs, role pages (EACC,
+// Flywheel) and anything added later. The Markdown body goes in the default slot.
+import { Picture } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Card from './Card.astro';
+import MetaLine from './MetaLine.astro';
+import OpenItems from './OpenItems.astro';
+import Placeholder from './Placeholder.astro';
+import Text from './Text.astro';
+import { getPrograms, projectHref, type Project } from '../lib/content';
+import { ratio, slot } from '../lib/slots';
+import { SHOW_TODOS, clean, hasTodo, isPending, noteText, segments, shown, type Pending } from '../lib/todo';
+
+interface Props {
+  entry: Project;
+  /** Other entries for the cards at the end of the page. */
+  more: Project[];
+  moreLabel: string;
+}
+
+const { entry, more, moreLabel } = Astro.props;
+const d = entry.data;
+if (more.some((m) => m.collection === entry.collection && m.id === entry.id)) {
+  throw new Error(`"${moreLabel}" on ${entry.id} must not list the page itself.`);
+}
+const lang = d.titleLang === 'es' ? 'es' : undefined;
+const isRole = d.kind === 'role';
+const key = `${entry.collection}-${entry.id}`;
+
+const photo = d.cover.photo as Pending<ImageMetadata> | undefined;
+const realPhoto = photo && !isPending(photo) ? photo : undefined;
+const lead: 'pair' | 'solo' | 'none' = d.poster ? (realPhoto || (SHOW_TODOS && photo) ? 'pair' : 'solo') : 'none';
+
+const subtitle = isRole ? [d.role, d.place, d.dateLabel] : [d.type, d.place, d.dateLabel];
+const artists = d.artists.filter((a) => shown(a.name));
+const venues = d.venues.filter(shown);
+const partners = d.partners.filter(shown);
+
+// Extra facts: plain lines, or links to programs (role pages).
+const programs = await getPrograms();
+const facts = d.facts
+  .map((f) =>
+    'programs' in f
+      ? { label: f.label, links: f.programs.map((slug) => programs.find((p) => p.id === slug)).filter((p): p is Project => !!p) }
+      : { label: f.label, items: f.items.filter(shown) },
+  )
+  .filter((f) => ('links' in f ? f.links.length > 0 : f.items.length > 0));
+
+type Tile =
+  | { kind: 'image'; src: ImageMetadata; alt: string; caption: string }
+  | { kind: 'embed'; url: string; title: string }
+  | { kind: 'pending'; caption: string };
+const tiles: Tile[] = [];
+for (const g of d.gallery) {
+  const img = g.image as Pending<ImageMetadata>;
+  if (!isPending(img)) tiles.push({ kind: 'image', src: img, alt: clean(g.alt) || g.caption, caption: g.caption });
+  else if (SHOW_TODOS) tiles.push({ kind: 'pending', caption: g.caption || noteText(img.todo) || 'Photo' });
+}
+if (d.embed && typeof d.embed === 'object') tiles.push({ kind: 'embed', url: d.embed.url, title: d.embed.title });
+else if (d.embed && SHOW_TODOS) tiles.push({ kind: 'pending', caption: noteText(d.embed) || 'Short video or reel' });
+
+const quote = d.quote && typeof d.quote === 'object' ? { ...d.quote, text: d.quote.text.replace(/^[“"]|[”"]$/g, '') } : null;
+const pendingQuote = !quote && SHOW_TODOS && typeof d.quote === 'string' && hasTodo(d.quote);
+const credit = d.credit && segments(d.credit).length > 0 ? d.credit : null;
+---
+
+<article class="project" style={`--panel: ${d.cover.panelColor}`}>
+  <header class="title-block">
+    <h1 class="project-title" lang={lang}>{d.title}</h1>
+    <MetaLine class="subtitle" parts={subtitle} />
+  </header>
+
+  {
+    lead !== 'none' && d.poster && (
+      <section class:list={['lead', `lead--${lead}`]} aria-label={lead === 'pair' ? 'Poster and photograph' : 'Poster'}>
+        <div class="lead-poster">
+          <Picture
+            src={d.poster}
+            alt={clean(d.posterAlt) || `${d.type} poster`}
+            formats={['avif']}
+            fallbackFormat="webp"
+            {...slot(lead === 'pair' ? 'projectPosterPair' : 'projectPosterSolo', d.poster)}
+            class="project-poster"
+            style={`--r: ${ratio(d.poster)}; --vt-name: poster-${key}`}
+            loading="eager"
+            fetchpriority="high"
+          />
+        </div>
+        {lead === 'pair' &&
+          (realPhoto ? (
+            <Picture
+              src={realPhoto}
+              alt={clean(d.cover.photoAlt)}
+              formats={['avif']}
+              fallbackFormat="webp"
+              {...slot('projectPhoto', realPhoto)}
+              class="lead-photo"
+              loading="eager"
+            />
+          ) : (
+            <Placeholder tone="dark" caption={noteText((photo as { todo: string }).todo) || 'Photo'} class="lead-photo" />
+          ))}
+      </section>
+    )
+  }
+
+  <section class:list={['story', { 'story--text-led': lead === 'none' }]}>
+    <dl class="facts">
+      {
+        !isRole && (
+          <div>
+            <dt class="label">Role</dt>
+            <dd>
+              <Text value={d.role} />
+            </dd>
+          </div>
+        )
+      }
+      {
+        artists.length > 0 && (
+          <div>
+            <dt class="label">{artists.length > 1 ? 'Artists' : 'Artist'}</dt>
+            {artists.map((a) => (
+              <dd>
+                <Text value={a.name} />, {a.craft}
+                {a.country && ` (${a.country})`}
+                {a.note && SHOW_TODOS && (
+                  <>
+                    {' '}
+                    <Text value={a.note} />
+                  </>
+                )}
+              </dd>
+            ))}
+          </div>
+        )
+      }
+      {
+        venues.length > 0 && (
+          <div>
+            <dt class="label">Where</dt>
+            {venues.map((v) => (
+              <dd>
+                <Text value={v} />
+              </dd>
+            ))}
+          </div>
+        )
+      }
+      {
+        partners.length > 0 && (
+          <div>
+            <dt class="label">Partners</dt>
+            {partners.map((p) => (
+              <dd>
+                <Text value={p} />
+              </dd>
+            ))}
+          </div>
+        )
+      }
+      {
+        facts.map((f) => (
+          <div>
+            <dt class="label">{f.label}</dt>
+            {'links' in f
+              ? f.links.map((p) => (
+                  <dd class="prose">
+                    <a href={projectHref(p)} lang={p.data.titleLang === 'es' ? 'es' : undefined}>
+                      {p.data.title}
+                    </a>
+                    , <Text value={p.data.dateShort} />
+                  </dd>
+                ))
+              : f.items.map((item) => (
+                  <dd>
+                    <Text value={item} />
+                  </dd>
+                ))}
+          </div>
+        ))
+      }
+    </dl>
+    <div class="body prose">
+      <slot />
+    </div>
+  </section>
+
+  {
+    tiles.length > 0 && (
+      <section class="gallery" aria-label="Photographs">
+        {tiles.map((t, i) =>
+          t.kind === 'image' ? (
+            <figure class="tile">
+              <Picture src={t.src} alt={t.alt} formats={['avif']} fallbackFormat="webp" {...slot('galleryTile', t.src)} />
+              {t.caption && <figcaption>{t.caption}</figcaption>}
+            </figure>
+          ) : t.kind === 'embed' ? (
+            <div class="tile tile--embed">
+              <iframe src={t.url} title={t.title} loading="lazy" allowfullscreen />
+            </div>
+          ) : (
+            <Placeholder caption={t.caption} tone={i % 2 === 0 ? 'light' : 'mid'} class="tile tile--pending" />
+          ),
+        )}
+      </section>
+    )
+  }
+
+  {
+    quote && (
+      <figure class="pull-quote">
+        <blockquote lang={quote.lang}>
+          <p class="pq">
+            <span class="q-open">“</span>
+            {quote.text}
+            <span class="q-close">”</span>
+          </p>
+        </blockquote>
+        <figcaption class="pq-by">
+          {quote.name}
+          {quote.role && `, ${quote.role}`}
+        </figcaption>
+      </figure>
+    )
+  }
+  {
+    pendingQuote && (
+      <figure class="pull-quote">
+        <blockquote>
+          <p class="pq">
+            “<span class="todo">[{noteText(d.quote as string) || 'A real line'}]</span>”
+          </p>
+        </blockquote>
+        <figcaption class="pq-by">
+          <span class="todo">[Name, role]</span>
+        </figcaption>
+      </figure>
+    )
+  }
+
+  {
+    credit && (
+      <div class:list={['credit', { 'credit--after-gallery': !(quote || pendingQuote) && tiles.length > 0 }]}>
+        <MetaLine class="credit-line" parts={[credit]} />
+      </div>
+    )
+  }
+
+  <OpenItems file={entry.filePath} />
+</article>
+
+{
+  more.length > 0 && (
+    <nav class="more" aria-labelledby="more-heading">
+      <h2 id="more-heading" class="more__label">
+        {moreLabel}
+      </h2>
+      <div class="more__cards">
+        {more.map((m) => (
+          <Card entry={m} />
+        ))}
+      </div>
+    </nav>
+  )
+}
+
+<style>
+  .title-block {
+    container: tb / inline-size;
+    padding: var(--sp-64) 0 var(--sp-40);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .project-title {
+    font-size: var(--fs-project-title);
+    line-height: 1.08;
+    font-weight: 500;
+    color: var(--oxblood);
+    text-wrap: balance;
+  }
+
+  .title-block :global(.subtitle) {
+    font-size: var(--fs-subtitle);
+    color: var(--text-2);
+    text-wrap: balance;
+  }
+
+  @container tb (width < 560px) {
+    .title-block :global(.seg) {
+      display: block;
+    }
+
+    .title-block :global(.sep) {
+      display: none;
+    }
+
+    .title-block :global(.subtitle) {
+      line-height: 1.35;
+    }
+  }
+
+  /* Lead row: the poster beside the best photo, or the poster alone on paper. */
+  .lead {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .lead :global(picture) {
+    display: contents;
+  }
+
+  .lead-poster {
+    flex: 2 1 300px;
+    min-width: 0;
+    max-width: 484px;
+  }
+
+  .lead-poster :global(.project-poster) {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: var(--r);
+  }
+
+  .lead :global(.lead-photo) {
+    flex: 3 1 420px;
+    min-width: 0;
+    min-height: 360px;
+    object-fit: cover;
+  }
+
+  .lead :global(.lead-photo.placeholder) {
+    padding: 22px;
+    font-size: 1.125rem;
+  }
+
+  .lead--solo .lead-poster {
+    flex: 0 1 482.4px;
+    margin-inline: auto;
+  }
+
+  @container page (480px <= width < 736px) {
+    .lead {
+      flex-wrap: nowrap;
+    }
+
+    .lead :global(.lead-photo) {
+      min-height: 0;
+    }
+  }
+
+  @container page (width < 480px) {
+    .lead {
+      flex-direction: column;
+    }
+
+    .lead-poster,
+    .lead--solo .lead-poster {
+      flex: none;
+      width: 100%;
+      max-width: none;
+    }
+
+    .lead :global(.lead-photo) {
+      flex: none;
+      width: 100%;
+      min-height: 0;
+      aspect-ratio: 4 / 3;
+    }
+  }
+
+  /* Facts beside the story. */
+  .story {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px 56px;
+    padding: var(--sp-56) 0;
+  }
+
+  .story--text-led {
+    border-top: 1px solid var(--rule);
+  }
+
+  .facts {
+    flex: 1 1 260px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    font-size: 1.0625rem;
+    line-height: 1.45;
+  }
+
+  .facts dd {
+    margin: 2px 0 0;
+    text-wrap: pretty;
+  }
+
+  .facts dd + dd {
+    margin-top: 0;
+  }
+
+  .body {
+    flex: 2.4 1 420px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    font-size: var(--fs-body);
+    line-height: 1.55;
+  }
+
+  .body :global(p) {
+    text-wrap: pretty;
+  }
+
+  @container page (560px <= width < 736px) {
+    .facts {
+      display: block;
+      columns: 2;
+      column-gap: 32px;
+    }
+
+    .facts > div {
+      break-inside: avoid;
+      padding-bottom: 18px;
+    }
+  }
+
+  /* Gallery: same-size 4:3 tiles, an incomplete last row centred. */
+  .gallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .gallery > :global(*) {
+    flex: 0 1 calc((100% - 32px) / 3);
+  }
+
+  .gallery :global(.tile--pending),
+  .tile--embed {
+    aspect-ratio: 4 / 3;
+  }
+
+  .tile {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .tile :global(picture) {
+    display: contents;
+  }
+
+  .tile :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  .tile figcaption {
+    font-size: 0.9375rem;
+    font-style: italic;
+    color: var(--muted);
+  }
+
+  .tile--embed iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  @container page (width < 932px) {
+    .gallery > :global(*) {
+      flex-basis: calc((100% - 16px) / 2);
+    }
+  }
+
+  @container page (width < 480px) {
+    .gallery {
+      gap: 12px;
+    }
+
+    .gallery > :global(*) {
+      flex-basis: 100%;
+    }
+  }
+
+  /* Pull quote, with the marks hung outside the measure. */
+  .pull-quote {
+    padding: var(--sp-64) 0 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .pq {
+    max-width: 760px;
+    margin: 0 auto;
+    font-size: var(--fs-quote);
+    line-height: 1.3;
+    font-style: italic;
+    color: var(--oxblood);
+    text-wrap: balance;
+  }
+
+  .q-open {
+    margin-inline-start: -0.389em;
+  }
+
+  .q-close {
+    margin-inline-end: -0.39em;
+  }
+
+  .pq-by {
+    font-size: 1.0625rem;
+    color: var(--muted);
+  }
+
+  .credit {
+    container: credit / inline-size;
+    padding: 24px 0 var(--sp-56);
+    text-align: center;
+  }
+
+  .credit--after-gallery {
+    padding-top: var(--sp-64);
+  }
+
+  .credit :global(.credit-line) {
+    font-size: 1rem;
+    color: var(--muted);
+    text-wrap: balance;
+  }
+
+  @container credit (width < 600px) {
+    .credit :global(.seg) {
+      display: block;
+    }
+
+    .credit :global(.sep) {
+      display: none;
+    }
+  }
+
+  /* More programs */
+  .more {
+    border-top: 1px solid var(--rule);
+    padding: var(--sp-40) 0 var(--sp-56);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .more__label {
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+
+  .more__cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  @container page (width < 812px) {
+    .more__cards {
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .more__cards > :global(*) {
+      flex: none;
+    }
+  }
+</style>
