@@ -1,8 +1,33 @@
 import * as THREE from 'three';
 
 /* =========================================================================
-   Content. Only facts from src/content (showcase wording: no open notes).
+   Content. Facts are written out; anything in her voice is a placeholder
+   (ph) naming what goes there and which interview question fills it.
    ========================================================================= */
+const SITE = { email: 'vanessa.s.espin@gmail.com', linkedin: 'https://www.linkedin.com/in/vanessaespin', headline: 'Brand curator of events and experience' };
+
+// The interview (published separately): question number -> what it fills.
+const INTERVIEW = {
+  q01: 'Her position in one breath (EN and ES)', q02: 'From brand jobs to “more than a role, it’s a mission”',
+  q03: 'Herencia Viva', q04: 'Iyuana, and how to credit her role beside the Sápara artists', q05: 'The Ayazamana night',
+  q06: 'The poster process', q07: 'Brand habits brought into a gallery', q08: 'A brand case', q09: 'What she’d never say; where home shows',
+  q10: 'Earlier work', q11: 'An unrealized project', q12: 'Three words, plus anything else',
+};
+// A placeholder: [label] in the accent, with the interview question(s) that will fill it.
+// ph('Iyuana in her words · 5–6 short lines', 'q04') or ph('…', '', 'To come: …') for things that aren't hers to write.
+function phSpan(text, qs = '', note = '') {
+  const list = qs.split(/[\s,]+/).filter(Boolean);
+  const nums = list.map((q) => +q.slice(1));
+  const said = nums.length > 1 ? `${nums.slice(0, -1).join(', ')} and ${nums[nums.length - 1]}` : nums[0];
+  const title = note || (list.length ? `Her words go here · interview question${nums.length > 1 ? 's' : ''} ${said}` : 'To come');
+  return `<span class="ph"${list.length ? ` data-q="${list.join(' ')}"` : ''} title="${title}">${text}</span>`;
+}
+const ph = (label, qs, note) => phSpan(`[${label}]`, qs, note);
+// A placeholder spread over several masked lines: the first opens the bracket, the last closes it.
+const phLines = (lines, qs, tail = '') => lines.map((t, i) => phSpan(`${i === 0 ? '[' : ''}${t}${i === lines.length - 1 ? `]${tail}` : ''}`, qs));
+const PHOTOS = 'Her photographs go here, with the photographer’s credit';
+const WITH_PERMISSION = 'Their words go here, only with their permission';
+
 const PROGRAMS = [
   {
     slug: 'iyuana', name: 'Iyuana', lang: 'es', poster: 'img/iyuana.jpg', short: 'Aug 2026',
@@ -14,24 +39,32 @@ const PROGRAMS = [
     page: {
       credits: [['Producer & creative director', 'Vanessa Espín'], ['Artists', 'Yanda Montahuano, Li Can Vega, Armando Vega, Israel Vargas “Panchis”']],
       specs: [['Type', 'Film & photography exhibition'], ['Where', '5-11 47th Ave, Long Island City'], ['When', 'August 18–24, 2026']],
-      logline: ['Iyuana was a week', 'of film and photography', 'by four artists from', 'Ecuador, Peru and Mexico,', 'about the Sápara Nation', 'of the Ecuadorian Amazon.'],
-      lead: 'I produced it: the two venues, the identity and campaign, the installation, and the week itself, introducing each artist’s work to visitors.',
+      logline: phLines(['Iyuana,', 'in her words:', 'what it was,', 'who it was with,', 'why it mattered'], 'q04', ' · q04'),
+      lead: ph('Iyuana in her words: what she did, and how her role sits beside the artists and the Sápara Nation · 2–3 sentences', 'q04'),
+      docs: ['Installation view · photographer credit', 'Opening night · guests with the artists', 'A screening · the audience in the dark', 'Detail · one photograph up close', 'Closing · the last day of the week'],
       list: { label: 'Artists', rows: [['Yanda Montahuano', 'Filmmaker & photographer, Ecuador'], ['Li Can Vega', 'CGI visual artist, Peru'], ['Armando Vega', 'Photographer, Mexico'], ['Israel Vargas “Panchis”', 'Photographer, Ecuador']] },
-      credit: [['Identity, poster & campaign', 'Vanessa Espín']],
+      voice: ph('A line from one of the artists, with their permission', '', WITH_PERMISSION),
+      voiceBy: ph('artist · discipline · country', '', WITH_PERMISSION),
+      credit: [['Identity, poster & campaign', 'Vanessa Espín'], ['Her relationship to the Sápara Nation', ph('as she describes it · one line', 'q04')], ['The poster', ph('how she made it · 1–2 lines', 'q06')]],
     },
   },
   {
     slug: 'ayazamana', name: 'Ayazamana', poster: 'img/ayazamana.png', short: 'Jul 2026',
     homeTitle: ['Ayazamana'],
     pageTitle: ['Ayazamana'],
-    specs: [['Role', 'Program & campaign'], ['With', 'Ecuadorian American Cultural Center'], ['When', 'Saturday, July 11, 2026']],
+    specs: [['Poster', 'Vanessa Espín'], ['Performers', 'Ayazamana Dance Group'], ['When', 'Saturday, July 11, 2026']],
     blurbs: [['The night', 'Live music and<br>traditional dance'], ['With', 'The Ecuadorian American<br>Cultural Center']],
     back: { title: 'Ayazamana', lines: ['Live music & traditional dance', 'Ecuadorian American Cultural Center', 'Saturday, July 11, 2026, 8 PM'] },
     page: {
-      credits: [['Program & campaign', 'Vanessa Espín'], ['With', 'Ecuadorian American Cultural Center']],
-      specs: [['Type', 'Live music & traditional dance'], ['When', 'Saturday, July 11, 2026, 8 PM'], ['With', 'Ecuadorian American Cultural Center']],
-      logline: ['Ayazamana was', 'a night of live music', 'and traditional dance', 'with the Ecuadorian', 'American Cultural Center.'],
-      lead: 'I planned it with the Center as part of its public events program.',
+      credits: [['Poster', 'Vanessa Espín'], ['Performers', 'Ayazamana Dance Group'], ['With', 'Ecuadorian American Cultural Center']],
+      specs: [['Type', 'Live music & traditional dance'], ['When', 'Saturday, July 11, 2026, 8 PM'], ['With', 'Ecuadorian American Cultural Center'], ['Her role', ph('her role on the night · q05', 'q05')]],
+      logline: phLines(['Ayazamana,', 'in her words:', 'the night,', 'the dancers,', 'her part in it'], 'q05', ' · q05'),
+      lead: ph('The night in her words: what it was, and what she did beyond the poster · 2–3 sentences', 'q05'),
+      docs: ['The stage · photographer credit', 'The Ayazamana Dance Group · in performance', 'The musicians', 'The audience · the room that night', 'After · the dancers with guests'],
+      list: { label: 'Performers', rows: [['Ayazamana Dance Group', 'The Ecuadorian American Cultural Center’s traditional dance group,<br>founded in 1992 by José Rivera. Dances from La Costa, La Sierra and El Oriente.']] },
+      voice: ph('A line from the Ayazamana Dance Group, with their permission', '', WITH_PERMISSION),
+      voiceBy: ph('dancer or director · Ayazamana Dance Group', '', WITH_PERMISSION),
+      credit: [['Poster', 'Vanessa Espín'], ['The poster', ph('how she made it · 1–2 lines', 'q06')]],
     },
   },
   {
@@ -43,10 +76,13 @@ const PROGRAMS = [
     back: { title: 'Herencia Viva', sub: 'Threads of Memory', lines: ['Painting exhibition', 'Flushing Town Hall', 'May 29–31, 2026'] },
     page: {
       credits: [['Curator & creative director', 'Vanessa Espín'], ['Painter', 'Luis Medina']],
-      specs: [['Type', 'Painting exhibition'], ['Where', 'Flushing Town Hall, 137-35 Northern Blvd, Flushing'], ['When', 'May 29–31, 2026']],
-      logline: ['Painter', 'Luis Medina’s exhibition', 'of Ecuadorian', 'magic realism.'],
-      lead: 'I curated it and led its creative direction. I designed the poster and promotional materials, and hosted guests, walking them through the stories behind each work.',
-      credit: [['Curation, poster & promotional materials', 'Vanessa Espín']],
+      specs: [['Type', 'Painting exhibition'], ['Where', 'Flushing Town Hall, 137-35 Northern Blvd, Flushing'], ['When', 'May 29–31, 2026'], ['With', 'Ayllu Gallery']],
+      logline: phLines(['Herencia Viva,', 'in her words:', 'the paintings,', 'the painter,', 'why it mattered'], 'q03', ' · q03'),
+      lead: ph('Herencia Viva in her words: what she did with Luis Medina and Ayllu Gallery, and why these paintings · 2–3 sentences', 'q03'),
+      docs: ['Installation view · photographer credit', 'Opening · guests with Luis Medina', 'Detail · one painting up close', 'The room · Flushing Town Hall', 'Closing · the last afternoon'],
+      voice: ph('A line from Luis Medina, with his permission', '', WITH_PERMISSION),
+      voiceBy: ph('Luis Medina · painter', '', WITH_PERMISSION),
+      credit: [['Curation, poster & promotional materials', 'Vanessa Espín'], ['The poster', ph('how she made it · 1–2 lines', 'q06')]],
     },
   },
   {
@@ -58,14 +94,50 @@ const PROGRAMS = [
     back: { title: 'Ecuadorian American Cultural Center', lines: ['Creative & Community Coordinator', 'New York', '2025–2026'] },
     page: {
       credits: [['Creative & Community Coordinator', 'Vanessa Espín']],
-      specs: [['Where', 'New York'], ['When', '2025–2026'], ['Programs', 'Ayazamana, July 2026']],
-      logline: ['Daily operations', 'and a public events program,', 'shaped with', 'the community.'],
-      lead: 'As Creative & Community Coordinator, I ran daily operations and a public events program shaped with the community, including <em>Ayazamana</em>, a night of live music and traditional dance. I made the event content and promotion, and built relationships with prospective sponsors and partners.',
+      specs: [['Where', 'New York'], ['When', 'Sep 2025 – Apr 2026']],
+      logline: phLines(['The Center,', 'in her words:', '“more than a role,', 'it’s a mission”:', 'what that meant'], 'q02', ' · q02'),
+      did: ['Direct daily operations of the cultural center, managing scheduling, administrative functions, and facility coordination', 'Plan and execute cultural programs and events, increasing community engagement and strengthening stakeholder relationships', 'Manage cross-functional projects, coordinating with internal teams and external partners to meet organizational goals', 'Initiate fundraising and partnership development efforts by identifying new opportunities, conducting outreach, and building relationships with prospective sponsors'],
+      docs: ['The Center · photographer credit', 'A program · in progress', 'The community · at an event', 'Behind the scenes · the daily work'],
+      voice: ph('A line from a partner or colleague at the Center, with their permission', '', WITH_PERMISSION),
+      voiceBy: ph('name · role', '', WITH_PERMISSION),
     },
   },
 ];
 const N = PROGRAMS.length;
-const SITE = { email: 'vanessa.s.espin@gmail.com', linkedin: 'https://www.linkedin.com/in/vanessaespin' };
+
+// Brand work: facts from her LinkedIn.
+const BRANDS = [
+  { name: 'Flywheel', years: '2021–2025', role: 'Art Direction Design Specialist', dates: 'Jun 2021 – May 2025', facts: ['Design strategy for over 20 brands', 'Primary liaison for one of Flywheel’s largest accounts', 'Amazon and Walmart brand stores, A+ content, carousel imagery and paid ads'] },
+  { name: 'Enchante Accessories', years: '2020–2021', role: 'Brand designer, E-commerce Division', dates: 'Aug 2020 – Feb 2021', facts: ['Amazon store pages and Shopify assets', 'Visual styles for 3 brands', 'Product infographics', 'E-commerce photography direction for beauty products', 'Social ad campaigns'] },
+  { name: 'Humane Lane', years: '2025–', role: 'Brand development project, for Heidi Pearl', dates: 'Apr 2025 – present', facts: ['Brand development strategy', 'Art direction'] },
+];
+const CASE = [
+  ['Objective', `Design strategy for over 20 brands on one of Flywheel’s largest accounts, as its primary liaison. ${ph('the brief in one line', 'q08')}`],
+  ['Insight', ph('what she saw that shaped the work · one sentence', 'q08')],
+  ['Idea', ph('the principle she brought to the portfolio · one sentence', 'q08')],
+  ['Execution', `Amazon and Walmart brand stores, A+ content, carousel imagery and paid ads. ${ph('what she can show, with permission', '', 'To come: the work Flywheel and the client allow her to show')}`],
+  ['Result', ph('a sourced result, or cut this', '', 'Only a result with a source; otherwise this column goes')],
+];
+// Earlier work, from her old site: year · title · kind · role.
+const ARCHIVE = [
+  ['2021', '100 Roses of Concrete', 'Awareness campaign · Live Light Live Right', 'Art director & lead designer'],
+  ['2020', 'Outside the Pink Box', 'Case study · workplace gender bias', null],
+  ['2019', 'The Dinner Table Doc', 'Non-profit campaign · Wunderman Thompson', 'Co-art director'],
+  ['2019', 'ZARA Loyalty Program', 'App and print concept', null],
+  ['2019', 'Purell', 'Out-of-home and print', null],
+  ['2018', 'Pure Leaf', 'Magazine ad', null],
+  ['2018', 'BOLD Cosmetics', 'Identity, book, website', null],
+];
+// Selected experience, as she lists it on LinkedIn.
+const EXPERIENCE = [
+  ['Creative Director, Brand & Experience', 'Sápara Nation art exhibition (Iyuana)', 'Jun 2026 – present'],
+  ['Creative Director, Brand & Experience', 'Ayllu Gallery · Luis Medina exhibition project (Herencia Viva)', 'Apr – Jun 2026'],
+  ['Creative & Community Coordinator', 'Ecuadorian American Cultural Center', 'Sep 2025 – Apr 2026'],
+  ['Brand development project', 'Humane Lane (Heidi Pearl)', 'Apr 2025 – present'],
+  ['Art Direction Design Specialist', 'Flywheel', 'Jun 2021 – May 2025'],
+  ['Brand designer, E-commerce Division', 'Enchante Accessories', 'Aug 2020 – Feb 2021'],
+];
+const EDUCATION = [['BA, Communication Design', 'City Tech (CUNY)', 'President of the Art + Design Club']];
 
 /* =========================================================================
    Setup
@@ -907,9 +979,14 @@ const body = document.body;
 const pageBg = $('.page-bg');
 const programView = $('.program');
 const aboutView = $('.about');
+const brandView = $('.brand');
+const archiveView = $('.archive');
+const pageViews = [programView, aboutView, brandView, archiveView];
 const state = { p: 0, target: 0, mode: 'loading', active: 0, hoverWanted: false, ready: false };
 let sheets = [], portrait = null;
-let tiltK = 1, storyTone = 'night', loaderOn = true;
+let tiltK = 1, storyTone = 'night', loaderOn = true, aboutMode = 'drawer';
+// viewHash: the route of the view on screen (null before the first one); the About drawer opens over it.
+let viewHash = null, navToken = 0, currentNav = 'programs';
 
 function layout() {
   const mobile = VW < 760;
@@ -953,7 +1030,17 @@ function setTone(tone) {
   body.classList.toggle('is-night', tone === 'night');
 }
 function setNav(which) {
+  currentNav = which;
   document.querySelectorAll('[data-nav]').forEach((a) => a.classList.toggle('is-current', a.dataset.nav === which));
+}
+// Leaving a page view: its revealed parts slide out, then it empties.
+function leavePages(keep) {
+  const leaving = pageViews.filter((v) => v !== keep && !v.hidden);
+  leaving.forEach((v) => v.querySelectorAll('.is-in').forEach(conceal));
+  return leaving;
+}
+function clearPages(keep) {
+  pageViews.forEach((v) => { if (v !== keep) { v.hidden = true; v.innerHTML = ''; } });
 }
 
 function enterHome() {
@@ -963,10 +1050,11 @@ function enterHome() {
   setNav('programs'); setTone('paper');
   sheets.forEach((s) => { s.rate = from === 'loading' ? 4.2 : 5.5; s.float = 1; });
   if (portrait) portrait.tgt.o = 0;
-  const leaving = [programView, aboutView].filter((v) => !v.hidden);
-  leaving.forEach((v) => v.querySelectorAll('.is-in').forEach(conceal));
+  const leaving = leavePages(null);
+  const tok = ++navToken;
   setTimeout(() => {
-    leaving.forEach((v) => { v.hidden = true; v.innerHTML = ''; });
+    if (tok !== navToken) return;
+    clearPages(null);
     scrollTo(0, 0);
     home.hidden = false;
     showHomeText(state.active, true);
@@ -984,9 +1072,13 @@ function enterProgram(i) {
   setNav('programs');
   [homeTitle, homeSpecs, homeBlurbs].forEach(conceal);
   document.querySelectorAll('.home__corner').forEach(conceal);
-  aboutView.hidden = true; aboutView.innerHTML = '';
+  if (portrait) portrait.tgt.o = 0;
+  const others = leavePages(programView);
+  const tok = ++navToken;
   const build = () => {
+    if (tok !== navToken) return;
     home.hidden = true;
+    clearPages(programView);
     programView.innerHTML = programHTML(i);
     programView.hidden = false;
     body.classList.add('is-scroll');
@@ -998,34 +1090,65 @@ function enterProgram(i) {
       setTimeout(() => sheets.forEach((s) => (s.rate = 7)), 1300);
     });
   };
-  setTimeout(build, fromHome ? 380 : 0);
+  setTimeout(build, fromHome || others.length ? 380 : 0);
 }
 
-function enterAbout() {
+// A page without WebGL slots of its own (About as a page, Brand work, Earlier work): the
+// posters are parked out of sight by pageFrame, as on the old About page.
+function enterPage(mode, view, html, nav, tone, after) {
   hideScribble();
-  state.mode = 'about';
+  state.mode = mode;
   body.classList.remove('is-home');
-  setNav('about'); setTone('paper');
+  setNav(nav); setTone(tone);
   [homeTitle, homeSpecs, homeBlurbs].forEach(conceal);
   document.querySelectorAll('.home__corner').forEach(conceal);
+  leavePages(view);
+  if (!view.hidden) view.querySelectorAll('.is-in').forEach(conceal);
+  const tok = ++navToken;
   setTimeout(() => {
-    home.hidden = true; programView.hidden = true; programView.innerHTML = '';
-    aboutView.innerHTML = aboutHTML(); aboutView.hidden = false;
+    if (tok !== navToken) return;
+    home.hidden = true;
+    clearPages(view);
+    view.innerHTML = html; view.hidden = false;
     body.classList.add('is-scroll'); scrollTo(0, 0);
     sheets.forEach((s) => (s.rate = 4.6));
+    if (after) after();
+  }, 380);
+}
+function enterAbout() {
+  enterPage('about', aboutView, aboutHTML(), 'about', 'paper', () => {
     if (portrait) portrait.rate = 4.2;
     requestAnimationFrame(() => setTimeout(() => reveal($('.about__inner', aboutView)), 200));
-  }, 380);
+  });
+}
+function enterBrand() {
+  enterPage('brand', brandView, brandHTML(), 'brand', 'night', () => requestAnimationFrame(() => setTimeout(() => reveal($('.b-head', brandView)), 160)));
+}
+function enterArchive() {
+  enterPage('archive', archiveView, archiveHTML(), 'archive', 'paper', () => requestAnimationFrame(() => setTimeout(() => reveal($('.a-head', archiveView)), 160)));
 }
 
 function route() {
   if (!state.ready) return;
   const h = location.hash.replace(/^#\/?/, '');
   closeIndex();
+  // About as a drawer opens over the view on screen; with nothing under it (a direct
+  // link, or the About page itself), over home.
+  if (h === 'about' && aboutMode === 'drawer') {
+    const under = viewHash !== null && state.mode !== 'about';
+    if (!under) { viewHash = ''; enterHome(); }
+    return openDrawer(under);
+  }
+  if (drawerOn) closeDrawer(true);
+  if (h === viewHash) return; // back from the drawer: the view under it stays as it was
+  viewHash = h;
   if (!h) return enterHome();
   if (h === 'about') return enterAbout();
+  if (h === 'brand') return enterBrand();
+  if (h === 'archive') return enterArchive();
   const i = PROGRAMS.findIndex((p) => p.slug === h);
   if (i >= 0) return enterProgram(i);
+  viewHash = '';
   enterHome();
 }
 addEventListener('hashchange', route);
@@ -1033,12 +1156,46 @@ addEventListener('hashchange', route);
 /* =========================================================================
    Program and About pages
    ========================================================================= */
+const foot = () => `<footer class="pg-foot"><span>Vanessa Espín · New York</span><span><a href="mailto:${SITE.email}">${SITE.email}</a> · <a href="${SITE.linkedin}">LinkedIn</a></span></footer>`;
+
+// The quick-cut tool: one frame per wheel notch, arrow key or click. The picture cuts,
+// the caption follows. Stone frames stand in until her photographs exist.
+function docsHTML(caps) {
+  const n = caps.length, pad = (k) => String(k).padStart(2, '0');
+  return `<section class="p-docs" aria-label="Documentation">
+    <div class="p-docs__side">
+      <span class="eyebrow">Documentation</span>
+      <span class="p-docs__count" aria-hidden="true"><b>${pad(1)}</b> / ${pad(n)}</span>
+      <p class="p-docs__cap" aria-live="polite">${ph(caps[0], '', PHOTOS)}</p>
+      <span class="p-docs__hint">${coarse ? 'Tap for the next photograph' : 'Scroll inside, click or use the arrow keys'}</span>
+    </div>
+    <div class="p-docs__stage" tabindex="0" role="group" aria-roledescription="slideshow" aria-label="Documentation, ${n} photographs to come" data-i="0" data-caps="${encodeURIComponent(JSON.stringify(caps))}">
+      ${caps.map((c, k) => `<div class="p-docs__frame" data-k="${k}"${k ? ' hidden' : ''}><i class="crop crop--tl"></i><i class="crop crop--tr"></i><i class="crop crop--bl"></i><i class="crop crop--br"></i><span class="p-docs__no">${pad(k + 1)}</span></div>`).join('')}
+    </div>
+  </section>`;
+}
+function stepDocs(stage, d, wrap = false) {
+  const caps = JSON.parse(decodeURIComponent(stage.dataset.caps)), n = caps.length;
+  const i = +stage.dataset.i, j = wrap ? (i + d + n) % n : clamp(i + d, 0, n - 1);
+  if (j === i) return false;
+  stage.dataset.i = j;
+  stage.querySelectorAll('.p-docs__frame').forEach((f) => (f.hidden = +f.dataset.k !== j));
+  const side = stage.parentElement;
+  $('.p-docs__count b', side).textContent = String(j + 1).padStart(2, '0');
+  $('.p-docs__cap', side).innerHTML = ph(caps[j], '', PHOTOS);
+  return true;
+}
+
 function programHTML(i) {
   const p = PROGRAMS[i], g = p.page, next = PROGRAMS[(i + 1) % N];
   const lang = p.lang ? ` lang="${p.lang}"` : '';
   const credits = g.credits.map(([k, v]) => `<span class="eyebrow">${k}</span>${v}`).join(' ');
   const list = g.list ? `<div class="p-list"><span class="eyebrow">${g.list.label}</span>${g.list.rows.map(([n, m]) => `<div class="p-list__row"><i class="rule"></i><span class="p-list__name">${n}</span><span class="p-list__meta">${m}</span></div>`).join('')}<div class="p-list__row" style="padding:0"><i class="rule"></i></div></div>` : '';
   const credit = g.credit ? `<dl class="specs p-credit">${rows(g.credit, 0, 0.05)}</dl>` : '';
+  const lead = g.did
+    ? `<div class="p-did"><span class="eyebrow">What I did</span><ul>${g.did.map((t) => `<li><i class="rule"></i>${t}</li>`).join('')}</ul></div>`
+    : `<p class="p-text__lead">${g.lead}</p>`;
+  const voice = g.voice ? `<blockquote class="p-voice"><p>${g.voice}</p><footer>${g.voiceBy}</footer></blockquote>` : '';
   return `
   <div class="p-hero" data-tone="paper">
     <a class="p-back" href="#/">← All programs</a>
@@ -1056,8 +1213,10 @@ function programHTML(i) {
     </div>
   </div>
   <div class="p-text" data-tone="paper">
-    <p class="p-text__lead">${g.lead}</p>
+    ${lead}
+    ${docsHTML(g.docs)}
     ${list}
+    ${voice}
     ${credit}
   </div>
   <section class="p-next" data-tone="stone">
@@ -1071,17 +1230,101 @@ function programHTML(i) {
   </section>`;
 }
 
+/* About: the same placeholders in the drawer (live) and on the old page (lab) */
+const ABOUT = {
+  position: phLines(['Her position', 'in one breath,', 'in English', 'and Spanish'], 'q01', ' · q01'),
+  bio: ph('Her bio in her own words: who she is, where she works, what she makes, where home shows · 40–60 words', 'q01 q02 q09'),
+  artists: ph('How she works with artists, in her words · 2–3 sentences', 'q04 q06'),
+  doors: [
+    ['Artists', ph('what an artist can bring her, and how to begin · one line', 'q11 q12')],
+    ['Institutions & venues', ph('what she brings to a venue · one line', 'q11 q12')],
+    ['Brands & sponsors', ph('what a partnership with her looks like · one line', 'q11 q12')],
+    ['Press', ph('what she can send, and in which languages · one line', 'q11 q12')],
+  ],
+};
+const doorsHTML = () => `<ul class="doors" role="list">${ABOUT.doors.map(([k, v]) => `<li><a class="door" href="mailto:${SITE.email}?subject=${encodeURIComponent(k)}"><span class="door__k">${k}</span><span class="door__v">${v}</span><span class="door__go" aria-hidden="true">→</span></a></li>`).join('')}</ul>`;
+const contactRows = (d0, cls = '', based = true) => {
+  const list = [['Email', `<a href="mailto:${SITE.email}">${SITE.email}</a>`], ['LinkedIn', `<a href="${SITE.linkedin}">linkedin.com/in/vanessaespin</a>`], ['Résumé', '<a href="Vanessa_Espin_Resume.pdf">PDF</a>'], ...(based ? [['Based in', 'New York']] : [])];
+  return `<dl class="specs ${cls}">${rows(list, d0, 0.07)}<div class="specs__row" style="padding:0"><i class="rule" style="--d:${(d0 + list.length * 0.07).toFixed(2)}s"></i></div></dl>`;
+};
+
 function aboutHTML() {
   return `
   <div class="about__slot" data-slot="portrait"></div>
   <div class="about__inner">
-    <h1 class="about__statement">${lns(['I produce exhibitions', 'and events in New York,', 'most of them with artists', 'from Ecuador and across', 'Latin America, and I', 'design them myself.'], 0.05, 0.06)}</h1>
+    <h1 class="about__statement">${lns(ABOUT.position, 0.05, 0.06)}</h1>
+    <p class="about__headline eyebrow">${lns([SITE.headline], 0.3)}</p>
     <div class="about__body">
-      ${lns([`In 2026 I produced <em>Iyuana</em>, a week of film and photography about the Sápara Nation of the Ecuadorian Amazon, in Long Island City. I curated <em>Herencia Viva</em>, painter Luis Medina’s exhibition of Ecuadorian magic realism, at three venues including Flushing Town Hall. And for the Ecuadorian American Cultural Center, where I was Creative & Community Coordinator, I planned <em>Ayazamana</em>, a night of live music and traditional dance.`], 0.4)}
-      ${lns(['Before that, I spent four years at Flywheel, a digital commerce agency, art-directing Amazon and Walmart storefronts and ads for more than twenty health, beauty and consumer brands.'], 0.5)}
-      ${lns(['I studied Communication Design at City Tech, CUNY.'], 0.58)}
+      ${lns([ABOUT.bio], 0.4)}
+      <span class="eyebrow about__label">${lns(['How I work with artists'], 0.46)}</span>
+      ${lns([ABOUT.artists], 0.5)}
     </div>
-    <dl class="specs">${rows([['Email', `<a href="mailto:${SITE.email}">${SITE.email}</a>`], ['LinkedIn', `<a href="${SITE.linkedin}">linkedin.com/in/vanessaespin</a>`], ['Résumé', '<a href="Vanessa_Espin_Resume.pdf">PDF</a>'], ['Based in', 'New York']], 0.6, 0.07)}<div class="specs__row" style="padding:0"><i class="rule" style="--d:0.9s"></i></div></dl>
+    <div class="about__together"><span class="eyebrow about__label">Work together</span>${doorsHTML()}</div>
+    ${contactRows(0.6)}
+  </div>`;
+}
+
+function drawerHTML() {
+  return `<div class="drawer__inner">
+    <div class="drawer__top"><span class="eyebrow">About</span><button class="drawer__close" type="button">Close <span aria-hidden="true">×</span></button></div>
+    <h2 class="drawer__name" id="drawer-title">${lns(['Vanessa', 'Espín'], 0.12, 0.07)}</h2>
+    <p class="drawer__headline eyebrow">${lns([SITE.headline], 0.28)}</p>
+    <p class="drawer__bio">${ABOUT.bio}</p>
+    <section class="drawer__sec"><span class="eyebrow">How I work with artists</span><p>${ABOUT.artists}</p></section>
+    <section class="drawer__sec"><span class="eyebrow">Work together</span>${doorsHTML()}</section>
+    ${contactRows(0.45, 'drawer__contact', false)}
+    <figure class="drawer__portrait"><img src="img/portrait.jpg" alt="Vanessa Espín at Brooklyn Bridge Park" loading="lazy" decoding="async"></figure>
+  </div>`;
+}
+
+/* Brand work, #/brand */
+function brandHTML() {
+  return `
+  <div class="b-head" data-tone="night">
+    <span class="eyebrow">${lns(['Brand work · 2020 to now'], 0.05)}</span>
+    <h1 class="b-title">${lns(['Brand work'], 0.1)}</h1>
+    <p class="b-intro">${lns([ph('What she brings from brand work into a gallery, in her words · 2–3 lines', 'q07')], 0.3)}</p>
+  </div>
+  <div class="b-entries js-in" data-tone="night">
+    ${BRANDS.map((b, k) => `<article class="b-entry"><i class="rule" style="--d:${(k * 0.08).toFixed(2)}s"></i>
+      <h2 class="b-entry__name">${lns([b.name], 0.05 + k * 0.08)}</h2>
+      <div class="b-entry__info">
+        <p class="b-entry__role">${b.role}<span>${b.dates}</span></p>
+        <ul class="b-entry__facts">${b.facts.map((f) => `<li>${f}</li>`).join('')}</ul>
+      </div></article>`).join('')}
+    <div class="b-entry" style="padding:0"><i class="rule" style="--d:0.24s"></i></div>
+  </div>
+  <div class="b-case js-in" data-tone="night">
+    <span class="eyebrow">A case · Flywheel</span>
+    <div class="b-case__cols">${CASE.map(([k, v], j) => `<div class="b-case__col"><i class="rule" style="--d:${(j * 0.07).toFixed(2)}s"></i><span class="eyebrow">${String(j + 1).padStart(2, '0')} · ${k}</span><p>${v}</p></div>`).join('')}</div>
+    <blockquote class="b-quote"><p>“${ph('a line from a colleague, with permission', '', WITH_PERMISSION)}”</p><footer>${ph('name · role · Flywheel', '', WITH_PERMISSION)}</footer></blockquote>
+  </div>
+  <div class="b-bridge js-in" data-tone="paper">
+    <span class="eyebrow">Brands and culture</span>
+    <p class="b-bridge__lines">${lns(phLines(['What changed', 'between the brand jobs', 'and “more than a role,', 'it’s a mission”;', 'what she carried over'], 'q02 q07', ' · q02 · q07'), 0.05, 0.09)}</p>
+    <a class="pg-next" href="#/archive"><span class="eyebrow">Next</span>Earlier work →</a>
+    ${foot()}
+  </div>`;
+}
+
+/* Earlier work, #/archive */
+function archiveHTML() {
+  const block = (label, head, list, d0) => `<section class="a-block js-in"><span class="eyebrow">${label}</span>
+    <div class="a-rows a-rows--${head.length}" role="table" aria-label="${label}"><div class="a-row a-row--head" role="row">${head.map((h) => `<span class="eyebrow" role="columnheader">${h}</span>`).join('')}</div>
+    ${list.map((r, k) => `<div class="a-row" role="row"><i class="rule" style="--d:${(d0 + k * 0.05).toFixed(2)}s"></i>${r.map((c, j) => `<span role="cell" class="a-c${j}">${c}</span>`).join('')}</div>`).join('')}
+    <div class="a-row" style="padding:0"><i class="rule" style="--d:${(d0 + list.length * 0.05).toFixed(2)}s"></i></div></div></section>`;
+  return `
+  <div class="a-head" data-tone="paper">
+    <span class="eyebrow">${lns(['Before the programs'], 0.05)}</span>
+    <h1 class="a-title">${lns(['Earlier work'], 0.1)}</h1>
+    <p class="a-intro">${lns([ph('Her earlier work in her words: what she is proud of, and what it taught her · 2 lines', 'q10')], 0.3)}</p>
+  </div>
+  <div class="a-body" data-tone="paper">
+    ${block('Earlier work', ['Year', 'Title', 'Kind', 'Role'], ARCHIVE.map(([y, t, k, r]) => [y, t, k, r || ph('her role', 'q10')]), 0)}
+    ${block('Selected experience', ['Role', 'With', 'Dates'], EXPERIENCE, 0)}
+    ${block('Education', ['Degree', 'School', 'Also'], EDUCATION, 0)}
+    <a class="pg-next" href="#/brand"><span class="eyebrow">Next</span>Brand work →</a>
+    ${foot()}
   </div>`;
 }
 
@@ -1135,6 +1378,67 @@ function aboutFrame() {
   if (slot && portrait) { slotTarget(slot, [0.0, 0.16, -0.035], portrait.tgt); portrait.float = 1; }
   sheets.forEach((o, j) => { carouselTarget(o, (j - state.active) * 2.6); o.tgt.o = 0; });
 }
+// Brand work and Earlier work: no slots, so every sheet stays parked out of sight (as on
+// About); sections reveal on entry and the page tone follows the one mid-screen.
+function pageFrame(view) {
+  sheets.forEach((o, j) => { carouselTarget(o, (j - state.active) * 2.6); o.tgt.o = 0; });
+  if (portrait) portrait.tgt.o = 0;
+  view.querySelectorAll('.js-in').forEach((el) => {
+    if (!el.classList.contains('is-in') && el.getBoundingClientRect().top < VH * 0.92) reveal(el);
+  });
+  const mid = VH * 0.5;
+  for (const el of view.querySelectorAll('[data-tone]')) {
+    const r = el.getBoundingClientRect();
+    if (r.top <= mid && r.bottom > mid) { if (pageBg.dataset.tone !== el.dataset.tone) setTone(el.dataset.tone); break; }
+  }
+}
+
+/* =========================================================================
+   About as a drawer (the Winkeler move): it slides over the view on screen,
+   which stays as it was. #/about opens it; closing restores the previous link.
+   ========================================================================= */
+const drawer = $('.drawer'), scrim = $('.drawer-scrim');
+let drawerOn = false, drawerPushed = false, drawerToken = 0, drawerFocus = null, navBeforeDrawer = 'programs';
+function openDrawer(pushed) {
+  if (drawerOn) return;
+  drawerOn = true; drawerPushed = pushed;
+  const tok = ++drawerToken;
+  hideScribble(); state.hoverWanted = false; canvas.classList.remove('is-over');
+  drawerFocus = document.activeElement;
+  navBeforeDrawer = currentNav; setNav('about');
+  drawer.innerHTML = drawerHTML();
+  drawer.hidden = false; scrim.hidden = false;
+  void drawer.offsetWidth;
+  drawer.classList.add('is-open'); scrim.classList.add('is-open');
+  body.classList.add('is-drawer');
+  $('#main').inert = true; $('.nav').inert = true;
+  $('.drawer__close', drawer).focus({ preventScroll: true });
+  setTimeout(() => { if (tok === drawerToken) reveal($('.drawer__inner', drawer)); }, reduced ? 0 : 140);
+}
+// silent: the route already moved on (back button, another link), so leave the history alone
+function closeDrawer(silent = false) {
+  if (!drawerOn) return;
+  drawerOn = false;
+  const tok = ++drawerToken;
+  drawer.classList.remove('is-open'); scrim.classList.remove('is-open');
+  body.classList.remove('is-drawer');
+  $('#main').inert = false; $('.nav').inert = false;
+  setNav(navBeforeDrawer);
+  setTimeout(() => { if (tok === drawerToken) { drawer.hidden = true; scrim.hidden = true; drawer.innerHTML = ''; } }, reduced ? 0 : 520);
+  if (drawerFocus && drawerFocus !== body && document.contains(drawerFocus)) drawerFocus.focus({ preventScroll: true });
+  if (silent || !/^#\/?about$/.test(location.hash)) return;
+  if (drawerPushed) history.back();
+  else history.replaceState(null, '', viewHash ? `#/${viewHash}` : location.pathname + location.search);
+}
+scrim.addEventListener('click', () => closeDrawer());
+drawer.addEventListener('click', (e) => { if (e.target.closest('.drawer__close')) closeDrawer(); });
+drawer.addEventListener('keydown', (e) => {
+  if (e.key !== 'Tab') return;
+  const f = [...drawer.querySelectorAll('a[href], button')];
+  if (!f.length) return;
+  if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+  else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+});
 
 /* =========================================================================
    Input
@@ -1196,7 +1500,7 @@ canvas.addEventListener('pointercancel', endDrag);
 canvas.addEventListener('pointerleave', () => { pointer.inside = false; if (!drag) { state.hoverWanted = false; canvas.classList.remove('is-over'); } });
 
 addEventListener('wheel', (e) => {
-  if (state.mode !== 'home') return;
+  if (state.mode !== 'home' || drawerOn) return;
   e.preventDefault();
   const dy = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
   const unit = e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? VH : 1;
@@ -1207,8 +1511,8 @@ addEventListener('wheel', (e) => {
 
 addEventListener('keydown', (e) => {
   if (e.target.closest && e.target.closest('input, textarea')) return;
-  if (e.key === 'Escape') { if (!indexPanel.hidden) closeIndex(); else if (state.mode !== 'home') location.hash = '#/'; return; }
-  if (state.mode !== 'home') return;
+  if (e.key === 'Escape') { if (drawerOn) closeDrawer(); else if (!indexPanel.hidden) closeIndex(); else if (state.mode !== 'home') location.hash = '#/'; return; }
+  if (state.mode !== 'home' || drawerOn) return;
   if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); goTo(state.active + 1); hideScribble(); }
   if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); goTo(state.active - 1); hideScribble(); }
   if (e.key === 'Enter' && document.activeElement === body) location.hash = `#/${PROGRAMS[state.active].slug}`;
@@ -1230,11 +1534,39 @@ programView.addEventListener('pointerout', (e) => {
 });
 addEventListener('scroll', () => { if (state.mode !== 'home' && scribbleOn) hideScribble(); }, { passive: true });
 
+/* The documentation tool: a wheel notch inside it steps one frame; at either end the
+   wheel goes back to scrolling the page. Arrow keys when focused, a click for the next. */
+let docsAcc = 0, docsLast = 0, docsLock = 0;
+programView.addEventListener('wheel', (e) => {
+  const stage = e.target.closest('.p-docs__stage');
+  if (!stage) return;
+  const dy = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+  const d = Math.sign(dy), i = +stage.dataset.i, n = stage.querySelectorAll('.p-docs__frame').length;
+  if (!d || (d < 0 && i === 0) || (d > 0 && i === n - 1)) return;
+  e.preventDefault();
+  const now = performance.now();
+  if (now - docsLast > 220 || Math.sign(docsAcc) !== d) docsAcc = 0;
+  docsLast = now;
+  docsAcc += dy * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? VH : 1);
+  if (Math.abs(docsAcc) >= 30 && now - docsLock > 160) { docsAcc = 0; docsLock = now; stepDocs(stage, d); }
+}, { passive: false });
+programView.addEventListener('click', (e) => {
+  const stage = e.target.closest('.p-docs__stage');
+  if (stage) stepDocs(stage, 1, true);
+});
+programView.addEventListener('keydown', (e) => {
+  const stage = e.target.closest('.p-docs__stage');
+  if (!stage) return;
+  const d = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0;
+  if (d) { e.preventDefault(); stepDocs(stage, d); }
+  else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); stepDocs(stage, 1, true); }
+});
+
 /* Index dropdown */
 const indexBtn = $('.nav__index-btn'), indexPanel = $('#index-panel'), indexList = $('.index__list');
 indexList.innerHTML =
   PROGRAMS.map((p, i) => `<li><a class="index__row" href="#/${p.slug}" data-i="${i}"><span${p.lang ? ` lang="${p.lang}"` : ''}>${p.homeTitle.join(' ')}</span><span>${p.short}</span></a></li>`).join('') +
-  `<li class="index__group eyebrow">Brand work</li><li><a class="index__row" href="#/about"><span>Flywheel</span><span>2021–2025</span></a></li>` +
+  `<li class="index__group eyebrow">Work</li><li><a class="index__row" href="#/brand"><span>Brand work</span><span>2020–2025</span></a></li><li><a class="index__row" href="#/archive"><span>Earlier work</span><span>2018–2021</span></a></li>` +
   `<li class="index__group eyebrow">Studio</li><li><a class="index__row" href="#/about"><span>About</span><span>New York</span></a></li><li><a class="index__row" href="mailto:${SITE.email}"><span>Email</span><span>${SITE.email}</span></a></li>`;
 function openIndex() { indexPanel.hidden = false; indexBtn.setAttribute('aria-expanded', 'true'); }
 function closeIndex() { indexPanel.hidden = true; indexBtn.setAttribute('aria-expanded', 'false'); }
@@ -1274,6 +1606,10 @@ function frame(now) {
     programFrame();
   } else if (state.mode === 'about') {
     aboutFrame();
+  } else if (state.mode === 'brand') {
+    pageFrame(brandView);
+  } else if (state.mode === 'archive') {
+    pageFrame(archiveView);
   }
   // a little parallax from the pointer on the carousel
   const px = state.mode === 'home' && pointer.inside && !reduced ? pointer.nx * 0.16 : 0;
@@ -1327,6 +1663,13 @@ const LAB = {
     if (st) st.dataset.tone = v;
   } },
   loader: { label: 'Loader', def: 'on', options: [['on', 'On'], ['off', 'Off']], apply: (v) => { loaderOn = v === 'on'; } },
+  about: { label: 'About', def: 'drawer', options: [['drawer', 'Drawer'], ['page', 'Page']], apply: (v) => {
+    aboutMode = v;
+    if (!state.ready || location.hash.replace(/^#\/?/, '') !== 'about') return;
+    // switched while About is showing: show it the other way, in place
+    if (drawerOn) closeDrawer(true);
+    if (v === 'page') { viewHash = 'about'; enterAbout(); } else route();
+  } },
 };
 const lab = {};
 for (const k in LAB) {
@@ -1433,7 +1776,7 @@ async function boot() {
   setTimeout(() => {
     const h = location.hash.replace(/^#\/?/, '');
     if (h) route();
-    else { enterHome(); document.querySelectorAll('.home__corner').forEach((el) => reveal(el)); }
+    else { viewHash = ''; enterHome(); document.querySelectorAll('.home__corner').forEach((el) => reveal(el)); }
   }, reduced ? 0 : 650);
 }
 boot().catch((err) => { console.error(err); body.classList.add('is-ready'); });

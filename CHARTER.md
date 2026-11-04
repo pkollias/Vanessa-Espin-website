@@ -89,6 +89,12 @@ Anything not marked **Confirmed** must be resolved with Vanessa before it ships.
 | Languages | "English and Spanish" appears in the About mock with "[confirm]" | **Unconfirmed** |
 | Numbers | Attendance, RSVPs, sponsors or funds raised, social reach, press | **None exist yet.** Do not estimate |
 
+**Confirmed Nov 4, 2026 (Pavlos)**, with her LinkedIn as the source for her own roles:
+- **Posters:** Vanessa designed all the posters. "Poster: Vanessa Espín" is credited on Iyuana, Herencia Viva and Ayazamana.
+- **Iyuana** is the "Sapara Nation - Art Exhibition" on her LinkedIn (Creative Director, Brand & Experience, Jun 2026 to present). How she describes her relationship to the Sápara Nation is still to come from her.
+- **Herencia Viva: Threads of Memory** is painter Luis Medina's exhibition, listed on her LinkedIn as the "Ayllu Gallery - Luis Medina Exhibition Project" (Creative Director, Brand & Experience, Apr to Jun 2026); the poster carries Ayllu Gallery's logo. Credited "With: Ayllu Gallery".
+- **Ayazamana:** the performers are the **Ayazamana Dance Group**, the Ecuadorian American Cultural Center's traditional dance group, founded in 1992 by José Rivera, performing dances from La Costa, La Sierra and El Oriente (sources: Dance/NYC, https://www.dance.nyc/equity/immigrant-artists/worksartists/view/Ayazamana-Dance-Group/, and ecuadorcenter.org). Her confirmed part is the poster; her role on the night is still to come from her. The site must not imply she created, named or planned Ayazamana.
+
 ## 8. Design spec (from the approved canvas)
 
 The mocks were drawn at 1280 px wide with inline styles. They say fonts and spacing are "indicative", so treat the values below as the intended design and refine rather than guess. Reference copies are in `design-reference/`.
