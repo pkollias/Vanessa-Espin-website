@@ -469,15 +469,15 @@ function showHomeText(i, instant = false) {
 
 /* =========================================================================
    Marks: the hand-made gesture around the selected poster.
-   ?mark=circle (default) | grease | hang | tape. ?marks also shows a chooser;
-   the M key cycles through them.
+   ?mark=circle (default) | grease | hang | tape | hangtape | wire | box,
+   also chosen in the lab (see Lab below).
    ========================================================================= */
 const SVGNS = 'http://www.w3.org/2000/svg';
 const markLayer = $('#marks');
-const MARK_NAMES = ['circle', 'grease', 'hang', 'tape', 'hangtape'];
+const MARK_NAMES = ['circle', 'grease', 'hang', 'tape', 'hangtape', 'wire', 'box'];
 const params = new URLSearchParams(location.search);
 let markName = MARK_NAMES.includes(params.get('mark')) ? params.get('mark') : 'circle';
-let scribbleOn = false, markTrack = null, markToken = 0;
+let scribbleOn = false, markTrack = null, markToken = 0, markClock = null;
 
 function projectCorners(sheet) {
   const a = sheet.aspect;
@@ -551,6 +551,170 @@ function edgeFrame(c) {
   let up = [along[1], -along[0]];
   if (up[1] > 0) up = mul(up, -1);
   return { BL, BR, TR, TL, along, up, w: len2(sub(TR, TL)), h: len2(sub(TL, BL)) };
+}
+
+/* The wire and the box are drawn by the frame loop from a clock, not by CSS
+   transitions: the wire keeps moving once drawn (it takes the weight), and the box
+   is paced by hand, slowing into each turn. Both are re-fitted every frame. */
+// a CSS cubic-bezier() as a function
+const bez = (x1, y1, x2, y2) => {
+  const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+  const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+  return (x) => {
+    if (x <= 0) return 0;
+    if (x >= 1) return 1;
+    let t = x;
+    for (let i = 0; i < 8; i++) {
+      const d = (3 * ax * t + 2 * bx) * t + cx;
+      if (Math.abs(d) < 1e-6) break;
+      t = clamp01(t - (((ax * t + bx) * t + cx) * t - x) / d);
+    }
+    return ((ay * t + by) * t + cy) * t;
+  };
+};
+const E_DRAW = bez(0.62, 0.05, 0.28, 1); // the circle's curve
+const E_OUT = bez(0.2, 0.7, 0.3, 1);
+const E_IN = bez(0.55, 0, 0.75, 0); // the erase
+const seg = (t, a, b) => clamp01((t - a) / (b - a));
+const lerp2 = (p, q, k) => [p[0] + (q[0] - p[0]) * k, p[1] + (q[1] - p[1]) * k];
+const perp = (d) => [d[1], -d[0]];
+const rot2 = (v, a) => [v[0] * Math.cos(a) - v[1] * Math.sin(a), v[0] * Math.sin(a) + v[1] * Math.cos(a)];
+
+// The sheet's plane on screen: P(u, v) in sheet widths and heights from the top-left
+// corner, exact in perspective, so marks off the sheet still lie on its plane.
+function quadMap(c) {
+  const [BL, BR, TR, TL] = c;
+  const [x0, y0] = TL, [x1, y1] = TR, [x2, y2] = BR, [x3, y3] = BL;
+  const sx = x0 - x1 + x2 - x3, sy = y0 - y1 + y2 - y3;
+  const dx1 = x1 - x2, dx2 = x3 - x2, dy1 = y1 - y2, dy2 = y3 - y2;
+  const den = dx1 * dy2 - dx2 * dy1 || 1e-9;
+  const g = (sx * dy2 - dx2 * sy) / den, h = (dx1 * sy - sx * dy1) / den;
+  const a = x1 - x0 + g * x1, b = x3 - x0 + h * x3, d = y1 - y0 + g * y1, e = y3 - y0 + h * y3;
+  const P = (u, v) => { const w = g * u + h * v + 1; return [(a * u + b * v + x0) / w, (d * u + e * v + y0) / w]; };
+  P.w = len2(sub(TR, TL)); P.h = len2(sub(BL, TL));
+  P.down = unit(sub(P(0.5, 0.6), P(0.5, 0.1)));
+  return P;
+}
+// the part of a polyline between fractions a..b of its length
+function sliceArc(pts, a, b) {
+  if (pts.length < 2 || b - a <= 1e-4) return [];
+  const L = [0];
+  for (let i = 1; i < pts.length; i++) L.push(L[i - 1] + len2(sub(pts[i], pts[i - 1])));
+  const A = a * L[L.length - 1], B = b * L[L.length - 1];
+  const at = (s) => { let i = 1; while (i < L.length - 1 && L[i] < s) i++; return lerp2(pts[i - 1], pts[i], clamp01((s - L[i - 1]) / (L[i] - L[i - 1] || 1))); };
+  const out = [at(A)];
+  for (let i = 1; i < pts.length - 1; i++) if (L[i] > A && L[i] < B) out.push(pts[i]);
+  out.push(at(B));
+  return out;
+}
+// a Catmull-Rom curve through ctrl as a dense polyline (the curve smoothPath draws)
+function catmull(ctrl, per = 8) {
+  const out = [];
+  for (let i = 0; i < ctrl.length - 1; i++) {
+    const p0 = ctrl[Math.max(0, i - 1)], p1 = ctrl[i], p2 = ctrl[i + 1], p3 = ctrl[Math.min(ctrl.length - 1, i + 2)];
+    for (let k = 0; k < per; k++) {
+      const t = k / per, t2 = t * t, t3 = t2 * t;
+      out.push([0, 1].map((j) => 0.5 * (2 * p1[j] + (p2[j] - p0[j]) * t + (2 * p0[j] - 5 * p1[j] + 4 * p2[j] - p3[j]) * t2 + (3 * p1[j] - p0[j] - 3 * p2[j] + p3[j]) * t3)));
+    }
+  }
+  out.push(ctrl[ctrl.length - 1]);
+  return out;
+}
+const crossPts = (N, r) => [[add(N, [-r, -r]), add(N, [r, r])], [add(N, [r, -r]), add(N, [-r, r])]];
+function setD(el, pts) {
+  const d = pts.length < 2 ? '' : 'M' + pts.map(pt).join('L');
+  if (el.getAttribute('d') !== d) el.setAttribute('d', d);
+}
+// The frame loop calls render(corners, t, lt) every frame: t in seconds since shown,
+// lt since leave (-1 until then).
+function clockMark(sheet, c, render) {
+  markClock = { sheet, c, t0: performance.now(), leaveAt: 0, render };
+  render(c, 0, -1);
+}
+function tickMark(now) {
+  const m = markClock;
+  m.render(m.sheet ? projectCorners(m.sheet) : m.c, (now - m.t0) / 1000, m.leaveAt ? (now - m.leaveAt) / 1000 : -1);
+}
+
+// a seeded random stream (mulberry32): the same quirks every frame, new ones every show
+function rng(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+// the quad's edges pushed out by pad px and re-intersected: a frame round the sheet as seen
+function inflate(c, pad) {
+  const cen = mul(c.reduce((s, p) => add(s, p), [0, 0]), 0.25);
+  const lines = c.map((p, i) => {
+    const q = c[(i + 1) % 4], d = unit(sub(q, p)), m = lerp2(p, q, 0.5);
+    let n = perp(d);
+    if ((m[0] - cen[0]) * n[0] + (m[1] - cen[1]) * n[1] < 0) n = mul(n, -1);
+    return { p: add(p, mul(n, pad)), d };
+  });
+  return c.map((_, i) => {
+    const A = lines[(i + 3) % 4], B = lines[i];
+    const den = A.d[0] * B.d[1] - A.d[1] * B.d[0];
+    if (Math.abs(den) < 1e-6) return B.p;
+    const t = ((B.p[0] - A.p[0]) * B.d[1] - (B.p[1] - A.p[1]) * B.d[0]) / den;
+    return add(A.p, mul(A.d, t));
+  });
+}
+// a hand-drawn run from p to q (interior points only): a slight bow and a tremor, never ruled
+function run(p, q, R, steps) {
+  const d = sub(q, p), n = perp(unit(d)), bow = (R() - 0.35) * 0.022 * len2(d);
+  const out = [];
+  for (let k = 1; k < steps; k++) out.push(add(lerp2(p, q, k / steps), mul(n, bow * Math.sin((Math.PI * k) / steps) + (R() - 0.5) * 1.1)));
+  return out;
+}
+// The select box round a quad. The frame (tilt about a degree, jittered corners) comes
+// from one seed and the hand (bow, tremor, start and run-on) from another, so a second
+// pass can follow the same box with a different hand. On the home page the bottom side
+// keeps 8px above the captions under the sheet, but never enters the sheet.
+const BOX_PER = 6;
+function boxGeom(c, frameSeed, handSeed, extra, avoid) {
+  const F = rng(frameSeed), R = rng(handSeed);
+  const f = edgeFrame(c), s = Math.min(f.w, f.h);
+  const pad = clamp(f.h * (VW < 760 ? 0.035 : 0.05), 9, 34) + extra, jit = f.h * 0.008;
+  const tilt = (F() < 0.5 ? -1 : 1) * 0.022 * (0.6 + F() * 0.4);
+  const cen = mul(c.reduce((q, p) => add(q, p), [0, 0]), 0.25);
+  const Q = inflate(c, pad).map((p) => add(add(cen, rot2(sub(p, cen), tilt)), [(F() - 0.5) * 2 * jit, (F() - 0.5) * 2 * jit]));
+  let lim = Infinity;
+  if (avoid && avoid.left < Math.max(Q[1][0], Q[2][0]) && avoid.right > Math.min(Q[0][0], Q[3][0])) {
+    lim = Math.max(avoid.top - 8, Math.max(c[0][1], c[1][1]) + 5);
+    Q[0][1] = Math.min(Q[0][1], lim); Q[1][1] = Math.min(Q[1][1], lim);
+  }
+  const keep = (pts) => pts.map((p) => [p[0], Math.min(p[1], lim)]);
+  const [BL, BR, TR, TL] = Q;
+  const top = unit(sub(TR, TL)), down = unit(sub(BR, TR)), back = unit(sub(BL, BR)), up = unit(sub(TL, BL));
+  const S = add(sub(TL, mul(top, 1.3 * clamp(s * 0.06, 10, 24) * (0.8 + R() * 0.4))), mul(perp(top), (R() - 0.5) * 3));
+  const E = add(add(TL, mul(up, 1.3 * clamp(s * 0.075, 12, 30) * (0.8 + R() * 0.4))), mul(top, 2 + R() * 5));
+  const rc = clamp(s * 0.045, 4, 22);
+  const turn = (K, din, dout) => [sub(K, mul(din, rc)), add(K, mul(sub(din, dout), 1.3)), add(K, mul(dout, rc))];
+  const ctrl = [S], at = [];
+  ctrl.push(...run(S, TR, R, 5), ...turn(TR, top, down)); at.push(ctrl.length - 2);
+  ctrl.push(...run(TR, BR, R, 6), ...keep(turn(BR, down, back))); at.push(ctrl.length - 2);
+  ctrl.push(...keep([...run(BR, BL, R, 5), ...turn(BL, back, up)])); at.push(ctrl.length - 2);
+  ctrl.push(...run(BL, TL, R, 6), TL); at.push(ctrl.length - 1);
+  ctrl.push(E);
+  const pts = catmull(ctrl, BOX_PER);
+  const L = [0];
+  for (let i = 1; i < pts.length; i++) L.push(L[i - 1] + len2(sub(pts[i], pts[i - 1])));
+  const T = L[L.length - 1], ks = [...at.map((i) => L[i * BOX_PER]), T];
+  return { pts, fr: ks.map((k) => k / T), legLen: ks.map((k, i) => k - (i ? ks[i - 1] : 0)) };
+}
+const BOX_EASES = [bez(0.55, 0.04, 0.62, 0.86), ...Array(3).fill(bez(0.36, 0.16, 0.64, 0.84)), bez(0.3, 0.45, 0.6, 0.95)];
+// how far round the box the pen is at t, with each leg eased into its turn
+function legAt(legs, t) {
+  let from = 0;
+  for (const l of legs) {
+    if (t < l.t1) return mix(from, l.to, l.ease(seg(t, l.t0, l.t1)));
+    from = l.to;
+  }
+  return 1;
 }
 
 const MARKS = {
@@ -627,15 +791,89 @@ const MARKS = {
     MARKS.hang(c);
     MARKS.tape(c);
   },
+  // Hung: a pencil cross where the nail goes, the nail, then the wire from corner to
+  // corner over it, slack until it takes the weight. Under a link the wire is strung
+  // between two nails below the words. On leave it goes slack and is pulled off.
+  wire(c, sheet) {
+    const g = svg('g', { filter: 'url(#rough-wire)' }); // #rough, with room round a near-straight wire
+    const nails = (sheet ? [0] : [0, 1]).map(() => [svg('path', { class: 'mk mk--cross' }, g), svg('path', { class: 'mk mk--cross' }, g)]);
+    const strand = svg('path', { class: 'mk mk--strand' }, g), wire = svg('path', { class: 'mk mk--wire' }, g);
+    const heads = nails.map(() => svg('circle', { class: 'mk-nail', r: 0 }));
+    const slack = sheet ? 0.1 : 0.05, rest = sheet ? 0 : 0.006;
+    clockMark(sheet, c, (c2, t, lt) => {
+      const P = quadMap(c2);
+      const down = P.down, up = mul(down, -1), r = clamp(P.h * 0.011, 3.6, 6);
+      const N = sheet ? [P(0.5, -clamp(P.h * 0.13, 28, 74) / P.h)] : [0, 1].map((u) => add(P(u, 1), mul(down, 6)));
+      const fade = lt < 0 ? 1 : 1 - seg(lt, 0.15, 0.32);
+      N.forEach((p, k) => {
+        const [ca, cb] = crossPts(p, r), t0 = k * 0.08;
+        setD(nails[k][0], sliceArc(ca, 0, E_OUT(seg(t, t0, t0 + 0.09))));
+        setD(nails[k][1], sliceArc(cb, 0, E_OUT(seg(t, t0 + 0.07, t0 + 0.16))));
+        nails[k][0].style.opacity = nails[k][1].style.opacity = fade;
+        const hp = seg(t, t0 + 0.14, t0 + 0.3);
+        heads[k].setAttribute('cx', p[0].toFixed(1)); heads[k].setAttribute('cy', p[1].toFixed(1));
+        heads[k].setAttribute('r', hp <= 0 ? 0 : (r * 0.5 * (1 + 0.45 * Math.sin(hp * Math.PI) * (1 - hp))).toFixed(2));
+        heads[k].style.opacity = fade;
+      });
+      // slack while it is drawn, then it takes the weight: one twang and still
+      const tau = t - 0.62;
+      let sag = tau < 0 ? slack : rest + (slack - rest) * Math.exp(-tau / 0.09) * Math.cos(2 * Math.PI * 4.2 * tau);
+      if (lt >= 0) sag = mix(sag, slack * 1.4, E_OUT(seg(lt, 0, 0.2)));
+      const leg = (S, E, n = 28) => {
+        const L = len2(sub(E, S));
+        return Array.from({ length: n + 1 }, (_, i) => add(lerp2(S, E, i / n), mul(down, sag * L * 4 * (i / n) * (1 - i / n))));
+      };
+      let pts, along;
+      if (sheet) {
+        const A = P(0.012, 0.004), B = P(0.988, 0.004), [M] = N;
+        along = unit(sub(B, A));
+        const h0 = add(add(M, mul(along, -r * 1.1)), mul(up, r * 0.2)), h1 = add(M, mul(up, r * 0.95)), h2 = add(add(M, mul(along, r * 1.1)), mul(up, r * 0.2));
+        pts = [...leg(A, h0), ...catmull([h0, h1, h2], 6).slice(1), ...leg(h2, B).slice(1)];
+      } else {
+        along = unit(sub(N[1], N[0]));
+        pts = leg(N[0], N[1], 40);
+      }
+      const a0 = lt < 0 ? 0 : E_IN(seg(lt, 0.02, 0.36)), off = mul(perp(along), -1.6);
+      setD(wire, sliceArc(pts, a0, E_DRAW(seg(t, 0.1, 0.62))));
+      setD(strand, sliceArc(pts.map((p) => add(p, off)), a0, 0.97 * E_DRAW(seg(t, 0.18, 0.7))));
+    });
+  },
+  // The select box: on a contact sheet the pick is boxed in red china marker. One
+  // stroke from just left of the top-left corner, slowing into each turn and run on
+  // past its start so the closing corner crosses; a thinner second pass goes over the
+  // right side. Today's marker ink, a little different every time.
+  box(c, sheet) {
+    const seed = (Math.random() * 2 ** 32) >>> 0;
+    const avoid = sheet && state.mode === 'home' ? $('.home__blurbs').getBoundingClientRect() : null;
+    const main = svg('path', { class: 'mk mk--marker' }), thin = svg('path', { class: 'mk mk--marker-thin' });
+    const T = VW < 760 ? 0.66 : 0.74;
+    let legs = null;
+    clockMark(sheet, c, (c2, t, lt) => {
+      const G = boxGeom(c2, seed, seed + 1, 0, avoid), G2 = boxGeom(c2, seed, seed + 2, 2.6, avoid);
+      if (!legs) {
+        const w = G.legLen.slice(0, 4).map((l) => l ** 0.8), W = w.reduce((x, y) => x + y, 0);
+        let t0 = 0;
+        legs = G.fr.map((to, i) => {
+          const dur = i < 4 ? ((T - 0.07) * w[i]) / W : 0.07;
+          t0 += dur;
+          return { to, t0: t0 - dur, t1: t0, ease: BOX_EASES[i] };
+        });
+      }
+      const a0 = lt < 0 ? 0 : E_IN(seg(lt, 0, 0.36));
+      setD(main, sliceArc(G.pts, a0, legAt(legs, t)));
+      const u0 = 0.55 * G2.fr[0], u1 = G2.fr[1] + 0.6 * (G2.fr[2] - G2.fr[1]);
+      setD(thin, sliceArc(G2.pts, mix(u0, u1, a0), mix(u0, u1, E_DRAW(seg(t, 0.3, 0.72)))));
+    });
+  },
 };
 
 function showScribble(sheet, corners) {
   if (reduced) return;
   const token = ++markToken;
   markLayer.replaceChildren();
-  markTrack = null;
+  markTrack = null; markClock = null;
   const c = corners || projectCorners(sheet);
-  MARKS[markName](c);
+  MARKS[markName](c, sheet);
   scribbleOn = token;
   markLayer.dataset.sheet = sheet ? sheets.indexOf(sheet) : '';
 }
@@ -643,8 +881,9 @@ function hideScribble() {
   if (!scribbleOn) return;
   scribbleOn = false;
   markTrack = null;
+  if (markClock) markClock.leaveAt = performance.now();
   const token = ++markToken;
-  for (const p of markLayer.querySelectorAll('path')) {
+  for (const p of markLayer.querySelectorAll('path[data-len]')) {
     p.style.transition = 'stroke-dashoffset .35s cubic-bezier(.55,0,.75,0)';
     p.style.strokeDashoffset = `${-(+p.dataset.len || 0)}`;
   }
@@ -653,7 +892,7 @@ function hideScribble() {
     t.style.transform = 'scale(1.12)';
     t.style.opacity = '0';
   }
-  setTimeout(() => { if (token === markToken) markLayer.replaceChildren(); }, 420);
+  setTimeout(() => { if (token === markToken) { markLayer.replaceChildren(); markClock = null; } }, 420);
 }
 function setMark(name) {
   if (!MARK_NAMES.includes(name)) return;
@@ -1045,6 +1284,7 @@ function frame(now) {
   sheets.forEach((s) => s.update(dt, now));
   if (portrait) portrait.update(dt, now);
   if (markTrack && state.mode === 'home') markTrack(projectCorners(sheets[state.active]));
+  if (markClock) tickMark(now);
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }
@@ -1068,7 +1308,7 @@ const GRAINS = { off: 0, soft: 0.11, strong: 0.22 };
 const TILTS = { flat: 0.35, soft: 1, strong: 1.6 };
 
 const LAB = {
-  mark: { label: 'Selection mark', def: 'circle', options: [['circle', 'Circle'], ['grease', 'Grease pencil'], ['hang', 'Hanging marks'], ['tape', 'Tape'], ['hangtape', 'Tape + marks']], apply: (v) => setMark(v) },
+  mark: { label: 'Selection mark', def: 'circle', options: [['circle', 'Circle'], ['grease', 'Grease pencil'], ['hang', 'Hanging marks'], ['tape', 'Tape'], ['hangtape', 'Tape + marks'], ['wire', 'Nail and wire'], ['box', 'Select box']], apply: (v) => setMark(v) },
   type: { label: 'Title type', def: 'zodiak', options: [['zodiak', 'Zodiak'], ['gambetta', 'Gambetta'], ['caslon', 'Libre Caslon'], ['instrument', 'Instrument Serif']], apply: (v) => {
     const t = TYPES[v];
     if (t.css && !document.querySelector(`link[data-type="${v}"]`)) {

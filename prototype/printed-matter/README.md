@@ -21,7 +21,7 @@ live site; a dot marks them. Every change is kept in the address, so any combina
 
 | Switch | Link value | Options |
 |---|---|---|
-| Selection mark | `mark` | `circle` (live), `grease`, `hang`, `tape`, `hangtape` |
+| Selection mark | `mark` | `circle` (live), `grease`, `hang`, `tape`, `hangtape`, `wire` (nail and wire), `box` (select box) |
 | Title type | `type` | `zodiak` (live), `gambetta`, `caslon`, `instrument` |
 | Paper | `paper` | `warm` (live), `cream`, `white`, `stone` |
 | Accent | `accent` | `oxblood` (live), `brick`, `ink` |
