@@ -19,6 +19,7 @@ const SWING = [0, 118, 74, 150, 0, 74, 118, 150];
 const BULGE = [0, 0.34, 0.2, 0.42, 0, 0.2, 0.34, 0.42];
 const LATE = [0, 0.017, 0.034, 0.051]; // the columns take off in order, so their heights read as a staircase
 
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const lerp = (a, b, t) => a + (b - a) * t;
 const glog = (a, b, t) => a * Math.pow(b / a, t);
@@ -26,7 +27,7 @@ const seg = (v, a, b) => clamp((v - a) / (b - a));
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const rad = (d) => (d * Math.PI) / 180;
 
-export function createOpening({ host, reduced, onEnd }) {
+function createOpening(host) {
   const cv = host.querySelector('canvas'), ctx = cv.getContext('2d');
   const links = [...host.querySelectorAll('.opening__word')];
   let W = 0, H = 0, D = 1, M = 0, cx = 0, cy = 0, words = [], cols = [], flood = null, bars = [];
@@ -163,7 +164,7 @@ export function createOpening({ host, reduced, onEnd }) {
   function finish() {
     on = false; tw = null; q = target = 1;
     host.hidden = true;
-    onEnd();
+    api.onEnd();
   }
   function to(v, ms) {
     if (reduced) { if (v >= 1) finish(); else start(); return; }
@@ -204,11 +205,18 @@ export function createOpening({ host, reduced, onEnd }) {
   addEventListener('resize', () => { if (on) { layout(); draw(); } });
   document.fonts.load(`700 100px ${FONT}`).then(() => { if (on) { layout(); draw(); } }).catch(() => {});
 
-  return {
+  const api = {
     get on() { return on; },
+    onEnd() {},
     start, back, finish, scroll, to,
     nudge: (d) => scroll(d * TRAVEL * H * 0.14),
     skip: () => to(1, 1400),
     rewind: () => { back(); to(0, 1500); },
+    repaint: () => { if (on) { layout(); draw(); } },
   };
+  return api;
 }
+
+export const opening = createOpening(document.querySelector('.opening'));
+// This file loads ahead of everything else, so on home the V and E are the first thing on the page: no poster shows before them.
+if (!location.hash.replace(/^#\/?/, '')) { document.body.classList.add('is-home'); opening.start(); }

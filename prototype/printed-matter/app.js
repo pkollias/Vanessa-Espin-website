@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { picturesHTML, picturesFrame, picturesEnter, picturesLeave } from './pictures.js';
 // the gliding scroll (lab scroll=glide): see glide.js
 import { glideInstall, glideTick, glideHalt } from './glide.js';
-import { createOpening } from './opening.js';
+import { opening } from './opening.js';
 
 /* =========================================================================
    Content. Facts are written out; anything in her voice is a placeholder
@@ -642,6 +642,7 @@ function showIntro(on) {
   if (!on) return;
   swapToken++; shownIndex = -1;
   [homeTitle, homeSpecs].forEach(conceal);
+  opening.repaint(); // the lab may have changed the paper since the first paint
 }
 function showHomeText(i, instant = false) {
   if (i === shownIndex && !instant) return;
@@ -1284,7 +1285,7 @@ function toPoster(i) {
 /* Home opens on the V and E (opening.js), which run on the wheel, a finger or the arrow keys. They end on the first poster and
    the rest of that flick is dropped. Scrolling up past the first poster plays them in reverse. */
 let wheelHold = 0, wantIntro = false;
-const opening = createOpening({ host: $('.opening'), reduced, onEnd: () => { wheelHold = performance.now() + 700; } });
+opening.onEnd = () => { wheelHold = performance.now() + 700; };
 const atIntro = () => opening.on;
 const wheelF = { acc: 0, last: -1e9, armed: true, stepAt: -1e9, avg: 0, peak: 0 };
 function wheelNotch(d, now) {
@@ -2413,7 +2414,6 @@ const loadBar = $('.loader__bar i');
 const statusLabel = $('.nav__status');
 async function boot() {
   const t0 = performance.now();
-  if (!location.hash.replace(/^#\/?/, '')) opening.start();
   let shown = 0;
   const tick = () => {
     shown = Math.min(1, (performance.now() - t0) / 1400);
