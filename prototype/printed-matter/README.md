@@ -56,7 +56,7 @@ motion there is no press, flight or turn: the poster is simply in place, and the
 | `#/archive` | Earlier work (rows from her old site), selected experience, education |
 | `#/about` | Opens the About drawer over the view on screen (with the lab's `about=page`, the old About page) |
 
-Nav: Programs · Brand work · About · Index. Index lists the programs, then Brand work, Earlier work, About and Email.
+Nav: Programs · Brand work · About · Index. Index lists the programs, then Brand work, Earlier work, About and LinkedIn.
 On Earlier work the Index button is marked as the current item, since that is where the page is listed.
 Her headline ("Brand curator of events and experience") sits in the home's lower-left corner; on phones it is one
 small centred line above the blurbs (the right-hand counter and hint stay hidden there).
@@ -66,7 +66,7 @@ Brand work and Earlier work have no WebGL slots: the sheets are parked out of si
 right over the current view, in 0.5 s on `cubic-bezier(.165,.84,.44,1)`, while a scrim dims the page. Close, a click
 on the scrim or Esc closes it; focus moves into the drawer and back afterwards, and the link returns to what it was
 (the view underneath is not rebuilt). It holds her name and headline, a bio placeholder, "How I work with artists",
-four "Work together" doors (Artists; Institutions & venues; Brands & sponsors; Press), email, LinkedIn, the résumé and
+four "Work together" doors (Artists; Institutions & venues; Brands & sponsors; Press), LinkedIn and
 a greyscale portrait.
 
 **Documentation tool** (on each program page). One frame at a time: a wheel notch inside it, the arrow keys (when
@@ -171,3 +171,5 @@ when the switches are mixed, neither button is pressed and each switch is writte
 Example: `?mark=hangtape&paper=cream` shows the tape and hanging marks on cream paper.
 To add a switch, add an entry to `LAB` in `app.js`: its options and an `apply` function (and `snap`, its
 snapshot option, if the Compare row should set it). The visual-pass switches write their value into `VIS`.
+
+No email address and no résumé on public pages or in this repo (decided Nov 5, 2026, because of crawlers). LinkedIn is the contact for now.

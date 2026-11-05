@@ -7,13 +7,13 @@ site:
   # Approved copy. The year range only holds if the Enchante page ships.
   brandLink: "Brand and ecommerce work, 2020–2025 {{TODO: confirm the 2020 start: keep it only if the Enchante page ships}}"
   # {{TODO: confirm this is the address you want public (it is the one in the mocks and on the résumé)}}
-  email: vanessa.s.espin@gmail.com
+  email: ""
   # Full URL once known, e.g. https://www.instagram.com/handle
   instagram: "{{TODO: Instagram handle}}"
   # {{TODO: confirm the LinkedIn URL (taken from the résumé header)}}
   linkedin: https://www.linkedin.com/in/vanessaespin
   languages: "English and Spanish {{TODO: confirm}}"
-  resume: /Vanessa_Espin_Resume.pdf
+  resume: ""
   # Optional "open to" line for Contact. Leave null unless she wants to say it.
   openTo: null
   # Short third-person bio for press, partners and programs (Appendix A).

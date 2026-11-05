@@ -6,7 +6,7 @@ import { picturesHTML, picturesFrame, picturesEnter, picturesLeave } from './pic
    Content. Facts are written out; anything in her voice is a placeholder
    (ph) naming what goes there and which interview question fills it.
    ========================================================================= */
-const SITE = { email: 'vanessa.s.espin@gmail.com', linkedin: 'https://www.linkedin.com/in/vanessaespin', headline: 'Brand curator of events and experience' };
+const SITE = { linkedin: 'https://www.linkedin.com/in/vanessaespin', headline: 'Brand curator of events and experience' };
 
 // The interview (published separately): question number -> what it fills.
 const INTERVIEW = {
@@ -1363,7 +1363,7 @@ addEventListener('hashchange', route);
 /* =========================================================================
    Program and About pages
    ========================================================================= */
-const foot = () => `<footer class="pg-foot"><span>Vanessa Espín · New York</span><span><a href="mailto:${SITE.email}">${SITE.email}</a> · <a href="${SITE.linkedin}">LinkedIn</a></span></footer>`;
+const foot = () => `<footer class="pg-foot"><span>Vanessa Espín · New York</span><span><a href="${SITE.linkedin}">LinkedIn</a></span></footer>`;
 
 // The quick-cut tool: one frame per wheel notch, arrow key or click. The picture cuts,
 // the caption follows. docs is a list of pictures (see pictures() at the top) or of placeholder
@@ -1452,7 +1452,7 @@ function programHTML(i) {
       <span class="p-next__go">Open ${next.name}</span>
     </a>
     <div class="slot slot--next" data-slot="next" style="--ar:${sheets[(i + 1) % N].aspect}"></div>
-    <footer class="p-foot"><span>Vanessa Espín · New York</span><span><a href="mailto:${SITE.email}">${SITE.email}</a> · <a href="${SITE.linkedin}">LinkedIn</a></span></footer>
+    <footer class="p-foot"><span>Vanessa Espín · New York</span><span><a href="${SITE.linkedin}">LinkedIn</a></span></footer>
   </section>`;
 }
 
@@ -1468,9 +1468,9 @@ const ABOUT = {
     ['Press', ph('what she can send, and in which languages · one line', 'q11 q12')],
   ],
 };
-const doorsHTML = () => `<ul class="doors" role="list">${ABOUT.doors.map(([k, v]) => `<li><a class="door" href="mailto:${SITE.email}?subject=${encodeURIComponent(k)}"><span class="door__k">${k}</span><span class="door__v">${v}</span><span class="door__go" aria-hidden="true">→</span></a></li>`).join('')}</ul>`;
+const doorsHTML = () => `<ul class="doors" role="list">${ABOUT.doors.map(([k, v]) => `<li><a class="door" href="${SITE.linkedin}"><span class="door__k">${k}</span><span class="door__v">${v}</span><span class="door__go" aria-hidden="true">→</span></a></li>`).join('')}</ul>`;
 const contactRows = (d0, cls = '', based = true) => {
-  const list = [['Email', `<a href="mailto:${SITE.email}">${SITE.email}</a>`], ['LinkedIn', `<a href="${SITE.linkedin}">linkedin.com/in/vanessaespin</a>`], ['Résumé', '<a href="Vanessa_Espin_Resume.pdf">PDF</a>'], ...(based ? [['Based in', 'New York']] : [])];
+  const list = [['LinkedIn', `<a href="${SITE.linkedin}">linkedin.com/in/vanessaespin</a>`], ...(based ? [['Based in', 'New York']] : [])];
   return `<dl class="specs ${cls}">${rows(list, d0, 0.07)}<div class="specs__row" style="padding:0"><i class="rule" style="--d:${(d0 + list.length * 0.07).toFixed(2)}s"></i></div></dl>`;
 };
 
@@ -2045,7 +2045,7 @@ const indexBtn = $('.nav__index-btn'), indexPanel = $('#index-panel'), indexList
 indexList.innerHTML =
   PROGRAMS.map((p, i) => `<li><a class="index__row" href="#/${p.slug}" data-i="${i}"><span${p.lang ? ` lang="${p.lang}"` : ''}>${p.homeTitle.join(' ')}</span><span>${p.short}</span></a></li>`).join('') +
   `<li class="index__group eyebrow">Work</li><li><a class="index__row" href="#/brand"><span>Brand work</span><span>2020–now</span></a></li><li><a class="index__row" href="#/archive"><span>Earlier work</span><span>2018–2021</span></a></li>` +
-  `<li class="index__group eyebrow">Studio</li><li><a class="index__row" href="#/about"><span>About</span><span>New York</span></a></li><li><a class="index__row" href="mailto:${SITE.email}"><span>Email</span><span>${SITE.email}</span></a></li>`;
+  `<li class="index__group eyebrow">Studio</li><li><a class="index__row" href="#/about"><span>About</span><span>New York</span></a></li><li><a class="index__row" href="${SITE.linkedin}"><span>LinkedIn</span><span>Vanessa Espín</span></a></li>`;
 function openIndex() { indexPanel.hidden = false; indexBtn.setAttribute('aria-expanded', 'true'); }
 function closeIndex() { indexPanel.hidden = true; indexBtn.setAttribute('aria-expanded', 'false'); }
 indexBtn.addEventListener('click', (e) => { e.stopPropagation(); indexPanel.hidden ? openIndex() : closeIndex(); });

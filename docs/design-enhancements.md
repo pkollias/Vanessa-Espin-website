@@ -626,7 +626,7 @@ Review text notes are `<span class="todo">[note]</span>` with no styling of thei
   - `.contact-band{background:var(--cream);min-height:260px;padding:32px;margin-bottom:var(--sp-72);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center}`. At ≤480px the padding becomes `32px 16px`.
   - Inside, in order:
     1. An optional `openTo` `<p>` (20px/1.55, max-width 560). It is null today.
-    2. `<a href="mailto:vanessa.s.espin@gmail.com">` showing the address at `clamp(22px,6.2vw,30px)`, line-height 1.35, ink, with the A7 hover.
+    2. `<a href="#">` showing the address at `clamp(22px,6.2vw,30px)`, line-height 1.35, ink, with the A7 hover.
     3. `.btns{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}` holding:
        - `.btn.btn--solid.on-dark` "Email"
        - `.btn` "Résumé (PDF)" → `/Vanessa_Espin_Resume.pdf`

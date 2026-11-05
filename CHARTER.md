@@ -83,7 +83,7 @@ Anything not marked **Confirmed** must be resolved with Vanessa before it ships.
 | Flywheel | Art Direction Design Specialist, 2021–2025; Amazon and Walmart storefronts and ads; 20+ brands in health, beauty and consumer goods | Confirmed |
 | Enchante Accessories | Brand Designer, eCommerce, 2020–21 | Role confirmed. **"15+ brands" and "Cook with Color refresh" are NOT confirmed.** The résumé notes rejected the 15+ claim as unverified, so leave both out until she confirms |
 | Education | Communication Design, City Tech, CUNY | Confirmed |
-| Email | vanessa.s.espin@gmail.com (used in the mocks) | Appears in the mocks; confirm it is the one she wants public |
+| Email | [her email, kept off the public repo] (used in the mocks) | Appears in the mocks; confirm it is the one she wants public |
 | Instagram | Not known | **Needed** |
 | LinkedIn URL | https://www.linkedin.com/in/vanessaespin (from the résumé header) | **Confirm** |
 | Languages | "English and Spanish" appears in the About mock with "[confirm]" | **Unconfirmed** |
@@ -252,11 +252,11 @@ Recommended; swap freely, nothing above depends on it.
 - **Fonts:** EB Garamond, self-hosted: the Google Fonts v33 Latin files the mocks load (one variable upright file for 400–600, plus 400 italic, about 70 KB together), committed with `OFL.txt` in `src/assets/fonts/`. Latin only: every Spanish character is in it.
 - **JavaScript:** none by default. Add only for things like a lightbox, and make it optional. One deliberate exception (Nov 3): a JSON `<script type="speculationrules">` that prerenders a page when its link is hovered. No code runs.
 - **Hosting:** Netlify, plus a GitHub Pages copy at the user's request. Until launch both serve the showcase build with `noindex`; branch deploys on Netlify do the same, and a branch named `review` shows the review build.
-- **Contact:** a visible `mailto:` link is required. A form is optional (Netlify Forms or Formspree). Never expose an address as an image.
+- **Contact:** no email address on public pages (decided Nov 5, 2026, because of crawlers). LinkedIn for now; a form is an option.
 - **SEO and sharing:** unique `<title>` and meta description per page, Open Graph image from each program's poster, favicon (monogram "VE" or similar, oxblood on cream), `sitemap.xml`, `robots.txt`.
 - **Accessibility:** semantic landmarks, one `h1` per page, alt text per image, visible focus states, AA contrast, `lang="es"` on Spanish titles, tested keyboard-only.
 - **Performance budget:** no page over about 1 MB of initial transfer apart from images below the fold; Lighthouse 95+ on performance, accessibility and SEO.
-- **Résumé link:** host the résumé PDF as a static file at `/Vanessa_Espin_Resume.pdf` and link it from About and Contact.
+- **Résumé:** not public (decided Nov 5, 2026).
 
 **Suggested repo layout**
 ```
@@ -389,10 +389,10 @@ I studied Communication Design at City Tech, CUNY.
 
 **About, lower band**
 - Artists and partners: Luis Medina, Yanda Montahuano, Armando Vega, Israel Vargas "Panchis", Li Can Vega; Flushing Town Hall, Ayllu Gallery, Ecuadorian American Cultural Center; {{TODO: Iyuana venues and sponsors}}
-- Contact: vanessa.s.espin@gmail.com · Instagram {{TODO: handle}} · New York · English and Spanish {{TODO: confirm}}
+- Contact: [her email, kept off the public repo] · Instagram {{TODO: handle}} · New York · English and Spanish {{TODO: confirm}}
 - Buttons: Résumé (PDF) · LinkedIn
 
-**Footer (all pages):** "© 2026 Vanessa Espín · New York" · "vanessa.s.espin@gmail.com · Instagram {{TODO: handle}}"
+**Footer (all pages):** "© 2026 Vanessa Espín · New York" · "[her email, kept off the public repo] · Instagram {{TODO: handle}}"
 
 **Short bio (third person, for press, partners and programs)**
 Vanessa Espín is a designer and producer in New York. In 2026 she produced *Iyuana: El Retorno de los Sueños*, a film and photography exhibition about the Sápara Nation of the Ecuadorian Amazon; curated *Herencia Viva: Threads of Memory*, painter Luis Medina's exhibition of Ecuadorian magic realism, at three venues including Flushing Town Hall; and planned *Ayazamana*, a night of live music and traditional dance, with the Ecuadorian American Cultural Center, where she was Creative & Community Coordinator. She previously spent four years at the digital commerce agency Flywheel, art-directing ecommerce for health, beauty and consumer brands. She studied Communication Design at City Tech, CUNY.
