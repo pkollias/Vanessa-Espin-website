@@ -633,7 +633,22 @@ function homeHTML(i) {
   };
 }
 const homeIntro = $('.home__intro');
+const introLines = [...homeIntro.querySelectorAll('.ln')];
+const introAt = { x: 0, y: 0 };
 let introOn = false;
+// The statement floats a little, each line on its own time, and the pointer moves the lines and their second ink apart
+function tickIntro(now) {
+  if (reduced) return;
+  const t = now / 1000;
+  introAt.x += (pointer.nx - introAt.x) * 0.05; introAt.y += (pointer.ny - introAt.y) * 0.05;
+  introLines.forEach((el, i) => {
+    const k = 0.6 + i * 0.3;
+    el.style.transform = `translate3d(${(Math.cos(t * 0.33 + i * 2.1) * 3 - introAt.x * 7 * k).toFixed(2)}px, ${(Math.sin(t * 0.47 + i * 1.7) * 4.5 - introAt.y * 5 * k).toFixed(2)}px, 0)`;
+  });
+  const g = VW < 760 ? 0.4 : 1.35; // the second ink's offset follows the size of the type
+  homeIntro.style.setProperty('--gx', `${(g * (3 + Math.sin(t * 0.41) * 1.3 + introAt.x * 3.5)).toFixed(2)}px`);
+  homeIntro.style.setProperty('--gy', `${(g * (2 + Math.cos(t * 0.29) * 1.1 + introAt.y * 2.5)).toFixed(2)}px`);
+}
 function showIntro(on) {
   introOn = on;
   body.classList.toggle('is-intro', on);
@@ -2215,6 +2230,7 @@ function frame(now) {
     if (state.mode === 'home') {
       const intro = atIntro();
       if (intro !== introOn) showIntro(intro);
+      if (intro) tickIntro(now);
       if (!intro && shownIndex !== ai && Math.abs(state.target - ai) < 0.5) showHomeText(ai);
       const settled = Math.abs(state.target - state.p) < 0.01 && !drag;
       settledFor = settled ? settledFor + dt : 0;

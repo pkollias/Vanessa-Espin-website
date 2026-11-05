@@ -144,9 +144,15 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 /* ---------- home ---------- */
 .home { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
 .home[hidden] { display: none; }
-/* The statement: home's first screen, one step before the first poster */
-.home__intro { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: max-content; margin: 0; font-family: var(--serif); font-weight: 300; font-size: min(7.6vw, 15.5svh); line-height: 0.98; letter-spacing: -0.03em; text-align: center; text-transform: uppercase; }
-.home__intro em { font-style: italic; color: var(--oxblood); letter-spacing: -0.02em; }
+/* The statement: home's first screen, one step before the first poster. Set in the same letters as her name in the nav,
+   and printed in two inks: each line carries a faint second ink, a little out of register, that slips with the pointer */
+.home__intro { --gx: 3px; --gy: 2px; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: grid; width: min(47vw, 92svh); margin: 0; font-family: var(--serif); font-weight: 400; font-size: min(7.1vw, 14.4svh); line-height: 1; letter-spacing: -0.022em; }
+.home__intro .ln { overflow: visible; clip-path: inset(0 -1em); will-change: transform; }
+.home__intro .ln:nth-child(even) { justify-self: end; }
+.home__intro .ln__i { --ghost: rgb(71 0 0 / 0.2); text-shadow: var(--gx) var(--gy) 0 var(--ghost); }
+.home__intro em { font-style: italic; }
+.home__intro .ink-a { --ghost: rgb(47 95 192 / 0.3); color: var(--oxblood); }
+.home__intro .ink-b { --ghost: rgb(71 0 0 / 0.26); color: var(--cobalt); }
 .is-intro .home__count { opacity: 0; }
 .home__info { position: absolute; top: 1.15rem; left: var(--gutter); width: 26rem; }
 .home__title { width: max-content; margin: 0 0 0.75rem; font-family: var(--serif); font-weight: 300; font-size: 2.75rem; line-height: 0.96; letter-spacing: -0.03em; text-transform: uppercase; white-space: nowrap; }
@@ -435,7 +441,7 @@ html[data-type='caslon'] .p-title, html[data-type='caslon'] .p-next__title { let
   .is-night .nav__link, .is-night .nav__mark { color: var(--ink-2); }
   .is-night .nav__link.is-current, .is-night .nav__mark { color: var(--ink); }
   .index { top: auto; bottom: calc(100% + 0.5rem); width: calc(100vw - 2rem); }
-  .home__intro { top: 66%; font-size: 13.4vw; }
+  .home__intro { --gx: 1.2px; --gy: 0.8px; top: 66%; width: 88vw; font-size: 14vw; }
   .home__info { right: var(--gutter); width: auto; top: 1rem; }
   .home__title { font-size: 2.2rem; white-space: normal; }
   .home__specs .specs__row:nth-child(n + 4) { display: none; }
