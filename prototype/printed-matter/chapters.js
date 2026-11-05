@@ -20,12 +20,10 @@
    dy-headlines (one line-height of travel inside a mask, power3.out, cascade by position, lag 0.8 s), dy-drift (object
    speeds 1.23 and 1.88 times the page); obys-collapse (the AIM row, its slide right, the column that changes from below).
 
-   Hooks (pictures.js): chaptersHTML(cfg, coarse), chaptersEnter(root, ctx, cfg), chaptersFrame(c, ctx), chaptersLeave(c).
+   Hooks (pictures.js): chaptersHTML(cfg), chaptersEnter(root, ctx, cfg), chaptersFrame(c, ctx), chaptersLeave(c).
    With reduced motion a recipe's still() replaces all of this: plain still compositions in the page's flow, no sheets. */
 
 import { edgeHTML, edgeEnter, edgeDraw, edgeLeave } from './edge.js';
-
-export const chaptersReady = true;
 
 /* ---------- curves ---------- */
 const bez = (x1, y1, x2, y2) => {
@@ -195,7 +193,7 @@ const travel = {
     s.frames = s.ch.frames.map((f) => ({ f, s: makePrint(c, f.pic, { rule: s.ch.rule, ruleF: f.ruleF ?? 0.016 }) }));
   },
   layout(s, { vw, vh }) {
-    const phone = vw < 760, mg = Math.max(16, vw * 0.018);
+    const phone = vw < 760;
     s.phone = phone;
     const turned = turnStack(s.stack, vw, vh, phone, 24, 76);
     if (phone) {
@@ -205,6 +203,7 @@ const travel = {
       let y = 10;
       s.words.forEach((w, i) => {
         w.m.style.fontSize = px(fits[i] * k); w.m.style.top = px(y); w.m.style.left = '0'; w.m.style.transform = '';
+        w.shown = false; // the phone moves the masks, so the desktop has to set them again
         y += fits[i] * k * lh + Math.min(lead, 18);
       });
       return;
@@ -344,7 +343,7 @@ const aim = {
     s.rowcap.hidden = slide >= 1;
     // the light follows the row's left edge, and the photograph shows only where the light has reached
     const edge = slide * (vw + 8);
-    moved(s.light, edge - vw, 0);
+    moved(s.light, Math.min(0, edge - vw), 0);
     const shown = clamp01((edge - col.x) / col.w);
     s.col.style.clipPath = `inset(0 ${((1 - shown) * 100).toFixed(2)}% 0 0)`;
     s.sideImg.style.transform = `scale(${(1.07 - 0.07 * slide).toFixed(4)})`;
@@ -355,7 +354,7 @@ const aim = {
     }
   },
   idle() {},
-  still: (ch, cfg) => `<div class="ch-still__row">${ch.pics.map((p) => stillFig(cfg, p)).join('')}</div><div class="ch-still__stack">${ch.words.map((w) => `<span data-fit="96">${esc(w)}</span>`).join('')}</div>${stillFig(cfg, { ...ch.side, by: ch.by })}`,
+  still: (ch, cfg) => `<div class="ch-still__row">${ch.pics.map((p) => stillFig(cfg, p)).join('')}</div><div class="ch-still__stack">${ch.words.map((w) => `<span data-fit="96">${esc(w)}</span>`).join('')}</div><div class="ch-still__row">${stillFig(cfg, { ...ch.side, by: ch.by })}</div>`,
 };
 
 /* A speck near the foot of the screen grows through the words until it fills the height (dy-pushin), lifts off them, and the
@@ -494,8 +493,10 @@ const rooms = {
       // dy-headlines: the word starts up its mask when its line is at 92% of the screen, done by 62%
       maskTo(m, p3(seg(vh * 0.94 - (m.top + off), 0, vh * 0.34)), ctx);
     }));
-    const e = iy(seg(vh * 1.02 - (s.spacedTop + off), 0, vh * 0.42));
-    s.letters.forEach((l) => { l.el.style.transform = `translate3d(${mix(l.from, l.x, e).toFixed(1)}px, 0, 0)`; });
+    if (s.letters.length) {
+      const e = iy(seg(vh * 1.02 - (s.spacedTop + off), 0, vh * 0.42));
+      s.letters.forEach((l) => { l.el.style.transform = `translate3d(${mix(l.from, l.x, e).toFixed(1)}px, 0, 0)`; });
+    }
     if (s.insert) {
       // at its place when the scene has risen by `at` screens, moving at its own rate against the page
       const o = s.ch.insert, m = s.phone ? o.m : o, H = Math.min(vh * m.h, s.insert.max);
@@ -584,7 +585,7 @@ export function chaptersHTML(cfg) {
     const r = RECIPES[ch.recipe];
     if (reduced) return `<div class="ch-still ch-still--${ch.recipe}" data-tone="${ch.tone}" style="--ch-ground:var(--${ch.tone});--ch-ink:${ch.ink}">${r.still(ch, cfg)}</div>`;
     // a tone marker crosses the middle of the screen at t = its top - 0.5
-    const marks = (r.marks?.(ch) ?? []).map(([t, tone]) => `<i class="ch-tone" data-tone="${tone}" style="top:${((t + 0.5) * 100).toFixed(1)}svh;height:auto;bottom:0"></i>`).join('');
+    const marks = (r.marks?.(ch) ?? []).map(([t, tone]) => `<i class="ch-tone" data-tone="${tone}" style="top:${((t + 0.5) * 100).toFixed(1)}svh;height:auto;bottom:-${TONE_AT}svh"></i>`).join('');
     return `<div class="ch" style="height:${lengthOf(r, ch) * 100}svh">${r.sr(ch)}<i class="ch-tone" data-tone="${ch.tone}" style="top:${TONE_AT}svh"></i>${marks}</div>`;
   }).join('');
   return `<section class="pic-chapters" data-pictures="chapters" data-sheets="park" aria-label="${esc(cfg.label)}">${body}</section>`;
@@ -592,11 +593,16 @@ export function chaptersHTML(cfg) {
 
 export function chaptersEnter(root, ctx, cfg) {
   const sec = root.querySelector('.pic-chapters');
-  const c = { root, sec, cfg, paper: ctx.paper, sheets: [], todo: [], scenes: [], w: 0, h: 0, dead: false, still: ctx.reduced, dirty: true, y: 0 };
+  const c = { root, sec, cfg, paper: ctx.paper, sheets: [], todo: [], scenes: [], w: 0, h: 0, dead: false, still: !!sec.querySelector('.ch-still'), dirty: true, y: 0 };
   // the type is fitted by measuring it, so it is measured again whenever a font arrives
   c.refit = () => { c.dirty = true; };
   document.fonts?.addEventListener('loadingdone', c.refit);
   if (c.still) return c;
+  // the page stays on the closing ground until the paper has all but reached the top, as it does under Iyuana's wall
+  c.tone = document.createElement('i');
+  c.tone.className = 'pic-wall__tone';
+  c.tone.dataset.tone = cfg.chapters[cfg.chapters.length - 1].tone;
+  sec.nextElementSibling?.prepend(c.tone);
   const stage = document.createElement('div');
   stage.className = 'ch-stage';
   stage.hidden = true;
@@ -677,5 +683,6 @@ export function chaptersLeave(c) {
   c.sheets.forEach((s) => s.dispose());
   c.sheets.length = 0;
   c.scenes.forEach((s) => { if (s.edge) edgeLeave(s.edge); });
+  c.tone?.remove();
   c.stage?.remove();
 }

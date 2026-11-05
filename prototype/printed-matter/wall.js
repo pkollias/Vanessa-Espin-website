@@ -32,7 +32,10 @@ const PRINTS = [
   { f: '4848', x: 90, y: 37.9, w: 28, h: 18.7, size: 'large', cap: "Everyone" },
 ];
 const src = (p) => p.src || `img/iyuana/wall/${p.f}.jpg`;
-// Which print the page opens on (lab wallopen), and the stops after the wall (lab wallexit). slide: go along the wall.
+// On a phone a print that stays on the wall is at most 366 px wide, so it comes from img/iyuana/phone/ (1200 px on the long side).
+// The prints the camera goes into keep their full files, and the lightbox always has them.
+const wallSrc = (p, coarse, open) => (coarse && !p.src && p.f !== open ? `img/iyuana/phone/${p.f}.jpg` : src(p));
+// Which print the page opens on (lab wallopen), and the stops after the wall. slide: go along the wall.
 const OPEN = { hands: '4633', sky: '4620' };
 const TOUR = [{ f: '4619' }, { f: '4787' }, { f: '4762', slide: true }, { f: '4825' }, { f: '4842', slide: true }];
 const STOPS = { tour: TOUR, cacao: [{ f: '4842' }], candles: [{ f: '4825' }], off: [] };
@@ -67,8 +70,9 @@ const mix = (a, b, t) => a + (b - a) * t;
 const E_MAIN = bez(0.625, 0.05, 0, 1);
 const E_PULL = (t) => 0.5 * E_MAIN(t) + 0.5 * (0.5 - 0.5 * Math.cos(Math.PI * t)); // Daddy Yankee's zoom curve
 
-export function wallHTML(coarse) {
-  const prints = PRINTS.map((p, k) => `<button class="pic-print" type="button" data-k="${k}" aria-label="Open: ${altOf(p, k)}" style="--mt:${(MOUNT * (p.w / p.h) * 100).toFixed(2)}%"><img data-src="${src(p)}" alt="${altOf(p, k)}" decoding="async"></button>`).join('');
+export function wallHTML(coarse, wallOpen) {
+  const open = OPEN[wallOpen] || OPEN.hands;
+  const prints = PRINTS.map((p, k) => `<button class="pic-print" type="button" data-k="${k}" aria-label="Open: ${altOf(p, k)}" style="--mt:${(MOUNT * (p.w / p.h) * 100).toFixed(2)}%"><img data-src="${wallSrc(p, coarse, open)}" alt="${altOf(p, k)}" decoding="async"></button>`).join('');
   return `
   <section class="pic-wall" data-pictures="wall" data-tone="night" data-sheets="park" aria-label="The evening, in ${PRINTS.length} prints">
     <div class="pic-wall__pin">
@@ -185,7 +189,13 @@ export function wallFrame(c, ctx) {
   if (hidden !== c.hidden) { c.hidden = hidden; c.ground.style.transition = hidden ? 'none' : ''; }
   if (!c.loaded && r.top < vh * 2.5) {
     c.loaded = true;
-    for (const el of c.els) { const im = el.firstElementChild; im.src = im.dataset.src; delete im.dataset.src; }
+    // the opening print on its own first: it fills the screen, and the other fifteen would only compete with it
+    const show = (im) => { if (im.dataset.src) { im.src = im.dataset.src; delete im.dataset.src; } };
+    const rest = () => c.els.forEach((el) => show(el.firstElementChild));
+    const first = c.els[PRINTS.findIndex((p) => p.f === (OPEN[ctx.vis.wallOpen] || OPEN.hands))].firstElementChild;
+    first.addEventListener('load', rest, { once: true });
+    first.addEventListener('error', rest, { once: true });
+    show(first);
   }
   if (r.bottom < -vh || r.top > vh * 1.5) return;
   const y = -r.top / vh, now = performance.now(), dt = Math.min(0.1, (now - c.t) / 1000);
@@ -198,7 +208,7 @@ export function wallFrame(c, ctx) {
   const u = clamp01((c.p - g.y) / g.len), cam = c.cam;
   if (reduced) { cam.s = 1; cam.x = 0; cam.y = 0; } else aim(cam, g, u, vw, vh);
   const { s, x: tx, y: ty } = cam;
-  c.sec.classList.toggle('is-rest', g.kind === 'hold' && s < 1.02);
+  c.sec.classList.toggle('is-rest', reduced || (g.kind === 'hold' && s < 1.02));
   // a stop's caption shows while the camera is on it
   const on = reduced ? -1 : g.kind === 'hold' || u > 0.9 ? g.to : u < 0.1 ? g.from : -1;
   if (on !== c.capOn) {

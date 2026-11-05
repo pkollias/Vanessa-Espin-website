@@ -90,7 +90,7 @@ main .program.is-leaving > .pic-chapters + .p-text { background: transparent; tr
 .ch-still__close figcaption span { margin-left: 0.9em; opacity: 0.72; }
 
 @media (max-width: 760px) {
-  .ch-stack, .ch-name { inset: auto; left: 0; top: 0; }
+  .ch-stack { inset: auto; left: 0; top: 0; }
   .ch-credit { left: 1rem; bottom: 4.6rem; }
   .ch-aim__meta { font-size: 0.9rem; }
   .ch-rowcap { font-size: 0.8rem; }

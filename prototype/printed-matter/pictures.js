@@ -17,23 +17,21 @@
      middle of the screen (followTone in app.js). data-sheets="park" on an element asks the poster to park
      while that element covers most of the viewport (built by the journey builder).
 
-   Iyuana, the held light (lab held=on): a full-bleed photograph held for 120svh with nothing moving but a slow
+   Iyuana, the held light (no longer reachable from the lab): a full-bleed photograph held for 120svh with nothing moving but a slow
    scale (1.00 to 1.04), then, as you keep scrolling, it shrinks and travels into the first frame of the
    documentation tool, the same photograph (Radian's hero handoff, cubic-bezier(.625,.05,0,1)). A night backdrop
    keeps the page dark around the light until the picture lands, then the paper page with the tool shows.
    The section (.pic-held) is only a spacer that sets the night ground; the picture itself is a fixed layer
    beside it (.pic-held__layer), outside the toned section, so the off-tone fade never hides it.
 
-   Herencia Viva, the drift band (lab drift=on): MAGIC REALISM (from her poster's "Ecuadorian Magic Realism")
+   Herencia Viva, the drift band (no longer reachable from the lab): MAGIC REALISM (from her poster's "Ecuadorian Magic Realism")
    rises out of its own masks, and four of the pictures drift past it at their own speeds (0.6, 0.85, 1.15 and
    1.4 times the page), two behind the line and two in front (Daddy Yankee's framed drift). */
 
 import { wallHTML, wallEnter, wallFrame, wallLeave, wallKeyOff } from './wall.js';
 import { longHTML, longEnter, longFrame } from './crossing.js';
-import { chaptersHTML, chaptersEnter, chaptersFrame, chaptersLeave, chaptersReady } from './chapters.js';
+import { chaptersHTML, chaptersEnter, chaptersFrame, chaptersLeave } from './chapters.js';
 import { chaptersFor } from './chapters-content.js';
-
-export { chaptersReady }; // app.js: once true, the chapters are the default of the drift switch
 
 // A CSS cubic-bezier() as a function (the same as bez in app.js)
 const bez = (x1, y1, x2, y2) => {
@@ -107,7 +105,7 @@ export function picturesHTML(p, i, vis = {}) {
   // a program with an entry in chapters-content.js, and its lab switch set if it names one, gets the chapters
   const chap = chaptersFor(p.slug, vis);
   if (chap) return chaptersHTML(chap);
-  if (p.slug === 'iyuana' && vis.held === 'wall') return wallHTML(matchMedia('(pointer: coarse)').matches);
+  if (p.slug === 'iyuana' && vis.held === 'wall') return wallHTML(matchMedia('(pointer: coarse)').matches, vis.wallOpen);
   if (p.slug === 'iyuana' && vis.held === 'cut') return heldHTML();
   if (p.slug === 'herencia-viva' && vis.drift === 'long') return longHTML();
   if (p.slug === 'herencia-viva' && vis.drift === 'band') return driftHTML();

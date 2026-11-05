@@ -144,6 +144,10 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 /* ---------- home ---------- */
 .home { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
 .home[hidden] { display: none; }
+/* The statement: home's first screen, one step before the first poster */
+.home__intro { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: max-content; margin: 0; font-family: var(--serif); font-weight: 300; font-size: min(7.6vw, 15.5svh); line-height: 0.98; letter-spacing: -0.03em; text-align: center; text-transform: uppercase; }
+.home__intro em { font-style: italic; color: var(--oxblood); letter-spacing: -0.02em; }
+.is-intro .home__count { opacity: 0; }
 .home__info { position: absolute; top: 1.15rem; left: var(--gutter); width: 26rem; }
 .home__title { width: max-content; margin: 0 0 0.75rem; font-family: var(--serif); font-weight: 300; font-size: 2.75rem; line-height: 0.96; letter-spacing: -0.03em; text-transform: uppercase; white-space: nowrap; }
 .specs { margin: 0; }
@@ -215,11 +219,10 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .p-credit { grid-column: 1 / -1; margin: 1rem 0 0; }
 
 .p-next { position: relative; display: block; min-height: 100svh; padding: 3.2rem var(--gutter) 0; text-align: center; overflow: hidden; }
-.p-next__link { display: block; color: inherit; }
-.p-next__link > .eyebrow { display: block; margin-bottom: 1.2rem; }
+.p-next__link { display: block; pointer-events: auto; cursor: pointer; }
+.p-next__head > .eyebrow { display: block; margin-bottom: 1.2rem; }
 .p-next__title { position: relative; display: block; margin: 0; font-family: var(--serif); font-weight: 300; font-size: 9.5rem; line-height: 0.86; letter-spacing: -0.045em; text-transform: uppercase; }
 .p-next__title .rule { top: auto; bottom: -0.2rem; }
-.p-next__go { display: inline-block; margin-top: 2rem; font: 500 1.05rem/1 var(--sans); border-bottom: var(--hair) solid currentColor; padding-bottom: 0.2rem; }
 /* next=turn: the pile sits in view, so its lifted corner and the turn can be seen; the eyebrow clears the nav */
 .p-next--turn { padding-top: 4.6rem; }
 .p-next--turn .slot--next { bottom: 2svh; }
@@ -227,10 +230,9 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .p-foot a { border-bottom: var(--hair) solid transparent; }
 .p-foot a:hover { border-color: currentColor; }
 /* The turn: the old page's text exits upward while the next poster turns (next=turn). */
-.p-next__link > *, .p-foot { transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.35s linear; }
-.is-leaving .p-next__link > *, .is-leaving .p-foot { transform: translateY(-3rem); opacity: 0; }
-.is-leaving .p-next__link > :nth-child(2) { transition-delay: 0.03s; }
-.is-leaving .p-next__link > :nth-child(3) { transition-delay: 0.06s; }
+.p-next__head > *, .p-foot { transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.35s linear; }
+.is-leaving .p-next__head > *, .is-leaving .p-foot { transform: translateY(-3rem); opacity: 0; }
+.is-leaving .p-next__head > :nth-child(2) { transition-delay: 0.03s; }
 .is-leaving .p-foot { transition-delay: 0.09s; }
 .program.is-leaving > :not(.p-next) { opacity: 0; }
 
@@ -433,6 +435,7 @@ html[data-type='caslon'] .p-title, html[data-type='caslon'] .p-next__title { let
   .is-night .nav__link, .is-night .nav__mark { color: var(--ink-2); }
   .is-night .nav__link.is-current, .is-night .nav__mark { color: var(--ink); }
   .index { top: auto; bottom: calc(100% + 0.5rem); width: calc(100vw - 2rem); }
+  .home__intro { top: 66%; font-size: 13.4vw; }
   .home__info { right: var(--gutter); width: auto; top: 1rem; }
   .home__title { font-size: 2.2rem; white-space: normal; }
   .home__specs .specs__row:nth-child(n + 4) { display: none; }
@@ -512,5 +515,5 @@ html[data-type='caslon'] .p-title, html[data-type='caslon'] .p-next__title { let
   .ln__i, .rule, .page-bg, .crop, .drawer, .drawer-scrim, .b-entry__info, .b-case__col p, .b-quote, .program [data-tone], .brand [data-tone], .is-offtone { transition: none !important; }
   .grain { animation: none; }
   .program.is-leaving > * { opacity: 0; transition: opacity 0.25s linear !important; }
-  .is-leaving .p-next__link > *, .is-leaving .p-foot { transform: none; transition: none; opacity: 1; }
+  .is-leaving .p-next__head > *, .is-leaving .p-foot { transform: none; transition: none; opacity: 1; }
 }

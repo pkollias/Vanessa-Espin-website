@@ -21,7 +21,7 @@ one included: the carousel's tilt plus a little off the wall (more curl, a small
 softer shadow). The poster under the pointer, any of them, sticks flat to the wall: tilt, curl, wave, bend, float and
 lift ease to 0 in 280 ms with a tight contact shadow, and it eases back in 200 ms when the pointer leaves. One poster
 at a time; while the carousel moves or a drag is under way, all of them hang. On touch, the poster under the finger
-sticks while it is pressed, and a tap still opens it. There is no hover mark by default (lab `mark=none`), and no tape
+sticks while it is pressed, and a tap still opens it. There is no hover mark, and no tape
 (lab `tape=on` presses four strips across the stuck poster's corners, top left, top right, bottom right, bottom left,
 70 ms apart, once it is flat, and peels them in 100 ms; the tape's animation is still to be designed). The tape is a
 state of the poster, drawn in its own layer (`#pins`) by the frame loop. The two lines under the poster are smaller
@@ -74,7 +74,7 @@ focused) or a click steps to the next frame. The picture cuts at once and the ca
 page until the whole frame fits the screen, and at either end it scrolls the page again. Iyuana and Herencia Viva show real pictures; Ayazamana and the Cultural Center keep stone
 frames with placeholder captions until her photographs exist.
 
-**The pictures.** `img/iyuana/` holds the ten event photographs (`01-…` to `10-…`, 1800 px wide) and
+**The pictures.** `img/iyuana/` holds the eight event photographs (`01-…` to `10-…`, 1800 px wide) and
 `held-dscf4842.jpg`, the same photograph as frame 01 at 2600 px for the held light. `img/herencia-viva/` holds eight
 artworks and designs (`01-…` to `08-…`). They are listed in the `docs` arrays in `PROGRAMS`, through `pictures()` in
 `app.js`: file, size, caption and, where it differs, the frame's own credit. Event photographs fill the frame
@@ -118,7 +118,7 @@ voice is an honest placeholder, made with `ph(label, qs)` in `app.js`:
 
 The label says what goes there and roughly how long it is. The title names the question (from `INTERVIEW` in
 `app.js`) for a pointer; the same note is repeated as visually hidden text, so keyboard, touch and screen-reader users
-get it too. It is set in the font of its context, in `--ph` (`#470000`, which the lab's accent switch leaves alone) on
+get it too. It is set in the font of its context, in `--ph` (`#470000`) on
 paper and stone and in `#e3907d` on night. A section drawn for the other tone fades out while the page is still on the
 wrong ground (`followTone` in `app.js`), so night text never sits on paper or the reverse. Things that are not hers to write (photographs, artists' or colleagues' lines,
 results) carry no `data-q` and say in their title what is needed (for example, permission). To find every open slot:
@@ -146,31 +146,32 @@ Add `?lab` to the address (or press Shift+L) to open a panel of switches. The de
 live site; a dot marks them. Every change is kept in the address, so any combination is a link:
 "Copy link" copies the current version without the panel, to send to someone.
 
-**Compare.** The first row, `Director's cut | Snapshot`, sets the switches of visual pass 1 (and the mark) at once. Each of
-them defaults to the new behaviour (the director's cut), and one option, marked with a ring, reproduces the
-snapshot: the site as tagged `stage-2026-11-04`. `?compare=snapshot` is the whole snapshot; a switch named in the
-link as well wins over it (`?compare=snapshot&pin=hover`). At its default the Compare row stays out of the link, and
+**Compare.** The first row, `Normal | Faded + tape`, sets two switches at once: `?compare=faded` is `poster=faded` and
+`tape=on`, and a switch named in the link as well wins over it. At Normal the Compare row stays out of the link, and
 when the switches are mixed, neither button is pressed and each switch is written on its own.
 
 | Switch | Link value | Options |
 |---|---|---|
-| Home: poster under the pointer | `pin` | `hover` (default: all hang tilted, the one under the pointer sticks flat to the wall), `off` (snapshot: the centred poster lifts under the pointer) |
-| Home: tape on the stuck poster | `tape` | `off` (default and snapshot), `on` (four tapes press on; an older link's `pin=tape` reads as `tape=on`) |
-| Home: wheel | `step` | `notch` (default: one notch, one poster, with the flock), `free` (snapshot: free scroll that snaps back) |
-| Program: poster | `poster` | `cover` (default: the press and flight, a flat cover, then to the side), `faded` (the same cover, then a ghost behind the story), `table` (snapshot: on the table, then to the side; the Center's card keeps its larger type, which runs past the rule) |
-| Program: next poster | `next` | `turn` (default: on the pile, raised into view; a push or the click turns it into the next cover; Back lands at the top of the page), `click` (snapshot: a link, and the page swaps at once; the poster waits low, and the browser restores the scroll) |
-| Program: scroll | `scroll` | `glide` (default: the wheel glides), `native` (snapshot) |
-| Title type | `type` | `zodiak` (live), `gambetta`, `caslon`, `instrument` |
-| Paper | `paper` | `warm` (live), `cream`, `white`, `stone` |
-| Grain | `grain` | `off`, `soft` (live), `strong` |
-| Poster tilt | `tilt` | `flat`, `soft` (live), `strong` |
-| Program story section | `story` | `night` (live), `stone`, `paper` |
-| Loader | `loader` | `on` (live), `off` |
-| About | `about` | `drawer` (live), `page` (the old full About page, with the same placeholders) |
+| Home: poster under the pointer | `pin` | `hover` (default: the centred poster sticks flat to the wall under the pointer), `off` (it lifts) |
+| Home: tape on the stuck poster | `tape` | `off` (default), `on` (four tapes press on) |
+| Home: wheel | `step` | `free` (default: free scroll that snaps to a poster), `notch` (one notch, one poster, with the flock) |
+| Program: poster | `poster` | `cover` (default: the press and flight, a flat cover, then to the side), `faded` (the same cover, then a ghost behind the story), `table` (on the table, then to the side) |
+| Program: next poster | `next` | `turn` (default: on the pile, raised into view; a push or the click turns it into the next cover; Back lands at the top of the page), `click` (a link, and the page swaps at once) |
+| Iyuana: opening print | `wallopen` | `hands` (default), `sky` |
+| Iyuana: the walk | `walk` | `mixed` (default: far prints zoom, neighbours slide), `zoom` (always), `jump` (print to print, no pull back) |
+| Herencia Viva: how a ground arrives | `edge` | `bubble` (default), `flat`, `fade` |
+| Program: scroll | `scroll` | `glide` (default: the wheel glides), `native` |
+| Title type | `type` | `gambetta` (default), `zodiak`, `caslon`, `instrument` |
+| Paper | `paper` | `stone` (default), `warm`, `cream`, `white` |
+| Grain | `grain` | `off`, `soft` (default), `strong` |
+| Poster tilt | `tilt` | `flat`, `soft` (default), `strong` |
+| Program story section | `story` | `night` (default), `stone`, `paper` |
+| Loader | `loader` | `on` (default), `off` |
+| About | `about` | `drawer` (default), `page` (the old full About page, with the same placeholders) |
 
-Example: `?mark=hangtape&paper=cream` shows the tape and hanging marks on cream paper.
-To add a switch, add an entry to `LAB` in `app.js`: its options and an `apply` function (and `snap`, its
-snapshot option, if the Compare row should set it). The visual-pass switches write their value into `VIS`.
+Example: `?tape=on&paper=cream` shows the tape on cream paper.
+To add a switch, add an entry to `LAB` in `app.js`: its options and an `apply` function (and an entry in `PRESETS`
+if the Compare row should set it). The visual-pass switches write their value into `VIS`.
 
 ## Gliding scroll
 
@@ -184,17 +185,17 @@ any scroll that isn't its own ends the glide. Mark an element `data-no-glide` to
 
 ## Grounds
 
-`data-tone` takes `night`, `blood` (the oxblood), `stone`, `paper` and `rose` (`#c7797f`, the pink of the Herencia Viva
-poster). `blood` behaves as `night` (`darkTone` in `app.js`): paper text, the dark nav, the light placeholder colour. `rose`
+`data-tone` takes `night`, `blood` (the oxblood), `cobalt` (`#2f5fc0`, the blue of her poster), `stone`, `paper` and `rose` (`#c7797f`, the pink of the Herencia Viva
+poster). `blood` and `cobalt` behave as `night` (`darkTone` in `app.js`): paper text, the dark nav, the light placeholder colour. `rose`
 behaves as `paper`. A section fades out only on a ground of the other kind, dark or light.
 
 ## Pictures (Nov 4 revision)
 
 The rapid stepper is no longer the default. Each program shows its pictures according to what they are:
 
-- **Iyuana: the wall** (`wall.js`, lab `held=wall`). It opens full-screen on the print of hands over the eyes (lab `wallopen`), pulls back to 16 prints on one dark wall, and a click pushes a print in. On the way out the camera pushes into the cacao (lab `wallexit`), holds half a screen, and the photograph leaves with the scroll: the next section has its own paper ground (`.pic-wall + .p-text` in `pictures.css`) and rises on a flat line under it. Those two sections are exempt from the off-tone fade, and the page's tone turns when the paper has nearly reached the top. Photos are in `img/iyuana/wall/`.
-- **Herencia Viva: the chapters** (`chapters.js`, lab `drift=chapters`): see below. **The crossing** (`crossing.js`, lab `drift=long`) stays as an option: paintings slow and mounted, her designs fast, the rooms flush to the screen's edge, then one painting holds.
-- **Stepper** (lab `docs=one`): Ayazamana only, and it never takes the wheel on stone frames. `docs=all` restores it everywhere.
+- **Iyuana: the wall** (`wall.js`). It opens full-screen on the print of hands over the eyes (lab `wallopen`), pulls back to 16 prints on one dark wall, and a click pushes a print in. Then the scroll walks the wall (see below); the last stop, the cacao, holds half a screen, and the photograph leaves with the scroll: the next section has its own paper ground (`.pic-wall + .p-text` in `pictures.css`) and rises on a flat line under it. Those two sections are exempt from the off-tone fade, and the page's tone turns when the paper has nearly reached the top. Photos are in `img/iyuana/wall/` and, for the prints the camera goes into, `img/iyuana/full/`. Phones get the prints that stay on the wall from `img/iyuana/phone/` (the same pictures, 1200 px on the long side); the lightbox always uses the larger files. The opening print loads first, the other fifteen after it.
+- **Herencia Viva: the chapters** (`chapters.js`): see below. `crossing.js` and the held light and drift band in `pictures.js` can no longer be reached from the lab.
+- **Stepper**: Ayazamana only, and it never takes the wheel on stone frames.
 
 Never repeat the home carousel's visual on another page.
 
@@ -204,15 +205,16 @@ Herencia Viva's pictures, between the story and the text, on Daddy Yankee's logi
 
 | Chapter | Recipe | What happens |
 |---|---|---|
-| The show | `zoomout` | HERENCIA and VIVA zoom down from 5x onto each side of a card (painting 04, thin oxblood rule) that grows as they settle; Threads of Memory rises under it. Paper |
-| His paintings | `collapse` | Rose comes up with a torn edge and ECUADORIAN / MAGIC / REALISM climbs, each word in its own mask. Three paintings rise at slightly different speeds, fold to the right like pictures on a wall seen down a corridor, then open one after another, whole, and pass to the far wall. Each carries its label on its mount |
+| The print | `bleed` | The oranges print fills the screen on night, no type, only a slow push |
+| The words | `travel` | Cobalt rises on the bubbling edge; ECUADORIAN, MAGIC and REALISM come up the screen in giant capitals and slide to the sides, each at its own moment |
+| His paintings, then her | `aim` | Encuentro, the Meninas detail and the village rise edge to edge on night, each a small step lower. The row slides off to the right and uncovers the light ground: A TEAM THAT DIDN'T REST on the left, Vanessa on the ladder at the right, black and white and unframed |
 | Her designs | `pushin` | On blood, Threads of Memory grows from a speck to the screen's height, lifts off, and ECUADOR. NY. 2026 is there behind it; the fish and the shirt pop in and cross over the type at 1.23 and 1.88 times the scroll |
-| The event | `rooms` | No pin. On night, FLUSHING TOWN HALL and MAY 29–31, 2026 go by beside the two rooms, flush to the screen's edges at their own size; the address gathers its letters from a wide spread |
-| The artist | `name` | LUIS MEDINA fills the screen, painting 04 comes up over it in the existing `.pic-hold`, and the words leave inside their masks |
+| The event | `rooms` | No pin. On night, FLUSHING TOWN HALL goes by beside a finger pointing at Encuentro, flush to the screen's left edge |
+| The close | `closer` | LUIS [print] MEDINA on cobalt: the print opens between the words and grows until it fills the screen, the words go off past the edges, and it holds until the page's paper covers it on a flat line |
 
-What you see lives in two layers: `.ch-stage` in `#under-gl` below the canvas (grounds, type, rooms), and sheets of the posters' paper above it (every printed object), so objects always pass in front of the type. The page keeps a transparent spacer for the scroll and for what a screen reader gets. Each scene is a sticky pin done by hand, and a recipe's `frame()` is a pure function of the scroll, so when the scroll stops the move stops; only the words have a tail (scrub 0.8). The page's tone turns when a new ground has nearly reached the top of the screen. The display type is Zodiak Extrabold (800, and 801 for the italic), added to the font link: the site's Light goes thin at this size. Type is fitted to the screen by measuring it, again whenever a font arrives.
+What you see lives in two layers: `.ch-stage` in `#under-gl` below the canvas (grounds, type, rooms), and sheets of the posters' paper above it (every printed object), so objects always pass in front of the type. The page keeps a transparent spacer for the scroll and for what a screen reader gets. Each scene is a sticky pin done by hand, and a recipe's `frame()` is a pure function of the scroll, so when the scroll stops the move stops; only the words have a tail (scrub 0.8). The page's tone turns when a new ground has nearly reached the top of the screen. The display type is the title font (`--serif`) at weight 800. Type is fitted to the screen by measuring it, again whenever a font arrives.
 
-Nothing is shown above 1.2 times its own size, and nothing is cropped. On a phone the word stacks turn and read up the screen, since a tall screen is a wide one on its side, and the sheet that fills the height on a desktop stops at the screen's width. With reduced motion each recipe's `still()` replaces all of it: still compositions in the page's flow, with no sheets. The words are only what is on her poster, campaign image and specs, plus names and dates.
+At 1440 and 1280 nothing is shown above 1.2 times its own size. The row of paintings runs edge to edge, so on monitors of 1920 and up it passes that (the village reaches 1.46x at 1920 and 1.94x at 2560); whether to accept this or get larger files is an open decision. No painting is cropped. On a phone the word stacks turn and read up the screen, since a tall screen is a wide one on its side, and the sheet that fills the height on a desktop stops at the screen's width. With reduced motion each recipe's `still()` replaces all of it: still compositions in the page's flow, with no sheets. The words are only what is on her poster, campaign image and specs, plus names and dates.
 
 ## The edge
 
@@ -220,12 +222,16 @@ Nothing is shown above 1.2 times its own size, and nothing is cropped. On a phon
 
 ## Herencia Viva, as approved (Nov 5)
 
-`chapters.js` is the engine and `chapters-content.js` the content, so a program can move between engines by config. The page runs: the oranges print full-screen, ECUADORIAN MAGIC REALISM travelling on cobalt, three paintings rising edge to edge, A TEAM THAT DIDN'T REST (Luis Medina's words, translated from his June 7, 2026 post) beside Vanessa on the ladder, ECUADOR. NY. 2026, Flushing Town Hall, then LUIS [print] MEDINA with the print growing to full screen. The opening and the ending are approved: leave them as they are. Lab switches: `hvground`, `hvopen`, `hvclose`, `edge` (bubble, flat, fade), `scroll`.
+`chapters.js` is the engine and `chapters-content.js` the content, so a program can move between engines by config. The page runs: the oranges print full-screen, ECUADORIAN MAGIC REALISM travelling on cobalt, three paintings rising edge to edge, A TEAM THAT DIDN'T REST (Luis Medina's words, translated from his June 7, 2026 post) beside Vanessa on the ladder, ECUADOR. NY. 2026, Flushing Town Hall, then LUIS [print] MEDINA with the print growing to full screen. The opening and the ending are approved: leave them as they are. Lab switches: `edge` (bubble, flat, fade), `scroll`.
 
 No email address and no résumé on public pages or in this repo (decided Nov 5, 2026, because of crawlers). LinkedIn is the contact for now.
 
-Iyuana's wall now walks: after the pull back the scroll stops at the palm portraits, Vanessa, the Sápara Nation, the candles and the cacao. Far prints are reached by zooming out and in, neighbours by a slide along the wall. The stops are `TOUR` in `wall.js`; lab `wallexit` compares it with the shorter ways out.
+Iyuana's wall now walks: after the pull back the scroll stops at the palm portraits, Vanessa, the Sápara Nation, the candles and the cacao. Far prints are reached by zooming out and in, neighbours by a slide along the wall. The stops are `TOUR` in `wall.js`.
 
 ## The normal version (Nov 5)
 
 Defaults: Gambetta titles, stone paper, free wheel on home. The lab's Compare row has Normal and Faded + tape (`?compare=faded`: poster=faded, tape=on). `Iyuana: the walk` (`walk`) chooses mixed, zoom or jump. Older links with switches that no longer exist fall back to the defaults.
+
+## Home's statement and the next poster (Nov 5)
+
+Home opens at `INTRO` (position -1 in the carousel): the statement in the middle and the first poster waiting at the top right, in the slot the next poster always uses. The first scroll, swipe, key or click on the poster goes on to it; scrolling back returns. The name in the nav goes to the statement, Curation to the posters. "I create curated experiences" is a placeholder line until her words arrive. At the foot of a program page the next poster itself is the link (`.p-next__link` over `slot--next`); the name above it is a label.

@@ -632,6 +632,17 @@ function homeHTML(i) {
     specs: rows(p.specs, 0.12, 0.07),
   };
 }
+const homeIntro = $('.home__intro');
+let introOn = false;
+function showIntro(on) {
+  introOn = on;
+  body.classList.toggle('is-intro', on);
+  if (state.mode === 'home') setNav(on ? '' : 'programs');
+  if (!on) { conceal(homeIntro); return; }
+  swapToken++; shownIndex = -1;
+  [homeTitle, homeSpecs].forEach(conceal);
+  reveal(homeIntro);
+}
 function showHomeText(i, instant = false) {
   if (i === shownIndex && !instant) return;
   shownIndex = i;
@@ -1239,13 +1250,14 @@ const journey = { flight: null, turn: null, endAt: 0, pendingGo: null };
 const push = { acc: 0, last: -1e9, armed: false, touchY: null };
 const isCover = () => VIS.poster !== 'table';
 
-const clampP = (v) => clamp(v, -0.25, N - 0.75);
+const INTRO = -1; // home's statement: one step before the first poster
+const clampP = (v) => clamp(v, INTRO - 0.25, N - 0.75);
 let snapTimer = 0;
 function scheduleSnap(ms = 170) {
   clearTimeout(snapTimer);
-  snapTimer = setTimeout(() => { state.target = clamp(Math.round(state.target), 0, N - 1); }, ms);
+  snapTimer = setTimeout(() => { state.target = clamp(Math.round(state.target), INTRO, N - 1); }, ms);
 }
-function goTo(i) { state.target = clamp(i, 0, N - 1); }
+function goTo(i) { state.target = clamp(i, INTRO, N - 1); }
 
 /* One notch, one poster (step=notch). A wheel step glides 0.51 s on A24's
    cubic-bezier(.32,.72,0,1). The filter: deltas add up to a step at 50 px (a mouse notch
@@ -1257,8 +1269,8 @@ const E_GLIDE = bez(0.32, 0.72, 0, 1);
 const GLIDE = 0.51, NOTCH_PX = 50, NOTCH_LOCK = 400, NOTCH_PAUSE = 150;
 const glideAt = (now) => (state.tw ? E_GLIDE(clamp01((now - state.tw.t0) / 1000 / state.tw.dur)) : 1);
 function stepTo(dir, now) {
-  const from = state.tw ? state.tw.to : clamp(Math.round(state.target), 0, N - 1);
-  const to = clamp(from + dir, 0, N - 1);
+  const from = state.tw ? state.tw.to : clamp(Math.round(state.target), INTRO, N - 1);
+  const to = clamp(from + dir, INTRO, N - 1);
   if (to === from) return false;
   state.target = to;
   state.tw = reduced ? null : { from: state.p, to, t0: now, dur: GLIDE };
@@ -1269,6 +1281,16 @@ function toPoster(i) {
   if (VIS.step !== 'notch') return goTo(i);
   state.target = i;
   state.tw = reduced ? null : { from: state.p, to: i, t0: performance.now(), dur: GLIDE };
+}
+/* Home opens one step before the first poster: the statement in the middle of the screen, and the first poster waiting where
+   the next one always waits, at the top right. The first move of any size goes on to it; the rest of that flick is dropped. */
+const atIntro = () => state.target < -0.5;
+let wheelHold = 0, wantIntro = false;
+function leaveIntro() {
+  wheelHold = performance.now() + 800;
+  clearTimeout(snapTimer);
+  state.target = 0;
+  state.tw = reduced ? null : { from: state.p, to: 0, t0: performance.now(), dur: GLIDE * 1.7 };
 }
 const wheelF = { acc: 0, last: -1e9, armed: true, stepAt: -1e9, avg: 0, peak: 0 };
 function wheelNotch(d, now) {
@@ -1319,7 +1341,8 @@ function enterHome() {
   const from = state.mode;
   state.mode = 'home';
   body.classList.add('is-home'); body.classList.remove('is-scroll');
-  setNav('programs'); setTone('paper');
+  if (wantIntro) { wantIntro = false; state.target = INTRO; }
+  setNav(atIntro() ? '' : 'programs'); setTone('paper');
   sheets.forEach((s) => { s.rate = from === 'loading' ? 4.2 : 5.5; s.float = 1; });
   homeRates = false; state.tw = null;
   if (portrait) portrait.tgt.o = 0;
@@ -1330,7 +1353,7 @@ function enterHome() {
     clearPages(null);
     scrollTo(0, 0);
     home.hidden = false;
-    showHomeText(state.active, true);
+    if (atIntro()) showIntro(true); else showHomeText(state.active, true);
     document.querySelectorAll('.home__corner').forEach((el) => reveal(el));
     setTimeout(() => { sheets.forEach((s) => (s.rate = 9)); if (tok === navToken) homeRates = true; }, 900);
   }, leaving.length ? 450 : 0);
@@ -1349,7 +1372,7 @@ function enterProgram(i) {
   state.active = i; state.target = state.p = i;
   body.classList.remove('is-home');
   setNav('programs');
-  [homeTitle, homeSpecs].forEach(conceal);
+  [homeTitle, homeSpecs, homeIntro].forEach(conceal);
   document.querySelectorAll('.home__corner').forEach(conceal);
   if (portrait) portrait.tgt.o = 0;
   const others = leavePages(programView);
@@ -1393,7 +1416,7 @@ function enterPage(mode, view, html, nav, tone, after) {
   state.mode = mode;
   body.classList.remove('is-home');
   setNav(nav); setTone(tone);
-  [homeTitle, homeSpecs].forEach(conceal);
+  [homeTitle, homeSpecs, homeIntro].forEach(conceal);
   document.querySelectorAll('.home__corner').forEach(conceal);
   leavePages(view);
   if (!view.hidden) view.querySelectorAll('.is-in').forEach(conceal);
@@ -1423,6 +1446,7 @@ function enterArchive() {
 
 function route() {
   if (!state.ready) return;
+  sheets.forEach((s) => { s.liftTgt = 0; });
   const h = location.hash.replace(/^#\/?/, '');
   // a row in the Index panel is about to be hidden: focus returns to the Index button
   const fromIndex = indexPanel.contains(document.activeElement);
@@ -1539,12 +1563,11 @@ function programHTML(i) {
     ${credit}
   </div>
   <section class="p-next${VIS.next === 'turn' ? ' p-next--turn' : ''}" data-tone="stone">
-    <a class="p-next__link" href="#/${next.slug}">
+    <div class="p-next__head">
       <span class="eyebrow">Next program</span>
       <span class="p-next__title"${next.lang ? ` lang="${next.lang}"` : ''}>${next.pageTitle.join('<br>')}</span>
-      <span class="p-next__go">Open ${next.name}</span>
-    </a>
-    <div class="slot slot--next" data-slot="next" style="--ar:${sheets[(i + 1) % N].aspect}"></div>
+    </div>
+    <a class="slot slot--next p-next__link" data-slot="next" href="#/${next.slug}" aria-label="Open ${next.name}" style="--ar:${sheets[(i + 1) % N].aspect}"></a>
     <footer class="p-foot"><span>Vanessa Espín · New York</span><span><a href="${SITE.linkedin}">LinkedIn</a></span></footer>
   </section>`;
 }
@@ -1922,7 +1945,7 @@ const ndc = new THREE.Vector2();
 const pointer = { x: 0, y: 0, nx: 0, ny: 0, inside: false };
 function hitActive(e) {
   const s = sheets[state.active];
-  if (!s || state.mode !== 'home') return false;
+  if (!s || state.mode !== 'home' || atIntro()) return false;
   ndc.set((e.clientX / VW) * 2 - 1, -(e.clientY / VH) * 2 + 1);
   ray.setFromCamera(ndc, camera);
   return ray.intersectObject(s.mesh, false).length > 0;
@@ -1989,6 +2012,8 @@ canvas.addEventListener('pointermove', (e) => {
     return;
   }
   const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+  // a swipe up on a phone leaves the statement, as the wheel does
+  if (atIntro() && dy < -24 && -dy > Math.abs(dx)) { drag = null; canvas.classList.remove('is-dragging'); leaveIntro(); return; }
   if (Math.hypot(dx, dy) > 6) drag.moved = true;
   if (!drag.moved) return;
   hideScribble();
@@ -2002,6 +2027,7 @@ function endDrag(e) {
   const d = drag; drag = null;
   canvas.classList.remove('is-dragging');
   if (!d.moved) {
+    if (atIntro()) { if (d.press) leaveIntro(); return; }
     if (d.onSheet) location.hash = `#/${PROGRAMS[state.active].slug}`;
     else if (VIS.pin === 'hover' && d.press && sheets.indexOf(d.press) !== state.active) toPoster(sheets.indexOf(d.press));
     return;
@@ -2013,7 +2039,7 @@ function endDrag(e) {
   }
   const [t0, x0] = d.samples[0], [t1, x1] = d.samples[d.samples.length - 1];
   const v = (x1 - x0) / Math.max(16, t1 - t0);
-  state.target = clamp(Math.round(clampP(state.target - v * (VW < 760 ? 0.6 : 0.9))), 0, N - 1);
+  state.target = clamp(Math.round(clampP(state.target - v * (VW < 760 ? 0.6 : 0.9))), INTRO, N - 1);
 }
 canvas.addEventListener('pointerup', endDrag);
 canvas.addEventListener('pointercancel', endDrag);
@@ -2024,6 +2050,8 @@ addEventListener('wheel', (e) => {
   e.preventDefault();
   const dy = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
   const unit = e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? VH : 1;
+  if (performance.now() < wheelHold) return;
+  if (atIntro()) { if (dy > 0 && !drag) leaveIntro(); return; }
   if (VIS.step === 'notch') {
     // a mouse that reports a notch as a few pixels still steps: its legacy wheelDelta is a multiple of 120
     const notch = Math.abs(e.wheelDeltaY || 0) >= 120 && e.wheelDeltaY % 120 === 0;
@@ -2040,28 +2068,18 @@ addEventListener('keydown', (e) => {
   if (e.target.closest && e.target.closest('input, textarea')) return;
   if (e.key === 'Escape') { if (drawerOn) closeDrawer(); else if (!indexPanel.hidden) closeIndex(); else if (state.mode !== 'home') location.hash = '#/'; return; }
   if (state.mode !== 'home' || drawerOn) return;
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); goTo(state.active + 1); hideScribble(); }
-  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); goTo(state.active - 1); hideScribble(); }
-  if (e.key === 'Enter' && document.activeElement === body) location.hash = `#/${PROGRAMS[state.active].slug}`;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); if (atIntro()) leaveIntro(); else goTo(state.active + 1); hideScribble(); }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); if (!atIntro()) goTo(state.active - 1); hideScribble(); }
+  if (e.key === 'Enter' && document.activeElement === body) { if (atIntro()) leaveIntro(); else location.hash = `#/${PROGRAMS[state.active].slug}`; }
 });
 
-/* A lab mark (mark=circle and the others) also circles the next program's title on hover */
-programView.addEventListener('pointerover', (e) => {
-  const link = e.target.closest('.p-next__link');
-  if (!link || coarse || link.dataset.circled || journey.turn || markName === 'none') return;
-  link.dataset.circled = '1';
-  const t = $('.p-next__go', link).getBoundingClientRect();
-  showScribble(null, rectCorners(t, 4));
-});
-programView.addEventListener('pointerout', (e) => {
-  const link = e.target.closest('.p-next__link');
-  if (!link || link.contains(e.relatedTarget)) return;
-  delete link.dataset.circled;
-  hideScribble();
-});
+/* The next poster is the way on: it lifts a little under the pointer */
+const nextLift = (e, v) => { if (e.target.closest('.p-next__link') && !journey.turn && state.mode === 'program') sheets[(state.active + 1) % N].liftTgt = v; };
+programView.addEventListener('pointerover', (e) => nextLift(e, 1));
+programView.addEventListener('pointerout', (e) => nextLift(e, 0));
 addEventListener('scroll', () => { if (state.mode !== 'home' && scribbleOn) hideScribble(); }, { passive: true });
 
-/* The turn (next=turn): "Open X" hands off to the next poster, and so does a deliberate push past
+/* The turn (next=turn): a click on the next poster hands off to it, and so does a deliberate push past
    the end of the page: one more wheel notch or about 80 px of overscroll, begun after the page has
    rested at its end. Scrolling that runs into the end (a stream of notches, a trackpad's momentum)
    is not a push, so it never fires while reading. A modified click stays a plain link. */
@@ -2185,6 +2203,8 @@ function frame(now) {
       state.p += (state.target - state.p) * (reduced ? 1 : 1 - Math.exp(-dt * 6.5));
     }
     sheets.forEach((s, i) => carouselTarget(s, i - state.p));
+    // on a phone the first poster waits higher up, above the statement
+    if (VW < 760 && state.p < 0 && sheets.length) { sheets[0].tgt.y -= state.p * Hv * 0.25; sheets[0].tgt.x += state.p * Wv * 0.24; }
     // the flock (step=notch): the centre sheet follows fastest, the far ones a beat later
     if (homeRates && state.mode === 'home') sheets.forEach((s, i) => (s.rate = VIS.step === 'notch' ? clamp(11 - 1.15 * Math.abs(i - state.p), 6.5, 15) : 9));
     const ai = clamp(Math.round(state.p), 0, N - 1);
@@ -2193,7 +2213,9 @@ function frame(now) {
       sheets.forEach((s, i) => { if (i !== ai) s.spinTgt = Math.round(s.spinTgt / (Math.PI * 2)) * Math.PI * 2; });
     }
     if (state.mode === 'home') {
-      if (shownIndex !== ai && Math.abs(state.target - ai) < 0.5) showHomeText(ai);
+      const intro = atIntro();
+      if (intro !== introOn) showIntro(intro);
+      if (!intro && shownIndex !== ai && Math.abs(state.target - ai) < 0.5) showHomeText(ai);
       const settled = Math.abs(state.target - state.p) < 0.01 && !drag;
       settledFor = settled ? settledFor + dt : 0;
       const sa = sheets[state.active];
@@ -2201,13 +2223,13 @@ function frame(now) {
         // the poster under the pointer sticks to the wall, or the one under a finger (or the mouse)
         // while it is pressed; while the carousel moves or a drag is under way, every poster hangs
         const still = Math.abs(state.target - state.p) < 0.02;
-        if (drag) { stuck = !drag.moved && drag.press === sa ? sa : null; hitAt.x = NaN; }
+        if (drag) { stuck = !intro && !drag.moved && drag.press === sa ? sa : null; hitAt.x = NaN; }
         else if (!pointer.inside || coarse || !still || drawerOn) { stuck = null; hitAt.x = NaN; }
         else if (pointer.x !== hitAt.x || pointer.y !== hitAt.y || posesMoving()) {
           // only the centred poster goes flat; one at the side stays tilted, and a click brings it to the centre
           const over = hitSheet(pointer.x, pointer.y, stuck);
-          stuck = over === sa ? over : null;
-          canvas.classList.toggle('is-side', !!over && over !== sa);
+          stuck = !intro && over === sa ? over : null;
+          canvas.classList.toggle('is-side', !!over && (intro || over !== sa));
           hitAt.x = pointer.x; hitAt.y = pointer.y;
         }
         flatSheet = stuck;
@@ -2383,6 +2405,11 @@ labEl.addEventListener('click', async (e) => {
     setTimeout(() => (b.textContent = 'Copy link'), 1600);
   }
 });
+// the name goes back to the statement; Curation goes to the posters
+$('.nav__mark').addEventListener('click', () => { if (state.mode === 'home') { state.tw = null; goTo(INTRO); } else wantIntro = true; });
+$('[data-nav="programs"]').addEventListener('click', () => {
+  if (state.mode === 'home') { if (atIntro()) leaveIntro(); } else if (atIntro()) state.target = state.p = 0;
+});
 addEventListener('keydown', (e) => { if (e.shiftKey && (e.key === 'L' || e.key === 'l')) toggleLab(); });
 if (params.has('lab')) toggleLab(true);
 
@@ -2393,6 +2420,7 @@ const loadBar = $('.loader__bar i');
 const statusLabel = $('.nav__status');
 async function boot() {
   const t0 = performance.now();
+  if (!location.hash.replace(/^#\/?/, '')) state.p = state.target = INTRO;
   let shown = 0;
   const tick = () => {
     shown = Math.min(1, (performance.now() - t0) / 1400);
@@ -2425,7 +2453,7 @@ async function boot() {
   }
   // start edge-on, far back, then hang one by one
   sheets.forEach((s, i) => {
-    carouselTarget(s, i);
+    carouselTarget(s, i - state.p);
     Object.assign(s.cur, s.tgt, loaderOn ? { z: s.tgt.z - 5, ry: s.tgt.ry + Math.PI * 0.5, y: s.tgt.y - 0.6, o: 0 } : { o: 0 });
     s.rate = loaderOn ? 3.2 : 6;
   });
