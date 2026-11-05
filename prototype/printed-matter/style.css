@@ -82,9 +82,9 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 
 /* Line reveal: each line slides up out of its own mask. */
 .ln { display: block; overflow: hidden; padding: 0.16em 0 0.1em; margin: -0.16em 0 -0.1em; }
-.ln__i { display: block; transform: translateY(112%); transition: transform 1s var(--ease); transition-delay: var(--d, 0s); }
+.ln__i { display: block; transform: translateY(150%); transition: transform 1s var(--ease); transition-delay: var(--d, 0s); }
 .is-in .ln__i { transform: none; }
-.is-out .ln__i { transform: translateY(-112%); transition-duration: 0.5s; transition-timing-function: var(--ease-io); transition-delay: calc(var(--d, 0s) * 0.4); }
+.is-out .ln__i { transform: translateY(-150%); transition-duration: 0.5s; transition-timing-function: var(--ease-io); transition-delay: calc(var(--d, 0s) * 0.4); }
 
 .rule { position: absolute; left: 0; right: 0; top: 0; height: var(--hair); background: currentColor; transform: scaleX(0); transform-origin: 0 50%; transition: transform 1.2s var(--ease); transition-delay: var(--d, 0s); }
 .is-in .rule { transform: none; }
@@ -144,16 +144,28 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 /* ---------- home ---------- */
 .home { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
 .home[hidden] { display: none; }
-/* The statement: home's first screen, one step before the first poster. Set in the same letters as her name in the nav,
-   and printed in two inks: each line carries a faint second ink, a little out of register, that slips with the pointer */
-.home__intro { --gx: 3px; --gy: 2px; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: grid; width: min(47vw, 92svh); margin: 0; font-family: var(--serif); font-weight: 400; font-size: min(7.1vw, 14.4svh); line-height: 1; letter-spacing: -0.022em; }
-.home__intro .ln { overflow: visible; clip-path: inset(0 -1em); will-change: transform; }
-.home__intro .ln:nth-child(even) { justify-self: end; }
-.home__intro .ln__i { --ghost: rgb(71 0 0 / 0.2); text-shadow: var(--gx) var(--gy) 0 var(--ghost); }
-.home__intro em { font-style: italic; }
-.home__intro .ink-a { --ghost: rgb(47 95 192 / 0.3); color: var(--oxblood); }
-.home__intro .ink-b { --ghost: rgb(71 0 0 / 0.26); color: var(--cobalt); }
+/* The statement: home's first screen, one step before the first poster. Her name's letters, a weight up, left aligned, in the
+   reds, oranges and yellows of her posters. A faint second ink sits under each line and slips with the pointer */
 .is-intro .home__count { opacity: 0; }
+.home__name { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* The V and E (opening.js): over the posters, under the nav */
+.opening { position: fixed; inset: 0; z-index: 15; display: none; touch-action: none; }
+.is-home .opening:not([hidden]) { display: block; }
+.opening.is-in { animation: opening-in 0.45s var(--ease) both; }
+@keyframes opening-in { from { opacity: 0; } }
+.opening canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.opening__word { position: absolute; color: transparent; text-align: center; text-decoration: none; white-space: nowrap; pointer-events: none; -webkit-user-select: none; user-select: none; }
+.opening.is-live .opening__word { pointer-events: auto; }
+.opening__cue { position: absolute; right: var(--gutter); bottom: 1.2rem; font: 500 0.95rem/1.35 var(--sans); color: var(--ink-2); transition: opacity 0.3s; }
+.opening.is-moving .opening__cue { opacity: 0; }
+/* the nav reads over paper and over black, letter by letter, while the blocks pass under it (a phone's nav has its own pill) */
+@media (min-width: 761px) {
+  .is-home.is-intro .nav { mix-blend-mode: difference; }
+  .is-home.is-intro .nav__mark, .is-home.is-intro .nav__link:hover { color: #fff; }
+  .is-home.is-intro .nav__link { color: rgb(255 255 255 / 0.7); }
+}
+@media (max-width: 760px) { .opening__cue { right: 0; left: 0; bottom: 5rem; text-align: center; } }
 .home__info { position: absolute; top: 1.15rem; left: var(--gutter); width: 26rem; }
 .home__title { width: max-content; margin: 0 0 0.75rem; font-family: var(--serif); font-weight: 300; font-size: 2.75rem; line-height: 0.96; letter-spacing: -0.03em; text-transform: uppercase; white-space: nowrap; }
 .specs { margin: 0; }
@@ -441,10 +453,10 @@ html[data-type='caslon'] .p-title, html[data-type='caslon'] .p-next__title { let
   .is-night .nav__link, .is-night .nav__mark { color: var(--ink-2); }
   .is-night .nav__link.is-current, .is-night .nav__mark { color: var(--ink); }
   .index { top: auto; bottom: calc(100% + 0.5rem); width: calc(100vw - 2rem); }
-  .home__intro { --gx: 1.2px; --gy: 0.8px; top: 66%; width: 88vw; font-size: 14vw; }
   .home__info { right: var(--gutter); width: auto; top: 1rem; }
   .home__title { font-size: 2.2rem; white-space: normal; }
-  .home__specs .specs__row:nth-child(n + 4) { display: none; }
+  .home__specs .specs__row { padding: 0.28rem 0 0.32rem; }
+  .home__specs .specs__row:nth-child(n + 5) { display: none; } /* the Who and the Work wait on the program page */
   .specs dd { font-size: 1.05rem; }
   .home__corner--r { display: none; }
   /* her line stays on phones: one small centred line above the nav */

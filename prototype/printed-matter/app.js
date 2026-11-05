@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { picturesHTML, picturesFrame, picturesEnter, picturesLeave } from './pictures.js';
 // the gliding scroll (lab scroll=glide): see glide.js
 import { glideInstall, glideTick, glideHalt } from './glide.js';
+import { createOpening } from './opening.js';
 
 /* =========================================================================
    Content. Facts are written out; anything in her voice is a placeholder
@@ -45,7 +46,8 @@ const PROGRAMS = [
     slug: 'iyuana', name: 'Iyuana', lang: 'es', poster: 'img/iyuana.jpg', short: 'Aug 2026',
     homeTitle: ['Iyuana: El Retorno', 'de los Sueños'],
     pageTitle: ['Iyuana'], sub: 'El Retorno de los Sueños',
-    specs: [['Role', 'Producer & creative director'], ['Where', 'Long Island City, Queens'], ['When', 'August 18–24, 2026'], ['Artists', 'Yanda Montahuano<br>Li Can Vega<br>Armando Vega<br>Israel Vargas “Panchis”']],
+    // the top left of home: What, Role, Where, When, a Who named for the program (Artists, Painter, Dance Group), Work
+    specs: [['What', 'Film & photography exhibition'], ['Role', 'Producer & creative director'], ['Where', 'Long Island City, Queens'], ['When', 'August 18–24, 2026'], ['Artists', 'Yanda Montahuano<br>Li Can Vega<br>Armando Vega<br>Israel Vargas “Panchis”'], ['Work', 'Identity, poster & campaign']],
     back: { title: 'Iyuana', sub: 'El Retorno de los Sueños', lines: ['Film & photography exhibition', 'Long Island City, Queens', 'August 18–24, 2026'] },
     page: {
       credits: [['Producer & creative director', 'Vanessa Espín'], ['Artists', 'Yanda Montahuano, Li Can Vega, Armando Vega, Israel Vargas “Panchis”']],
@@ -63,7 +65,7 @@ const PROGRAMS = [
     slug: 'ayazamana', name: 'Ayazamana', poster: 'img/ayazamana.png', short: 'Jul 2026',
     homeTitle: ['Ayazamana'],
     pageTitle: ['Ayazamana'],
-    specs: [['Poster', 'Vanessa Espín'], ['Performers', 'Ayazamana Dance Group'], ['When', 'Saturday, July 11, 2026']],
+    specs: [['What', 'Live music & traditional dance'], ['Role', ph('her role on the night · q05', 'q05')], ['Where', 'Ecuadorian American Cultural Center'], ['When', 'Saturday, July 11, 2026'], ['Dance Group', 'Ayazamana Dance Group'], ['Work', 'Poster']],
     back: { title: 'Ayazamana', lines: ['Live music & traditional dance', 'Ecuadorian American Cultural Center', 'Saturday, July 11, 2026, 8 PM'] },
     page: {
       credits: [['Poster', 'Vanessa Espín'], ['Performers', 'Ayazamana Dance Group']],
@@ -81,7 +83,7 @@ const PROGRAMS = [
     slug: 'herencia-viva', name: 'Herencia Viva', lang: 'es', poster: 'img/herencia-viva.jpg', short: 'May 2026',
     homeTitle: ['Herencia Viva:', 'Threads of Memory'],
     pageTitle: ['Herencia', 'Viva'], sub: 'Threads of Memory',
-    specs: [['Role', 'Curator & creative director'], ['Painter', 'Luis Medina'], ['Where', 'Flushing Town Hall'], ['When', 'May 29–31, 2026']],
+    specs: [['What', 'Painting exhibition'], ['Role', 'Curator & creative director'], ['Where', 'Flushing Town Hall'], ['When', 'May 29–31, 2026'], ['Painter', 'Luis Medina'], ['Work', 'Curation, poster & promotional materials']],
     back: { title: 'Herencia Viva', sub: 'Threads of Memory', lines: ['Painting exhibition', 'Flushing Town Hall', 'May 29–31, 2026'] },
     page: {
       credits: [['Curator & creative director', 'Vanessa Espín'], ['Painter', 'Luis Medina']],
@@ -98,7 +100,7 @@ const PROGRAMS = [
     slug: 'ecuadorian-american-cultural-center', name: 'Ecuadorian American Cultural Center', card: true, short: '2025–2026',
     homeTitle: ['Ecuadorian American', 'Cultural Center'],
     pageTitle: ['Ecuadorian', 'American', 'Cultural Center'],
-    specs: [['Role', 'Creative & Community Coordinator'], ['Where', 'New York'], ['When', '2025–2026'], ['Work', 'Programs, content, sponsors']],
+    specs: [['What', 'Cultural center'], ['Role', 'Creative & Community Coordinator'], ['Where', 'New York'], ['When', '2025–2026'], ['Who', ph('who she worked with · q02', 'q02')], ['Work', 'Programs, content, sponsors']],
     back: { title: 'Ecuadorian American Cultural Center', lines: ['Creative & Community Coordinator', 'New York', '2025–2026'] },
     page: {
       credits: [['Creative & Community Coordinator', 'Vanessa Espín']],
@@ -632,31 +634,14 @@ function homeHTML(i) {
     specs: rows(p.specs, 0.12, 0.07),
   };
 }
-const homeIntro = $('.home__intro');
-const introLines = [...homeIntro.querySelectorAll('.ln')];
-const introAt = { x: 0, y: 0 };
 let introOn = false;
-// The statement floats a little, each line on its own time, and the pointer moves the lines and their second ink apart
-function tickIntro(now) {
-  if (reduced) return;
-  const t = now / 1000;
-  introAt.x += (pointer.nx - introAt.x) * 0.05; introAt.y += (pointer.ny - introAt.y) * 0.05;
-  introLines.forEach((el, i) => {
-    const k = 0.6 + i * 0.3;
-    el.style.transform = `translate3d(${(Math.cos(t * 0.33 + i * 2.1) * 3 - introAt.x * 7 * k).toFixed(2)}px, ${(Math.sin(t * 0.47 + i * 1.7) * 4.5 - introAt.y * 5 * k).toFixed(2)}px, 0)`;
-  });
-  const g = VW < 760 ? 0.4 : 1.35; // the second ink's offset follows the size of the type
-  homeIntro.style.setProperty('--gx', `${(g * (3 + Math.sin(t * 0.41) * 1.3 + introAt.x * 3.5)).toFixed(2)}px`);
-  homeIntro.style.setProperty('--gy', `${(g * (2 + Math.cos(t * 0.29) * 1.1 + introAt.y * 2.5)).toFixed(2)}px`);
-}
 function showIntro(on) {
   introOn = on;
   body.classList.toggle('is-intro', on);
   if (state.mode === 'home') setNav(on ? '' : 'programs');
-  if (!on) { conceal(homeIntro); return; }
+  if (!on) return;
   swapToken++; shownIndex = -1;
   [homeTitle, homeSpecs].forEach(conceal);
-  reveal(homeIntro);
 }
 function showHomeText(i, instant = false) {
   if (i === shownIndex && !instant) return;
@@ -1190,7 +1175,7 @@ let tiltK = 1, storyTone = 'night', loaderOn = true, aboutMode = 'drawer';
 //   held   wall | cut | off   Iyuana: the pictures between the story and the text
 //   drift  chapters | long | band | off   Herencia Viva: the same
 //   scroll glide | native        program pages: the wheel glides (glide.js)
-const VIS = { pin: 'hover', tape: 'off', step: 'free', poster: 'cover', next: 'turn', held: 'wall', wallOpen: 'hands', wallExit: 'tour', walk: 'mixed', drift: 'chapters', hvGround: 'cobalt', hvOpen: 'oranges', hvClose: 'mona', edge: 'bubble', docs: 'one', scroll: 'glide' };
+const VIS = { pin: 'hover', tape: 'on', step: 'free', poster: 'cover', next: 'turn', held: 'wall', wallOpen: 'hands', wallExit: 'tour', walk: 'mixed', drift: 'chapters', hvGround: 'cobalt', hvOpen: 'oranges', hvClose: 'mona', edge: 'bubble', docs: 'one', scroll: 'glide' };
 // homeRates: the entry flight back to the carousel is over and the follow rates are the carousel's own
 let homeRates = false;
 // viewHash: the route of the view on screen (null before the first one); the About drawer opens over it.
@@ -1265,14 +1250,13 @@ const journey = { flight: null, turn: null, endAt: 0, pendingGo: null };
 const push = { acc: 0, last: -1e9, armed: false, touchY: null };
 const isCover = () => VIS.poster !== 'table';
 
-const INTRO = -1; // home's statement: one step before the first poster
-const clampP = (v) => clamp(v, INTRO - 0.25, N - 0.75);
+const clampP = (v) => clamp(v, -0.25, N - 0.75);
 let snapTimer = 0;
 function scheduleSnap(ms = 170) {
   clearTimeout(snapTimer);
-  snapTimer = setTimeout(() => { state.target = clamp(Math.round(state.target), INTRO, N - 1); }, ms);
+  snapTimer = setTimeout(() => { state.target = clamp(Math.round(state.target), 0, N - 1); }, ms);
 }
-function goTo(i) { state.target = clamp(i, INTRO, N - 1); }
+function goTo(i) { state.target = clamp(i, 0, N - 1); }
 
 /* One notch, one poster (step=notch). A wheel step glides 0.51 s on A24's
    cubic-bezier(.32,.72,0,1). The filter: deltas add up to a step at 50 px (a mouse notch
@@ -1284,8 +1268,8 @@ const E_GLIDE = bez(0.32, 0.72, 0, 1);
 const GLIDE = 0.51, NOTCH_PX = 50, NOTCH_LOCK = 400, NOTCH_PAUSE = 150;
 const glideAt = (now) => (state.tw ? E_GLIDE(clamp01((now - state.tw.t0) / 1000 / state.tw.dur)) : 1);
 function stepTo(dir, now) {
-  const from = state.tw ? state.tw.to : clamp(Math.round(state.target), INTRO, N - 1);
-  const to = clamp(from + dir, INTRO, N - 1);
+  const from = state.tw ? state.tw.to : clamp(Math.round(state.target), 0, N - 1);
+  const to = clamp(from + dir, 0, N - 1);
   if (to === from) return false;
   state.target = to;
   state.tw = reduced ? null : { from: state.p, to, t0: now, dur: GLIDE };
@@ -1297,16 +1281,11 @@ function toPoster(i) {
   state.target = i;
   state.tw = reduced ? null : { from: state.p, to: i, t0: performance.now(), dur: GLIDE };
 }
-/* Home opens one step before the first poster: the statement in the middle of the screen, and the first poster waiting where
-   the next one always waits, at the top right. The first move of any size goes on to it; the rest of that flick is dropped. */
-const atIntro = () => state.target < -0.5;
+/* Home opens on the V and E (opening.js), which run on the wheel, a finger or the arrow keys. They end on the first poster and
+   the rest of that flick is dropped. Scrolling up past the first poster plays them in reverse. */
 let wheelHold = 0, wantIntro = false;
-function leaveIntro() {
-  wheelHold = performance.now() + 800;
-  clearTimeout(snapTimer);
-  state.target = 0;
-  state.tw = reduced ? null : { from: state.p, to: 0, t0: performance.now(), dur: GLIDE * 1.7 };
-}
+const opening = createOpening({ host: $('.opening'), reduced, onEnd: () => { wheelHold = performance.now() + 700; } });
+const atIntro = () => opening.on;
 const wheelF = { acc: 0, last: -1e9, armed: true, stepAt: -1e9, avg: 0, peak: 0 };
 function wheelNotch(d, now) {
   const w = wheelF, mag = Math.abs(d);
@@ -1356,7 +1335,7 @@ function enterHome() {
   const from = state.mode;
   state.mode = 'home';
   body.classList.add('is-home'); body.classList.remove('is-scroll');
-  if (wantIntro) { wantIntro = false; state.target = INTRO; }
+  if (wantIntro) { wantIntro = false; state.target = state.p = 0; opening.start(true); }
   setNav(atIntro() ? '' : 'programs'); setTone('paper');
   sheets.forEach((s) => { s.rate = from === 'loading' ? 4.2 : 5.5; s.float = 1; });
   homeRates = false; state.tw = null;
@@ -1387,7 +1366,7 @@ function enterProgram(i) {
   state.active = i; state.target = state.p = i;
   body.classList.remove('is-home');
   setNav('programs');
-  [homeTitle, homeSpecs, homeIntro].forEach(conceal);
+  [homeTitle, homeSpecs].forEach(conceal);
   document.querySelectorAll('.home__corner').forEach(conceal);
   if (portrait) portrait.tgt.o = 0;
   const others = leavePages(programView);
@@ -1431,7 +1410,7 @@ function enterPage(mode, view, html, nav, tone, after) {
   state.mode = mode;
   body.classList.remove('is-home');
   setNav(nav); setTone(tone);
-  [homeTitle, homeSpecs, homeIntro].forEach(conceal);
+  [homeTitle, homeSpecs].forEach(conceal);
   document.querySelectorAll('.home__corner').forEach(conceal);
   leavePages(view);
   if (!view.hidden) view.querySelectorAll('.is-in').forEach(conceal);
@@ -2027,8 +2006,8 @@ canvas.addEventListener('pointermove', (e) => {
     return;
   }
   const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
-  // a swipe up on a phone leaves the statement, as the wheel does
-  if (atIntro() && dy < -24 && -dy > Math.abs(dx)) { drag = null; canvas.classList.remove('is-dragging'); leaveIntro(); return; }
+  // a swipe down on the first poster goes back to the V and E
+  if (e.pointerType === 'touch' && state.active === 0 && dy > 40 && dy > Math.abs(dx) * 1.5) { drag = null; canvas.classList.remove('is-dragging'); opening.rewind(); return; }
   if (Math.hypot(dx, dy) > 6) drag.moved = true;
   if (!drag.moved) return;
   hideScribble();
@@ -2042,7 +2021,6 @@ function endDrag(e) {
   const d = drag; drag = null;
   canvas.classList.remove('is-dragging');
   if (!d.moved) {
-    if (atIntro()) { if (d.press) leaveIntro(); return; }
     if (d.onSheet) location.hash = `#/${PROGRAMS[state.active].slug}`;
     else if (VIS.pin === 'hover' && d.press && sheets.indexOf(d.press) !== state.active) toPoster(sheets.indexOf(d.press));
     return;
@@ -2054,7 +2032,7 @@ function endDrag(e) {
   }
   const [t0, x0] = d.samples[0], [t1, x1] = d.samples[d.samples.length - 1];
   const v = (x1 - x0) / Math.max(16, t1 - t0);
-  state.target = clamp(Math.round(clampP(state.target - v * (VW < 760 ? 0.6 : 0.9))), INTRO, N - 1);
+  state.target = clamp(Math.round(clampP(state.target - v * (VW < 760 ? 0.6 : 0.9))), 0, N - 1);
 }
 canvas.addEventListener('pointerup', endDrag);
 canvas.addEventListener('pointercancel', endDrag);
@@ -2066,7 +2044,8 @@ addEventListener('wheel', (e) => {
   const dy = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
   const unit = e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? VH : 1;
   if (performance.now() < wheelHold) return;
-  if (atIntro()) { if (dy > 0 && !drag) leaveIntro(); return; }
+  if (atIntro()) { opening.scroll(dy * unit); return; }
+  if (dy < 0 && !drag && state.active === 0 && state.target <= 0) { clearTimeout(snapTimer); state.target = 0; opening.back(); opening.scroll(dy * unit); return; }
   if (VIS.step === 'notch') {
     // a mouse that reports a notch as a few pixels still steps: its legacy wheelDelta is a multiple of 120
     const notch = Math.abs(e.wheelDeltaY || 0) >= 120 && e.wheelDeltaY % 120 === 0;
@@ -2083,9 +2062,9 @@ addEventListener('keydown', (e) => {
   if (e.target.closest && e.target.closest('input, textarea')) return;
   if (e.key === 'Escape') { if (drawerOn) closeDrawer(); else if (!indexPanel.hidden) closeIndex(); else if (state.mode !== 'home') location.hash = '#/'; return; }
   if (state.mode !== 'home' || drawerOn) return;
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); if (atIntro()) leaveIntro(); else goTo(state.active + 1); hideScribble(); }
-  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); if (!atIntro()) goTo(state.active - 1); hideScribble(); }
-  if (e.key === 'Enter' && document.activeElement === body) { if (atIntro()) leaveIntro(); else location.hash = `#/${PROGRAMS[state.active].slug}`; }
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); if (atIntro()) opening.nudge(1); else goTo(state.active + 1); hideScribble(); }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); if (atIntro()) opening.nudge(-1); else if (state.active === 0) { opening.back(); opening.nudge(-1); } else goTo(state.active - 1); hideScribble(); }
+  if (e.key === 'Enter' && document.activeElement === body) { if (atIntro()) opening.skip(); else location.hash = `#/${PROGRAMS[state.active].slug}`; }
 });
 
 /* The next poster is the way on: it lifts a little under the pointer */
@@ -2219,7 +2198,6 @@ function frame(now) {
     }
     sheets.forEach((s, i) => carouselTarget(s, i - state.p));
     // on a phone the first poster waits higher up, above the statement
-    if (VW < 760 && state.p < 0 && sheets.length) { sheets[0].tgt.y -= state.p * Hv * 0.25; sheets[0].tgt.x += state.p * Wv * 0.24; }
     // the flock (step=notch): the centre sheet follows fastest, the far ones a beat later
     if (homeRates && state.mode === 'home') sheets.forEach((s, i) => (s.rate = VIS.step === 'notch' ? clamp(11 - 1.15 * Math.abs(i - state.p), 6.5, 15) : 9));
     const ai = clamp(Math.round(state.p), 0, N - 1);
@@ -2230,7 +2208,6 @@ function frame(now) {
     if (state.mode === 'home') {
       const intro = atIntro();
       if (intro !== introOn) showIntro(intro);
-      if (intro) tickIntro(now);
       if (!intro && shownIndex !== ai && Math.abs(state.target - ai) < 0.5) showHomeText(ai);
       const settled = Math.abs(state.target - state.p) < 0.01 && !drag;
       settledFor = settled ? settledFor + dt : 0;
@@ -2314,7 +2291,7 @@ const TILTS = { flat: 0.35, soft: 1, strong: 1.6 };
 
 const LAB = {
   pin: { label: 'Home: poster under the pointer', def: 'hover', options: [['hover', 'Sticks to the wall'], ['off', 'Lifts']], apply: (v) => { VIS.pin = v; } },
-  tape: { label: 'Home: tape on the stuck poster', def: 'off', options: [['off', 'Off'], ['on', 'Four tapes']], apply: (v) => { VIS.tape = v; } },
+  tape: { label: 'Home: tape on the stuck poster', def: 'on', options: [['off', 'Off'], ['on', 'Four tapes']], apply: (v) => { VIS.tape = v; } },
   step: { label: 'Home: wheel', def: 'free', options: [['notch', 'One notch, one poster'], ['free', 'Free']], apply: (v) => { VIS.step = v; state.tw = null; } },
   poster: { label: 'Program: poster', def: 'cover', options: [['cover', 'Cover'], ['faded', 'Faded'], ['table', 'Table']], apply: (v) => { VIS.poster = v; applyPoster(); } },
   next: { label: 'Program: next poster', def: 'turn', options: [['turn', 'Turn'], ['click', 'Click']], apply: (v) => {
@@ -2421,10 +2398,10 @@ labEl.addEventListener('click', async (e) => {
     setTimeout(() => (b.textContent = 'Copy link'), 1600);
   }
 });
-// the name goes back to the statement; Curation goes to the posters
-$('.nav__mark').addEventListener('click', () => { if (state.mode === 'home') { state.tw = null; goTo(INTRO); } else wantIntro = true; });
+// the name goes back to the V and E; Curation goes to the posters
+$('.nav__mark').addEventListener('click', () => { if (state.mode === 'home') { state.tw = null; goTo(0); opening.rewind(); } else wantIntro = true; });
 $('[data-nav="programs"]').addEventListener('click', () => {
-  if (state.mode === 'home') { if (atIntro()) leaveIntro(); } else if (atIntro()) state.target = state.p = 0;
+  if (state.mode === 'home') { if (atIntro()) opening.skip(); } else if (atIntro()) opening.finish();
 });
 addEventListener('keydown', (e) => { if (e.shiftKey && (e.key === 'L' || e.key === 'l')) toggleLab(); });
 if (params.has('lab')) toggleLab(true);
@@ -2436,7 +2413,7 @@ const loadBar = $('.loader__bar i');
 const statusLabel = $('.nav__status');
 async function boot() {
   const t0 = performance.now();
-  if (!location.hash.replace(/^#\/?/, '')) state.p = state.target = INTRO;
+  if (!location.hash.replace(/^#\/?/, '')) opening.start();
   let shown = 0;
   const tick = () => {
     shown = Math.min(1, (performance.now() - t0) / 1400);
@@ -2448,7 +2425,7 @@ async function boot() {
   requestAnimationFrame(frame);
 
   await Promise.race([
-    Promise.all([document.fonts.load('300 40px Gambetta'), document.fonts.load('400 40px Gambetta'), document.fonts.load('700 40px Gambetta'), document.fonts.load('400 40px Zodiak'), document.fonts.load('500 20px Switzer')]),
+    Promise.all([document.fonts.load('300 40px Gambetta'), document.fonts.load('400 40px Gambetta'), document.fonts.load('600 40px Gambetta'), document.fonts.load('700 40px Gambetta'), document.fonts.load('400 40px Zodiak'), document.fonts.load('500 20px Switzer')]),
     new Promise((r) => setTimeout(r, 2500)),
   ]);
   const imgs = await Promise.all(PROGRAMS.map((p) => (p.poster ? loadImage(p.poster) : Promise.resolve(null))));

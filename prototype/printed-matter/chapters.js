@@ -92,7 +92,7 @@ const moved = (el, x, y, s = 1) => { el.style.transform = `translate3d(${x.toFix
 function maskTo(m, e, ctx, lag = true) {
   m.cur = lag && Number.isFinite(m.cur) ? m.cur + (e - m.cur) * (1 - Math.exp(-LAG * ctx.dt)) : e;
   if (Math.abs(m.cur - e) < 0.0015) m.cur = e;
-  const y = Math.round((1 - m.cur) * 1180) / 10;
+  const y = Math.round((1 - m.cur) * 1320) / 10;
   if (y !== m.y) { m.y = y; m.i.style.transform = `translate3d(0, ${y}%, 0)`; }
 }
 const masks = (root) => [...root.querySelectorAll('.ch-m__i')].map((i) => ({ i, m: i.parentElement, cur: NaN, y: NaN }));
