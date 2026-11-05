@@ -12,6 +12,8 @@
    start of the pull. The section only pins (sticky) and sets the ground: data-tone night, data-sheets park. */
 
 // x, y, w, h: wall units (a 120 x 67.5 wall), read left to right as the evening: daylight to candles to everyone.
+import { glideHalt } from './glide.js';
+
 const WALL_W = 120, WALL_H = 67.5, MOUNT = 0.035;
 const PRINTS = [
   { f: '4633', x: 3, y: 11.5, w: 20, h: 13.3, size: 'medium', cap: "A print, up close", src: 'img/iyuana/full/4633.jpg' },
@@ -45,6 +47,9 @@ const FOCUS_PHONE = { 4619: [0.42, 0.3], 4787: [0.47, 0.5], 4762: [0.46, 0.56], 
 // in screen heights of scroll: the opening, then for each stop a pull back (OUT), a breath, a push in (IN) or a slide (ALONG)
 const HOLD = 0.35, PULL = 1.5, REST = 0.6, OUT = 0.9, BREATH = 0.2, IN = 1, ALONG = 0.9, STAY = 0.35, LEFT = 0.5;
 const DIP = 0.55; // how far a slide steps back at its middle, as the log of the scale
+// One notch, one move (lab wallstep): the wheel starts a move and the clock plays it. Holds cost no time, so a notch answers at once.
+const PACE = 1, LEAVE = 1100; // screens of the timeline per second; ms for the paper to rise over the last picture
+const NOTCH_PX = 50, NOTCH_PAUSE = 150; // as on home: deltas add up to a notch at 50 px, and a new gesture starts after a pause
 const BLEED = 2; // px of the picture kept past the screen's edge, so its mount never shows as a lit column
 const CREDIT = 'Photographs: <span class="ph" title="To come">[photographer credit]</span>';
 const WHO = '<span class="ph" title="Who is speaking: to come from Vanessa">[who is speaking]</span>';
@@ -113,10 +118,10 @@ function place(c, vw, vh, vis) {
   const wall = (k) => ({ s: 1, x: 0, y: -Math.min(c.pan, Math.max(0, r[k].y + r[k].h / 2 - vh / 2)) });
   // the timeline: every stretch of scroll is a hold, a zoom or a slide between two cameras. from, to: the print it leaves or reaches
   const stops = STOPS[vis.wallExit] || TOUR, open = cover(at(OPEN[vis.wallOpen] || OPEN.hands));
-  const walk = vis.walk || 'mixed'; // lab: mixed (far prints zoom, neighbours slide), zoom (always), jump (print to print, no pull back)
+  const walk = vis.walk || 'zoom'; // lab: mixed (far prints zoom, neighbours slide), zoom (always), jump (print to print, no pull back)
   const tl = [];
   let y = 0;
-  const add = (a, b, len, kind, from = -1, to = -1, dip = 0) => { tl.push({ a, b, y, len, kind, from, to, dip }); y += len; };
+  const add = (a, b, len, kind, from = -1, to = -1, dip = 0, rest = true) => { tl.push({ a, b, y, len, kind, from, to, dip, rest }); y += len; };
   let here = stops.length ? wall(at(stops[0].f)) : { s: 1, x: 0, y: 0 }, was = -1;
   add(open, open, HOLD, 'hold');
   add(open, here, PULL, 'zoom');
@@ -128,7 +133,7 @@ function place(c, vw, vh, vis) {
       if (i) {
         const back = wall(k);
         add(here, back, OUT, 'zoom', was);
-        add(back, back, BREATH, 'hold');
+        add(back, back, BREATH, 'hold', -1, -1, 0, vis.wallStep === 'wall'); // on the way through, unless the notch stops here
         here = back;
       }
       add(here, cam, IN, 'zoom', -1, k);
@@ -138,6 +143,8 @@ function place(c, vw, vh, vis) {
   });
   if (!stops.length && c.pan) { const end = { s: 1, x: 0, y: -c.pan }; add(here, end, c.pan / vh, 'zoom'); add(end, end, REST, 'hold'); }
   c.tl = tl; c.len = y;
+  c.rests = [...tl.filter((g) => g.kind === 'hold' && g.rest), { y: y + 1, len: 0 }]; // the last rest: the paper up, over the wall
+  c.notched = vis.wallStep !== 'free';
   c.drawn = 0;
 }
 
@@ -158,6 +165,77 @@ function aim(cam, g, u, vw, vh) {
   cam.x = mix(a.x, b.x, q); cam.y = mix(a.y, b.y, q);
 }
 
+// The stretches between two points of the timeline, in order, each with the time it takes. A breath keeps its time.
+function legs(c, from, to) {
+  const lo = Math.min(from, to), hi = Math.max(from, to), out = [];
+  for (const g of c.tl) {
+    const a = Math.max(g.y, lo), b = Math.min(g.y + g.len, hi);
+    if (b > a) out.push({ a, b, ms: g.kind === 'hold' ? (g.rest ? 0 : g.len * 1000) : ((b - a) * 1000) / PACE });
+  }
+  if (hi > c.len) out.push({ a: Math.max(c.len, lo), b: hi, ms: LEAVE, soft: true });
+  return from < to ? out : out.reverse().map((l) => ({ ...l, a: l.b, b: l.a }));
+}
+function stepStart(c, dir) {
+  const vh = c.kh, r = c.sec.getBoundingClientRect(), y = -r.top / vh, q = c.rests;
+  const rest = dir > 0 ? q.find((g) => g.y > y + 0.001) : [...q].reverse().find((g) => g.y + g.len < y - 0.001);
+  if (!rest) return false;
+  const to = rest.y + rest.len / 2;
+  glideHalt();
+  c.step = { to, top: scrollY + r.top, t0: performance.now(), seen: scrollY, legs: legs(c, y, to), dir };
+  return true;
+}
+function stepTick(c, vh) {
+  const st = c.step;
+  if (Math.abs(scrollY - st.seen) > 2) { c.step = null; return; } // someone else moved the page
+  let t = performance.now() - st.t0, y = st.to, done = true;
+  for (const l of st.legs) {
+    if (t < l.ms) { const u = t / l.ms; y = mix(l.a, l.b, l.soft ? u * u * (3 - 2 * u) : u); done = false; break; }
+    t -= l.ms;
+  }
+  scrollTo(0, st.top + y * vh);
+  st.seen = scrollY;
+  if (!done) return;
+  c.step = null;
+  if (c.queued) { const d = c.queued; c.queued = 0; stepStart(c, d); }
+}
+// whether a wheel or a key at this point of the page belongs to the wall, going this way
+function inWalk(c, dir) {
+  if (!c.notched || c.open >= 0 || !c.kh || document.body.classList.contains('is-drawer')) return false;
+  const y = -c.sec.getBoundingClientRect().top / c.kh, end = c.len + 1;
+  const first = c.rests[0]; // above the first rest the page is the page's own again
+  return dir > 0 ? y > -0.002 && y < end - 0.002 : y > first.y + first.len + 0.002 && y < end + 0.002;
+}
+function onWheel(c, e) {
+  if (e.ctrlKey || e.shiftKey || e.target.closest?.('.lab, #index-panel, .drawer, [data-no-glide]') || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+  const now = performance.now(), w = c.notch;
+  w.wheeled = now;
+  const px = e.deltaY * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? innerHeight : 1);
+  if (!px || !inWalk(c, Math.sign(px))) return;
+  e.preventDefault();
+  // a mouse that reports a notch as a few pixels still steps: its legacy wheelDelta is a multiple of 120
+  const whole = Math.abs(e.wheelDeltaY || 0) >= 120 && e.wheelDeltaY % 120 === 0;
+  const d = whole ? Math.sign(px) * Math.max(Math.abs(px), NOTCH_PX) : px, mag = Math.abs(d);
+  if (now - w.last > NOTCH_PAUSE) { w.acc = 0; w.avg = 0; w.peak = 0; w.armed = true; } // a new gesture
+  w.last = now;
+  const rising = w.peak > 0 && mag > w.peak * 1.5, since = now - w.at;
+  w.avg = w.avg ? mix(w.avg, mag, 0.3) : mag;
+  w.peak = Math.max(w.peak, w.avg);
+  // the tail of a flick is a decaying stream with no pause: it never counts. A pause, a harder push or a sustained one does.
+  if (!w.armed) { if ((rising && since > 190) || (since > 480 && w.avg >= 0.8 * w.peak)) { w.armed = true; w.acc = 0; } else return; }
+  if (w.acc && Math.sign(d) !== Math.sign(w.acc)) w.acc = 0;
+  w.acc += d;
+  if (Math.abs(w.acc) < NOTCH_PX) return;
+  const dir = Math.sign(w.acc);
+  w.acc = 0; w.armed = false; w.at = now;
+  if (c.step) c.queued = dir; else stepStart(c, dir); // a notch during a move plays after it
+}
+function onKey(c, e) {
+  const dir = { ArrowDown: 1, PageDown: 1, ArrowUp: -1, PageUp: -1, ' ': e.shiftKey ? -1 : 1 }[e.key];
+  if (!dir || e.target.closest?.('input, textarea, button, a') || !inWalk(c, dir)) return;
+  e.preventDefault();
+  if (c.step) c.queued = dir; else stepStart(c, dir);
+}
+
 export function wallEnter(root) {
   const sec = root.querySelector('.pic-wall');
   const c = { sec, root, pin: sec.querySelector('.pic-wall__pin'), els: [...sec.querySelectorAll('.pic-print')], kw: 0, kh: 0, p: 0, first: true, t: 0, loaded: false, box: null, open: -1, cam: { s: 1, x: 0, y: 0 }, capOn: -1, cap: sec.querySelector('.pic-wall__cap') };
@@ -169,6 +247,13 @@ export function wallEnter(root) {
   c.tone.dataset.tone = 'night';
   sec.nextElementSibling?.prepend(c.tone);
   c.ground = document.querySelector('.page-bg');
+  c.notch = { acc: 0, last: -1e9, at: -1e9, wheeled: -1e9, armed: true, avg: 0, peak: 0 };
+  c.step = null; c.queued = 0;
+  // on the way in, ahead of the gliding scroll and the page's other wheel listeners
+  c.onWheel = (e) => onWheel(c, e);
+  c.onKey = (e) => onKey(c, e);
+  addEventListener('wheel', c.onWheel, { passive: false, capture: true });
+  addEventListener('keydown', c.onKey, true);
   return c;
 }
 
@@ -182,7 +267,15 @@ export function wallFrame(c, ctx) {
     c.sec.style.height = `${(reduced ? c.wallH : (c.len + 1) * vh).toFixed(1)}px`;
     if (reduced) c.pin.style.height = `${c.wallH.toFixed(1)}px`;
   }
+  if (c.step) stepTick(c, vh);
   const r = c.sec.getBoundingClientRect();
+  // a gliding wheel docks at either end of the walk, so the walk always starts from a rest
+  const at = -r.top / vh, end = c.len + 1;
+  if (c.notched && !c.step && !reduced && performance.now() - c.notch.wheeled < 1500 && c.at !== undefined) {
+    const dock = c.at < 0 && at >= 0 ? 0 : c.at > end && at <= end ? end : null;
+    if (dock !== null) { glideHalt(); scrollTo(0, scrollY + r.top + dock * vh); c.at = dock; return; }
+  }
+  c.at = at;
   // while the photograph leaves, it and the paper hide the page's ground: the ground turns at once, not on its slow fade,
   // so a fast scroll that reaches the paper's foot finds paper there and not a ground still on its way from night
   const hidden = r.bottom > 0 && r.bottom <= vh;
@@ -200,7 +293,7 @@ export function wallFrame(c, ctx) {
   if (r.bottom < -vh || r.top > vh * 1.5) return;
   const y = -r.top / vh, now = performance.now(), dt = Math.min(0.1, (now - c.t) / 1000);
   c.t = now;
-  c.p = c.first ? y : c.p + (y - c.p) * (1 - Math.exp(-dt / 0.16));
+  c.p = c.first || c.step ? y : c.p + (y - c.p) * (1 - Math.exp(-dt / 0.16)); // a move has its own easing
   if (Math.abs(y - c.p) < 0.0004) c.p = y;
   c.first = false;
   let g = c.tl[c.tl.length - 1];
@@ -231,6 +324,9 @@ export function wallFrame(c, ctx) {
 
 export function wallLeave(c) {
   c.sec.removeEventListener('click', c.onClick);
+  removeEventListener('wheel', c.onWheel, { capture: true });
+  removeEventListener('keydown', c.onKey, true);
+  c.step = null;
   c.tone.remove();
   c.ground.style.transition = '';
   boxClose(c, true);

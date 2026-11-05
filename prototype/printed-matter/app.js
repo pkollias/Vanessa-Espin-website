@@ -1176,7 +1176,7 @@ let tiltK = 1, storyTone = 'night', loaderOn = true, aboutMode = 'drawer';
 //   held   wall | cut | off   Iyuana: the pictures between the story and the text
 //   drift  chapters | long | band | off   Herencia Viva: the same
 //   scroll glide | native        program pages: the wheel glides (glide.js)
-const VIS = { pin: 'hover', tape: 'on', step: 'free', poster: 'cover', next: 'turn', held: 'wall', wallOpen: 'hands', wallExit: 'tour', walk: 'mixed', drift: 'chapters', hvGround: 'cobalt', hvOpen: 'oranges', hvClose: 'mona', edge: 'bubble', docs: 'one', scroll: 'glide' };
+const VIS = { pin: 'hover', tape: 'on', step: 'notch', poster: 'cover', next: 'turn', held: 'wall', wallOpen: 'hands', wallExit: 'tour', walk: 'zoom', wallStep: 'pic', drift: 'chapters', hvGround: 'cobalt', hvOpen: 'oranges', hvClose: 'mona', edge: 'bubble', docs: 'one', scroll: 'glide' };
 // homeRates: the entry flight back to the carousel is over and the follow rates are the carousel's own
 let homeRates = false;
 // viewHash: the route of the view on screen (null before the first one); the About drawer opens over it.
@@ -1305,6 +1305,7 @@ function wheelNotch(d, now) {
   if (Math.abs(w.acc) < NOTCH_PX) return false;
   const dir = Math.sign(w.acc);
   w.acc = 0;
+  if (dir < 0 && state.active === 0 && !state.tw) { wheelHold = now + 300; opening.back(); opening.scroll(d); w.armed = false; w.stepAt = now; return true; } // up past the first poster
   if (!stepTo(dir, now)) return false;
   w.armed = false; w.stepAt = now;
   return true;
@@ -2044,9 +2045,9 @@ addEventListener('wheel', (e) => {
   e.preventDefault();
   const dy = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
   const unit = e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? VH : 1;
-  if (performance.now() < wheelHold) return;
+  if (performance.now() < wheelHold) { wheelHold = Math.max(wheelHold, performance.now() + 160); return; } // it lasts until the wheel pauses
   if (atIntro()) { opening.scroll(dy * unit); return; }
-  if (dy < 0 && !drag && state.active === 0 && state.target <= 0) { clearTimeout(snapTimer); state.target = 0; opening.back(); opening.scroll(dy * unit); return; }
+  if (VIS.step !== 'notch' && dy < 0 && !drag && state.active === 0 && state.target <= 0) { clearTimeout(snapTimer); state.target = 0; opening.back(); opening.scroll(dy * unit); return; }
   if (VIS.step === 'notch') {
     // a mouse that reports a notch as a few pixels still steps: its legacy wheelDelta is a multiple of 120
     const notch = Math.abs(e.wheelDeltaY || 0) >= 120 && e.wheelDeltaY % 120 === 0;
@@ -2293,7 +2294,7 @@ const TILTS = { flat: 0.35, soft: 1, strong: 1.6 };
 const LAB = {
   pin: { label: 'Home: poster under the pointer', def: 'hover', options: [['hover', 'Sticks to the wall'], ['off', 'Lifts']], apply: (v) => { VIS.pin = v; } },
   tape: { label: 'Home: tape on the stuck poster', def: 'on', options: [['off', 'Off'], ['on', 'Four tapes']], apply: (v) => { VIS.tape = v; } },
-  step: { label: 'Home: wheel', def: 'free', options: [['notch', 'One notch, one poster'], ['free', 'Free']], apply: (v) => { VIS.step = v; state.tw = null; } },
+  step: { label: 'Home: wheel', def: 'notch', options: [['notch', 'One notch, one poster'], ['free', 'Free']], apply: (v) => { VIS.step = v; state.tw = null; } },
   poster: { label: 'Program: poster', def: 'cover', options: [['cover', 'Cover'], ['faded', 'Faded'], ['table', 'Table']], apply: (v) => { VIS.poster = v; applyPoster(); } },
   next: { label: 'Program: next poster', def: 'turn', options: [['turn', 'Turn'], ['click', 'Click']], apply: (v) => {
     VIS.next = v;
@@ -2304,7 +2305,8 @@ const LAB = {
     if (v !== 'turn') sheets.forEach((s, j) => { if (j !== state.active) s.liftTgt = 0; });
   } },
   wallopen: { label: 'Iyuana: opening print', def: 'hands', options: [['hands', 'Hands over the eyes'], ['sky', 'Milky Way']], apply: (v) => { VIS.wallOpen = v; rePictures(); } },
-  walk: { label: 'Iyuana: the walk', def: 'mixed', options: [['mixed', 'Zoom far, slide near'], ['zoom', 'Zoom every time'], ['jump', 'Pic to pic']], apply: (v) => { VIS.walk = v; rePictures(); } },
+  wallstep: { label: 'Iyuana: one notch goes', def: 'pic', options: [['pic', 'To the next picture'], ['wall', 'To the wall, then the picture'], ['free', 'Continuous scroll']], apply: (v) => { VIS.wallStep = v; } },
+  walk: { label: 'Iyuana: the walk', def: 'zoom', options: [['mixed', 'Zoom far, slide near'], ['zoom', 'Zoom every time'], ['jump', 'Pic to pic']], apply: (v) => { VIS.walk = v; rePictures(); } },
   edge: { label: 'Herencia Viva: how a ground arrives', def: 'bubble', options: [['bubble', 'Bubbling'], ['flat', 'Flat line'], ['fade', 'Fade']], apply: (v) => { VIS.edge = v; rePictures(); } },
   scroll: { label: 'Program: scroll', def: 'glide', options: [['glide', 'Gliding'], ['native', 'Native']], apply: (v) => { VIS.scroll = v; glideHalt(); } },
   type: { label: 'Title type', def: 'gambetta', options: [['zodiak', 'Zodiak'], ['gambetta', 'Gambetta'], ['caslon', 'Libre Caslon'], ['instrument', 'Instrument Serif']], apply: (v) => {
