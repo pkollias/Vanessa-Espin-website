@@ -1,0 +1,65 @@
+/* Owned by the pictures builder: the documentation images, the Iyuana held light and the Herencia Viva drift band.
+   Loaded right after style.css, so a rule here wins over style.css at equal specificity. */
+
+/* ---------- the documentation tool with real pictures ---------- */
+.p-docs--pics .p-docs__frame { background: var(--stone); }
+.p-docs__frame img { position: absolute; display: block; }
+/* Event photographs fill the frame */
+.p-docs__frame--cover img { inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.p-docs__frame--cover .crop { color: var(--paper); opacity: 0.8; }
+/* Artworks and designs: whole, on the paper ground, with a thin margin, and never above 1.2x their own size */
+.p-docs--pics .p-docs__frame--contain { --m: 1.6rem; background: var(--paper); }
+.p-docs__frame--contain img {
+  inset: var(--m); margin: auto; width: calc(100% - 2 * var(--m)); height: calc(100% - 2 * var(--m));
+  max-width: calc(var(--w) * 1.2); max-height: calc(var(--h) * 1.2); object-fit: contain;
+}
+/* The label, then the credit line under it */
+.p-docs__credit { display: block; margin-top: 0.35rem; color: var(--ink-2); font: 500 0.95rem/1.3 var(--sans); letter-spacing: 0; }
+/* The first frame waits under the held picture until it lands */
+.p-docs__stage.is-held .p-docs__frame[data-k='0'] { background: transparent; }
+.p-docs__stage.is-held .p-docs__frame[data-k='0'] > img, .p-docs__stage.is-held .p-docs__frame[data-k='0'] .crop { visibility: hidden; }
+
+/* ---------- Iyuana: the held light ---------- */
+/* Only a spacer: it sets the night ground. pictures.js sizes it so the cut lands on the first frame. */
+.pic-held { position: relative; height: 220svh; }
+/* The picture is a fixed layer beside the section, over the posters and the page, under the nav */
+.pic-held__layer { position: fixed; inset: 0; z-index: 5; overflow: hidden; pointer-events: none; }
+.pic-held__dark, .pic-held__park { position: absolute; inset: 0; }
+.pic-held__dark { background: var(--night); opacity: 0; }
+.pic-held__park { visibility: hidden; }
+.pic-held__shot { position: absolute; left: 0; top: 0; width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--night); will-change: transform, width, height; }
+/* the glass stands a little left of centre */
+.pic-held__shot img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 43% 50%; transform-origin: 43% 50%; }
+
+/* ---------- Herencia Viva: the drift band ---------- */
+.pic-drift { position: relative; height: 135svh; color: var(--ink); overflow-x: clip; }
+.pic-drift__field { position: absolute; inset: 0; }
+/* Set like .p-title, on one line */
+.pic-drift__type {
+  position: absolute; left: 0; right: 0; top: 50%; z-index: 2; margin: 0; translate: 0 -50%;
+  font-family: var(--serif); font-weight: 300; font-size: 12rem; line-height: 0.84; letter-spacing: -0.045em;
+  text-align: center; text-transform: uppercase; white-space: nowrap;
+}
+.pic-drift__type .ln { display: inline-block; vertical-align: top; }
+/* A small framed picture: a thin dark frame round a white paper mount, with a soft shadow */
+.pic-drift__pic {
+  position: absolute; left: calc(var(--x) * 1vw); top: calc(50% + var(--y) * 1svh); width: calc(var(--w) * 1vw);
+  max-width: calc(var(--nw) * 1.2); margin: 0; padding: 0.8rem; translate: 0 -50%;
+  background: #f8f6f1; outline: 1px solid rgb(18 17 16 / 0.82); outline-offset: -1px;
+  box-shadow: 0 1.6rem 3rem rgb(18 17 16 / 0.2), 0 0.25rem 0.7rem rgb(18 17 16 / 0.14);
+  will-change: transform;
+}
+.pic-drift__pic img { display: block; width: 100%; height: auto; }
+.pic-drift__pic--back { z-index: 1; }
+.pic-drift__pic--front { z-index: 3; }
+.pic-drift__credit { position: absolute; left: var(--gutter); right: var(--gutter); bottom: 2rem; z-index: 4; margin: 0; text-align: center; text-wrap: balance; }
+
+@media (max-width: 760px) {
+  /* the pictures are mostly upright: on a phone a taller frame keeps them readable */
+  .p-docs--contain .p-docs__stage { aspect-ratio: 4 / 5; }
+  .p-docs--pics .p-docs__frame--contain { --m: 0.9rem; }
+  .pic-drift { height: 165svh; }
+  .pic-drift__type { font-size: 20.5vw; line-height: 0.86; white-space: normal; }
+  .pic-drift__type .ln { display: block; }
+  .pic-drift__pic { left: calc(var(--xm) * 1vw); top: calc(50% + var(--ym) * 1svh); width: calc(var(--wm) * 1vw); padding: 0.5rem; }
+}

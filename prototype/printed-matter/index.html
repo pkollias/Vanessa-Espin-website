@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vanessa Espín</title>
-<meta name="description" content="Vanessa Espín produces and designs exhibitions and events in New York.">
+<meta name="description" content="Vanessa Espín, brand curator of events and experience. New York.">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#eeece8">
 <link rel="icon" href="favicon.ico" sizes="32x32">
@@ -13,7 +13,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Vanessa Espín">
 <meta property="og:title" content="Vanessa Espín">
-<meta property="og:description" content="Vanessa Espín produces and designs exhibitions and events in New York.">
+<meta property="og:description" content="Vanessa Espín, brand curator of events and experience. New York.">
 <meta property="og:url" content="https://pkollias.github.io/Vanessa-Espin-website/">
 <meta property="og:image" content="https://pkollias.github.io/Vanessa-Espin-website/og.jpg">
 <meta property="og:image:width" content="1200">
@@ -24,6 +24,7 @@
 <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
 <link href="https://api.fontshare.com/v2/css?f[]=zodiak@300,400,401&f[]=switzer@400,500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="pictures.css">
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js" } }</script>
 <script type="module" src="app.js"></script>
 </head>
@@ -59,6 +60,7 @@
       <feDropShadow dx="0" dy="0.02" stdDeviation="0.012" flood-color="#1b1714" flood-opacity="0.22"/>
     </filter>
   </defs>
+  <g id="pins"></g>
   <g id="marks"></g>
 </svg>
 <aside class="lab" aria-label="Design lab" hidden></aside>
@@ -71,7 +73,7 @@
   <a class="nav__link" href="#/brand" data-nav="brand">Brand work</a>
   <a class="nav__link" href="#/about" data-nav="about">About</a>
   <div class="nav__index">
-    <button class="nav__link nav__index-btn" type="button" aria-expanded="false" aria-controls="index-panel">
+    <button class="nav__link nav__index-btn" type="button" data-nav="index" aria-expanded="false" aria-controls="index-panel">
       <span class="nav__status">Index</span>
       <svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
     </button>

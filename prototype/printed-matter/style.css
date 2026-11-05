@@ -9,6 +9,8 @@
   --ink: #121110;
   --ink-2: rgb(18 17 16 / 0.56);
   --oxblood: #470000;
+  /* placeholders keep their own colour, so the lab's accent switch can't hide them */
+  --ph: #470000;
   --serif: 'Zodiak', 'Times New Roman', Georgia, serif;
   --sans: 'Switzer', 'Helvetica Neue', Arial, sans-serif;
   --ease: cubic-bezier(0.19, 1, 0.22, 1);
@@ -139,15 +141,15 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .specs__row { position: relative; display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; padding: 0.5rem 0 0.55rem; }
 .specs dt { padding-top: 0.28rem; white-space: nowrap; }
 .specs dd { margin: 0; text-align: right; font: 500 1.125rem/1.38 var(--sans); letter-spacing: -0.01em; }
-.home__blurbs { position: absolute; left: 50%; bottom: 2.4rem; transform: translateX(-50%); display: flex; gap: 4.5rem; text-align: center; }
-.blurb { width: 21rem; }
-.blurb .eyebrow { display: block; margin-bottom: 0.6rem; }
-.blurb__mark { display: block; width: 0.45rem; height: 0.45rem; margin: 0 auto 0.75rem; background: var(--oxblood); transform: rotate(45deg) scale(0); transition: transform 0.9s var(--ease); transition-delay: var(--d, 0s); }
+.home__blurbs { position: absolute; left: 50%; bottom: 2.4rem; transform: translateX(-50%); display: flex; gap: 2.2rem; text-align: center; }
+.blurb { width: 16rem; }
+.blurb .eyebrow { display: block; margin-bottom: 0.4rem; }
+.blurb__mark { display: block; width: 0.45rem; height: 0.45rem; margin: 0 auto 0.5rem; background: var(--oxblood); transform: rotate(45deg) scale(0); transition: transform 0.9s var(--ease); transition-delay: var(--d, 0s); }
 .is-in .blurb__mark { transform: rotate(45deg) scale(1); }
 .is-out .blurb__mark { transform: rotate(45deg) scale(0); transition-duration: 0.4s; }
-.blurb__text { font-family: var(--serif); font-weight: 400; font-size: 1.95rem; line-height: 1.02; letter-spacing: -0.018em; text-transform: uppercase; }
+.blurb__text { font-family: var(--serif); font-weight: 400; font-size: 1.45rem; line-height: 0.98; letter-spacing: -0.022em; text-transform: uppercase; }
 .home__corner { position: absolute; bottom: 1.2rem; margin: 0; font: 500 0.95rem/1.35 var(--sans); }
-.home__corner--l { left: var(--gutter); max-width: 17rem; }
+.home__corner--l { left: var(--gutter); max-width: 20rem; text-wrap: balance; }
 .home__corner--r { right: var(--gutter); text-align: right; }
 .home__count { display: block; font: 300 1.8rem/1 var(--serif); letter-spacing: -0.02em; font-variant-numeric: lining-nums tabular-nums; margin-bottom: 0.35rem; }
 .home__hint { color: var(--ink-2); }
@@ -169,6 +171,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .crop--tl { left: 0.6rem; top: 4.8rem; } .crop--tr { right: 0.6rem; top: 4.8rem; }
 .crop--bl { left: 0.6rem; bottom: 1.2rem; } .crop--br { right: 0.6rem; bottom: 1.2rem; }
 .is-in .crop { opacity: 1; }
+.p-title:focus { outline: none; } /* it takes focus after a turn, for screen readers only */
 .p-title { margin: 0; font-family: var(--serif); font-weight: 300; font-size: 12rem; line-height: 0.84; letter-spacing: -0.045em; text-transform: uppercase; }
 .p-sub { margin: 0.8rem 0 0; font-family: var(--serif); font-weight: 300; font-size: 3.4rem; line-height: 1; letter-spacing: -0.03em; text-transform: uppercase; }
 .p-credits { margin: 1.5rem auto 0; max-width: 70rem; font: 500 1.05rem/1.6 var(--sans); }
@@ -182,6 +185,12 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .slot--hero { left: 50%; bottom: -27svh; width: min(33vw, 56svh); aspect-ratio: var(--ar, 0.8); transform: translateX(-50%); }
 .slot--story { left: 80.5%; top: 52%; width: min(25vw, 54svh); aspect-ratio: var(--ar, 0.8); transform: translate(-50%, -50%); }
 .slot--next { left: 50%; bottom: -30svh; width: min(28vw, 46svh); aspect-ratio: var(--ar, 0.8); transform: translateX(-50%); }
+/* poster=cover|faded: the poster hangs on the wall right of the title, about 70vh tall (at most
+   42vw wide); the title, credits and specs keep to the column on its left. */
+.p-hero--cover { --cover-h: min(70svh, calc(42vw / var(--ar, 0.8))); --cover-top: calc(50svh - var(--cover-h) / 2 + 1.4rem); padding-top: calc(var(--cover-top) - 1rem); padding-right: calc(var(--cover-h) * var(--ar, 0.8) + 6vw + 3.5rem); padding-bottom: 3rem; text-align: left; }
+.p-hero--cover .p-title .ln + .ln { margin-top: -0.26em; } /* adjacent margins collapse: this keeps the leading even when a long line wraps */
+.p-hero--cover .p-credits { max-width: none; margin-left: 0; }
+.p-hero--cover .slot--hero { left: auto; right: 6vw; top: var(--cover-top); bottom: auto; width: auto; height: var(--cover-h); transform: none; }
 
 .p-story { position: relative; height: 300svh; color: var(--paper); }
 .p-story__sticky { position: sticky; top: 0; height: 100svh; }
@@ -193,14 +202,14 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .p-logline li.is-in:last-child::after { transform: none; }
 .p-logline .ln { font-family: var(--serif); font-weight: 300; font-size: 4.4rem; line-height: 0.95; letter-spacing: -0.03em; text-transform: uppercase; }
 
-.p-text { position: relative; padding: 9rem var(--gutter) 6rem; display: grid; grid-template-columns: 1fr 1fr; gap: 3rem 4rem; }
+.p-text { position: relative; padding: 9rem var(--gutter) 6rem; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 3rem 4rem; }
 .p-text__lead { grid-column: 1 / -1; max-width: 62rem; margin: 0 0 3rem; font: 500 2.4rem/1.22 var(--sans); letter-spacing: -0.022em; }
 .p-text__lead em { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: -0.02em; }
 .p-list { grid-column: 1 / -1; position: relative; }
 .p-list > .eyebrow { display: block; margin-bottom: 0.9rem; }
 .p-list__row { position: relative; display: flex; justify-content: space-between; align-items: baseline; gap: 2rem; padding: 0.9rem 0 0.8rem; }
 .p-list__name { font-family: var(--serif); font-weight: 300; font-size: 3.8rem; line-height: 1; letter-spacing: -0.03em; text-transform: uppercase; }
-.p-list__meta { font: 500 1.125rem/1.3 var(--sans); text-align: right; color: var(--ink-2); }
+.p-list__meta { max-width: 34rem; font: 500 1.125rem/1.3 var(--sans); text-align: right; text-wrap: pretty; color: var(--ink-2); }
 .p-credit { grid-column: 1 / -1; margin: 1rem 0 0; }
 
 .p-next { position: relative; display: block; min-height: 100svh; padding: 3.2rem var(--gutter) 0; text-align: center; overflow: hidden; }
@@ -209,9 +218,19 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .p-next__title { position: relative; display: block; margin: 0; font-family: var(--serif); font-weight: 300; font-size: 9.5rem; line-height: 0.86; letter-spacing: -0.045em; text-transform: uppercase; }
 .p-next__title .rule { top: auto; bottom: -0.2rem; }
 .p-next__go { display: inline-block; margin-top: 2rem; font: 500 1.05rem/1 var(--sans); border-bottom: var(--hair) solid currentColor; padding-bottom: 0.2rem; }
+/* next=turn: the pile sits in view, so its lifted corner and the turn can be seen; the eyebrow clears the nav */
+.p-next--turn { padding-top: 4.6rem; }
+.p-next--turn .slot--next { bottom: 2svh; }
 .p-foot { position: absolute; left: var(--gutter); right: var(--gutter); bottom: 1.2rem; z-index: 2; display: flex; justify-content: space-between; gap: 1rem; font: 500 0.95rem/1.3 var(--sans); }
 .p-foot a { border-bottom: var(--hair) solid transparent; }
 .p-foot a:hover { border-color: currentColor; }
+/* The turn: the old page's text exits upward while the next poster turns (next=turn). */
+.p-next__link > *, .p-foot { transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.35s linear; }
+.is-leaving .p-next__link > *, .is-leaving .p-foot { transform: translateY(-3rem); opacity: 0; }
+.is-leaving .p-next__link > :nth-child(2) { transition-delay: 0.03s; }
+.is-leaving .p-next__link > :nth-child(3) { transition-delay: 0.06s; }
+.is-leaving .p-foot { transition-delay: 0.09s; }
+.program.is-leaving > :not(.p-next) { opacity: 0; }
 
 /* ---------- about ---------- */
 .about { position: relative; min-height: 100svh; padding: 6rem var(--gutter) 3rem; display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
@@ -231,8 +250,15 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 
 /* ---------- placeholders: her words go here ---------- */
 /* Same font as the text around them; the accent marks what is still to come. */
-.ph { color: var(--oxblood); cursor: help; }
+.ph { color: var(--ph); }
 [data-tone='night'] .ph { color: #e3907d; }
+/* visually hidden, still read aloud */
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+
+/* Sections have no ground of their own: one drawn for the other tone fades out until the
+   page turns (see followTone in app.js). */
+.program [data-tone], .brand [data-tone] { transition: opacity 0.45s var(--ease); }
+.is-offtone { opacity: 0; }
 
 /* ---------- program: what I did, documentation, voice ---------- */
 .p-did { grid-column: 1 / -1; max-width: 66rem; margin: 0 0 3rem; }
@@ -370,6 +396,7 @@ body.is-drawer { overflow: hidden; }
   box-shadow: 0 12px 40px rgb(18 17 16 / 0.16), 0 0 0 0.5px rgb(18 17 16 / 0.14);
 }
 .lab[hidden] { display: none; }
+body.is-drawer .lab { z-index: 30; } /* under the drawer's scrim while About is open */
 .lab__head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
 .lab__title { font: 400 12px/1 var(--serif); letter-spacing: 0.2em; text-transform: uppercase; }
 .lab__actions { display: flex; gap: 4px; }
@@ -379,6 +406,10 @@ body.is-drawer { overflow: hidden; }
 }
 .lab__opts button[aria-pressed='true'] { background: var(--ink); color: #f6f4f0; box-shadow: none; }
 .lab__live { position: absolute; top: 3px; right: 3px; width: 4px; height: 4px; border-radius: 50%; background: var(--oxblood); }
+.lab__snap { position: absolute; top: 2.5px; right: 2.5px; width: 5px; height: 5px; border-radius: 50%; box-shadow: inset 0 0 0 1px currentColor; opacity: 0.6; }
+.lab__opts [data-cmp] { padding: 7px 10px; }
+.lab__row--compare { border-top: 0; }
+.lab__row--new + .lab__row:not(.lab__row--new) { border-top: 1px solid rgb(18 17 16 / 0.32); margin-top: 4px; }
 .lab__row { padding: 9px 0 7px; border-top: 0.5px solid rgb(18 17 16 / 0.14); }
 .lab__label { display: block; margin-bottom: 6px; color: rgb(18 17 16 / 0.6); font-size: 12px; }
 .lab__opts { display: flex; flex-wrap: wrap; gap: 4px; }
@@ -408,22 +439,34 @@ html[data-type='caslon'] .p-title, html[data-type='caslon'] .p-next__title { let
   .home__blurbs { bottom: 5.6rem; gap: 1.4rem; width: calc(100vw - 2rem); justify-content: center; }
   .blurb { width: auto; flex: 1; }
   .blurb__text { font-size: 1.2rem; }
-  .home__corner { display: none; }
+  .home__corner--r { display: none; }
+  /* her headline stays on phones: one small centred line above the blurbs (they are at most 3 lines, 85px) */
+  .home__corner--l { left: var(--gutter); right: var(--gutter); bottom: 13rem; max-width: none; text-align: center; color: var(--ink-2); }
   .p-hero { padding-top: 4.2rem; }
   .p-back { top: 1.1rem; }
   .crop--tl, .crop--tr { top: 3.6rem; }
-  .p-title { font-size: 5rem; }
+  .p-title { font-size: clamp(2.6rem, 13.5vw, 5rem); } /* "Ecuadorian" is the widest line: 13.5vw keeps it inside the column */
   .p-sub { font-size: 1.5rem; }
   .p-credits .eyebrow { display: block; margin: 0.9rem 0 0.2rem; }
   .slot--hero { width: 62vw; bottom: -24svh; }
+  /* the cover on phones: below the title, the full column wide, then the credits and specs */
+  .p-hero--cover { display: flex; flex-direction: column; padding: 4.2rem var(--gutter) 3rem; text-align: center; }
+  .p-hero--cover .p-credits, .p-hero--cover .p-specs { order: 2; }
+  .p-hero--cover .p-credits { margin: 1.5rem 0 0; width: 100%; }
+  .p-hero--cover .slot--hero { position: relative; order: 1; right: auto; top: auto; flex: none; width: 100%; height: auto; margin-top: 1.6rem; }
   .slot--story { left: 50%; top: 27%; width: 44vw; }
   .p-logline { padding: 50svh var(--gutter) 6rem; }
   .p-logline li:nth-child(3n + 2) { padding-left: 10vw; }
   .p-logline li:nth-child(3n) { padding-left: 5vw; }
   .slot--next { width: 58vw; }
+  .p-next--turn { padding-top: 3.2rem; } /* the nav is at the foot here */
+  .p-next--turn .slot--next { bottom: 16svh; } /* in the middle of the section, clear of the title and the foot */
   .p-logline .ln { font-size: 1.65rem; }
   .is-scroll.is-night .nav { background: #f8f7f4; box-shadow: 0 0.3rem 1.4rem rgb(0 0 0 / 0.3); }
-  .p-text { grid-template-columns: 1fr; padding-top: 5rem; }
+  .p-text { grid-template-columns: minmax(0, 1fr); padding-top: 5rem; }
+  .p-credit .specs__row { flex-direction: column; gap: 0.15rem; }
+  .p-credit dt { white-space: normal; }
+  .p-credit dd { text-align: left; }
   .p-text__lead { font-size: 1.55rem; }
   .p-list__name { font-size: 2rem; }
   .p-list__row { flex-direction: column; gap: 0.3rem; align-items: flex-start; }
@@ -469,6 +512,8 @@ html[data-type='caslon'] .p-title, html[data-type='caslon'] .p-next__title { let
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ln__i, .rule, .blurb__mark, .page-bg, .crop, .drawer, .drawer-scrim, .b-entry__info, .b-case__col p, .b-quote { transition: none !important; }
+  .ln__i, .rule, .blurb__mark, .page-bg, .crop, .drawer, .drawer-scrim, .b-entry__info, .b-case__col p, .b-quote, .program [data-tone], .brand [data-tone], .is-offtone { transition: none !important; }
   .grain { animation: none; }
+  .program.is-leaving > * { opacity: 0; transition: opacity 0.25s linear !important; }
+  .is-leaving .p-next__link > *, .is-leaving .p-foot { transform: none; transition: none; opacity: 1; }
 }
