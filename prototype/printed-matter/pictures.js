@@ -3,14 +3,17 @@
    app.js calls these four hooks (search for "pictures hook" there):
      picturesHTML(p, i, vis)  in programHTML, between the story section (.p-story) and the text section (.p-text).
                           Returns the HTML of any section that sits there ('' for none). p is PROGRAMS[i], vis is VIS.
-     picturesEnter(root, p, i)  right after a program's DOM is in place (root is the program view, .program).
+     picturesEnter(root, p, i, ctx)  right after a program's DOM is in place (root is the program view, .program).
+                          ctx is the object picturesFrame gets; at this point only ctx.paper and the constant fields are
+                          current.
      picturesFrame(ctx)   every frame while a program is entered, at the very end of programFrame.
-                          ctx = { root, scrollY, vh, vw, reduced, coarse, i, p, vis, resetDocs } (one object, reused
-                          every frame). resetDocs(stage) returns the documentation tool to its first frame.
+                          ctx = { root, scrollY, vh, vw, reduced, coarse, i, p, vis, now, dt, paper, resetDocs } (one
+                          object, reused every frame). resetDocs(stage) returns the documentation tool to its first frame.
+                          paper is the way into the WebGL scene: see OWNERSHIP.md.
      picturesLeave()      when that program view is left or replaced (home, another page, the next program).
                           The old DOM is still on screen for about 0.4 s while it slides out, then it is emptied.
    Shared contract (see OWNERSHIP.md):
-     data-tone="night|stone|paper" on any element in the program view sets the page ground while it crosses the
+     data-tone="night|blood|cobalt|stone|paper|rose" on any element in the program view sets the page ground while it crosses the
      middle of the screen (followTone in app.js). data-sheets="park" on an element asks the poster to park
      while that element covers most of the viewport (built by the journey builder).
 
@@ -24,6 +27,13 @@
    Herencia Viva, the drift band (lab drift=on): MAGIC REALISM (from her poster's "Ecuadorian Magic Realism")
    rises out of its own masks, and four of the pictures drift past it at their own speeds (0.6, 0.85, 1.15 and
    1.4 times the page), two behind the line and two in front (Daddy Yankee's framed drift). */
+
+import { wallHTML, wallEnter, wallFrame, wallLeave, wallKeyOff } from './wall.js';
+import { longHTML, longEnter, longFrame } from './crossing.js';
+import { chaptersHTML, chaptersEnter, chaptersFrame, chaptersLeave, chaptersReady } from './chapters.js';
+import { chaptersFor } from './chapters-content.js';
+
+export { chaptersReady }; // app.js: once true, the chapters are the default of the drift switch
 
 // A CSS cubic-bezier() as a function (the same as bez in app.js)
 const bez = (x1, y1, x2, y2) => {
@@ -94,16 +104,24 @@ function driftHTML() {
 
 /* ---------- hooks ---------- */
 export function picturesHTML(p, i, vis = {}) {
-  if (p.slug === 'iyuana' && vis.held !== 'off') return heldHTML();
-  if (p.slug === 'herencia-viva' && vis.drift !== 'off') return driftHTML();
+  // a program with an entry in chapters-content.js, and its lab switch set if it names one, gets the chapters
+  const chap = chaptersFor(p.slug, vis);
+  if (chap) return chaptersHTML(chap);
+  if (p.slug === 'iyuana' && vis.held === 'wall') return wallHTML(matchMedia('(pointer: coarse)').matches);
+  if (p.slug === 'iyuana' && vis.held === 'cut') return heldHTML();
+  if (p.slug === 'herencia-viva' && vis.drift === 'long') return longHTML();
+  if (p.slug === 'herencia-viva' && vis.drift === 'band') return driftHTML();
   return '';
 }
 
-// what is on screen now: { kind: 'held' | 'drift', ... }, or null
+// what is on screen now: { kind: 'chapters' | 'wall' | 'long' | 'held' | 'drift', ... }, or null
 let cur = null;
 
-export function picturesEnter(root, p, i) {
+export function picturesEnter(root, p, i, ctx) {
   cur = null;
+  if (root.querySelector('.pic-chapters')) { cur = { kind: 'chapters', root, chapters: chaptersEnter(root, ctx, chaptersFor(p.slug, ctx.vis)) }; return; }
+  if (root.querySelector('.pic-wall')) { cur = { kind: 'wall', root, wall: wallEnter(root) }; return; }
+  if (root.querySelector('.pic-long')) { cur = { kind: 'long', root, long: longEnter(root) }; return; }
   const held = root.querySelector('.pic-held');
   if (held) {
     const layer = root.querySelector('.pic-held__layer');
@@ -118,11 +136,16 @@ export function picturesEnter(root, p, i) {
 
 export function picturesFrame(ctx) {
   if (!cur || cur.root !== ctx.root) return;
-  if (cur.kind === 'held') heldFrame(ctx);
+  if (cur.kind === 'chapters') chaptersFrame(cur.chapters, ctx);
+  else if (cur.kind === 'wall') wallFrame(cur.wall, ctx);
+  else if (cur.kind === 'long') longFrame(cur.long, ctx);
+  else if (cur.kind === 'held') heldFrame(ctx);
   else driftFrame(ctx);
 }
 
 export function picturesLeave() {
+  if (cur && cur.kind === 'chapters') chaptersLeave(cur.chapters);
+  if (cur && cur.kind === 'wall') { wallLeave(cur.wall); wallKeyOff(cur.wall); }
   // the old page stays on screen for about 0.4 s while it slides out: the fixed picture goes at once
   if (cur && cur.kind === 'held') {
     cur.layer.hidden = true;

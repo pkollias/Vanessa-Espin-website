@@ -1,12 +1,14 @@
 import * as THREE from 'three';
 // pictures hook (owned by the pictures builder)
 import { picturesHTML, picturesFrame, picturesEnter, picturesLeave } from './pictures.js';
+// the gliding scroll (lab scroll=glide): see glide.js
+import { glideInstall, glideTick, glideHalt } from './glide.js';
 
 /* =========================================================================
    Content. Facts are written out; anything in her voice is a placeholder
    (ph) naming what goes there and which interview question fills it.
    ========================================================================= */
-const SITE = { linkedin: 'https://www.linkedin.com/in/vanessaespin', headline: 'Brand curator of events and experience' };
+const SITE = { linkedin: 'https://www.linkedin.com/in/vanessaespin', headline: 'Curator & creative director' };
 
 // The interview (published separately): question number -> what it fills.
 const INTERVIEW = {
@@ -44,14 +46,13 @@ const PROGRAMS = [
     homeTitle: ['Iyuana: El Retorno', 'de los Sueños'],
     pageTitle: ['Iyuana'], sub: 'El Retorno de los Sueños',
     specs: [['Role', 'Producer & creative director'], ['Where', 'Long Island City, Queens'], ['When', 'August 18–24, 2026'], ['Artists', 'Yanda Montahuano<br>Li Can Vega<br>Armando Vega<br>Israel Vargas “Panchis”']],
-    blurbs: [['The exhibition', 'A week of film<br>and photography'], ['The artists', 'From Ecuador,<br>Peru and Mexico']],
     back: { title: 'Iyuana', sub: 'El Retorno de los Sueños', lines: ['Film & photography exhibition', 'Long Island City, Queens', 'August 18–24, 2026'] },
     page: {
       credits: [['Producer & creative director', 'Vanessa Espín'], ['Artists', 'Yanda Montahuano, Li Can Vega, Armando Vega, Israel Vargas “Panchis”']],
       specs: [['Type', 'Film & photography exhibition'], ['Where', '5-11 47th Ave, Long Island City'], ['When', 'August 18–24, 2026']],
       logline: phLines(['Iyuana,', 'in her words:', 'what it was,', 'who it was with,', 'why it mattered'], 'q04', ' · q04'),
       lead: ph('Iyuana in her words: what she did, and how her role sits beside the artists and the Sápara Nation · 2–3 sentences', 'q04'),
-      docs: pictures('iyuana', 'Iyuana', 'cover', `Photographs: ${ph('photographer credit')}`, [['01-dscf4842.jpg', 1800, 1200, 'Detail'], ['02-dscf4619.jpg', 1800, 1200, 'Installation view'], ['03-dscf4633.jpg', 1800, 1200, 'A print, up close'], ['04-dscf4801.jpg', 1800, 1200, 'The prints in the room'], ['05-dscf4629.jpg', 1800, 1200, 'On the table'], ['06-dscf4758.jpg', 1800, 1200, 'The room'], ['07-dscf4762.jpg', 1800, 1200, ph('who is speaking', 'q04')], ['08-dscf4822.jpg', 1800, 1200, 'The circle'], ['09-dscf4825.jpg', 1800, 1200, 'Candles'], ['10-dscf4848.jpg', 1800, 1200, 'Everyone']]),
+      docs: pictures('iyuana', 'Iyuana', 'cover', `Photographs: ${ph('photographer credit')}`, [['01-dscf4842.jpg', 1800, 1200, 'Cacao'], ['02-dscf4619.jpg', 1800, 1200, 'Installation view'], ['03-dscf4633.jpg', 1800, 1200, 'A print, up close'], ['04-dscf4801.jpg', 1800, 1200, 'The prints in the room'], ['05-dscf4629.jpg', 1800, 1200, 'On the table'], ['07-dscf4762.jpg', 1800, 1200, ph('who is speaking', 'q04')], ['09-dscf4825.jpg', 1800, 1200, 'Cacao ceremony'], ['10-dscf4848.jpg', 1800, 1200, 'Everyone']]),
       list: { label: 'Artists', rows: [['Yanda Montahuano', 'Filmmaker & photographer, Ecuador'], ['Li Can Vega', 'CGI visual artist, Peru'], ['Armando Vega', 'Photographer, Mexico'], ['Israel Vargas “Panchis”', 'Photographer, Ecuador']] },
       voice: ph('A line from one of the artists, with their permission', '', WITH_PERMISSION),
       voiceBy: ph('artist · discipline · country', '', WITH_PERMISSION),
@@ -63,7 +64,6 @@ const PROGRAMS = [
     homeTitle: ['Ayazamana'],
     pageTitle: ['Ayazamana'],
     specs: [['Poster', 'Vanessa Espín'], ['Performers', 'Ayazamana Dance Group'], ['When', 'Saturday, July 11, 2026']],
-    blurbs: [['The night', 'Live music and<br>traditional dance'], ['With', 'The Ecuadorian American<br>Cultural Center']],
     back: { title: 'Ayazamana', lines: ['Live music & traditional dance', 'Ecuadorian American Cultural Center', 'Saturday, July 11, 2026, 8 PM'] },
     page: {
       credits: [['Poster', 'Vanessa Espín'], ['Performers', 'Ayazamana Dance Group']],
@@ -82,7 +82,6 @@ const PROGRAMS = [
     homeTitle: ['Herencia Viva:', 'Threads of Memory'],
     pageTitle: ['Herencia', 'Viva'], sub: 'Threads of Memory',
     specs: [['Role', 'Curator & creative director'], ['Painter', 'Luis Medina'], ['Where', 'Flushing Town Hall'], ['When', 'May 29–31, 2026']],
-    blurbs: [['The exhibition', 'Ecuadorian<br>magic realism'], ['The painter', 'Luis Medina']],
     back: { title: 'Herencia Viva', sub: 'Threads of Memory', lines: ['Painting exhibition', 'Flushing Town Hall', 'May 29–31, 2026'] },
     page: {
       credits: [['Curator & creative director', 'Vanessa Espín'], ['Painter', 'Luis Medina']],
@@ -100,7 +99,6 @@ const PROGRAMS = [
     homeTitle: ['Ecuadorian American', 'Cultural Center'],
     pageTitle: ['Ecuadorian', 'American', 'Cultural Center'],
     specs: [['Role', 'Creative & Community Coordinator'], ['Where', 'New York'], ['When', '2025–2026'], ['Work', 'Programs, content, sponsors']],
-    blurbs: [['The role', 'Creative & Community<br>Coordinator'], ['The work', 'Programs, content<br>and sponsors']],
     back: { title: 'Ecuadorian American Cultural Center', lines: ['Creative & Community Coordinator', 'New York', '2025–2026'] },
     page: {
       credits: [['Creative & Community Coordinator', 'Vanessa Espín']],
@@ -276,6 +274,26 @@ const LIGHT = new THREE.Vector3(-0.42, 0.62, 0.66).normalize();
 const KEYS = ['x', 'y', 'z', 'rx', 'ry', 'rz', 's', 'o'];
 const HIT_MAT = new THREE.MeshBasicMaterial({ side: THREE.DoubleSide });
 
+// One material for everything that is paper: the posters (Sheet) and whatever else hangs in this scene (PaperSheet).
+function paperMaterial(front, back, aspect) {
+  return new THREE.ShaderMaterial({
+    uniforms: {
+      uFront: { value: front }, uBack: { value: back },
+      uBend: { value: 0 }, uCurl: { value: 0.05 }, uWave: { value: 0.1 }, uTime: { value: 0 },
+      uSize: { value: new THREE.Vector2(aspect, 1) },
+      uLight: { value: LIGHT }, uCam: { value: camera.position },
+      uOpacity: { value: 0 }, uLift: { value: 0 },
+    },
+    vertexShader: VERT, fragmentShader: FRAG, side: THREE.DoubleSide, transparent: true,
+  });
+}
+function paperShadowMaterial(aspect) {
+  return new THREE.ShaderMaterial({
+    uniforms: { uOpacity: { value: 0 }, uSize: { value: new THREE.Vector2(aspect, 1) }, uBlur: { value: 0.16 } },
+    vertexShader: SHADOW_VERT, fragmentShader: SHADOW_FRAG, transparent: true, depthWrite: false,
+  });
+}
+
 class Sheet {
   constructor(front, back, aspect, seed) {
     this.aspect = aspect;
@@ -283,26 +301,14 @@ class Sheet {
     this.group = new THREE.Group();
     this.spinner = new THREE.Group();
     this.group.add(this.spinner);
-    this.mat = new THREE.ShaderMaterial({
-      uniforms: {
-        uFront: { value: front }, uBack: { value: back },
-        uBend: { value: 0 }, uCurl: { value: 0.05 }, uWave: { value: 0.1 }, uTime: { value: 0 },
-        uSize: { value: new THREE.Vector2(aspect, 1) },
-        uLight: { value: LIGHT }, uCam: { value: camera.position },
-        uOpacity: { value: 0 }, uLift: { value: 0 },
-      },
-      vertexShader: VERT, fragmentShader: FRAG, side: THREE.DoubleSide, transparent: true,
-    });
+    this.mat = paperMaterial(front, back, aspect);
     this.mesh = new THREE.Mesh(new THREE.PlaneGeometry(aspect, 1, 48, 60), this.mat);
     this.spinner.add(this.mesh);
     // what the pointer's ray tests: the sheet as two triangles, never drawn
     this.hit = new THREE.Mesh(new THREE.PlaneGeometry(aspect, 1), HIT_MAT);
     this.hit.visible = false;
     this.spinner.add(this.hit);
-    this.shadowMat = new THREE.ShaderMaterial({
-      uniforms: { uOpacity: { value: 0 }, uSize: { value: new THREE.Vector2(aspect, 1) }, uBlur: { value: 0.16 } },
-      vertexShader: SHADOW_VERT, fragmentShader: SHADOW_FRAG, transparent: true, depthWrite: false,
-    });
+    this.shadowMat = paperShadowMaterial(aspect);
     this.shadow = new THREE.Mesh(new THREE.PlaneGeometry(aspect * 1.6, 1.6), this.shadowMat);
     this.shadow.position.set(0.06, -0.09, -0.4);
     this.shadow.renderOrder = -1;
@@ -529,6 +535,70 @@ function plainBackCanvas() {
   return c;
 }
 
+/* A sheet of the posters' paper for the pictures sections (ctx.paper.makeSheet): the same material, light, fibre and
+   shadow, but posed by its owner every frame, in screen pixels, with no follow or float of its own. The group's
+   origin is the pivot, so a rotation swings the sheet around that point (a peg, say). See OWNERSHIP.md. */
+let plainBackTex = null;
+class PaperSheet {
+  // pivot: [u, v] on the sheet, from its top left: [0.5, 0] is the middle of the top edge
+  constructor({ front, back, aspect = 1, pivot = [0.5, 0.5], seg = [24, 30] }) {
+    plainBackTex ||= texFromCanvas(plainBackCanvas());
+    this.aspect = aspect;
+    this.group = new THREE.Group();
+    this.mat = paperMaterial(front, back ?? plainBackTex, aspect);
+    this.mesh = new THREE.Mesh(new THREE.PlaneGeometry(aspect, 1, seg[0], seg[1]), this.mat);
+    const ox = (0.5 - pivot[0]) * aspect, oy = pivot[1] - 0.5;
+    this.mesh.position.set(ox, oy, 0);
+    this.shadowMat = paperShadowMaterial(aspect);
+    this.shadow = new THREE.Mesh(new THREE.PlaneGeometry(aspect * 1.6, 1.6), this.shadowMat);
+    this.shadow.renderOrder = -1;
+    this.off = [ox, oy];
+    this.group.add(this.shadow, this.mesh);
+    this.group.visible = false;
+    this.shade({});
+    scene.add(this.group);
+  }
+  // x, y: where the pivot sits on the screen, in px; h: the sheet's height in px. z, rx, ry, rz: world units and radians
+  place({ x, y, h, z = 0, rx = 0, ry = 0, rz = 0, o = 1 }) {
+    const k = Hv / VH;
+    this.group.position.set((x - VW / 2) * k, -(y - VH / 2) * k, z);
+    this.group.rotation.set(rx, ry, rz);
+    this.group.scale.setScalar(Math.max(h * k, 0.0001));
+    this.mat.uniforms.uOpacity.value = o;
+    this.shadowMat.uniforms.uOpacity.value = o * this.shadowO;
+    this.group.visible = o > 0.004;
+    return this;
+  }
+  // the paper's own shape: bend (about -1 to 1, around the vertical axis), curl, wave and lift; t in seconds drives the wave
+  flex({ bend, curl, wave, lift, t }) {
+    const u = this.mat.uniforms;
+    if (bend !== undefined) u.uBend.value = bend;
+    if (curl !== undefined) u.uCurl.value = curl;
+    if (wave !== undefined) u.uWave.value = wave;
+    if (lift !== undefined) u.uLift.value = lift;
+    if (t !== undefined) u.uTime.value = t;
+    return this;
+  }
+  // the shadow, in sheet heights from the sheet; o is its strength. The defaults hang close to a wall: much further back
+  // than this and perspective tucks the shadow in behind an upright sheet, where it can't be seen
+  shade({ o = 0.4, x = 0.02, y = -0.03, z = -0.03, blur = 0.08 }) {
+    this.shadowO = o;
+    this.shadow.position.set(this.off[0] + x, this.off[1] + y, z);
+    this.shadowMat.uniforms.uBlur.value = blur;
+    return this;
+  }
+  setFront(tex) { this.mat.uniforms.uFront.value = tex; return this; }
+  // off the scene and out of memory, its front (and back, unless it is the shared plain one) too
+  dispose() {
+    scene.remove(this.group);
+    const { uFront, uBack } = this.mat.uniforms;
+    uFront.value?.dispose?.();
+    if (uBack.value !== plainBackTex && uBack.value !== uFront.value) uBack.value?.dispose?.();
+    this.mesh.geometry.dispose(); this.shadow.geometry.dispose();
+    this.mat.dispose(); this.shadowMat.dispose();
+  }
+}
+
 /* =========================================================================
    DOM helpers: masked lines, hairlines, spec rows
    ========================================================================= */
@@ -551,7 +621,6 @@ function conceal(el) { if (!el) return; el.classList.add('is-out'); el.classList
 const home = $('.home');
 const homeTitle = $('.home__title');
 const homeSpecs = $('.home__specs');
-const homeBlurbs = $('.home__blurbs');
 const homeCount = $('.home__count');
 const homeOpen = $('.home__open');
 let shownIndex = -1, swapToken = 0;
@@ -561,7 +630,6 @@ function homeHTML(i) {
   return {
     title: lns(p.homeTitle, 0, 0.06),
     specs: rows(p.specs, 0.12, 0.07),
-    blurbs: p.blurbs.map(([k, v], j) => `<div class="blurb"><i class="blurb__mark" style="--d:${0.2 + j * 0.1}s"></i><span class="eyebrow">${lns([k], 0.22 + j * 0.1)}</span><p class="blurb__text" style="margin:0">${lns(v.split('<br>'), 0.28 + j * 0.1, 0.06)}</p></div>`).join(''),
   };
 }
 function showHomeText(i, instant = false) {
@@ -573,11 +641,11 @@ function showHomeText(i, instant = false) {
   homeCount.textContent = `${String(i + 1).padStart(2, '0')} / ${String(N).padStart(2, '0')}`;
   homeOpen.href = `#/${p.slug}`;
   homeOpen.textContent = `Open ${p.name}`;
-  const els = [homeTitle, homeSpecs, homeBlurbs];
+  const els = [homeTitle, homeSpecs];
   const put = () => {
     if (token !== swapToken) return;
     const h = homeHTML(i);
-    homeTitle.innerHTML = h.title; homeSpecs.innerHTML = h.specs; homeBlurbs.innerHTML = h.blurbs;
+    homeTitle.innerHTML = h.title; homeSpecs.innerHTML = h.specs;
     els.forEach((el) => reveal(el));
   };
   if (instant || !homeTitle.innerHTML) { put(); return; }
@@ -958,7 +1026,7 @@ const MARKS = {
   // right side. Today's marker ink, a little different every time.
   box(c, sheet) {
     const seed = (Math.random() * 2 ** 32) >>> 0;
-    const avoid = sheet && state.mode === 'home' ? $('.home__blurbs').getBoundingClientRect() : null;
+    const avoid = null;
     const main = svg('path', { class: 'mk mk--marker' }), thin = svg('path', { class: 'mk mk--marker-thin' });
     const T = VW < 760 ? 0.66 : 0.74;
     let legs = null;
@@ -1093,24 +1161,41 @@ let tiltK = 1, storyTone = 'night', loaderOn = true, aboutMode = 'drawer';
 //   step   notch | free          home: one wheel notch, one poster, with the flock
 //   poster cover | faded | table  program: the poster as the hero's cover
 //   next   turn | click          program: the next poster turns into the next cover
-//   held   on | off              Iyuana: the held light before the documentation
-//   drift  on | off              Herencia Viva: paintings drift past the type
-const VIS = { pin: 'hover', tape: 'off', step: 'notch', poster: 'cover', next: 'turn', held: 'on', drift: 'on' };
+//   held   wall | cut | off   Iyuana: the pictures between the story and the text
+//   drift  chapters | long | band | off   Herencia Viva: the same
+//   scroll glide | native        program pages: the wheel glides (glide.js)
+const VIS = { pin: 'hover', tape: 'off', step: 'free', poster: 'cover', next: 'turn', held: 'wall', wallOpen: 'hands', wallExit: 'tour', walk: 'mixed', drift: 'chapters', hvGround: 'cobalt', hvOpen: 'oranges', hvClose: 'mona', edge: 'bubble', docs: 'one', scroll: 'glide' };
 // homeRates: the entry flight back to the carousel is over and the follow rates are the carousel's own
 let homeRates = false;
 // viewHash: the route of the view on screen (null before the first one); the About drawer opens over it.
 let viewHash = null, navToken = 0, currentNav = 'programs';
 // pictures hook (owned by the pictures builder): picturesFrame runs only between picturesEnter and picturesLeave
 let picturesOn = false;
-const picCtx = { root: null, scrollY: 0, vh: 0, vw: 0, reduced, coarse, i: 0, p: null, vis: VIS, resetDocs: (st) => stepDocs(st, -(+st.dataset.i)) };
+// paper: what a pictures section needs from the WebGL scene (see OWNERSHIP.md). under: a layer below the canvas, above the ground
+const paper = {
+  THREE, scene, camera, under: $('#under-gl'),
+  makeSheet: (opts) => new PaperSheet(opts),
+  view: () => ({ vw: VW, vh: VH, wv: Wv, hv: Hv, k: Hv / VH }), // k: world units per CSS px at z = 0
+  toWorld: (x, y) => [(x - VW / 2) * (Hv / VH), -(y - VH / 2) * (Hv / VH)],
+  texFromCanvas, texFromImage, loadImage, paperFibres,
+};
+const picCtx = { root: null, scrollY: 0, vh: 0, vw: 0, reduced, coarse, i: 0, p: null, vis: VIS, now: 0, dt: 0, paper, resetDocs: (st) => stepDocs(st, -(+st.dataset.i)) };
 function leavePictures() { if (picturesOn) { picturesOn = false; picturesLeave(); } }
 // A lab switch (held, drift) changed: swap the pictures section of the program on screen, in place.
+// The rapid tool is no longer the default: Iyuana has its wall, Herencia Viva its chapters, the Center a role, not an evening.
+function showDocs(p) {
+  if (p.slug === 'iyuana') return VIS.held !== 'wall';
+  if (p.slug === 'herencia-viva') return VIS.drift !== 'long' && VIS.drift !== 'chapters';
+  return p.slug === 'ayazamana' || VIS.docs === 'all';
+}
 function rePictures() {
   if (!state.ready || state.mode !== 'program' || !picturesOn) return;
   leavePictures();
   programView.querySelectorAll('[data-pictures]').forEach((el) => el.remove());
   $('.p-story', programView).insertAdjacentHTML('afterend', picturesHTML(PROGRAMS[state.active], state.active, VIS));
-  picturesOn = true; picturesEnter(programView, PROGRAMS[state.active], state.active);
+  const docsEl = $('.p-docs', programView);
+  if (docsEl) docsEl.hidden = !showDocs(PROGRAMS[state.active]);
+  picturesOn = true; picturesEnter(programView, PROGRAMS[state.active], state.active, picCtx);
 }
 
 function layout() {
@@ -1179,6 +1264,12 @@ function stepTo(dir, now) {
   state.tw = reduced ? null : { from: state.p, to, t0: now, dur: GLIDE };
   return true;
 }
+// a click on a poster at the side: the same glide as the wheel, however far it is
+function toPoster(i) {
+  if (VIS.step !== 'notch') return goTo(i);
+  state.target = i;
+  state.tw = reduced ? null : { from: state.p, to: i, t0: performance.now(), dur: GLIDE };
+}
 const wheelF = { acc: 0, last: -1e9, armed: true, stepAt: -1e9, avg: 0, peak: 0 };
 function wheelNotch(d, now) {
   const w = wheelF, mag = Math.abs(d);
@@ -1202,9 +1293,11 @@ function wheelNotch(d, now) {
   return true;
 }
 
+// Grounds: paper, stone and rose take dark text and the light nav; night, blood and cobalt take paper text and the dark nav.
+const darkTone = (tone) => tone === 'night' || tone === 'blood' || tone === 'cobalt';
 function setTone(tone) {
   pageBg.dataset.tone = tone;
-  body.classList.toggle('is-night', tone === 'night');
+  body.classList.toggle('is-night', darkTone(tone));
 }
 function setNav(which) {
   currentNav = which;
@@ -1256,7 +1349,7 @@ function enterProgram(i) {
   state.active = i; state.target = state.p = i;
   body.classList.remove('is-home');
   setNav('programs');
-  [homeTitle, homeSpecs, homeBlurbs].forEach(conceal);
+  [homeTitle, homeSpecs].forEach(conceal);
   document.querySelectorAll('.home__corner').forEach(conceal);
   if (portrait) portrait.tgt.o = 0;
   const others = leavePages(programView);
@@ -1269,7 +1362,7 @@ function enterProgram(i) {
     programView.innerHTML = programHTML(i);
     programView.classList.remove('is-leaving');
     programView.hidden = false;
-    picturesOn = true; picturesEnter(programView, PROGRAMS[i], i); // pictures hook (owned by the pictures builder)
+    picturesOn = true; picturesEnter(programView, PROGRAMS[i], i, picCtx); // pictures hook (owned by the pictures builder)
     body.classList.add('is-scroll');
     scrollTo(0, 0);
     fitHeroTitle();
@@ -1300,7 +1393,7 @@ function enterPage(mode, view, html, nav, tone, after) {
   state.mode = mode;
   body.classList.remove('is-home');
   setNav(nav); setTone(tone);
-  [homeTitle, homeSpecs, homeBlurbs].forEach(conceal);
+  [homeTitle, homeSpecs].forEach(conceal);
   document.querySelectorAll('.home__corner').forEach(conceal);
   leavePages(view);
   if (!view.hidden) view.querySelectorAll('.is-in').forEach(conceal);
@@ -1372,15 +1465,15 @@ const foot = () => `<footer class="pg-foot"><span>Vanessa Espín · New York</sp
 const docsFrame = (d, k) => (d.src
   ? `<div class="p-docs__frame p-docs__frame--${d.fit}" data-k="${k}"${k ? ' hidden' : ''}><img ${k ? `data-src="${d.src}"` : `src="${d.src}" loading="lazy"`} alt="${d.alt}" width="${d.w}" height="${d.h}" decoding="sync" style="--w:${d.w}px;--h:${d.h}px"><i class="crop crop--tl"></i><i class="crop crop--tr"></i><i class="crop crop--bl"></i><i class="crop crop--br"></i></div>`
   : `<div class="p-docs__frame" data-k="${k}"${k ? ' hidden' : ''}><i class="crop crop--tl"></i><i class="crop crop--tr"></i><i class="crop crop--bl"></i><i class="crop crop--br"></i><span class="p-docs__no">${String(k + 1).padStart(2, '0')}</span></div>`);
-function docsHTML(docs) {
+function docsHTML(docs, off = false) {
   const n = docs.length, pad = (k) => String(k).padStart(2, '0'), real = !!docs[0].src;
   const caps = docs.map((d) => (d.src ? { cap: d.cap, credit: d.credit } : d));
-  return `<section class="p-docs${real ? ` p-docs--pics p-docs--${docs[0].fit}` : ''}" aria-label="Documentation">
+  return `<section class="p-docs${real ? ` p-docs--pics p-docs--${docs[0].fit}` : ''}" aria-label="Documentation"${off ? ' hidden' : ''}>
     <div class="p-docs__side">
       <span class="eyebrow">Documentation</span>
       <span class="p-docs__count" aria-hidden="true"><b>${pad(1)}</b> / ${pad(n)}</span>
       <p class="p-docs__cap" aria-live="polite">${docsCap(caps, 0)}</p>
-      <span class="p-docs__hint">${coarse ? `Tap for the next ${real ? 'picture' : 'photograph'}` : 'Scroll inside, click or use the arrow keys'}</span>
+      <span class="p-docs__hint">${coarse ? `Tap for the next ${real ? 'picture' : 'photograph'}` : !real && VIS.docs === 'one' ? 'Click or use the arrow keys' : 'Scroll inside, click or use the arrow keys'}</span>
     </div>
     <div class="p-docs__stage" tabindex="0" role="group" aria-roledescription="slideshow" aria-label="Documentation, ${n} ${real ? 'pictures' : 'photographs to come'}" data-i="0" data-caps="${encodeURIComponent(JSON.stringify(caps))}">
       ${docs.map(docsFrame).join('')}
@@ -1440,7 +1533,7 @@ function programHTML(i) {
   ${picturesHTML(p, i, VIS)}
   <div class="p-text" data-tone="paper">
     ${lead}
-    ${docsHTML(g.docs)}
+    ${docsHTML(g.docs, !showDocs(p))}
     ${list}
     ${voice}
     ${credit}
@@ -1507,8 +1600,8 @@ function drawerHTML() {
 function brandHTML() {
   return `
   <div class="b-head" data-tone="night">
-    <span class="eyebrow">${lns(['Brand work · 2020 to now'], 0.05)}</span>
-    <h1 class="b-title">${lns(['Brand work'], 0.1)}</h1>
+    <span class="eyebrow">${lns(['Branding · 2020 to now'], 0.05)}</span>
+    <h1 class="b-title">${lns(['Branding'], 0.1)}</h1>
     <p class="b-intro">${lns([ph('What she brings from brand work into a gallery, in her words · 2–3 lines', 'q07')], 0.3)}</p>
   </div>
   <div class="b-entries js-in" data-tone="night">
@@ -1549,7 +1642,7 @@ function archiveHTML() {
     ${block('Earlier work', ['Year', 'Title', 'Kind', 'Role'], ARCHIVE.map(([y, t, k, r]) => [y, t, k, r || ph('her role', 'q10')]), 0)}
     ${block('Selected experience', ['Role', 'With', 'Dates'], EXPERIENCE, 0)}
     ${block('Education', ['Degree', 'School', 'Also'], EDUCATION, 0)}
-    <a class="pg-next" href="#/brand"><span class="eyebrow">Next</span>Brand work →</a>
+    <a class="pg-next" href="#/brand"><span class="eyebrow">Next</span>Branding →</a>
     ${foot()}
   </div>`;
 }
@@ -1613,6 +1706,7 @@ function startTurn() {
   const heroSlot = $('[data-slot=hero]', programView), nextSlot = $('[data-slot=next]', programView);
   if (!o || !heroSlot || !nextSlot) return;
   hideScribble(true);
+  glideHalt(); // the page holds still under the lift
   const tok = navToken;
   // About opened during the turn: the drawer stays, and the turn finishes when it closes
   const go = () => {
@@ -1735,7 +1829,7 @@ function programFrame(now = performance.now()) {
 // The page tone follows the section in the middle of the screen. Sections have no ground of
 // their own, so one that needs the other ground (night text on paper, or the reverse) fades
 // out until the page turns to its tone.
-// Shared contract: ANY element in the view with data-tone="night|stone|paper" takes part, not
+// Shared contract: ANY element in the view with data-tone="night|blood|cobalt|stone|paper|rose" takes part, not
 // only the four program sections. Of those crossing the middle, the last in document order wins,
 // so a nested one beats its parent (and the parent of the winner is never faded, or the winner
 // would vanish with it). Siblings never overlap today, so this is the old first-match exactly.
@@ -1748,8 +1842,8 @@ function followTone(view) {
     if (r.top <= mid && r.bottom > mid) lead = el;
   }
   if (lead && pageBg.dataset.tone !== lead.dataset.tone) setTone(lead.dataset.tone);
-  const night = pageBg.dataset.tone === 'night';
-  for (const el of sections) el.classList.toggle('is-offtone', (el.dataset.tone === 'night') !== night && !(lead && el !== lead && el.contains(lead)));
+  const dark = darkTone(pageBg.dataset.tone);
+  for (const el of sections) el.classList.toggle('is-offtone', darkTone(el.dataset.tone) !== dark && !(lead && el !== lead && el.contains(lead)));
 }
 function aboutFrame() {
   const slot = $('[data-slot=portrait]', aboutView);
@@ -1909,6 +2003,7 @@ function endDrag(e) {
   canvas.classList.remove('is-dragging');
   if (!d.moved) {
     if (d.onSheet) location.hash = `#/${PROGRAMS[state.active].slug}`;
+    else if (VIS.pin === 'hover' && d.press && sheets.indexOf(d.press) !== state.active) toPoster(sheets.indexOf(d.press));
     return;
   }
   if (d.spinMode) {
@@ -2003,6 +2098,11 @@ addEventListener('touchmove', (e) => {
 addEventListener('touchend', () => { push.touchY = null; }, { passive: true });
 addEventListener('touchcancel', () => { push.touchY = null; }, { passive: true });
 
+/* The gliding scroll, on program pages only. Its wheel listener goes on after the push's above: the push ignores a
+   wheel that is already taken, and the glide takes every wheel the page would have scrolled with. Listeners on the
+   program view (the documentation tool) and inside it (the wall's lightbox) run earlier and keep theirs by taking it. */
+if (!reduced && !coarse) glideInstall(() => VIS.scroll === 'glide' && state.mode === 'program' && !drawerOn && !journey.turn && !journey.flight);
+
 /* The documentation tool: a wheel notch inside it steps one frame; at either end the
    wheel goes back to scrolling the page. Arrow keys when focused, a click for the next. */
 let docsAcc = 0, docsLast = 0, docsLock = 0;
@@ -2010,6 +2110,7 @@ programView.addEventListener('wheel', (e) => {
   const stage = e.target.closest('.p-docs__stage');
   // is-cutting: the Iyuana held picture is still travelling into it (pictures.js), so the page keeps scrolling
   if (!stage || stage.classList.contains('is-cutting')) return;
+  if (VIS.docs === 'one' && !stage.querySelector('img')) return; // stone frames never hold the page back
   // the page scrolls until the whole frame fits the screen, so reading never stalls on a half-seen picture
   const box = stage.getBoundingClientRect();
   if (box.height < VH && (box.top < -8 || box.bottom > VH + 8)) return;
@@ -2044,7 +2145,7 @@ programView.addEventListener('keydown', (e) => {
 const indexBtn = $('.nav__index-btn'), indexPanel = $('#index-panel'), indexList = $('.index__list');
 indexList.innerHTML =
   PROGRAMS.map((p, i) => `<li><a class="index__row" href="#/${p.slug}" data-i="${i}"><span${p.lang ? ` lang="${p.lang}"` : ''}>${p.homeTitle.join(' ')}</span><span>${p.short}</span></a></li>`).join('') +
-  `<li class="index__group eyebrow">Work</li><li><a class="index__row" href="#/brand"><span>Brand work</span><span>2020–now</span></a></li><li><a class="index__row" href="#/archive"><span>Earlier work</span><span>2018–2021</span></a></li>` +
+  `<li class="index__group eyebrow">Work</li><li><a class="index__row" href="#/brand"><span>Branding</span><span>2020–now</span></a></li><li><a class="index__row" href="#/archive"><span>Earlier work</span><span>2018–2021</span></a></li>` +
   `<li class="index__group eyebrow">Studio</li><li><a class="index__row" href="#/about"><span>About</span><span>New York</span></a></li><li><a class="index__row" href="${SITE.linkedin}"><span>LinkedIn</span><span>Vanessa Espín</span></a></li>`;
 function openIndex() { indexPanel.hidden = false; indexBtn.setAttribute('aria-expanded', 'true'); }
 function closeIndex() { indexPanel.hidden = true; indexBtn.setAttribute('aria-expanded', 'false'); }
@@ -2064,6 +2165,9 @@ let settledFor = 0;
 let homeFlat = false;
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  // the page moves first, so everything drawn this frame, the sheets included, reads the same scrollY
+  if (state.mode === 'program') glideTick(dt); else glideHalt();
+  picCtx.now = now; picCtx.dt = dt;
   const carousel = state.mode === 'home' || state.mode === 'loading';
   // pin=hover, only on the carousel: every poster hangs tilted, and flatSheet (the one under the
   // pointer) sticks flat to the wall. Leaving the carousel lets go of it once, here, before the
@@ -2097,10 +2201,13 @@ function frame(now) {
         // the poster under the pointer sticks to the wall, or the one under a finger (or the mouse)
         // while it is pressed; while the carousel moves or a drag is under way, every poster hangs
         const still = Math.abs(state.target - state.p) < 0.02;
-        if (drag) { stuck = drag.moved ? null : drag.press; hitAt.x = NaN; }
+        if (drag) { stuck = !drag.moved && drag.press === sa ? sa : null; hitAt.x = NaN; }
         else if (!pointer.inside || coarse || !still || drawerOn) { stuck = null; hitAt.x = NaN; }
         else if (pointer.x !== hitAt.x || pointer.y !== hitAt.y || posesMoving()) {
-          stuck = hitSheet(pointer.x, pointer.y, stuck);
+          // only the centred poster goes flat; one at the side stays tilted, and a click brings it to the centre
+          const over = hitSheet(pointer.x, pointer.y, stuck);
+          stuck = over === sa ? over : null;
+          canvas.classList.toggle('is-side', !!over && over !== sa);
           hitAt.x = pointer.x; hitAt.y = pointer.y;
         }
         flatSheet = stuck;
@@ -2159,23 +2266,20 @@ function frame(now) {
 const root = document.documentElement;
 const TYPES = {
   zodiak: { family: "'Zodiak'" },
-  gambetta: { family: "'Gambetta'", css: 'https://api.fontshare.com/v2/css?f[]=gambetta@300,400,401&display=swap' },
+  gambetta: { family: "'Gambetta'" },
   caslon: { family: "'Libre Caslon Display'", css: 'https://fonts.googleapis.com/css2?family=Libre+Caslon+Display&display=swap' },
   instrument: { family: "'Instrument Serif'", css: 'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap' },
 };
 const PAPERS = { warm: '#eeece8', cream: '#f2ebe0', white: '#f3f3f1', stone: '#e3dfd8' };
-const ACCENTS = { oxblood: '#470000', brick: '#891a20', ink: '#121110' };
 const GRAINS = { off: 0, soft: 0.11, strong: 0.22 };
 const TILTS = { flat: 0.35, soft: 1, strong: 1.6 };
 
-// The switches of visual pass 1 (and mark, whose snapshot is the circle) carry snap: their
-// snapshot option. The Compare row sets them all at once (Director's cut: every def; Snapshot: every snap).
 const LAB = {
-  pin: { label: 'Home: poster under the pointer', def: 'hover', snap: 'off', options: [['hover', 'Sticks to the wall'], ['off', 'Lifts (snapshot)']], apply: (v) => { VIS.pin = v; } },
-  tape: { label: 'Home: tape on the stuck poster', def: 'off', snap: 'off', options: [['off', 'Off'], ['on', 'Four tapes']], apply: (v) => { VIS.tape = v; } },
-  step: { label: 'Home: wheel', def: 'notch', snap: 'free', options: [['notch', 'One notch, one poster'], ['free', 'Free']], apply: (v) => { VIS.step = v; state.tw = null; } },
-  poster: { label: 'Program: poster', def: 'cover', snap: 'table', options: [['cover', 'Cover'], ['faded', 'Faded'], ['table', 'Table']], apply: (v) => { VIS.poster = v; applyPoster(); } },
-  next: { label: 'Program: next poster', def: 'turn', snap: 'click', options: [['turn', 'Turn'], ['click', 'Click']], apply: (v) => {
+  pin: { label: 'Home: poster under the pointer', def: 'hover', options: [['hover', 'Sticks to the wall'], ['off', 'Lifts']], apply: (v) => { VIS.pin = v; } },
+  tape: { label: 'Home: tape on the stuck poster', def: 'off', options: [['off', 'Off'], ['on', 'Four tapes']], apply: (v) => { VIS.tape = v; } },
+  step: { label: 'Home: wheel', def: 'free', options: [['notch', 'One notch, one poster'], ['free', 'Free']], apply: (v) => { VIS.step = v; state.tw = null; } },
+  poster: { label: 'Program: poster', def: 'cover', options: [['cover', 'Cover'], ['faded', 'Faded'], ['table', 'Table']], apply: (v) => { VIS.poster = v; applyPoster(); } },
+  next: { label: 'Program: next poster', def: 'turn', options: [['turn', 'Turn'], ['click', 'Click']], apply: (v) => {
     VIS.next = v;
     // the turn is the main way between programs: Back lands at the top of a page, as the route scrolled it
     history.scrollRestoration = v === 'turn' ? 'manual' : 'auto';
@@ -2183,10 +2287,11 @@ const LAB = {
     if (sec) sec.classList.toggle('p-next--turn', v === 'turn');
     if (v !== 'turn') sheets.forEach((s, j) => { if (j !== state.active) s.liftTgt = 0; });
   } },
-  held: { label: 'Iyuana: held light', def: 'on', snap: 'off', options: [['on', 'On'], ['off', 'Off']], apply: (v) => { VIS.held = v; rePictures(); } },
-  drift: { label: 'Herencia Viva: drift', def: 'on', snap: 'off', options: [['on', 'On'], ['off', 'Off']], apply: (v) => { VIS.drift = v; rePictures(); } },
-  mark: { label: 'Selection mark', def: 'none', snap: 'circle', options: [['none', 'None'], ['circle', 'Circle'], ['grease', 'Grease pencil'], ['hang', 'Hanging marks'], ['tape', 'Tape'], ['hangtape', 'Tape + marks'], ['wire', 'Nail and wire'], ['box', 'Select box']], apply: (v) => setMark(v) },
-  type: { label: 'Title type', def: 'zodiak', options: [['zodiak', 'Zodiak'], ['gambetta', 'Gambetta'], ['caslon', 'Libre Caslon'], ['instrument', 'Instrument Serif']], apply: (v) => {
+  wallopen: { label: 'Iyuana: opening print', def: 'hands', options: [['hands', 'Hands over the eyes'], ['sky', 'Milky Way']], apply: (v) => { VIS.wallOpen = v; rePictures(); } },
+  walk: { label: 'Iyuana: the walk', def: 'mixed', options: [['mixed', 'Zoom far, slide near'], ['zoom', 'Zoom every time'], ['jump', 'Pic to pic']], apply: (v) => { VIS.walk = v; rePictures(); } },
+  edge: { label: 'Herencia Viva: how a ground arrives', def: 'bubble', options: [['bubble', 'Bubbling'], ['flat', 'Flat line'], ['fade', 'Fade']], apply: (v) => { VIS.edge = v; rePictures(); } },
+  scroll: { label: 'Program: scroll', def: 'glide', options: [['glide', 'Gliding'], ['native', 'Native']], apply: (v) => { VIS.scroll = v; glideHalt(); } },
+  type: { label: 'Title type', def: 'gambetta', options: [['zodiak', 'Zodiak'], ['gambetta', 'Gambetta'], ['caslon', 'Libre Caslon'], ['instrument', 'Instrument Serif']], apply: (v) => {
     const t = TYPES[v];
     if (t.css && !document.querySelector(`link[data-type="${v}"]`)) {
       const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = t.css; l.dataset.type = v; document.head.appendChild(l);
@@ -2194,8 +2299,7 @@ const LAB = {
     root.style.setProperty('--serif', `${t.family}, 'Times New Roman', Georgia, serif`);
     root.dataset.type = v;
   } },
-  paper: { label: 'Paper', def: 'warm', options: [['warm', 'Warm grey'], ['cream', 'Cream'], ['white', 'Cool white'], ['stone', 'Stone']], apply: (v) => root.style.setProperty('--paper', PAPERS[v]) },
-  accent: { label: 'Accent', def: 'oxblood', options: [['oxblood', 'Oxblood'], ['brick', 'Brick red'], ['ink', 'Ink']], apply: (v) => root.style.setProperty('--oxblood', ACCENTS[v]) },
+  paper: { label: 'Paper', def: 'stone', options: [['warm', 'Warm grey'], ['cream', 'Cream'], ['white', 'Cool white'], ['stone', 'Stone']], apply: (v) => root.style.setProperty('--paper', PAPERS[v]) },
   grain: { label: 'Grain', def: 'soft', options: [['off', 'Off'], ['soft', 'Soft'], ['strong', 'Strong']], apply: (v) => root.style.setProperty('--grain', GRAINS[v]) },
   tilt: { label: 'Poster tilt', def: 'soft', options: [['flat', 'Flat'], ['soft', 'Soft'], ['strong', 'Strong']], apply: (v) => { tiltK = TILTS[v]; } },
   story: { label: 'Program story section', def: 'night', options: [['night', 'Night'], ['stone', 'Stone'], ['paper', 'Paper']], apply: (v) => {
@@ -2214,11 +2318,13 @@ const LAB = {
     if (v === 'page') { viewHash = 'about'; enterAbout(); } else route();
   } },
 };
-const COMPARE = Object.keys(LAB).filter((k) => LAB[k].snap);
-// 'cut' or 'snapshot' when every new switch agrees, '' when they are mixed
-const compareOf = () => (COMPARE.every((k) => lab[k] === LAB[k].def) ? 'cut' : COMPARE.every((k) => lab[k] === LAB[k].snap) ? 'snapshot' : '');
-// ?compare=snapshot starts every new switch from its snapshot option; a switch's own value wins
-const labBase = (k, cmp) => (cmp === 'snapshot' && LAB[k].snap ? LAB[k].snap : LAB[k].def);
+// The Compare row: a set of switches at once. Normal is every default.
+const PRESETS = { normal: {}, faded: { poster: 'faded', tape: 'on' } };
+const PRESET_KEYS = [...new Set(Object.values(PRESETS).flatMap((p) => Object.keys(p)))];
+// ?compare=faded starts from that set; a switch's own value in the link wins
+const labBase = (k, cmp) => PRESETS[cmp]?.[k] ?? LAB[k].def;
+// which set the switches match, or '' when they are mixed
+const compareOf = () => Object.keys(PRESETS).find((c) => PRESET_KEYS.every((k) => lab[k] === labBase(k, c))) || '';
 const lab = {};
 // an older link's pin=tape (the pinned centre poster) now reads as the stuck poster with tape
 if (params.get('pin') === 'tape') { params.set('pin', 'hover'); if (!params.has('tape')) params.set('tape', 'on'); }
@@ -2231,10 +2337,10 @@ for (const k in LAB) {
 const labEl = $('.lab');
 function labLink(withPanel) {
   const u = new URL(location.href);
-  // the Compare row stays out of the link at its default (the director's cut, or a mix)
+  // the Compare row stays out of the link at Normal, or a mix
   const cmp = compareOf();
   for (const k in LAB) { if (lab[k] === labBase(k, cmp)) u.searchParams.delete(k); else u.searchParams.set(k, lab[k]); }
-  if (cmp === 'snapshot') u.searchParams.set('compare', 'snapshot'); else u.searchParams.delete('compare');
+  if (cmp && cmp !== 'normal') u.searchParams.set('compare', cmp); else u.searchParams.delete('compare');
   if (withPanel) u.searchParams.set('lab', ''); else u.searchParams.delete('lab');
   return `${u.origin}${u.pathname}${u.search.replace(/=(?=&|$)/g, '')}${u.hash}`;
 }
@@ -2246,13 +2352,13 @@ function setLab(k, v) {
   labEl.querySelectorAll('[data-cmp]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.cmp === cmp)));
   history.replaceState(null, '', labLink(!labEl.hidden));
 }
-const labOpt = (k, d, v, l) => `<button type="button" data-k="${k}" data-v="${v}" aria-pressed="${lab[k] === v}">${l}${v === d.def ? '<i class="lab__live" title="The default"></i>' : ''}${v === d.snap ? '<i class="lab__snap" title="The snapshot: the site as it was on 4 November"></i>' : ''}</button>`;
+const labOpt = (k, d, v, l) => `<button type="button" data-k="${k}" data-v="${v}" aria-pressed="${lab[k] === v}">${l}${v === d.def ? '<i class="lab__live" title="The default"></i>' : ''}</button>`;
 function buildLab() {
   labEl.innerHTML =
     `<div class="lab__head"><button type="button" class="lab__title" data-act="min" aria-expanded="true">Lab</button><span class="lab__actions"><button type="button" data-act="copy">Copy link</button><button type="button" data-act="reset">Reset</button><button type="button" data-act="close" aria-label="Close the lab">×</button></span></div>` +
-    `<div class="lab__row lab__row--compare"><span class="lab__label">Compare</span><div class="lab__opts" role="group" aria-label="Compare">${[['cut', 'Director’s cut'], ['snapshot', 'Snapshot']].map(([v, l]) => `<button type="button" data-cmp="${v}" aria-pressed="${compareOf() === v}">${l}</button>`).join('')}</div></div>` +
-    Object.entries(LAB).map(([k, d]) => `<div class="lab__row${d.snap ? ' lab__row--new' : ''}"><span class="lab__label">${d.label}</span><div class="lab__opts" role="group" aria-label="${d.label}">${d.options.map(([v, l]) => labOpt(k, d, v, l)).join('')}</div></div>`).join('') +
-    `<p class="lab__note">A dot marks the default; a ring marks the snapshot (the site as it was on 4 November). Compare switches every new row at once. Every change is kept in the link; "Copy link" copies this exact version without the panel. Shift+L hides the lab.</p>`;
+    `<div class="lab__row lab__row--compare"><span class="lab__label">Compare</span><div class="lab__opts" role="group" aria-label="Compare">${[['normal', 'Normal'], ['faded', 'Faded + tape']].map(([v, l]) => `<button type="button" data-cmp="${v}" aria-pressed="${compareOf() === v}">${l}</button>`).join('')}</div></div>` +
+    Object.entries(LAB).map(([k, d]) => `<div class="lab__row"><span class="lab__label">${d.label}</span><div class="lab__opts" role="group" aria-label="${d.label}">${d.options.map(([v, l]) => labOpt(k, d, v, l)).join('')}</div></div>`).join('') +
+    `<p class="lab__note">A dot marks the default. Compare sets several rows at once. Every change is kept in the link; "Copy link" copies this exact version without the panel. Shift+L hides the lab.</p>`;
 }
 function toggleLab(on = labEl.hidden) {
   if (on && !labEl.innerHTML) {
@@ -2266,7 +2372,7 @@ labEl.addEventListener('click', async (e) => {
   const b = e.target.closest('button');
   if (!b) return;
   if (b.dataset.k) setLab(b.dataset.k, b.dataset.v);
-  else if (b.dataset.cmp) { for (const k of COMPARE) setLab(k, b.dataset.cmp === 'snapshot' ? LAB[k].snap : LAB[k].def); }
+  else if (b.dataset.cmp) { for (const k of PRESET_KEYS) setLab(k, labBase(k, b.dataset.cmp)); }
   else if (b.dataset.act === 'close') toggleLab(false);
   else if (b.dataset.act === 'min') { const min = labEl.classList.toggle('is-min'); b.setAttribute('aria-expanded', String(!min)); }
   else if (b.dataset.act === 'reset') { for (const k in LAB) setLab(k, LAB[k].def); }
@@ -2283,23 +2389,22 @@ if (params.has('lab')) toggleLab(true);
 /* =========================================================================
    Boot: load, count, hang the posters
    ========================================================================= */
-const counter = $('.loader__count');
+const loadBar = $('.loader__bar i');
 const statusLabel = $('.nav__status');
 async function boot() {
   const t0 = performance.now();
   let shown = 0;
   const tick = () => {
-    const target = Math.min(100, ((performance.now() - t0) / 1400) * 100);
-    shown = Math.max(shown, Math.floor(target));
-    counter.textContent = shown;
-    if (shown < 100) requestAnimationFrame(tick);
+    shown = Math.min(1, (performance.now() - t0) / 1400);
+    loadBar.style.transform = `scaleX(${shown.toFixed(3)})`;
+    if (shown < 1) requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);
   statusLabel.textContent = 'Hanging';
   requestAnimationFrame(frame);
 
   await Promise.race([
-    Promise.all([document.fonts.load('300 40px Zodiak'), document.fonts.load('400 40px Zodiak'), document.fonts.load('500 20px Switzer')]),
+    Promise.all([document.fonts.load('300 40px Gambetta'), document.fonts.load('400 40px Gambetta'), document.fonts.load('700 40px Gambetta'), document.fonts.load('400 40px Zodiak'), document.fonts.load('500 20px Switzer')]),
     new Promise((r) => setTimeout(r, 2500)),
   ]);
   const imgs = await Promise.all(PROGRAMS.map((p) => (p.poster ? loadImage(p.poster) : Promise.resolve(null))));
@@ -2326,7 +2431,7 @@ async function boot() {
   });
   const wait = loaderOn ? Math.max(0, 1450 - (performance.now() - t0)) : 0;
   await new Promise((r) => setTimeout(r, wait));
-  counter.textContent = '100';
+  loadBar.style.transform = 'scaleX(1)';
   body.classList.remove('is-loading');
   body.classList.add('is-ready');
   statusLabel.textContent = 'Index';

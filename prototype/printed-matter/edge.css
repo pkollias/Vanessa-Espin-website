@@ -1,0 +1,10 @@
+/* The line where one ground meets the next: stands on the top of the rising ground, which must be positioned. edge.js has the rest. */
+.ch-edge { position: absolute; left: 0; right: 0; bottom: calc(100% - 1px); color: var(--edge); pointer-events: none; transform-origin: 50% 100%; }
+.ch-edge--flat { height: 0; }
+/* .62 of a unit, where a unit is the screen's height, or its width if that is less: REACH in edge.js */
+.ch-edge--bubble { height: min(62svh, 62vw); }
+.ch-edge--bubble canvas { display: block; width: 100%; height: 100%; }
+.ch-edge--fade { height: 33svh; background: linear-gradient(to top, var(--edge), transparent); }
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  .ch-edge--fade { background: linear-gradient(to top, var(--edge), color-mix(in srgb, var(--edge) 86%, transparent) 18%, color-mix(in srgb, var(--edge) 56%, transparent) 42%, color-mix(in srgb, var(--edge) 24%, transparent) 68%, color-mix(in srgb, var(--edge) 6%, transparent) 88%, color-mix(in srgb, var(--edge) 0%, transparent)); }
+}

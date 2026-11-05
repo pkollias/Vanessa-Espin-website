@@ -63,3 +63,79 @@
   .pic-drift__type .ln { display: block; }
   .pic-drift__pic { left: calc(var(--xm) * 1vw); top: calc(50% + var(--ym) * 1svh); width: calc(var(--wm) * 1vw); padding: 0.5rem; }
 }
+
+/* ---------- Iyuana: the wall ---------- */
+.pic-wall { position: relative; height: 330svh; background: #14100e; }
+.pic-wall__pin { position: sticky; top: 0; height: 100svh; overflow: hidden; background: #14100e; }
+.pic-print { position: absolute; left: 0; top: 0; margin: 0; padding: 0; border: 0; background: #efece4; cursor: zoom-in; overflow: hidden; box-shadow: 0 0.6rem 1.8rem rgb(0 0 0 / 0.45); }
+.pic-print img { position: absolute; left: 3.5%; top: var(--mt); width: 93%; height: calc(100% - 2 * var(--mt)); object-fit: cover; display: block; }
+.pic-print:focus-visible { outline: 2px solid #e3907d; outline-offset: 3px; }
+.pic-wall__foot { position: absolute; left: var(--gutter); right: var(--gutter); bottom: 1.2rem; z-index: 2; display: flex; justify-content: space-between; gap: 1rem; margin: 0; color: rgb(239 236 228 / 0.72); font: 500 0.85rem/1.3 var(--sans); opacity: 0; transition: opacity 0.5s var(--ease); pointer-events: none; }
+.pic-wall.is-rest .pic-wall__foot { opacity: 1; }
+.pic-wall__cap { position: absolute; left: var(--gutter); bottom: 1.2rem; z-index: 2; margin: 0; padding: 0.35rem 0.6rem; background: #14100e; color: #efece4; font: 500 1rem/1.3 var(--sans); opacity: 0; transition: opacity 0.5s var(--ease); pointer-events: none; }
+.pic-wall.is-out .pic-wall__cap { opacity: 1; }
+.pic-wall .ph, .pic-box .ph { color: #e3907d; }
+.pic-wall.is-still { height: auto; }
+.pic-wall.is-still .pic-wall__pin { position: relative; }
+/* The way out: the wall has its own ground, and the next section brings its own paper, so the photograph leaves by the
+   scroll on a flat line and neither fades when the page's tone turns (.is-offtone). That paper follows the page to
+   stone on the same timing, so no line shows, and it lets go during the turn, so the next poster can rise past it. */
+.pic-wall.is-offtone, .pic-wall + .p-text.is-offtone { opacity: 1; }
+.pic-wall + .p-text { min-height: 100svh; align-content: start; background: var(--paper); transition: opacity 0.45s var(--ease), background-color 0.9s var(--ease-io); }
+.page-bg[data-tone='stone'] ~ main .pic-wall + .p-text { background: var(--stone); }
+main .program.is-leaving > .pic-wall + .p-text { background: transparent; transition: none; }
+.pic-wall__tone { position: absolute; left: 0; top: 0; width: 1px; height: 42svh; pointer-events: none; }
+
+.pic-box { position: fixed; inset: 0; z-index: 45; background: rgb(20 16 14 / 0); transition: background 0.5s var(--ease); touch-action: none; }
+.pic-box.is-open { background: rgb(20 16 14 / 0.97); }
+.pic-box__img { position: absolute; left: 50%; top: calc(50% - 2rem); translate: -50% -50%; max-width: calc(100vw - 4rem); max-height: calc(100svh - 8.5rem); width: auto; height: auto; display: block; }
+.pic-box__bar { position: absolute; left: var(--gutter); right: var(--gutter); bottom: 1.2rem; display: flex; align-items: center; gap: 0.9rem; color: #efece4; font: 500 0.95rem/1.3 var(--sans); opacity: 0; transition: opacity 0.4s var(--ease) 0.2s; }
+.pic-box.is-open .pic-box__bar { opacity: 1; }
+.pic-box__cap { flex: 1; min-width: 0; margin: 0; }
+.pic-box__cap span:last-child { display: block; color: rgb(239 236 228 / 0.66); font-size: 0.85rem; }
+.pic-box__count { font-variant-numeric: tabular-nums; color: rgb(239 236 228 / 0.66); }
+.pic-box__btn { padding: 0.5rem 0.7rem; border: 1px solid rgb(239 236 228 / 0.28); background: none; color: inherit; font: inherit; cursor: pointer; }
+.pic-box__btn:hover, .pic-box__btn:focus-visible { border-color: #efece4; }
+
+/* ---------- Herencia Viva: the crossing ---------- */
+.p-docs[hidden] { display: none; }
+.pic-long { position: relative; height: calc(var(--H) * 1svh); color: var(--ink); overflow-x: clip; }
+.pic-line { position: absolute; left: var(--gutter); right: var(--gutter); top: calc(var(--a) * 1svh); margin: 0; translate: 0 -50%; font-family: var(--serif); font-weight: 300; line-height: 0.86; letter-spacing: -0.045em; text-transform: uppercase; white-space: nowrap; }
+.pic-line .ln { display: inline-block; vertical-align: top; }
+.pic-line--one { font-size: 17.5vw; text-align: center; }
+.pic-line--two { font-size: 30vw; }
+.pic-line--three { font-size: 30vw; text-align: center; }
+.pic-line--four { font-size: 11vw; text-align: center; }
+.pic-line small { display: block; font-size: 0.42em; letter-spacing: -0.03em; line-height: 1.1; }
+.pic-piece { position: absolute; z-index: 2; left: calc(var(--x) * 1vw); top: calc(var(--a) * 1svh); width: calc(var(--w) * 1vw); max-width: calc(var(--nw) * 1.2); margin: 0; translate: 0 -50%; will-change: transform; }
+.pic-piece img { display: block; width: 100%; height: auto; }
+.pic-piece figcaption { margin-top: 0.7rem; font: 500 0.85rem/1.3 var(--sans); color: var(--ink); }
+.pic-piece figcaption span { display: block; color: var(--ink-2); }
+/* His paintings: whole, on a white mount */
+.pic-piece--art { padding: 0.9rem 0.9rem 0.8rem; background: #f8f6f1; outline: 1px solid rgb(18 17 16 / 0.82); outline-offset: -1px; box-shadow: 0 1.6rem 3rem rgb(18 17 16 / 0.2), 0 0.25rem 0.7rem rgb(18 17 16 / 0.14); }
+/* Her designs: printed things */
+.pic-piece--sheet img { box-shadow: 0 0.2rem 1.4rem rgb(18 17 16 / 0.16); }
+.pic-piece--print img { box-shadow: 0 0.8rem 2rem rgb(18 17 16 / 0.18); }
+/* The rooms: openings at the edge of the screen, not pictures */
+.pic-piece--room { z-index: 1; }
+.pic-piece--r { left: auto; right: 0; }
+.pic-piece--room figcaption { padding-inline: var(--gutter); }
+.pic-hold { position: relative; height: 190svh; }
+.pic-hold__pin { position: sticky; top: 0; height: 100svh; display: grid; place-items: center; }
+.pic-hold__fig { position: relative; left: auto; top: auto; translate: none; width: min(44vw, 620px, 62svh); max-width: none; will-change: auto; }
+
+@media (max-width: 760px) {
+  .pic-long { height: calc(var(--HM) * 1svh); }
+  .pic-line, .pic-piece { top: calc(var(--am) * 1svh); }
+  .pic-piece { left: calc(var(--xm) * 1vw); width: calc(var(--wm) * 1vw); }
+  .pic-piece--r { left: auto; right: 0; }
+  .pic-line--one { font-size: 19vw; }
+  .pic-line--two, .pic-line--three { font-size: 36vw; }
+  .pic-line--four { font-size: 19vw; white-space: normal; }
+  .pic-line--four .ln { display: block; }
+  .pic-hold__fig { width: min(84vw, 62svh); }
+  .pic-wall__foot, .pic-wall__cap { bottom: 5rem; }
+  .pic-wall__foot { left: 0; right: 0; padding: 0.4rem var(--gutter); background: #14100e; }
+  .pic-box__bar { bottom: 5rem; flex-wrap: wrap; }
+  .pic-box__img { max-width: 100vw; max-height: calc(100svh - 14rem); }
+}

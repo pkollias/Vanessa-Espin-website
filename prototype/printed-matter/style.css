@@ -3,15 +3,19 @@
    Bodoni Moda (display, labels) + Switzer (text). Oxblood is the one accent. */
 
 :root {
-  --paper: #eeece8;
+  --paper: #e3dfd8;
   --stone: #d9d5cf;
+  /* more grounds for the program pages: the oxblood, and the pink and the blue of the Herencia Viva poster */
+  --blood: var(--oxblood);
+  --rose: #c7797f;
+  --cobalt: #2f5fc0;
   --night: #141210;
   --ink: #121110;
   --ink-2: rgb(18 17 16 / 0.56);
   --oxblood: #470000;
   /* placeholders keep their own colour, so the lab's accent switch can't hide them */
   --ph: #470000;
-  --serif: 'Zodiak', 'Times New Roman', Georgia, serif;
+  --serif: 'Gambetta', 'Times New Roman', Georgia, serif;
   --sans: 'Switzer', 'Helvetica Neue', Arial, sans-serif;
   --ease: cubic-bezier(0.19, 1, 0.22, 1);
   --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
@@ -43,13 +47,19 @@ a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 :focus-visible { outline: 1.5px solid var(--oxblood); outline-offset: 4px; }
 
-/* Layers: page colour < WebGL posters < page content < hand-drawn marks < nav < grain */
+/* Layers: page colour < the under layer (.under-gl, for what must pass behind the sheets) < WebGL posters < page content < hand-drawn marks < nav < grain */
 .page-bg { position: fixed; inset: 0; z-index: -1; background: var(--paper); transition: background-color 0.9s var(--ease-io); }
 .page-bg[data-tone='night'] { background: var(--night); }
 .page-bg[data-tone='stone'] { background: var(--stone); }
+.page-bg[data-tone='blood'] { background: var(--blood); }
+.page-bg[data-tone='rose'] { background: var(--rose); }
+.page-bg[data-tone='cobalt'] { background: var(--cobalt); }
+.page-bg[data-tone='blood'] ~ main :focus-visible, .page-bg[data-tone='cobalt'] ~ main :focus-visible { outline-color: var(--paper); }
+.under-gl { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.under-gl:empty { display: none; }
 #gl { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100lvh; z-index: 0; display: block; touch-action: pan-y; }
 .is-home #gl { cursor: grab; touch-action: none; }
-.is-home #gl.is-over { cursor: pointer; }
+.is-home #gl.is-over, .is-home #gl.is-side { cursor: pointer; }
 .is-home #gl.is-dragging { cursor: grabbing; }
 
 .grain {
@@ -89,9 +99,7 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .is-ready .nav { opacity: 1; }
 .is-scroll .nav { background: rgb(238 236 232 / 0.78); -webkit-backdrop-filter: blur(12px) saturate(1.1); backdrop-filter: blur(12px) saturate(1.1); border-radius: 0.45rem; padding: 0 0.35rem; box-shadow: 0 0 0 var(--hair) rgb(18 17 16 / 0.08); transition: background-color 0.6s var(--ease-io), opacity 0.8s var(--ease) 0.2s; }
 .is-scroll.is-night .nav { background: rgb(20 18 16 / 0.6); box-shadow: 0 0 0 var(--hair) rgb(238 236 232 / 0.1); }
-.nav__mark { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; margin-right: 0.4rem; color: var(--ink); }
-.nav__mark svg { width: 100%; height: 100%; overflow: visible; }
-.nav__mark text { font: 400 30px var(--serif); letter-spacing: -1.5px; fill: currentColor; }
+.nav__mark { margin: 0 0.7rem 0 0.5rem; font: 400 1.05rem/1 var(--serif); letter-spacing: -0.01em; white-space: nowrap; color: var(--ink); }
 .nav__link {
   position: relative; display: inline-flex; align-items: center; gap: 0.4rem;
   font: 500 1.125rem/1 var(--sans); letter-spacing: -0.01em; color: var(--ink-2);
@@ -129,7 +137,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   display: flex; align-items: center; justify-content: space-between; padding: 0 var(--gutter);
   font: 500 1.05rem/1 var(--sans); transition: opacity 0.6s var(--ease-io);
 }
-.loader__count { position: absolute; left: 50%; top: 16%; transform: translateX(-50%); font: 300 7rem/1 var(--serif); letter-spacing: -0.03em; font-variant-numeric: lining-nums tabular-nums; }
+.loader__bar { position: absolute; left: 50%; top: 16%; width: min(13rem, 44vw); height: 2px; transform: translateX(-50%); background: rgb(18 17 16 / 0.12); overflow: hidden; }
+.loader__bar i { display: block; width: 100%; height: 100%; background: var(--ink); transform: scaleX(0); transform-origin: left; }
 .is-ready .loader { opacity: 0; }
 
 /* ---------- home ---------- */
@@ -141,13 +150,6 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .specs__row { position: relative; display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; padding: 0.5rem 0 0.55rem; }
 .specs dt { padding-top: 0.28rem; white-space: nowrap; }
 .specs dd { margin: 0; text-align: right; font: 500 1.125rem/1.38 var(--sans); letter-spacing: -0.01em; }
-.home__blurbs { position: absolute; left: 50%; bottom: 2.4rem; transform: translateX(-50%); display: flex; gap: 2.2rem; text-align: center; }
-.blurb { width: 16rem; }
-.blurb .eyebrow { display: block; margin-bottom: 0.4rem; }
-.blurb__mark { display: block; width: 0.45rem; height: 0.45rem; margin: 0 auto 0.5rem; background: var(--oxblood); transform: rotate(45deg) scale(0); transition: transform 0.9s var(--ease); transition-delay: var(--d, 0s); }
-.is-in .blurb__mark { transform: rotate(45deg) scale(1); }
-.is-out .blurb__mark { transform: rotate(45deg) scale(0); transition-duration: 0.4s; }
-.blurb__text { font-family: var(--serif); font-weight: 400; font-size: 1.45rem; line-height: 0.98; letter-spacing: -0.022em; text-transform: uppercase; }
 .home__corner { position: absolute; bottom: 1.2rem; margin: 0; font: 500 0.95rem/1.35 var(--sans); }
 .home__corner--l { left: var(--gutter); max-width: 20rem; text-wrap: balance; }
 .home__corner--r { right: var(--gutter); text-align: right; }
@@ -251,7 +253,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 /* ---------- placeholders: her words go here ---------- */
 /* Same font as the text around them; the accent marks what is still to come. */
 .ph { color: var(--ph); }
-[data-tone='night'] .ph { color: #e3907d; }
+[data-tone='night'] .ph, [data-tone='blood'] .ph { color: #e3907d; }
+[data-tone='cobalt'] .ph { color: #f6c324; }
 /* visually hidden, still read aloud */
 .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
 
@@ -406,10 +409,8 @@ body.is-drawer .lab { z-index: 30; } /* under the drawer's scrim while About is 
 }
 .lab__opts button[aria-pressed='true'] { background: var(--ink); color: #f6f4f0; box-shadow: none; }
 .lab__live { position: absolute; top: 3px; right: 3px; width: 4px; height: 4px; border-radius: 50%; background: var(--oxblood); }
-.lab__snap { position: absolute; top: 2.5px; right: 2.5px; width: 5px; height: 5px; border-radius: 50%; box-shadow: inset 0 0 0 1px currentColor; opacity: 0.6; }
 .lab__opts [data-cmp] { padding: 7px 10px; }
 .lab__row--compare { border-top: 0; }
-.lab__row--new + .lab__row:not(.lab__row--new) { border-top: 1px solid rgb(18 17 16 / 0.32); margin-top: 4px; }
 .lab__row { padding: 9px 0 7px; border-top: 0.5px solid rgb(18 17 16 / 0.14); }
 .lab__label { display: block; margin-bottom: 6px; color: rgb(18 17 16 / 0.6); font-size: 12px; }
 .lab__opts { display: flex; flex-wrap: wrap; gap: 4px; }
@@ -427,7 +428,7 @@ html[data-type='caslon'] .p-title, html[data-type='caslon'] .p-next__title { let
 @media (max-width: 760px) {
   :root { font-size: 13px; --gutter: 1rem; }
   .nav { top: auto; bottom: 0.9rem; background: #f8f7f4; border-radius: 0.4rem; padding: 0.2rem 0.3rem; box-shadow: 0 0.3rem 1.4rem rgb(18 17 16 / 0.12); }
-  .nav__mark { width: 2.4rem; height: 2.4rem; margin-right: 0; }
+  .nav__mark { display: none; }
   .nav__link { font-size: 1.05rem; padding: 0.6rem 0.65rem; }
   .is-night .nav__link, .is-night .nav__mark { color: var(--ink-2); }
   .is-night .nav__link.is-current, .is-night .nav__mark { color: var(--ink); }
@@ -436,12 +437,9 @@ html[data-type='caslon'] .p-title, html[data-type='caslon'] .p-next__title { let
   .home__title { font-size: 2.2rem; white-space: normal; }
   .home__specs .specs__row:nth-child(n + 4) { display: none; }
   .specs dd { font-size: 1.05rem; }
-  .home__blurbs { bottom: 5.6rem; gap: 1.4rem; width: calc(100vw - 2rem); justify-content: center; }
-  .blurb { width: auto; flex: 1; }
-  .blurb__text { font-size: 1.2rem; }
   .home__corner--r { display: none; }
-  /* her headline stays on phones: one small centred line above the blurbs (they are at most 3 lines, 85px) */
-  .home__corner--l { left: var(--gutter); right: var(--gutter); bottom: 13rem; max-width: none; text-align: center; color: var(--ink-2); }
+  /* her line stays on phones: one small centred line above the nav */
+  .home__corner--l { left: var(--gutter); right: var(--gutter); bottom: 6rem; max-width: none; text-align: center; color: var(--ink-2); }
   .p-hero { padding-top: 4.2rem; }
   .p-back { top: 1.1rem; }
   .crop--tl, .crop--tr { top: 3.6rem; }
@@ -479,7 +477,6 @@ html[data-type='caslon'] .p-title, html[data-type='caslon'] .p-next__title { let
   .about__body { font-size: 1.15rem; }
   .lab { left: 10px; right: 10px; width: auto; top: auto; bottom: 4.6rem; max-height: 50svh; }
   .nav__link { padding: 0.6rem 0.48rem; white-space: nowrap; }
-  .nav__mark { width: 2.2rem; }
   .p-did li { font-size: 1.25rem; }
   .p-docs { grid-template-columns: 1fr; gap: 1.2rem; }
   .p-docs__count { font-size: 2.6rem; }
@@ -512,7 +509,7 @@ html[data-type='caslon'] .p-title, html[data-type='caslon'] .p-next__title { let
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ln__i, .rule, .blurb__mark, .page-bg, .crop, .drawer, .drawer-scrim, .b-entry__info, .b-case__col p, .b-quote, .program [data-tone], .brand [data-tone], .is-offtone { transition: none !important; }
+  .ln__i, .rule, .page-bg, .crop, .drawer, .drawer-scrim, .b-entry__info, .b-case__col p, .b-quote, .program [data-tone], .brand [data-tone], .is-offtone { transition: none !important; }
   .grain { animation: none; }
   .program.is-leaving > * { opacity: 0; transition: opacity 0.25s linear !important; }
   .is-leaving .p-next__link > *, .is-leaving .p-foot { transform: none; transition: none; opacity: 1; }

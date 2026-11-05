@@ -56,7 +56,7 @@ motion there is no press, flight or turn: the poster is simply in place, and the
 | `#/archive` | Earlier work (rows from her old site), selected experience, education |
 | `#/about` | Opens the About drawer over the view on screen (with the lab's `about=page`, the old About page) |
 
-Nav: Programs · Brand work · About · Index. Index lists the programs, then Brand work, Earlier work, About and LinkedIn.
+Nav: Vanessa Espín · Curation · Branding · About · Index. Index lists the programs, then Brand work, Earlier work, About and LinkedIn.
 On Earlier work the Index button is marked as the current item, since that is where the page is listed.
 Her headline ("Brand curator of events and experience") sits in the home's lower-left corner; on phones it is one
 small centred line above the blurbs (the right-hand counter and hint stay hidden there).
@@ -105,6 +105,9 @@ design, so the credit under the band reads `Paintings: Luis Medina · Design: Va
 `DRIFT` in `pictures.js`, with their own positions for phones, where the line breaks in two. With reduced motion the pictures hold still.
 
 The code for both is in `pictures.js` and `pictures.css`; `app.js` calls four hooks (search for "pictures hook").
+`pictures.js` hands on to `wall.js`, `crossing.js` and `chapters.js`. Through `ctx.paper` a section can hang
+its own sheets of the posters' paper in the WebGL scene (`PaperSheet` in `app.js`) and put things behind them in
+`#under-gl`, a layer between the page's ground and the canvas.
 
 ## Placeholders: facts stay, her voice is still to come
 
@@ -156,12 +159,9 @@ when the switches are mixed, neither button is pressed and each switch is writte
 | Home: wheel | `step` | `notch` (default: one notch, one poster, with the flock), `free` (snapshot: free scroll that snaps back) |
 | Program: poster | `poster` | `cover` (default: the press and flight, a flat cover, then to the side), `faded` (the same cover, then a ghost behind the story), `table` (snapshot: on the table, then to the side; the Center's card keeps its larger type, which runs past the rule) |
 | Program: next poster | `next` | `turn` (default: on the pile, raised into view; a push or the click turns it into the next cover; Back lands at the top of the page), `click` (snapshot: a link, and the page swaps at once; the poster waits low, and the browser restores the scroll) |
-| Iyuana: held light | `held` | `on` (default), `off` (snapshot) |
-| Herencia Viva: drift | `drift` | `on` (default), `off` (snapshot) |
-| Selection mark | `mark` | `none` (default: nothing is drawn, on the posters or the next program's title), `circle` (snapshot), `grease`, `hang`, `tape`, `hangtape`, `wire` (nail and wire), `box` (select box) |
+| Program: scroll | `scroll` | `glide` (default: the wheel glides), `native` (snapshot) |
 | Title type | `type` | `zodiak` (live), `gambetta`, `caslon`, `instrument` |
 | Paper | `paper` | `warm` (live), `cream`, `white`, `stone` |
-| Accent | `accent` | `oxblood` (live), `brick`, `ink` |
 | Grain | `grain` | `off`, `soft` (live), `strong` |
 | Poster tilt | `tilt` | `flat`, `soft` (live), `strong` |
 | Program story section | `story` | `night` (live), `stone`, `paper` |
@@ -172,4 +172,60 @@ Example: `?mark=hangtape&paper=cream` shows the tape and hanging marks on cream 
 To add a switch, add an entry to `LAB` in `app.js`: its options and an `apply` function (and `snap`, its
 snapshot option, if the Compare row should set it). The visual-pass switches write their value into `VIS`.
 
+## Gliding scroll
+
+On program pages the wheel glides, as on Daddy Yankee: `glide.js` smooths it the way Lenis does (lerp 0.1, the same at
+any frame rate), so a notch still comes to 100 px and the scroll stops with a tail of under a second. The page scrolls
+for real, so sticky pins, the scrollbar, find and the keyboard stay the browser's own. It moves the page at the top of the
+frame, so the DOM and the WebGL sheets always read the same scroll. Off for touch and reduced motion; other pages keep
+the native wheel, and the home carousel keeps its notch. Left alone: a wheel something else took (the documentation
+tool, the lightbox), a pinch, a sideways or shift wheel, the lab, the Index panel and the drawer. A scrolling key or
+any scroll that isn't its own ends the glide. Mark an element `data-no-glide` to keep the wheel off it.
+
+## Grounds
+
+`data-tone` takes `night`, `blood` (the oxblood), `stone`, `paper` and `rose` (`#c7797f`, the pink of the Herencia Viva
+poster). `blood` behaves as `night` (`darkTone` in `app.js`): paper text, the dark nav, the light placeholder colour. `rose`
+behaves as `paper`. A section fades out only on a ground of the other kind, dark or light.
+
+## Pictures (Nov 4 revision)
+
+The rapid stepper is no longer the default. Each program shows its pictures according to what they are:
+
+- **Iyuana: the wall** (`wall.js`, lab `held=wall`). It opens full-screen on the print of hands over the eyes (lab `wallopen`), pulls back to 16 prints on one dark wall, and a click pushes a print in. On the way out the camera pushes into the cacao (lab `wallexit`), holds half a screen, and the photograph leaves with the scroll: the next section has its own paper ground (`.pic-wall + .p-text` in `pictures.css`) and rises on a flat line under it. Those two sections are exempt from the off-tone fade, and the page's tone turns when the paper has nearly reached the top. Photos are in `img/iyuana/wall/`.
+- **Herencia Viva: the chapters** (`chapters.js`, lab `drift=chapters`): see below. **The crossing** (`crossing.js`, lab `drift=long`) stays as an option: paintings slow and mounted, her designs fast, the rooms flush to the screen's edge, then one painting holds.
+- **Stepper** (lab `docs=one`): Ayazamana only, and it never takes the wheel on stone frames. `docs=all` restores it everywhere.
+
+Never repeat the home carousel's visual on another page.
+
+## The chapters
+
+Herencia Viva's pictures, between the story and the text, on Daddy Yankee's logic: each kind of thing gets its own treatment, and every screen has one loud thing on it. `chapters.js` is the engine and holds no content. `chapters-content.js` holds the words, pictures and grounds, one entry per program, so moving a program in or out of the chapters is an edit there (a program with an entry gets the chapters before anything else in `picturesHTML`; `lab` ties an entry to a lab switch). The file's header lists the recipes and what each takes.
+
+| Chapter | Recipe | What happens |
+|---|---|---|
+| The show | `zoomout` | HERENCIA and VIVA zoom down from 5x onto each side of a card (painting 04, thin oxblood rule) that grows as they settle; Threads of Memory rises under it. Paper |
+| His paintings | `collapse` | Rose comes up with a torn edge and ECUADORIAN / MAGIC / REALISM climbs, each word in its own mask. Three paintings rise at slightly different speeds, fold to the right like pictures on a wall seen down a corridor, then open one after another, whole, and pass to the far wall. Each carries its label on its mount |
+| Her designs | `pushin` | On blood, Threads of Memory grows from a speck to the screen's height, lifts off, and ECUADOR. NY. 2026 is there behind it; the fish and the shirt pop in and cross over the type at 1.23 and 1.88 times the scroll |
+| The event | `rooms` | No pin. On night, FLUSHING TOWN HALL and MAY 29–31, 2026 go by beside the two rooms, flush to the screen's edges at their own size; the address gathers its letters from a wide spread |
+| The artist | `name` | LUIS MEDINA fills the screen, painting 04 comes up over it in the existing `.pic-hold`, and the words leave inside their masks |
+
+What you see lives in two layers: `.ch-stage` in `#under-gl` below the canvas (grounds, type, rooms), and sheets of the posters' paper above it (every printed object), so objects always pass in front of the type. The page keeps a transparent spacer for the scroll and for what a screen reader gets. Each scene is a sticky pin done by hand, and a recipe's `frame()` is a pure function of the scroll, so when the scroll stops the move stops; only the words have a tail (scrub 0.8). The page's tone turns when a new ground has nearly reached the top of the screen. The display type is Zodiak Extrabold (800, and 801 for the italic), added to the font link: the site's Light goes thin at this size. Type is fitted to the screen by measuring it, again whenever a font arrives.
+
+Nothing is shown above 1.2 times its own size, and nothing is cropped. On a phone the word stacks turn and read up the screen, since a tall screen is a wide one on its side, and the sheet that fills the height on a desktop stops at the screen's width. With reduced motion each recipe's `still()` replaces all of it: still compositions in the page's flow, with no sheets. The words are only what is on her poster, campaign image and specs, plus names and dates.
+
+## The edge
+
+`edge.js` and `edge.css` draw the line where one ground meets the next, three ways: `bubble`, `flat` (the ground's own straight top) and `fade` (a third of a screen of gradient). `bubble` is Daddy Yankee's seam, ported from its source with its numbers: two sheets of round cells slide across each other under a threshold, so blobs swell out of the front, pinch off, hang and are taken back, and a fine grain roughens the outline. The scroll drives it; when it stops, the edge settles in about a second to a slow breath. Each edge is one WebGL2 canvas standing on the top of its ground (the parent must be positioned and must not clip), at most 1.5x the screen's pixels and 24 fps, and only on screen. Without WebGL2 or with reduced motion it is `flat`. The file's header has the API.
+
+## Herencia Viva, as approved (Nov 5)
+
+`chapters.js` is the engine and `chapters-content.js` the content, so a program can move between engines by config. The page runs: the oranges print full-screen, ECUADORIAN MAGIC REALISM travelling on cobalt, three paintings rising edge to edge, A TEAM THAT DIDN'T REST (Luis Medina's words, translated from his June 7, 2026 post) beside Vanessa on the ladder, ECUADOR. NY. 2026, Flushing Town Hall, then LUIS [print] MEDINA with the print growing to full screen. The opening and the ending are approved: leave them as they are. Lab switches: `hvground`, `hvopen`, `hvclose`, `edge` (bubble, flat, fade), `scroll`.
+
 No email address and no résumé on public pages or in this repo (decided Nov 5, 2026, because of crawlers). LinkedIn is the contact for now.
+
+Iyuana's wall now walks: after the pull back the scroll stops at the palm portraits, Vanessa, the Sápara Nation, the candles and the cacao. Far prints are reached by zooming out and in, neighbours by a slide along the wall. The stops are `TOUR` in `wall.js`; lab `wallexit` compares it with the shorter ways out.
+
+## The normal version (Nov 5)
+
+Defaults: Gambetta titles, stone paper, free wheel on home. The lab's Compare row has Normal and Faded + tape (`?compare=faded`: poster=faded, tape=on). `Iyuana: the walk` (`walk`) chooses mixed, zoom or jump. Older links with switches that no longer exist fall back to the defaults.

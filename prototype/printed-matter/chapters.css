@@ -1,0 +1,102 @@
+/* The chapters engine (chapters.js). What you see sits in .ch-stage, in #under-gl below the canvas; .pic-chapters in the page
+   is a transparent spacer. Linked from index.html after pictures.css. */
+.pic-chapters { position: relative; }
+.ch { position: relative; }
+.ch-tone { position: absolute; left: 0; width: 1px; height: 100%; pointer-events: none; }
+
+.ch-stage { position: absolute; inset: 0; overflow: hidden; }
+.ch-stage[hidden], .ch-scene[hidden], .ch-aim[hidden], .ch-tile[hidden] { display: none; }
+.ch-scene { position: absolute; left: 0; top: 0; width: 100%; height: 100%; color: var(--ch-ink); }
+.ch-ground { position: absolute; inset: 0; background: var(--ch-ground); }
+
+/* the display face at its loudest: paper-weight Zodiak goes thin at this size. All capitals */
+.ch-stack .ch-m__i, .ch-big .ch-m__i, .ch-spread .ch-m__i, .ch-cw .ch-m__i, .ch-aim__words .ch-m__i { font-family: var(--serif); font-weight: 800; letter-spacing: -0.025em; text-transform: uppercase; white-space: nowrap; }
+
+/* a word in its mask: it can overhang sideways, never above or below its own line */
+.ch-m { display: block; clip-path: inset(-0.07em -100vw -0.07em); line-height: 0.82; }
+.ch-m__i { display: block; width: max-content; will-change: transform; transform: translate3d(0, 100%, 0); }
+
+/* a picture that fills the screen */
+.ch-bleed { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; will-change: transform; }
+
+/* travel, pushin */
+.ch-stack, .ch-big { position: absolute; inset: 0; }
+.ch-stack .ch-m, .ch-big .ch-m { position: absolute; left: var(--gutter); width: max-content; }
+.ch-credit { position: absolute; left: 1.8vw; bottom: 1.2rem; margin: 0; font: 500 1.35rem/1.2 var(--sans); }
+.ch-credit .ch-m { line-height: 1.25; }
+
+/* aim: the row and the column are flush images on the night, the light ground comes in behind them */
+.ch-light { position: absolute; left: 0; top: 0; width: 100%; height: 100%; transform: translate3d(-100%, 0, 0); will-change: transform; }
+.ch-tile { position: absolute; left: 0; top: 0; margin: 0; overflow: hidden; will-change: transform; }
+.ch-tile__img { position: absolute; left: 0; top: 0; display: block; max-width: none; }
+.ch-col { position: absolute; left: 0; top: 0; overflow: hidden; pointer-events: none; }
+.ch-side { position: absolute; inset: 0; display: block; width: 100%; height: 100%; max-width: none; object-fit: cover; will-change: transform; }
+.ch-rowcap { position: absolute; left: 0; top: 0; margin: 0; font: 500 0.95rem/1.3 var(--sans); will-change: transform; }
+.ch-rowcap[hidden] { display: none; }
+.ch-aim { position: absolute; inset: 0; }
+.ch-aim__words .ch-m { position: absolute; width: max-content; }
+.ch-aim__meta { position: absolute; font: 500 1.05rem/1.35 var(--sans); }
+.ch-aim__meta .ch-m { display: block; line-height: 1.35; }
+
+/* rooms */
+.ch-spread { position: absolute; inset: 0; }
+.ch-spread .ch-m { position: absolute; width: max-content; }
+.ch-room { position: absolute; display: block; max-width: none; object-fit: cover; }
+.ch-spaced { position: absolute; margin: 0; overflow: hidden; white-space: nowrap; font: 500 1rem/1.3 var(--sans); text-transform: uppercase; }
+.ch-spaced span { position: absolute; left: 0; top: 0; display: block; will-change: transform; }
+.ch-tag { position: absolute; margin: 0; padding: 0.35rem 0.6rem; transform: translateY(-100%); font: 500 1.05rem/1.2 var(--sans); background: var(--night); color: var(--paper); }
+
+/* closer: the card is a window on the photograph, and it ends up the whole screen */
+.ch-cw { position: absolute; left: 0; top: 0; will-change: transform; }
+.ch-cw .ch-m { width: max-content; }
+.ch-card { position: absolute; left: 0; top: 0; overflow: hidden; background: var(--night); box-shadow: 0.5rem 0.8rem 2.6rem rgb(10 12 30 / 0.45); will-change: transform; }
+.ch-card__img { position: absolute; left: 0; top: 0; display: block; max-width: none; transform-origin: 0 0; will-change: transform; }
+.ch-cap { position: absolute; left: 1.2rem; bottom: 1.2rem; margin: 0; }
+.ch-cap .ch-m { line-height: 1.3; }
+.ch-cap .ch-m__i { padding: 0.4rem 0.7rem; font: 500 1.05rem/1.3 var(--sans); background: var(--night); color: var(--paper); }
+.ch-cap .ch-m__i span { margin-left: 0.9em; opacity: 0.72; }
+.ch-cap .ph { color: inherit; }
+
+/* The next section comes up as a solid sheet on a flat line, so the last picture leaves by scroll, covered: nothing fades.
+   Its own ground, and it is never hidden for being on the other tone: it has to arrive while the picture is still dark */
+.pic-chapters + .p-text { min-height: 100svh; align-content: start; background: var(--paper); transition: opacity 0.45s var(--ease), background-color 0.9s var(--ease-io); }
+.pic-chapters + .p-text.is-offtone, .ch-still.is-offtone { opacity: 1; }
+.page-bg[data-tone='stone'] ~ main .pic-chapters + .p-text { background: var(--stone); }
+main .program.is-leaving > .pic-chapters + .p-text { background: transparent; transition: none; }
+
+/* reduced motion: still compositions in the page's flow */
+.ch-still { padding: 6rem 1.8vw 3rem; min-height: 100svh; display: grid; align-content: center; gap: 2rem; background: var(--ch-ground); color: var(--ch-ink); overflow: hidden; }
+.ch-still--bleed { padding: 0; display: block; }
+.ch-still__bleed { display: block; width: 100%; height: 100svh; object-fit: cover; }
+.ch-still span[data-fit] { font-family: var(--serif); font-weight: 800; line-height: 0.84; letter-spacing: -0.025em; text-transform: uppercase; white-space: nowrap; width: max-content; }
+.ch-still__stack { display: grid; gap: 0.6rem; }
+.ch-still__row { display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; align-items: flex-end; }
+.ch-still__row figure { margin: 0; flex: 1 1 14rem; max-width: 30vw; }
+.ch-still__row img { display: block; width: 100%; height: auto; }
+.ch-still__row figcaption { margin-top: 0.6rem; font: 500 0.95rem/1.3 var(--sans); }
+.ch-still__row figcaption span { display: block; opacity: 0.72; }
+.ch-still__crop { position: relative; aspect-ratio: var(--ar); overflow: hidden; border: 0.4rem solid var(--rule); }
+.ch-still__row .ch-still__crop img { height: auto; }
+.ch-still__hero { display: grid; place-items: center; }
+.ch-still__hero img { height: 86svh; width: auto; max-width: 100%; object-fit: contain; }
+.ch-still__spread { display: flex; align-items: center; gap: 2vw; margin-inline: -1.8vw; }
+.ch-still__spread--r { flex-direction: row-reverse; }
+.ch-still__spread img { width: min(47vw, 662px); height: auto; }
+.ch-still__col { display: grid; gap: 0.4rem; padding-inline: 1.8vw; }
+.ch-still__spaced { margin: 0; font: 500 1.8rem/1.2 var(--sans); letter-spacing: 0.3em; text-transform: uppercase; text-align: center; }
+.ch-still__close { margin: 0 -1.8vw; }
+.ch-still__close img { display: block; width: 100%; height: 56svh; object-fit: cover; }
+.ch-still__close figcaption { padding: 0.6rem 1.8vw 0; font: 500 0.95rem/1.3 var(--sans); }
+.ch-still__close figcaption span { margin-left: 0.9em; opacity: 0.72; }
+
+@media (max-width: 760px) {
+  .ch-stack, .ch-name { inset: auto; left: 0; top: 0; }
+  .ch-credit { left: 1rem; bottom: 4.6rem; }
+  .ch-aim__meta { font-size: 0.9rem; }
+  .ch-rowcap { font-size: 0.8rem; }
+  .ch-cap { bottom: 4.6rem; }
+  .ch-still__row figure { max-width: 84vw; }
+  .ch-still__spread, .ch-still__spread--r { flex-direction: column; align-items: flex-start; }
+  .ch-still__spread--r { align-items: flex-end; }
+  .ch-still__spread img { width: 84vw; }
+}
