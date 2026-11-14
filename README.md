@@ -62,7 +62,7 @@ Follow CHARTER.md §12. The one code change: in `netlify.toml`, set the build co
 
 Everything the site says is in `src/content/`:
 
-- `site.yaml`: masthead line, email, links, short bio
+- `site.yaml`: masthead line, links, short bio
 - `programs/*.md`: one file per program, with its poster beside it
 - `brand-work/*.md`: Flywheel; Enchante is `draft: true` (review mode only) until she decides to keep it
 - `pages/about.md`: the About statement, copy, portrait, artists and partners

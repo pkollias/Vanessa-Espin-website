@@ -10,19 +10,11 @@ const instagram = unit(site.instagram);
 <footer class="site-footer">
   <p class="credit-line">© {year} {site.name}&nbsp;· {site.city}</p>
   <p class="links">
-    <a class="hit" href={`mailto:${site.email}`}>{site.email}</a>
-    {
-      instagram && (
-        <>
-          <span class="sep" aria-hidden="true">&nbsp;·</span>{' '}
-          <a class="hit" href={instagram}>Instagram</a>
-        </>
-      )
-    }
+    {instagram && <a class="hit" href={instagram}>Instagram</a>}
     {
       !instagram && SHOW_TODOS && (
         <>
-          <span class="sep" aria-hidden="true">&nbsp;·</span> Instagram <span class="todo">[@handle]</span>
+          Instagram <span class="todo">[@handle]</span>
         </>
       )
     }

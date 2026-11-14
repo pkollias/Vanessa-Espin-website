@@ -21,7 +21,7 @@ Builds on the existing Astro 7.4.5 tree in `/Users/kollias/Desktop/Projects/Vane
 - **§8.1 Type.** Add: "proportional lining figures; one ::selection (cream on oxblood); 2px oxblood focus ring".
 - **§8.6.** Replace the open items with pointers to the resolutions in sections 2–4 of this spec: phone layout, hover/focus, unmocked pages.
 - **§11 Fonts.** "Committed Google Fonts v33 latin files (one variable upright 400–600 plus 400 italic) with OFL.txt; latin only; build fails on any glyph outside the shipped cmap." Remove `@fontsource/eb-garamond`.
-- **§11 JavaScript / §16.** Log one deliberate exception: a JSON-only `<script type="speculationrules">`. Close the remaining §16 open items: the phone layout is resolved, Contact is mailto only, the host is Netlify.
+- **§11 JavaScript / §16.** Log one deliberate exception: a JSON-only `<script type="speculationrules">`. Close the remaining §16 open items: the phone layout is resolved, Contact is LinkedIn only (no email address on public pages, decided Nov 5, 2026), the host is Netlify.
 - **§7.** LinkedIn becomes `https://www.linkedin.com/in/vanessaespin` (from the résumé header), still with a confirm note. Instagram stays "Needed".
 - **§17 deliberate differences.** Log each of these:
   - Logo letter-spacing 0.2px on every page. Only home.html had it.
@@ -156,7 +156,7 @@ From motion-card-hover-focus.
 
 ### A7. Text links
 From motion-link-family.
-- **Nav and quiet links** (header socials, footer email and Instagram):
+- **Nav and quiet links** (header socials, footer Instagram):
   - Rest: `text-decoration: underline 1px transparent; text-underline-offset: .32em; transition: color 160ms ease, text-decoration-color 160ms ease`.
   - Hover, inside `@media (hover:hover) and (pointer:fine)`: `color: var(--oxblood); text-decoration-color: currentColor`.
   - Font weight never changes on hover. Active is `[aria-current="page"]{font-weight:600;color:var(--oxblood)}`, and is never animated.
@@ -247,7 +247,7 @@ Merges motion-reduced-motion-touch and phone-touch-and-tap. Each rule is declare
   - The view-transition naming rule stays ungated.
   - No hover rule changes `display` or `visibility`.
 - **Hit areas.** `@media (any-pointer:coarse){ .hit{position:relative} .hit::after{content:'';position:absolute;inset:-12px -8px} }` on the nav, socials, masthead link and footer links in row layouts. Not on the logo. The stacked phone footer gets real 44px rows instead (section 3).
-- Footer email becomes `mailto:`. The Instagram link renders only when a handle exists.
+- No email in the footer (decided Nov 5, 2026). The Instagram link renders only when a handle exists.
 - Visible at rest: no.
 
 ### A14. Motion allowlist and code guard
@@ -520,7 +520,7 @@ Fixed at every width: logo 30, nav 18 (16–18 on phones), socials 16 (15 in the
 - ≥640: the mock (space-between).
 - <640: `.site-footer{flex-direction:column;align-items:center;text-align:center;gap:6px}`.
   - Line 1: "© 2026 Vanessa Espín · New York".
-  - Then email and Instagram, each `display:inline-block;padding:12px 4px`, with no dot and no `.hit::after`.
+  - Then Instagram, `display:inline-block;padding:12px 4px`, with no dot and no `.hit::after`.
 
 **Spot checks.**
 - At 768: tablet header; alternating bands side by side, with Iyuana poster-only and info one fact per line; lead pair 293/411; facts in two columns; gallery 2-up; More as a list; About side by side.
@@ -626,10 +626,7 @@ Review text notes are `<span class="todo">[note]</span>` with no styling of thei
   - `.contact-band{background:var(--cream);min-height:260px;padding:32px;margin-bottom:var(--sp-72);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center}`. At ≤480px the padding becomes `32px 16px`.
   - Inside, in order:
     1. An optional `openTo` `<p>` (20px/1.55, max-width 560). It is null today.
-    2. `<a href="#">` showing the address at `clamp(22px,6.2vw,30px)`, line-height 1.35, ink, with the A7 hover.
-    3. `.btns{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}` holding:
-       - `.btn.btn--solid.on-dark` "Email"
-       - `.btn` "Résumé (PDF)" → `/Vanessa_Espin_Resume.pdf`
+    2. `.btns{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}` holding:
        - `.btn` "LinkedIn"
        - `.btn` "Instagram", only once a handle exists
   - Global ring. No form.
@@ -714,7 +711,7 @@ Review text notes are `<span class="todo">[note]</span>` with no styling of thei
 **Rejected by the charter or the motion allowlist**
 - **`<ClientRouter />`, `transition:*`, named header or logo transitions:** JavaScript, or a flickering header.
 - **Load, entrance and scroll-driven animation, sticky header, smooth scroll:** charter §4 non-goal.
-- **Contact form:** mailto only for v1.
+- **Contact form:** none for now; LinkedIn is the contact (no email address on public pages, decided Nov 5, 2026).
 
 ## 7. Open questions for the user
 

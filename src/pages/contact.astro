@@ -3,14 +3,13 @@ import Base from '../layouts/Base.astro';
 import MetaLine from '../components/MetaLine.astro';
 import OpenItems from '../components/OpenItems.astro';
 import { getSite } from '../lib/content';
-import { withBase } from '../lib/paths';
 import { unit } from '../lib/todo';
 
 const site = await getSite();
 const instagram = unit(site.instagram);
 ---
 
-<Base title="Contact" description={`Email Vanessa Espín at ${site.email}.`} section="contact" atIndex>
+<Base title="Contact" description="Contact Vanessa Espín." section="contact" atIndex>
   <header class="title-block">
     <h1>Contact</h1>
     <MetaLine class="subtitle" parts={[site.city, site.languages]} />
@@ -18,10 +17,7 @@ const instagram = unit(site.instagram);
 
   <section class="contact-band">
     {site.openTo && <p class="open-to">{site.openTo}</p>}
-    <a class="email" href={`mailto:${site.email}`}>{site.email}</a>
     <div class="btns">
-      <a class="btn btn--solid on-dark" href={`mailto:${site.email}`}>Email</a>
-      <a class="btn" href={withBase(site.resume)}>Résumé (PDF)</a>
       <a class="btn" href={site.linkedin}>LinkedIn</a>
       {instagram && <a class="btn" href={instagram}>Instagram</a>}
     </div>
@@ -70,12 +66,6 @@ const instagram = unit(site.instagram);
     max-width: 560px;
     font-size: 1.25rem;
     line-height: 1.55;
-  }
-
-  .email {
-    font-size: clamp(22px, 6.2vw, 30px);
-    line-height: 1.35;
-    overflow-wrap: anywhere;
   }
 
   .btns {

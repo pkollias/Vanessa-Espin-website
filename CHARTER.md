@@ -50,7 +50,7 @@ No CMS or admin UI, blog, shop, services or pricing list, client login, animatio
 
 ## 6. Scope: v1 sitemap
 
-Header nav on every page: **Programs · Brand Work · About · Contact**. Social links on the right of the header: Instagram, LinkedIn, Email.
+Header nav on every page: **Programs · Brand Work · About · Contact**. Social links on the right of the header: Instagram, LinkedIn.
 
 | Route | Page | Contents | Mocked? |
 |---|---|---|---|
@@ -62,7 +62,7 @@ Header nav on every page: **Programs · Brand Work · About · Contact**. Social
 | `/brand-work` | Brand Work index | Flywheel (2021–25, new) and Enchante Accessories (2020–21, only if filled), as cover bands | **No** |
 | `/brand-work/flywheel` | Project page | Same template; only screenshots she's allowed to show | **No** |
 | `/about` | About | Portrait, About copy, Artists and partners (real names only), Contact column. No services list | Yes (`about.html`) |
-| `/contact` | Contact | Email (required), optional short "open to" line, optional form | **No** (reuse the About contact column) |
+| `/contact` | Contact | LinkedIn, optional short "open to" line, optional form (no email address, see section 11) | **No** (reuse the About contact column) |
 | `404` | Not found | Plain, links home | No |
 
 **Off the site:** ZARA, Purell, Pure Leaf, Editorial Design, Outside the Pink Box, The Dinner Table Doc (2019) and 100 Roses of Concrete (2021) (unless she has strong images and wants them). Thin 2019–21 pages dilute the 2026 work.
@@ -83,7 +83,7 @@ Anything not marked **Confirmed** must be resolved with Vanessa before it ships.
 | Flywheel | Art Direction Design Specialist, 2021–2025; Amazon and Walmart storefronts and ads; 20+ brands in health, beauty and consumer goods | Confirmed |
 | Enchante Accessories | Brand Designer, eCommerce, 2020–21 | Role confirmed. **"15+ brands" and "Cook with Color refresh" are NOT confirmed.** The résumé notes rejected the 15+ claim as unverified, so leave both out until she confirms |
 | Education | Communication Design, City Tech, CUNY | Confirmed |
-| Email | [her email, kept off the public repo] (used in the mocks) | Appears in the mocks; confirm it is the one she wants public |
+| Email | Not published | No address on public pages or in the repo (decided Nov 5, 2026, because of crawlers) |
 | Instagram | Not known | **Needed** |
 | LinkedIn URL | https://www.linkedin.com/in/vanessaespin (from the résumé header) | **Confirm** |
 | Languages | "English and Spanish" appears in the About mock with "[confirm]" | **Unconfirmed** |
@@ -153,13 +153,13 @@ Type details (added Nov 3): proportional lining figures, one `::selection` (crea
 
 ### 8.3 Home (Programs)
 
-1. **Header:** three flex columns, each `flex: 1 1 280px`. Left: nav (gap 22px). Center: logo, centered. Right: Instagram, LinkedIn, Email (gap 18px, right-aligned). Padding 34px 0 26px, bottom border.
+1. **Header:** three flex columns, each `flex: 1 1 280px`. Left: nav (gap 22px). Center: logo, centered. Right: Instagram, LinkedIn (gap 18px, right-aligned). Padding 34px 0 26px, bottom border.
 2. **Masthead:** padding 60px 0 52px, centered. h1 "I produce and design exhibitions and events in New York." Below it one text link: "Brand and ecommerce work, 2020–2025" (to `/brand-work`).
 3. **Cover bands**, newest first, 20px apart, bottom padding 72px. Each band is one link wrapping two blocks:
    - **Image panel** (`flex: 3 1 420px`, height 440px, padding 18px, per-program `panelColor`): holds the poster at 4:5, full panel height. Variants: *poster + photo* (Iyuana: poster beside an opening-night photo that fills the rest), *poster only* (Ayazamana, Herencia Viva: poster centered), *grid* (EACC: 3×3 grid of posters and posts, 10px gap).
    - **Info panel** (`flex: 2 1 300px`, min-height 260px, `--cream`, padding 32px): centered title, "type · role", "place · date".
    - Bands **alternate sides**: first normal, second `row-reverse`, third normal, fourth reversed. Drive this by index, not by content.
-4. **Footer:** "© 2026 Vanessa Espín · New York" left; email and Instagram right. Padding 28px 0 40px.
+4. **Footer:** "© 2026 Vanessa Espín · New York" left; Instagram right. Padding 28px 0 40px.
 
 ### 8.4 Project page (Iyuana is the template)
 
@@ -177,7 +177,7 @@ Type details (added Nov 3): proportional lining figures, one `::selection` (crea
 
 1. Header with About active.
 2. **Statement + portrait** (padding 64px 0 48px, gap 40px 56px): portrait `flex: 2 1 320px` at 24:25 (alt: "Vanessa Espín at Brooklyn Bridge Park"); text `flex: 3 1 420px`. The About's first sentence is the **h1** (30px); the rest are 20px paragraphs, 18px apart. Copy is in Appendix A.
-3. **Lower band** (top border, padding 40px 0): "Artists and partners" label plus one running paragraph of names (`flex: 2 1 420px`), and a Contact column (`flex: 1 1 300px`): email, Instagram, "New York · English and Spanish" (unconfirmed), then two outline buttons: Résumé (PDF) and LinkedIn.
+3. **Lower band** (top border, padding 40px 0): "Artists and partners" label plus one running paragraph of names (`flex: 2 1 420px`), and a Contact column (`flex: 1 1 300px`): Instagram, "New York · English and Spanish" (unconfirmed), then one outline button: LinkedIn.
 4. Footer.
 
 ### 8.6 Not in the mocks: resolved while coding (Nov 3)
@@ -185,7 +185,7 @@ Type details (added Nov 3): proportional lining figures, one `::selection` (crea
 The full reasoning is in `docs/design-enhancements.md`; the values live in `src/styles/tokens.css` and the components.
 
 - **Phone and tablet.** Exact mock values from 1240px up; below that, sizes ease down with `clamp()`. Bands stack below 720px of content with a square image plate and the poster at its own ratio; narrow panels show one fact per line; the project lead row, facts and gallery reflow at fixed thresholds. The header stacks logo, nav and social links on phones, with the nav always on one row: no menu button, nothing hidden.
-- **Unmocked pages.** Brand Work index: the masthead line plus cover bands. EACC and Flywheel: role pages on the project template (role in the subtitle, linked programs in the facts). Contact: a cream band with the email large and one filled oxblood Email button. 404: the program cards.
+- **Unmocked pages.** Brand Work index: the masthead line plus cover bands. EACC and Flywheel: role pages on the project template (role in the subtitle, linked programs in the facts). Contact: a cream band with the LinkedIn button. 404: the program cards.
 - **Hover and focus.** One language: a band or card title takes oxblood and a 1px hairline, its poster lifts 2% (4% for thumbs), one 2px oxblood focus ring. Page changes crossfade, and a poster carries from its band or card into its page (CSS view transitions; nothing moves with reduced motion).
 - **Placeholders** show only in review builds. Showcase and launch builds never render them (see section 9).
 
@@ -263,10 +263,10 @@ Recommended; swap freely, nothing above depends on it.
 /design-reference/            approved mocks as static HTML + web-size images (reference only; don't ship)
 /src/content/programs/        one .md per program (+ images)
 /src/content/brand-work/
-/src/content/site.yaml        masthead line, email, social links, bio text
+/src/content/site.yaml        masthead line, social links, bio text
 /src/pages/                   index, about, contact, 404, dynamic routes
 /src/components/  /src/styles/tokens.css
-/public/                      favicon, résumé PDF, robots.txt
+/public/                      favicon, robots.txt
 CHARTER.md
 ```
 
@@ -300,7 +300,7 @@ Dates to be set once Vanessa's availability for photos and answers is known. Shi
 - Per program: the best photo with people in it; installation view; a screening or performance moment; guests with the artists; the Instagram carousel exported flat; printed pieces (flyers, wall text, signage); a reel or video if one exists; photographer's name.
 - EACC: the posters and posts for the 3×3 grid. Flywheel: storefront screenshots she is allowed to show.
 
-**Before M3:** email confirmation, Instagram handle, LinkedIn URL.
+**Before M3:** Instagram handle, LinkedIn URL.
 **Before M5:** Ayazamana timing vs her Apr 2026 EACC end date · her exact role on Ayazamana · Iyuana's second venue · which three venues Herencia Viva used · what Ayllu Gallery is · independent start date · how the cultural work started (volunteer at the Center while at Flywheel?) · Spanish level · whether to say she's open to roles · any press · one real quote per program (optional) · numbers, with how she knows them.
 **Enchante:** whether to keep the page, and if so confirm or drop "15+ brands" and "Cook with Color."
 
@@ -328,7 +328,7 @@ Dates to be set once Vanessa's availability for photos and answers is known. Shi
 - No services list on About.
 - "Rooted in New York's Latin American arts community" stays out of the summary and belongs in the cover letter; on the site, state the Ecuador and Latin America focus as plain fact.
 - Dropped from v1: the "wall label" default, the second sans-serif, and the 3:2 cover composites. The composites existed only to work around Portfolio's cover cropping.
-- Framework and host (Nov 3): Astro 7, static, on Netlify, with a GitHub Pages copy. Contact is mailto only for v1.
+- Framework and host (Nov 3): Astro 7, static, on Netlify, with a GitHub Pages copy. Contact is LinkedIn only for now (no email address on public pages, decided Nov 5, 2026).
 - Phone layout, hover and focus, and the unmocked pages (Nov 3): resolved in section 8.6.
 - A program page without an event photo shows its poster alone, on white, at the mock's size (Nov 3).
 
@@ -389,10 +389,10 @@ I studied Communication Design at City Tech, CUNY.
 
 **About, lower band**
 - Artists and partners: Luis Medina, Yanda Montahuano, Armando Vega, Israel Vargas "Panchis", Li Can Vega; Flushing Town Hall, Ayllu Gallery, Ecuadorian American Cultural Center; {{TODO: Iyuana venues and sponsors}}
-- Contact: [her email, kept off the public repo] · Instagram {{TODO: handle}} · New York · English and Spanish {{TODO: confirm}}
-- Buttons: Résumé (PDF) · LinkedIn
+- Contact: Instagram {{TODO: handle}} · New York · English and Spanish {{TODO: confirm}}
+- Buttons: LinkedIn
 
-**Footer (all pages):** "© 2026 Vanessa Espín · New York" · "[her email, kept off the public repo] · Instagram {{TODO: handle}}"
+**Footer (all pages):** "© 2026 Vanessa Espín · New York" · "Instagram {{TODO: handle}}"
 
 **Short bio (third person, for press, partners and programs)**
 Vanessa Espín is a designer and producer in New York. In 2026 she produced *Iyuana: El Retorno de los Sueños*, a film and photography exhibition about the Sápara Nation of the Ecuadorian Amazon; curated *Herencia Viva: Threads of Memory*, painter Luis Medina's exhibition of Ecuadorian magic realism, at three venues including Flushing Town Hall; and planned *Ayazamana*, a night of live music and traditional dance, with the Ecuadorian American Cultural Center, where she was Creative & Community Coordinator. She previously spent four years at the digital commerce agency Flywheel, art-directing ecommerce for health, beauty and consumer brands. She studied Communication Design at City Tech, CUNY.
