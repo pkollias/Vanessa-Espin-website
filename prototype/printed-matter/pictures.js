@@ -76,9 +76,9 @@ function heldHTML() {
 // rate: its speed against the page (1 moves with the page and the type).
 // Three are Luis Medina's paintings; the fish is her design, so the band's credit names them both.
 const DRIFT = [
-  { file: '04-andean-figures.jpg', w: 554, h: 666, alt: 'Painting', rate: 0.6, layer: 'back', at: { x: 5, y: -12, w: 22 }, m: { x: 5, y: -30, w: 46 } },
+  { file: '04-andean-figures.jpg', w: 554, h: 662, alt: 'Painting', rate: 0.6, layer: 'back', at: { x: 5, y: -12, w: 22 }, m: { x: 5, y: -30, w: 46 } },
   { file: '06-fish-in-the-city.jpg', w: 550, h: 670, alt: 'The poster’s fish, in New York', rate: 1.4, layer: 'front', at: { x: 27, y: 30, w: 25 }, m: { x: 48, y: 38, w: 46 } },
-  { file: '05-village-painting.jpg', w: 414, h: 444, alt: 'Painting', rate: 0.85, layer: 'back', at: { x: 57, y: -18, w: 18 }, m: { x: 60, y: -9, w: 34 } },
+  { file: '05-village-painting.jpg', w: 402, h: 430, alt: 'Painting', rate: 0.85, layer: 'back', at: { x: 57, y: -18, w: 18 }, m: { x: 60, y: -9, w: 34 } },
   { file: '03-meninas-detail.jpg', w: 550, h: 666, alt: 'Meninas Ancestrales · detail', rate: 1.15, layer: 'front', at: { x: 80, y: 16, w: 19 }, m: { x: 7, y: 19, w: 38 } },
 ];
 

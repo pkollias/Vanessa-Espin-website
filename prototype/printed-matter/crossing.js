@@ -12,7 +12,7 @@ const ART = 'Luis Medina', HERS = 'Design: Vanessa Espín';
 // x, w: left edge and width in vw; a: where its centre crosses the middle of the screen, in svh from the section's
 // top; r: its speed against the page. m: the same on a phone. side: flush to that edge of the screen.
 const PIECES = [
-  { f: '05-village-painting.jpg', w0: 414, h0: 444, kind: 'art', cap: 'Painting', credit: ART, x: 58, w: 30, a: 115, r: 0.7, m: { x: 14, w: 72, a: 125, r: 0.85 } },
+  { f: '05-village-painting.jpg', w0: 402, h0: 430, kind: 'art', cap: 'Painting', credit: ART, x: 58, w: 30, a: 115, r: 0.7, m: { x: 14, w: 72, a: 125, r: 0.85 } },
   { f: '01-threads-of-memory.jpg', w0: 1060, h0: 1412, kind: 'sheet', cap: 'Threads of Memory · the campaign', credit: HERS, x: 50, w: 38, a: 205, r: 1.25, m: { x: 6, w: 88, a: 245, r: 1.15 } },
   { f: '06-fish-in-the-city.jpg', w0: 550, h0: 670, kind: 'print', cap: 'The poster’s fish, in New York', credit: HERS, x: 7, w: 27, a: 248, r: 1.4, m: { x: 30, w: 64, a: 325, r: 1.2 } },
   { f: '07-shirt-back.jpg', w0: 552, h0: 670, kind: 'print', cap: 'The shirt', credit: HERS, x: 40, w: 21, a: 292, r: 1.3, m: { x: 6, w: 60, a: 390, r: 1.25 } },
@@ -45,7 +45,7 @@ export function longHTML() {
   </section>
   <section class="pic-hold" data-pictures="long" data-tone="paper" data-sheets="park" aria-label="One painting">
     <div class="pic-hold__pin">
-      <figure class="pic-piece pic-piece--art pic-hold__fig"><img src="img/herencia-viva/04-andean-figures.jpg" alt="Painting" width="554" height="666" loading="lazy" decoding="async">
+      <figure class="pic-piece pic-piece--art pic-hold__fig"><img src="img/herencia-viva/04-andean-figures.jpg" alt="Painting" width="554" height="662" loading="lazy" decoding="async">
         <figcaption>Painting<span>${ART}</span></figcaption></figure>
     </div>
   </section>`;

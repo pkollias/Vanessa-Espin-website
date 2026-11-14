@@ -61,9 +61,9 @@ export const CHAPTERS = {
           {
             recipe: 'aim', tone: 'night', ink: 'var(--paper)', edge: 17, light: 'paper', lightInk: 'var(--oxblood)',
             pics: [
-              pic('big/encuentro.jpg', 800, 840, 'Encuentro, 2024, a painting', 'Encuentro, 2024', MEDINA, { row: 1.1 }),
+              pic('big/encuentro.jpg', 778, 821, 'Encuentro, 2024, a painting', 'Encuentro, 2024', MEDINA, { row: 1.1 }),
               pic('03-meninas-detail.jpg', 550, 666, 'Meninas Ancestrales, detail', 'Meninas Ancestrales · detail', MEDINA, { row: 1 }),
-              pic('05-village-painting.jpg', 414, 444, 'Painting: a village in green hills', 'Painting', MEDINA, { row: 0.92 }),
+              pic('05-village-painting.jpg', 402, 430, 'Painting: a village in green hills', 'Painting', MEDINA, { row: 0.92 }),
             ],
             credit: `Paintings: ${MEDINA}`,
             // his own words, from his post of June 7, 2026: "Un equipo que no descansó el mes de Mayo. Se lograron 3 exhibiciones en NYC!"

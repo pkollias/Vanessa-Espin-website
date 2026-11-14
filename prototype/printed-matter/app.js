@@ -44,11 +44,15 @@ const WITH_PERMISSION = 'Their words go here, only with their permission';
 const PROGRAMS = [
   {
     slug: 'iyuana', name: 'Iyuana', lang: 'es', poster: 'img/iyuana.jpg', short: 'Aug 2026',
+    // field=ink: the ground is the gold of the title, the type the night of the photograph
+    field: { ground: '#faa949', ink: '#16130b', ph: '#470000' },
     homeTitle: ['Iyuana: El Retorno', 'de los Sueños'],
     pageTitle: ['Iyuana'], sub: 'El Retorno de los Sueños',
     // the top left of home: What, Role, Where, When, a Who named for the program (Artists, Painter, Dance Group), Work
     specs: [['What', 'Film & photography exhibition'], ['Role', 'Producer & creative director'], ['Where', 'Long Island City, Queens'], ['When', 'August 18–24, 2026'], ['Artists', 'Yanda Montahuano<br>Li Can Vega<br>Armando Vega<br>Israel Vargas “Panchis”'], ['Work', 'Identity, poster & campaign']],
-    back: { title: 'Iyuana', sub: 'El Retorno de los Sueños', lines: ['Film & photography exhibition', 'Long Island City, Queens', 'August 18–24, 2026'] },
+    // back: the facts (back=facts) and her note (back=note): her own words, from the interview answer named in q
+    back: { title: 'Iyuana', sub: 'El Retorno de los Sueños', lines: ['Film & photography exhibition', 'Long Island City, Queens', 'August 18–24, 2026'],
+      note: 'I curated the exhibition so that the images and the film could tell most of the story. During the event, I let Yanda, a Sápara member, speak his story.', q: 'q04', place: 'Long Island City, Queens · August 2026' },
     page: {
       credits: [['Producer & creative director', 'Vanessa Espín'], ['Artists', 'Yanda Montahuano, Li Can Vega, Armando Vega, Israel Vargas “Panchis”']],
       specs: [['Type', 'Film & photography exhibition'], ['Where', '5-11 47th Ave, Long Island City'], ['When', 'August 18–24, 2026']],
@@ -63,16 +67,19 @@ const PROGRAMS = [
   },
   {
     slug: 'herencia-viva', name: 'Herencia Viva', lang: 'es', poster: 'img/herencia-viva.jpg', short: 'May 2026',
+    // the blue of the bubbles and turbans, as her campaign prints it (the site's cobalt); the type the poster's white
+    field: { ground: '#2f5fc0', ink: '#f7f6f5', ph: '#f6c324' },
     homeTitle: ['Herencia Viva:', 'Threads of Memory'],
     pageTitle: ['Herencia', 'Viva'], sub: 'Threads of Memory',
     specs: [['What', 'Painting exhibition'], ['Role', 'Curator & creative director'], ['Where', 'Flushing Town Hall'], ['When', 'May 29–31, 2026'], ['Painter', 'Luis Medina'], ['Work', 'Curation, poster & promotional materials']],
-    back: { title: 'Herencia Viva', sub: 'Threads of Memory', lines: ['Painting exhibition', 'Flushing Town Hall', 'May 29–31, 2026'] },
+    back: { title: 'Herencia Viva', sub: 'Threads of Memory', lines: ['Painting exhibition', 'Flushing Town Hall', 'May 29–31, 2026'],
+      note: 'For the Luis Medina posters I decided to use the map of Ecuador as a frame. My work partner wasn’t a fan of the idea: she thought people might confuse it for the painting. I convinced her by showing her a digital version instead of a sketch. The artist liked it, and we ran with it.', q: 'q06', place: 'Flushing Town Hall · May 2026' },
     page: {
       credits: [['Curator & creative director', 'Vanessa Espín'], ['Painter', 'Luis Medina']],
       specs: [['Type', 'Painting exhibition'], ['Where', 'Flushing Town Hall, 137-35 Northern Blvd, Flushing'], ['When', 'May 29–31, 2026'], ['With', 'Ayllu Gallery']],
       logline: phLines(['Herencia Viva,', 'in her words:', 'the paintings,', 'the painter,', 'why it mattered'], 'q03', ' · q03'),
       lead: ph('Herencia Viva in her words: what she did with Luis Medina and Ayllu Gallery, and why these paintings · 2–3 sentences', 'q03'),
-      docs: pictures('herencia-viva', 'Herencia Viva', 'contain', 'Paintings: Luis Medina', [['01-threads-of-memory.jpg', 1060, 1412, 'Threads of Memory · the campaign', 'Design: Vanessa Espín'], ['02-gallery-wall.jpg', 552, 526, 'Installation view'], ['03-meninas-detail.jpg', 550, 666, 'Meninas Ancestrales · detail'], ['04-andean-figures.jpg', 554, 666, 'Painting'], ['05-village-painting.jpg', 414, 444, 'Painting'], ['06-fish-in-the-city.jpg', 550, 670, 'The poster’s fish, in New York', 'Design: Vanessa Espín'], ['07-shirt-back.jpg', 552, 670, 'The shirt', 'Design: Vanessa Espín'], ['08-studio.jpg', 552, 666, 'Paintings in a studio']]),
+      docs: pictures('herencia-viva', 'Herencia Viva', 'contain', 'Paintings: Luis Medina', [['01-threads-of-memory.jpg', 1060, 1412, 'Threads of Memory · the campaign', 'Design: Vanessa Espín'], ['02-gallery-wall.jpg', 552, 526, 'Installation view'], ['03-meninas-detail.jpg', 550, 666, 'Meninas Ancestrales · detail'], ['04-andean-figures.jpg', 554, 662, 'Painting'], ['05-village-painting.jpg', 402, 430, 'Painting'], ['06-fish-in-the-city.jpg', 550, 670, 'The poster’s fish, in New York', 'Design: Vanessa Espín'], ['07-shirt-back.jpg', 552, 670, 'The shirt', 'Design: Vanessa Espín'], ['08-studio.jpg', 552, 666, 'Paintings in a studio']]),
       voice: ph('A line from Luis Medina, with his permission', '', WITH_PERMISSION),
       voiceBy: ph('Luis Medina · painter', '', WITH_PERMISSION),
       credit: [['Curation, poster & promotional materials', 'Vanessa Espín'], ['How the poster was made', ph('how she made it · 1–2 lines', 'q06')]],
@@ -80,10 +87,13 @@ const PROGRAMS = [
   },
   {
     slug: 'ayazamana', name: 'Ayazamana', poster: 'img/ayazamana.png', short: 'Jul 2026',
+    // the yellow of ECUADOR and the date; the type the wine of the costume
+    field: { ground: '#f3dd67', ink: '#621d2c', ph: '#470000' },
     homeTitle: ['Ayazamana'],
     pageTitle: ['Ayazamana'],
     specs: [['What', 'Live music & traditional dance'], ['Role', ph('her role on the night · q05', 'q05')], ['Where', 'Ecuadorian American Cultural Center'], ['When', 'Saturday, July 11, 2026'], ['Dance Group', 'Ayazamana Dance Group'], ['Work', 'Poster']],
-    back: { title: 'Ayazamana', lines: ['Live music & traditional dance', 'Ecuadorian American Cultural Center', 'Saturday, July 11, 2026, 8 PM'] },
+    back: { title: 'Ayazamana', lines: ['Live music & traditional dance', 'Ecuadorian American Cultural Center', 'Saturday, July 11, 2026, 8 PM'],
+      note: 'I was in the tech room above, handling the visuals shown after every dance performance. My job was to make sure everything went smoothly, so the audience could enjoy every performance. Our goal was for them to feel proud of where they come from, in an artful, lively way.', q: 'q05', place: 'Ecuadorian American Cultural Center · July 2026' },
     page: {
       credits: [['Poster', 'Vanessa Espín'], ['Performers', 'Ayazamana Dance Group']],
       specs: [['Type', 'Live music & traditional dance'], ['When', 'Saturday, July 11, 2026, 8 PM'], ['With', 'Ecuadorian American Cultural Center'], ['Her role', ph('her role on the night · q05', 'q05')]],
@@ -98,10 +108,13 @@ const PROGRAMS = [
   },
   {
     slug: 'ecuadorian-american-cultural-center', name: 'Ecuadorian American Cultural Center', card: true, short: '2025–2026',
+    // the card's one colour, its oxblood rule; the type the card's paper
+    field: { ground: '#470000', ink: '#f3efe7', ph: '#e3907d' },
     homeTitle: ['Ecuadorian American', 'Cultural Center'],
     pageTitle: ['Ecuadorian', 'American', 'Cultural Center'],
     specs: [['What', 'Cultural center'], ['Role', 'Creative & Community Coordinator'], ['Where', 'New York'], ['When', '2025–2026'], ['Who', ph('who she worked with · q02', 'q02')], ['Work', 'Programs, content, sponsors']],
-    back: { title: 'Ecuadorian American Cultural Center', lines: ['Creative & Community Coordinator', 'New York', '2025–2026'] },
+    back: { title: 'Ecuadorian American Cultural Center', lines: ['Creative & Community Coordinator', 'New York', '2025–2026'],
+      note: 'At some point in my career I realized that I wanted more of me. This time I wanted to follow my heart and join the Ecuadorian community. I wanted to tell the stories of us, Ecuadorian immigrants and those who lived there.', q: 'q02', place: 'New York · 2025–2026' },
     page: {
       credits: [['Creative & Community Coordinator', 'Vanessa Espín']],
       specs: [['Where', 'New York'], ['When', 'Sep 2025 – Apr 2026']],
@@ -184,22 +197,69 @@ addEventListener('resize', resize);
 /* =========================================================================
    Paper: a printed sheet that bends, curls and catches light
    ========================================================================= */
+/* Creased paper (home: crumpled sides, flat centre). A side poster's sheet carries folds from being rolled and handled:
+   each fold is a line on the sheet with a sharp crest and a profile that relaxes to flat (1 - |s|/w)^2 across it, fading
+   out along its length, so the light breaks on the crest the way it does on a creased print. uCrease scales them all
+   (1 at the sides, a faint memory at the centre, 0 pressed to the wall); uRoll is the sheet remembering the tube: the top
+   and bottom edges come forward, with a slow unevenness across it. The vertex shader moves the paper by them; the
+   fragment shader works the folds' light out per pixel, so a crease stays sharp at any pixel ratio. All zero by default,
+   so every other sheet in the scene is unchanged. */
+const NFOLD = 24;
+const FOLDS_GLSL = /* glsl */ `
+uniform float uCrease;
+uniform vec4 uFold[${NFOLD}];  // centre x, y (sheet units from the centre), angle, height (+ crest toward the viewer, - away)
+uniform vec2 uFoldW[${NFOLD}]; // width across, length along
+float folds(vec2 q, inout vec2 grad) {
+  float h = 0.0;
+  for (int i = 0; i < ${NFOLD}; i++) {
+    vec4 f = uFold[i];
+    if (f.w == 0.0) continue;
+    vec2 d = vec2(cos(f.z), sin(f.z)), m = vec2(-d.y, d.x), r = q - f.xy;
+    float t = dot(r, d), s = dot(r, m), w = uFoldW[i].x, L = uFoldW[i].y;
+    if (abs(s) >= w || abs(t) > 3.0 * L) continue;
+    float k = 1.0 - abs(s) / w;
+    float env = exp(-(t * t) / (L * L));
+    h += f.w * k * k * env;
+    grad += f.w * (-2.0 * k * sign(s) / w * env * m + k * k * (-2.0 * t / (L * L)) * env * d);
+  }
+  return h;
+}`;
+
 const VERT = /* glsl */ `
 uniform float uBend;
 uniform float uCurl;
 uniform float uWave;
 uniform float uTime;
+uniform float uRoll;
+uniform float uSeed;
 uniform vec2 uSize;
 varying vec2 vUv;
 varying vec3 vN;
+varying vec3 vT;
+varying vec3 vB;
 varying vec3 vP;
+${FOLDS_GLSL}
 
-vec3 deform(vec3 p, vec2 uv) {
-  // A sheet carried sideways bends around its vertical axis.
+// the sheet's own shape before any bend: the rolled memory and the folds, as a height off its plane
+float paperShape(vec2 uv, bool withFolds) {
+  vec2 q = (uv - 0.5) * uSize;
+  float yy = abs(uv.y - 0.5) * 2.0;
+  float z = uRoll * (0.045 * yy * yy + 0.03 * pow(yy, 6.0));
+  z += uRoll * 0.012 * sin(q.x * 6.3 + uSeed * 1.7) * sin(q.y * 4.1 + uSeed * 0.9);
+  z += uRoll * 0.008 * sin(q.x * 2.9 - q.y * 5.3 + uSeed * 2.3);
+  if (withFolds && uCrease > 0.001) { vec2 g = vec2(0.0); z += uCrease * folds(q, g); }
+  return z;
+}
+
+vec3 deform(vec3 p, vec2 uv, bool withFolds) {
+  float z0 = paperShape(uv, withFolds);
+  // A sheet carried sideways bends around its vertical axis (its shape rides along the bent normal).
   float b = uBend;
   if (abs(b) > 0.0005) {
     float a = p.x * b;
-    p = vec3(sin(a) / b, p.y, p.z + (1.0 - cos(a)) / b);
+    p = vec3(sin(a) / b - z0 * sin(a), p.y, p.z + (1.0 - cos(a)) / b + z0 * cos(a));
+  } else {
+    p.z += z0;
   }
   // Paper is never flat: the lower right corner lifts a little.
   float cx = smoothstep(0.05, 0.5, uv.x - 0.5);
@@ -212,14 +272,18 @@ vec3 deform(vec3 p, vec2 uv) {
 
 void main() {
   vUv = uv;
-  vec3 p = deform(position, uv);
+  vec3 p = deform(position, uv, true);
+  // the light's frame comes from the sheet without its folds: the fragment shader adds them, sharp
   float e = 0.004;
-  vec3 px = deform(position + vec3(e, 0.0, 0.0), uv + vec2(e / uSize.x, 0.0));
-  vec3 py = deform(position + vec3(0.0, e, 0.0), uv + vec2(0.0, e / uSize.y));
-  vec3 n = normalize(cross(px - p, py - p));
+  vec3 p0 = deform(position, uv, false);
+  vec3 px = deform(position + vec3(e, 0.0, 0.0), uv + vec2(e / uSize.x, 0.0), false);
+  vec3 py = deform(position + vec3(0.0, e, 0.0), uv + vec2(0.0, e / uSize.y), false);
+  vec3 n = normalize(cross(px - p0, py - p0));
   vec4 wp = modelMatrix * vec4(p, 1.0);
   vP = wp.xyz;
   vN = normalize(mat3(modelMatrix) * n);
+  vT = normalize(mat3(modelMatrix) * (px - p0));
+  vB = normalize(mat3(modelMatrix) * (py - p0));
   gl_Position = projectionMatrix * viewMatrix * wp;
 }`;
 
@@ -230,14 +294,23 @@ uniform vec3 uLight;
 uniform vec3 uCam;
 uniform float uOpacity;
 uniform float uLift;
+uniform vec2 uSize;
 varying vec2 vUv;
 varying vec3 vN;
+varying vec3 vT;
+varying vec3 vB;
 varying vec3 vP;
+${FOLDS_GLSL}
 
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 
 void main() {
   vec3 n = normalize(vN);
+  if (uCrease > 0.001) {
+    vec2 g = vec2(0.0);
+    folds((vUv - 0.5) * uSize, g);
+    n = normalize(n - uCrease * (g.x * normalize(vT) + g.y * normalize(vB)));
+  }
   vec3 col;
   if (gl_FrontFacing) {
     col = texture2D(uFront, vUv).rgb;
@@ -285,6 +358,10 @@ function paperMaterial(front, back, aspect) {
       uSize: { value: new THREE.Vector2(aspect, 1) },
       uLight: { value: LIGHT }, uCam: { value: camera.position },
       uOpacity: { value: 0 }, uLift: { value: 0 },
+      // the folds (see FOLDS_GLSL): none unless a sheet is given its own (foldsFor)
+      uCrease: { value: 0 }, uRoll: { value: 0 }, uSeed: { value: 0 },
+      uFold: { value: Array.from({ length: NFOLD }, () => new THREE.Vector4(0, 0, 0, 0)) }, // (a Vector4's w is 1 by default)
+      uFoldW: { value: Array.from({ length: NFOLD }, () => new THREE.Vector2(1, 1)) },
     },
     vertexShader: VERT, fragmentShader: FRAG, side: THREE.DoubleSide, transparent: true,
   });
@@ -295,6 +372,25 @@ function paperShadowMaterial(aspect) {
     vertexShader: SHADOW_VERT, fragmentShader: SHADOW_FRAG, transparent: true, depthWrite: false,
   });
 }
+// A poster's folds, its own every visit (seeded), as on a sheet that was rolled, crushed a little and smoothed out: four
+// long soft creases down it, sixteen short wrinkles over all of it, mostly on the slant the roll left, and a bend at each
+// corner. Heights are in sheet heights (a crest comes toward the viewer), small enough that the print stays legible.
+function foldsFor(mat, aspect, seed) {
+  const R = rng(seed), u = mat.uniforms, F = u.uFold.value, W = u.uFoldW.value;
+  const pick = (a, b) => a + (b - a) * R();
+  const sgn = () => (R() < 0.5 ? -1 : 1);
+  const slant = sgn() * pick(0.25, 0.6); // the sheet's own lean, shared by most of its wrinkles
+  let k = 0;
+  const add = (x, y, ang, h, w, L) => { if (k < NFOLD) { F[k].set(x, y, ang, h); W[k].set(w, L); k++; } };
+  for (let i = 0; i < 4; i++) add(pick(-0.4, 0.4) * aspect, pick(-0.3, 0.3), Math.PI / 2 + slant + pick(-0.3, 0.3), sgn() * pick(0.0042, 0.0085), pick(0.03, 0.06), pick(0.3, 0.6));
+  for (let i = 0; i < 16; i++) add(pick(-0.48, 0.48) * aspect, pick(-0.48, 0.48), (R() < 0.7 ? Math.PI / 2 + slant : pick(0, Math.PI)) + pick(-0.45, 0.45), sgn() * pick(0.0017, 0.0045), pick(0.012, 0.03), pick(0.05, 0.16));
+  [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([cx, cy]) => add(cx * pick(0.36, 0.46) * aspect, cy * pick(0.38, 0.47), Math.atan2(cy, -cx) + pick(-0.4, 0.4), sgn() * pick(0.003, 0.007), pick(0.02, 0.04), pick(0.07, 0.15)));
+  u.uSeed.value = (seed % 97) * 0.37;
+}
+// crease=sides: how creased a poster is where it hangs. CREASE_REST is the centre's memory of its folds; pressed flat
+// to the wall it is 0. The folds follow the poster's live distance from the centre, so the flattening travels with it.
+const CREASE_REST = 0.07;
+const smooth = (a, b, x) => { const t = clamp01((x - a) / (b - a)); return t * t * (3 - 2 * t); };
 
 class Sheet {
   constructor(front, back, aspect, seed) {
@@ -328,6 +424,9 @@ class Sheet {
     this.flat = 0; this.flatTo = 0; this.flatFrom = 0; this.flatT0 = 0;
     this.hung = 0; this.hungTgt = 0;
     this.hangRz = 0;
+    // crease=sides: 1 at the sides, CREASE_REST at the centre (set by the frame loop); the roll goes with it
+    this.crease = 0; this.creaseTgt = 0;
+    foldsFor(this.mat, aspect, Math.round(seed * 1000) + 7);
   }
   snap() { Object.assign(this.cur, this.tgt); }
   // Pinning flattens in 280 ms; lifting off the wall takes 200 ms (both ease out).
@@ -379,6 +478,10 @@ class Sheet {
     u.uLift.value = lift;
     u.uCurl.value = reduced ? 0 : (0.045 + Hh * 0.045 + lift * 0.05) * (1 - F);
     u.uWave.value = reduced ? 0 : (0.1 + Math.abs(this.bend) * 0.3) * (1 - F);
+    // the folds and the roll: a state of the paper, so they stay with reduced motion; pressed to the wall they go
+    this.crease += (this.creaseTgt - this.crease) * (reduced ? 1 : 1 - Math.exp(-dt * 14));
+    u.uCrease.value = this.crease * (1 - F);
+    u.uRoll.value = clamp01((this.crease - CREASE_REST) / (1 - CREASE_REST)) * (1 - F);
     // the shadow: softer and larger while hung, a tight contact line once pinned
     let so = 0.2 - lift * 0.05 - Hh * 0.05, sx = 0.05 + lift * 0.05 + Hh * 0.03, sy = -0.08 - lift * 0.06 - Hh * 0.04, sz = -0.4 - Hh * 0.12, blur = 0.16 + Hh * 0.08;
     if (F) { so = mix(so, 0.6, F); sx = mix(sx, 0.006, F); sy = mix(sy, -0.011, F); sz = mix(sz, -0.02, F); blur = mix(blur, 0.035, F); }
@@ -424,17 +527,43 @@ function regMark(g, x, y, r, color) {
   g.restore();
 }
 
+/* The back of a poster (back=note, the default): the reverse of the same printed sheet. The front shows faintly through,
+   mirrored, the way ink shows through paper held to the light (multiplied into the paper, softened and greyed by it).
+   On it, printed in one ink, her note at reading size in the title serif, then her name in its italic as the signature
+   and a small place-and-date line. Her words only (PROGRAMS[].back.note); without a note, or with back=facts, a poster
+   keeps the facts back. The canvas is sized for the pixel ratio, so the note stays crisp where it is read. */
+const backWidth = (aspect) => clamp(Math.ceil((innerHeight * 0.75 * aspect * Math.min(devicePixelRatio || 1, 2)) / 100) * 100, 1000, 1600);
+const backSerif = () => (TYPES[lab.type] || TYPES.gambetta).family;
+// greedy lines, then no single word left alone on the last one
+function wrapLines(g, text, maxW) {
+  const lines = [];
+  let line = '';
+  for (const w of text.split(/\s+/)) {
+    const test = line ? `${line} ${w}` : w;
+    if (line && g.measureText(test).width > maxW) { lines.push(line); line = w; } else line = test;
+  }
+  lines.push(line);
+  const n = lines.length;
+  if (n > 1 && !lines[n - 1].includes(' ')) {
+    const prev = lines[n - 2].split(' ');
+    if (prev.length > 2) { const moved = `${prev.pop()} ${lines[n - 1]}`; if (g.measureText(moved).width <= maxW) { lines[n - 2] = prev.join(' '); lines[n - 1] = moved; } }
+  }
+  return lines;
+}
 function backCanvas(p, img, aspect, index) {
-  const W = 1000, H = Math.round(W / aspect);
+  const note = VIS.back === 'note' && p.back.note;
+  const W = note ? backWidth(aspect) : 1000, H = Math.round(W / aspect);
   const c = document.createElement('canvas'); c.width = W; c.height = H;
   const g = c.getContext('2d');
   g.fillStyle = '#f1eee8'; g.fillRect(0, 0, W, H);
-  if (img) {
+  if (img && (note || img instanceof HTMLImageElement)) { // the facts back never showed the card through
     g.save(); g.translate(W, 0); g.scale(-1, 1);
-    g.globalAlpha = 0.055; g.filter = 'blur(3px) saturate(0.5)';
+    if (note) { g.globalCompositeOperation = 'multiply'; g.globalAlpha = 0.065; g.filter = `blur(${(W * 0.0068).toFixed(1)}px) saturate(0.45)`; }
+    else { g.globalAlpha = 0.055; g.filter = 'blur(3px) saturate(0.5)'; }
     g.drawImage(img, 0, 0, W, H); g.restore();
   }
   paperFibres(g, W, H, 8);
+  if (note) return noteBack(g, c, p, W, H, index);
   const ink = '#1d1a17';
   const x = W * 0.08;
   g.fillStyle = ink;
@@ -475,6 +604,46 @@ function backCanvas(p, img, aspect, index) {
   g.letterSpacing = `${W * 0.004}px`;
   g.fillText('VANESSA ESPÍN · NEW YORK', x, H - W * 0.075);
   return c;
+}
+// her note: a running head (the poster's number and name), the note ragged right a little above the middle, the signature
+function noteBack(g, c, p, W, H, index) {
+  const ink = '#1d1a17', serif = backSerif();
+  const x = W * 0.1, maxW = W * 0.8;
+  g.fillStyle = ink;
+  g.textBaseline = 'alphabetic';
+  g.fontKerning = 'normal';
+  g.font = `500 ${W * 0.02}px Switzer`;
+  g.letterSpacing = `${W * 0.0034}px`;
+  g.fillText(`N° ${String(index + 1).padStart(2, '0')}`, x, W * 0.105);
+  g.textAlign = 'right';
+  g.fillText(p.name.toUpperCase(), W - x, W * 0.105);
+  g.textAlign = 'left';
+  const size = W * 0.047, lead = size * 1.38;
+  g.font = `400 ${size}px ${serif}`;
+  g.letterSpacing = '0px';
+  const lines = wrapLines(g, p.back.note, maxW);
+  // the signature stands a line and a half under the note, the place line close under it
+  const sigGap = lead * 1.55, placeGap = W * 0.046;
+  const block = (lines.length - 1) * lead + sigGap + placeGap;
+  let y = Math.max(W * 0.3, (H - block) * 0.44);
+  for (const l of lines) { g.fillText(l, x, y); y += lead; }
+  y += sigGap - lead;
+  g.font = `italic 400 ${size * 1.14}px ${serif}`;
+  g.fillText('Vanessa Espín', x, y);
+  y += placeGap;
+  g.font = `500 ${W * 0.019}px Switzer`;
+  g.letterSpacing = `${W * 0.003}px`;
+  g.fillText(p.back.place.toUpperCase(), x, y);
+  return c;
+}
+// the backs again, after the lab changed what they show (back) or their type (type)
+function refreshBacks() {
+  sheets.forEach((s, i) => {
+    if (!s.showThrough) return;
+    const old = s.mat.uniforms.uBack.value;
+    s.mat.uniforms.uBack.value = texFromCanvas(backCanvas(PROGRAMS[i], s.showThrough, s.aspect, i));
+    old?.dispose?.();
+  });
 }
 
 // fit: the title stays inside the rule (a cover); without it, the snapshot's larger type (poster=table)
@@ -1168,6 +1337,9 @@ let sheets = [], portrait = null;
 let tiltK = 1, storyTone = 'night', loaderOn = true, aboutMode = 'drawer';
 // Visual pass 1: the lab switches (see LAB below). Each default is the new behaviour; one
 // option of each reproduces the snapshot (the site as tagged stage-2026-11-04).
+//   crease sides | off           home: the posters at the side are rolled and creased, the centred one relaxes flat (off: all smooth)
+//   back   note | facts          every poster's back: her note, signed (facts: the title and fact lines it had before)
+//   field  off | ink             home: the ground takes one ink from the centred poster, laid in one pass (default off)
 //   pin    hover | off           home: every poster hangs tilted; the one under the pointer sticks flat to the wall
 //   tape   off | on              home: the stuck poster gets four tapes (both off in the snapshot)
 //   step   notch | free          home: one wheel notch, one poster, with the flock
@@ -1176,7 +1348,7 @@ let tiltK = 1, storyTone = 'night', loaderOn = true, aboutMode = 'drawer';
 //   held   wall | cut | off   Iyuana: the pictures between the story and the text
 //   drift  chapters | long | band | off   Herencia Viva: the same
 //   scroll glide | native        program pages: the wheel glides (glide.js)
-const VIS = { pin: 'hover', tape: 'on', step: 'notch', poster: 'cover', next: 'turn', held: 'wall', wallOpen: 'hands', wallExit: 'tour', walk: 'zoom', wallStep: 'pic', drift: 'chapters', hvGround: 'cobalt', hvOpen: 'oranges', hvClose: 'mona', edge: 'bubble', docs: 'one', scroll: 'glide' };
+const VIS = { crease: 'sides', back: 'note', field: 'off', pin: 'hover', tape: 'on', step: 'notch', poster: 'cover', next: 'turn', held: 'wall', wallOpen: 'hands', wallExit: 'tour', walk: 'zoom', wallStep: 'pic', drift: 'chapters', hvGround: 'cobalt', hvOpen: 'oranges', hvClose: 'mona', edge: 'bubble', docs: 'one', scroll: 'glide' };
 // homeRates: the entry flight back to the carousel is over and the follow rates are the carousel's own
 let homeRates = false;
 // viewHash: the route of the view on screen (null before the first one); the About drawer opens over it.
@@ -1282,10 +1454,10 @@ function toPoster(i) {
   state.target = i;
   state.tw = reduced ? null : { from: state.p, to: i, t0: performance.now(), dur: GLIDE };
 }
-/* Home opens on the V and E (opening.js), which run on the wheel, a finger or the arrow keys. They end on the first poster and
-   the rest of that flick is dropped. Scrolling up past the first poster plays them in reverse. */
+/* Home opens on the V and E (opening.js), which play by themselves and hear their own input: any wheel, touch, click or key
+   skips them. They end on the first poster; if a wheel skipped them, the rest of that flick is dropped. */
 let wheelHold = 0, wantIntro = false;
-opening.onEnd = () => { wheelHold = performance.now() + 700; };
+opening.onEnd = (byWheel) => { wheelHold = byWheel ? performance.now() + 700 : 0; };
 const atIntro = () => opening.on;
 const wheelF = { acc: 0, last: -1e9, armed: true, stepAt: -1e9, avg: 0, peak: 0 };
 function wheelNotch(d, now) {
@@ -1305,7 +1477,6 @@ function wheelNotch(d, now) {
   if (Math.abs(w.acc) < NOTCH_PX) return false;
   const dir = Math.sign(w.acc);
   w.acc = 0;
-  if (dir < 0 && state.active === 0 && !state.tw) { wheelHold = now + 300; opening.back(); opening.scroll(d); w.armed = false; w.stepAt = now; return true; } // up past the first poster
   if (!stepTo(dir, now)) return false;
   w.armed = false; w.stepAt = now;
   return true;
@@ -1444,6 +1615,7 @@ function route() {
   if (!state.ready) return;
   sheets.forEach((s) => { s.liftTgt = 0; });
   const h = location.hash.replace(/^#\/?/, '');
+  if (h && atIntro()) opening.end(); // leaving home ends the opening: nothing of it waits on Back
   // a row in the Index panel is about to be hidden: focus returns to the Index button
   const fromIndex = indexPanel.contains(document.activeElement);
   closeIndex();
@@ -2008,8 +2180,6 @@ canvas.addEventListener('pointermove', (e) => {
     return;
   }
   const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
-  // a swipe down on the first poster goes back to the V and E
-  if (e.pointerType === 'touch' && state.active === 0 && dy > 40 && dy > Math.abs(dx) * 1.5) { drag = null; canvas.classList.remove('is-dragging'); opening.rewind(); return; }
   if (Math.hypot(dx, dy) > 6) drag.moved = true;
   if (!drag.moved) return;
   hideScribble();
@@ -2024,7 +2194,8 @@ function endDrag(e) {
   canvas.classList.remove('is-dragging');
   if (!d.moved) {
     if (d.onSheet) location.hash = `#/${PROGRAMS[state.active].slug}`;
-    else if (VIS.pin === 'hover' && d.press && sheets.indexOf(d.press) !== state.active) toPoster(sheets.indexOf(d.press));
+    // a poster at the side comes to the centre with the wheel's own glide (and flattens on the way)
+    else if (d.press && sheets.indexOf(d.press) !== state.active) toPoster(sheets.indexOf(d.press));
     return;
   }
   if (d.spinMode) {
@@ -2046,8 +2217,7 @@ addEventListener('wheel', (e) => {
   const dy = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
   const unit = e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? VH : 1;
   if (performance.now() < wheelHold) { wheelHold = Math.max(wheelHold, performance.now() + 160); return; } // it lasts until the wheel pauses
-  if (atIntro()) { opening.scroll(dy * unit); return; }
-  if (VIS.step !== 'notch' && dy < 0 && !drag && state.active === 0 && state.target <= 0) { clearTimeout(snapTimer); state.target = 0; opening.back(); opening.scroll(dy * unit); return; }
+  if (atIntro()) return; // the opening hears its own wheel
   if (VIS.step === 'notch') {
     // a mouse that reports a notch as a few pixels still steps: its legacy wheelDelta is a multiple of 120
     const notch = Math.abs(e.wheelDeltaY || 0) >= 120 && e.wheelDeltaY % 120 === 0;
@@ -2064,9 +2234,10 @@ addEventListener('keydown', (e) => {
   if (e.target.closest && e.target.closest('input, textarea')) return;
   if (e.key === 'Escape') { if (drawerOn) closeDrawer(); else if (!indexPanel.hidden) closeIndex(); else if (state.mode !== 'home') location.hash = '#/'; return; }
   if (state.mode !== 'home' || drawerOn) return;
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); if (atIntro()) opening.nudge(1); else goTo(state.active + 1); hideScribble(); }
-  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); if (atIntro()) opening.nudge(-1); else if (state.active === 0) { opening.back(); opening.nudge(-1); } else goTo(state.active - 1); hideScribble(); }
-  if (e.key === 'Enter' && document.activeElement === body) { if (atIntro()) opening.skip(); else location.hash = `#/${PROGRAMS[state.active].slug}`; }
+  if (atIntro()) { if (e.key.startsWith('Arrow')) e.preventDefault(); return; } // the opening hears its own keys: any key skips it
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); goTo(state.active + 1); hideScribble(); }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); goTo(state.active - 1); hideScribble(); }
+  if (e.key === 'Enter' && document.activeElement === body) location.hash = `#/${PROGRAMS[state.active].slug}`;
 });
 
 /* The next poster is the way on: it lifts a little under the pointer */
@@ -2171,6 +2342,94 @@ indexList.addEventListener('click', (e) => {
 });
 
 /* =========================================================================
+   The field (lab field=ink): home's ground takes one flat ink from the centred poster, and home's type a partner ink
+   from the same poster (PROGRAMS[].field), so each piece has its own field. A new ink is laid in one pass on a straight
+   edge (0.62 s, nearly even, easing out at the end), along the wall: the edge stands at right angles to the line the
+   posters hang on and comes in from the side the new poster comes from, so the colour arrives with it. The type changes
+   ink as the edge crosses it.
+   ========================================================================= */
+const fieldEl = $('.field');
+const FIELD_PASS = 0.62, FIELD_DELAY = 0.06;
+const E_PASS = (x) => 1 - Math.pow(1 - x, 1.5);
+// base: the settled ground; passes: inks still being laid, newest last; idx: the poster the last pass was for
+const field = { on: false, idx: -1, base: null, passes: [], offAt: 0 };
+const fieldTypes = () => [$('.nav'), $('.home__info'), ...document.querySelectorAll('.home__corner')];
+function fieldInk(el, f) {
+  el.style.setProperty('--fi', f ? f.ink : '');
+  el.style.setProperty('--fph', f ? f.ph : '');
+}
+// the wall's direction on screen (a step toward the next poster), and the screen's extent along it
+function fieldAxis() {
+  const l = layout(), len = Math.hypot(l.sx, l.sy) || 1, ax = l.sx / len, ay = -l.sy / len;
+  const ps = [0, VW * ax, VH * ay, VW * ax + VH * ay];
+  return { ax, ay, lo: Math.min(...ps), hi: Math.max(...ps) };
+}
+// the screen, cut by the edge: the side toward s (+1: ahead along the wall) keeps the new ink
+function fieldClip(ax, ay, edge, s) {
+  const R = [[0, 0], [VW, 0], [VW, VH], [0, VH]], out = [];
+  for (let i = 0; i < 4; i++) {
+    const P = R[i], Q = R[(i + 1) % 4];
+    const fp = s * (P[0] * ax + P[1] * ay - edge), fq = s * (Q[0] * ax + Q[1] * ay - edge);
+    if (fp >= 0) out.push(P);
+    if (fp >= 0 !== fq >= 0) { const t = fp / (fp - fq); out.push([P[0] + (Q[0] - P[0]) * t, P[1] + (Q[1] - P[1]) * t]); }
+  }
+  return out.length ? `polygon(${out.map(([x, y]) => `${x.toFixed(1)}px ${y.toFixed(1)}px`).join(',')})` : 'polygon(0 0,0 0,0 0)';
+}
+function fieldPass(i, now) {
+  const f = PROGRAMS[i].field, dir = field.idx < 0 || i > field.idx ? 1 : -1;
+  field.idx = i;
+  const el = document.createElement('i');
+  el.style.background = f.ground;
+  el.style.clipPath = 'polygon(0 0,0 0,0 0)';
+  fieldEl.appendChild(el);
+  const { ax, ay } = fieldAxis();
+  // the type it will pass over, where each sits along the wall; only the newest pass changes the type
+  const types = fieldTypes().map((t) => { const r = t.getBoundingClientRect(); return { t, at: (r.left + r.width / 2) * ax + (r.top + r.height / 2) * ay, done: false }; });
+  field.passes.forEach((p) => (p.types = []));
+  field.passes.push({ el, f, dir, t0: now, types });
+}
+function fieldFrame(now) {
+  const want = VIS.field === 'ink' && state.mode === 'home' && state.ready && !atIntro();
+  if (want !== field.on) {
+    field.on = want;
+    fieldEl.classList.toggle('is-on', want);
+    body.classList.toggle('is-field', want);
+    if (want) {
+      // a fresh start: paper underneath, then the centred poster's ink is laid over it
+      clearTimeout(field.offAt);
+      fieldEl.replaceChildren();
+      field.base = document.createElement('i'); field.base.style.background = 'var(--paper)';
+      fieldEl.appendChild(field.base);
+      field.passes = []; field.idx = -1;
+    } else {
+      fieldTypes().forEach((t) => fieldInk(t, null));
+      field.offAt = setTimeout(() => { if (!field.on) { fieldEl.replaceChildren(); field.passes = []; field.idx = -1; } }, 500);
+      return;
+    }
+  }
+  if (!want) return;
+  const dest = state.tw ? state.tw.to : clamp(Math.round(state.target), 0, N - 1);
+  if (dest !== field.idx) fieldPass(dest, now);
+  const { ax, ay, lo, hi } = fieldAxis();
+  let settled = -1;
+  field.passes.forEach((p, k) => {
+    const x = reduced ? 1 : clamp01(((now - p.t0) / 1000 - FIELD_DELAY) / FIELD_PASS);
+    const e = E_PASS(x);
+    // forward: the ink comes in from the far end of the wall (where the next poster waits) and runs back along it
+    const edge = p.dir > 0 ? mix(hi + 2, lo - 2, e) : mix(lo - 2, hi + 2, e);
+    p.el.style.clipPath = x >= 1 ? 'none' : fieldClip(ax, ay, edge, p.dir);
+    for (const ty of p.types) if (!ty.done && (x >= 1 || p.dir * (ty.at - edge) >= 0)) { ty.done = true; fieldInk(ty.t, p.f); }
+    if (x >= 1) settled = k;
+  });
+  // a pass that has covered the screen becomes the ground, and everything under it goes
+  if (settled >= 0) {
+    const top = field.passes[settled];
+    field.base.style.background = top.f.ground;
+    field.passes.splice(0, settled + 1).forEach((p) => p.el.remove());
+  }
+}
+
+/* =========================================================================
    Frame loop
    ========================================================================= */
 let last = performance.now();
@@ -2188,6 +2447,7 @@ function frame(now) {
   // page's own frame code runs; after that the flat state belongs to the page (setFlat).
   let flatSheet = null;
   if (!carousel && homeFlat) { homeFlat = false; stuck = null; sheets.forEach((s) => s.setFlat(0, now)); pinRelease(now); }
+  if (!carousel) sheets.forEach((s) => (s.creaseTgt = 0)); // off the wall (a cover, the pile) the paper lies smooth
   sheets.forEach((s) => (s.hungTgt = carousel && VIS.pin !== 'off' ? 1 : 0));
   if (carousel) {
     if (state.tw && state.tw.to === state.target) {
@@ -2199,6 +2459,10 @@ function frame(now) {
       state.p += (state.target - state.p) * (reduced ? 1 : 1 - Math.exp(-dt * 6.5));
     }
     sheets.forEach((s, i) => carouselTarget(s, i - state.p));
+    // crease=sides: each poster is as creased as it is far from the centre, read from where it is now (its own lag
+    // included), so it flattens while it travels in and creases while it travels out
+    const lay = layout();
+    sheets.forEach((s) => { s.creaseTgt = VIS.crease === 'sides' ? mix(CREASE_REST, 1, smooth(0.1, 0.9, Math.abs((s.cur.x - lay.cx) / lay.sx))) : 0; });
     // on a phone the first poster waits higher up, above the statement
     // the flock (step=notch): the centre sheet follows fastest, the far ones a beat later
     if (homeRates && state.mode === 'home') sheets.forEach((s, i) => (s.rate = VIS.step === 'notch' ? clamp(11 - 1.15 * Math.abs(i - state.p), 6.5, 15) : 9));
@@ -2253,6 +2517,7 @@ function frame(now) {
     pageFrame(archiveView);
   }
   if (!carousel && state.mode !== 'program') pinRelease(now); // a cover's tape goes with the page
+  fieldFrame(now);
   // a little parallax from the pointer on the carousel
   const px = state.mode === 'home' && pointer.inside && !reduced ? pointer.nx * 0.16 : 0;
   const py = state.mode === 'home' && pointer.inside && !reduced ? -pointer.ny * 0.1 : 0;
@@ -2292,6 +2557,9 @@ const GRAINS = { off: 0, soft: 0.11, strong: 0.22 };
 const TILTS = { flat: 0.35, soft: 1, strong: 1.6 };
 
 const LAB = {
+  crease: { label: 'Home: posters at the side', def: 'sides', options: [['sides', 'Creased, centre flat'], ['off', 'Smooth']], apply: (v) => { VIS.crease = v; } },
+  back: { label: 'Poster back', def: 'note', options: [['note', 'Her note'], ['facts', 'Facts']], apply: (v) => { VIS.back = v; refreshBacks(); } },
+  field: { label: 'Home: field colour', def: 'off', options: [['off', 'Paper'], ['ink', 'From the poster']], apply: (v) => { VIS.field = v; } },
   pin: { label: 'Home: poster under the pointer', def: 'hover', options: [['hover', 'Sticks to the wall'], ['off', 'Lifts']], apply: (v) => { VIS.pin = v; } },
   tape: { label: 'Home: tape on the stuck poster', def: 'on', options: [['off', 'Off'], ['on', 'Four tapes']], apply: (v) => { VIS.tape = v; } },
   step: { label: 'Home: wheel', def: 'notch', options: [['notch', 'One notch, one poster'], ['free', 'Free']], apply: (v) => { VIS.step = v; state.tw = null; } },
@@ -2316,6 +2584,12 @@ const LAB = {
     }
     root.style.setProperty('--serif', `${t.family}, 'Times New Roman', Georgia, serif`);
     root.dataset.type = v;
+    // the backs' note is set in this serif too: print them again once its stylesheet and faces have arrived
+    if (state.ready) {
+      const link = t.css && document.querySelector(`link[data-type="${v}"]`);
+      const css = link && !link.sheet ? new Promise((r) => { link.addEventListener('load', r, { once: true }); link.addEventListener('error', r, { once: true }); }) : Promise.resolve();
+      css.then(() => Promise.all([document.fonts.load(`400 40px ${t.family}`), document.fonts.load(`italic 400 40px ${t.family}`)])).then(refreshBacks, refreshBacks);
+    }
   } },
   paper: { label: 'Paper', def: 'stone', options: [['warm', 'Warm grey'], ['cream', 'Cream'], ['white', 'Cool white'], ['stone', 'Stone']], apply: (v) => root.style.setProperty('--paper', PAPERS[v]) },
   grain: { label: 'Grain', def: 'soft', options: [['off', 'Off'], ['soft', 'Soft'], ['strong', 'Strong']], apply: (v) => root.style.setProperty('--grain', GRAINS[v]) },
@@ -2401,11 +2675,9 @@ labEl.addEventListener('click', async (e) => {
     setTimeout(() => (b.textContent = 'Copy link'), 1600);
   }
 });
-// the name goes back to the V and E; Curation goes to the posters
-$('.nav__mark').addEventListener('click', () => { if (state.mode === 'home') { state.tw = null; goTo(0); opening.rewind(); } else wantIntro = true; });
-$('[data-nav="programs"]').addEventListener('click', () => {
-  if (state.mode === 'home') { if (atIntro()) opening.skip(); } else if (atIntro()) opening.finish();
-});
+// the name plays the V and E again (from another page, on arriving home); Curation goes to the posters
+$('.nav__mark').addEventListener('click', () => { if (state.mode !== 'home') wantIntro = true; else if (!atIntro()) { state.tw = null; goTo(0); opening.replay(); } });
+$('[data-nav="programs"]').addEventListener('click', () => { if (atIntro()) opening.skip(); });
 addEventListener('keydown', (e) => { if (e.shiftKey && (e.key === 'L' || e.key === 'l')) toggleLab(); });
 if (params.has('lab')) toggleLab(true);
 
@@ -2427,7 +2699,9 @@ async function boot() {
   requestAnimationFrame(frame);
 
   await Promise.race([
-    Promise.all([document.fonts.load('300 40px Gambetta'), document.fonts.load('400 40px Gambetta'), document.fonts.load('600 40px Gambetta'), document.fonts.load('700 40px Gambetta'), document.fonts.load('400 40px Zodiak'), document.fonts.load('500 20px Switzer')]),
+    Promise.all([document.fonts.load('300 40px Gambetta'), document.fonts.load('400 40px Gambetta'), document.fonts.load('600 40px Gambetta'), document.fonts.load('700 40px Gambetta'), document.fonts.load('400 40px Zodiak'), document.fonts.load('500 20px Switzer'),
+      // the backs' note and signature, in the title serif the lab has chosen
+      document.fonts.load(`400 40px ${backSerif()}`), document.fonts.load(`italic 400 40px ${backSerif()}`)]),
     new Promise((r) => setTimeout(r, 2500)),
   ]);
   const imgs = await Promise.all(PROGRAMS.map((p) => (p.poster ? loadImage(p.poster) : Promise.resolve(null))));
@@ -2436,8 +2710,11 @@ async function boot() {
     const img = imgs[i];
     const aspect = img ? img.width / img.height : 0.8;
     const front = img ? texFromImage(img) : cardFace(p, aspect);
-    const back = texFromCanvas(backCanvas(p, img, aspect, i));
+    // what shows through the back: the poster, or the card's own printed face
+    const showThrough = img || front.image;
+    const back = texFromCanvas(backCanvas(p, showThrough, aspect, i));
     const s = new Sheet(front, back, aspect, i * 1.7 + 0.3);
+    s.showThrough = showThrough;
     // hung by hand: a small z-turn of 1.5–2.5°, alternating by index
     s.hangRz = (i % 2 ? 1 : -1) * THREE.MathUtils.degToRad(1.6 + 0.8 * ((i * 0.618) % 1));
     return s;
@@ -2460,6 +2737,7 @@ async function boot() {
   statusLabel.textContent = 'Index';
   state.ready = true;
   state.mode = 'loading';
+  opening.ready(); // the poster gate: from here the V and E can lift off the first poster
   sheets.forEach((s, i) => setTimeout(() => { s.rate = 3.4 + i * 0.2; }, i * 110));
   setTimeout(() => {
     const h = location.hash.replace(/^#\/?/, '');
@@ -2467,4 +2745,6 @@ async function boot() {
     else { viewHash = ''; enterHome(); document.querySelectorAll('.home__corner').forEach((el) => reveal(el)); }
   }, reduced ? 0 : 650);
 }
-boot().catch((err) => { console.error(err); body.classList.add('is-ready'); });
+// whatever went wrong, the visitor is never left behind the opening
+boot().catch((err) => { console.error(err); body.classList.add('is-ready'); opening.end(); });
+

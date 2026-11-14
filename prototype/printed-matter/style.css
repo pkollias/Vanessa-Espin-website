@@ -55,6 +55,19 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .page-bg[data-tone='rose'] { background: var(--rose); }
 .page-bg[data-tone='cobalt'] { background: var(--cobalt); }
 .page-bg[data-tone='blood'] ~ main :focus-visible, .page-bg[data-tone='cobalt'] ~ main :focus-visible { outline-color: var(--paper); }
+/* The field (lab field=ink): home's ground in one ink from the centred poster, laid by app.js in passes (each <i> a layer,
+   cut by its edge). The type takes the partner ink (--fi, and --fph for placeholders) as the edge passes it. */
+.field { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0; transition: opacity 0.45s var(--ease-io); }
+.field.is-on { opacity: 1; }
+.field i { position: absolute; inset: 0; }
+.is-field .home__info, .is-field .home__corner { color: var(--fi, var(--ink)); transition: color 0.16s linear; }
+.is-field .home__hint { color: color-mix(in srgb, var(--fi, var(--ink)) 70%, transparent); }
+.is-field .home .ph { color: var(--fph, var(--ph)); }
+@media (min-width: 761px) { /* the nav stands on the field; a phone's nav keeps its own pill */
+  .is-field .nav__mark, .is-field .nav__link.is-current, .is-field .nav__link:hover { color: var(--fi, var(--ink)); transition: color 0.16s linear; }
+  .is-field .nav__link { color: color-mix(in srgb, var(--fi, var(--ink)) 70%, transparent); }
+  .is-field .nav__link.is-current::after { background: var(--fi, var(--oxblood)); }
+}
 .under-gl { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
 .under-gl:empty { display: none; }
 #gl { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100lvh; z-index: 0; display: block; touch-action: pan-y; }
@@ -154,18 +167,14 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .is-home .opening:not([hidden]) { display: block; }
 .opening.is-in { animation: opening-in 0.45s var(--ease) both; }
 @keyframes opening-in { from { opacity: 0; } }
+.opening.is-fading { opacity: 0; transition: opacity 0.5s linear; } /* without motion, the still columns fade through */
 .opening canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.opening__word { position: absolute; color: transparent; text-align: center; text-decoration: none; white-space: nowrap; pointer-events: none; -webkit-user-select: none; user-select: none; }
-.opening.is-live .opening__word { pointer-events: auto; }
-.opening__cue { position: absolute; right: var(--gutter); bottom: 1.2rem; font: 500 0.95rem/1.35 var(--sans); color: var(--ink-2); transition: opacity 0.3s; }
-.opening.is-moving .opening__cue { opacity: 0; }
 /* the nav reads over paper and over black, letter by letter, while the blocks pass under it (a phone's nav has its own pill) */
 @media (min-width: 761px) {
   .is-home.is-intro .nav { mix-blend-mode: difference; }
   .is-home.is-intro .nav__mark, .is-home.is-intro .nav__link:hover { color: #fff; }
   .is-home.is-intro .nav__link { color: rgb(255 255 255 / 0.7); }
 }
-@media (max-width: 760px) { .opening__cue { right: 0; left: 0; bottom: 5rem; text-align: center; } }
 .home__info { position: absolute; top: 1.15rem; left: var(--gutter); width: 26rem; }
 .home__title { width: max-content; margin: 0 0 0.75rem; font-family: var(--serif); font-weight: 300; font-size: 2.75rem; line-height: 0.96; letter-spacing: -0.03em; text-transform: uppercase; white-space: nowrap; }
 .specs { margin: 0; }

@@ -12,13 +12,19 @@ then open http://localhost:4500
 
 Try: scroll, drag a poster to flip it, hover it, click it, use the arrow keys, open Index.
 
+**The opening.** On every full load of home the V and E play by themselves (`opening.js`, about 3.4 s): eight bars
+turn, lock into four columns with Curation and Branding inside, flood the page, and the black lifts off the first poster.
+Any wheel, touch, click or key skips it. It holds on the columns until the posters are hung, and with reduced motion it
+shows the still columns, then fades. The name in the nav plays it again. The beats and their timings are `SCORE` at the
+top of `opening.js`, still to be tuned.
+
 **Home, visual pass 1.** One wheel notch moves exactly one poster: it glides 0.51 s on A24's
 `cubic-bezier(.32,.72,0,1)`, and the neighbours follow with growing lag (about 90 ms at the centre, 155 ms at the
 edges). Trackpad deltas add up to a step at 50 px; after a step the wheel is locked until the glide is mostly done
 (at most 400 ms), and the tail of a flick never re-arms it, so one flick is one step (a pause, a harder push or a
 sustained push gives the next). Arrow keys and drag are unchanged. At rest every poster hangs tilted, the centred
 one included: the carousel's tilt plus a little off the wall (more curl, a small alternating turn of about 2°, a
-softer shadow). The poster under the pointer, any of them, sticks flat to the wall: tilt, curl, wave, bend, float and
+softer shadow). The centred poster, under the pointer, sticks flat to the wall (a poster at the side never does: a click brings it to the centre): tilt, curl, wave, bend, float and
 lift ease to 0 in 280 ms with a tight contact shadow, and it eases back in 200 ms when the pointer leaves. One poster
 at a time; while the carousel moves or a drag is under way, all of them hang. On touch, the poster under the finger
 sticks while it is pressed, and a tap still opens it. There is no hover mark, and no tape
@@ -127,11 +133,11 @@ results) carry no `data-q` and say in their title what is needed (for example, p
 | # | Interview question | Fills |
 |---|---|---|
 | q01 | Her position in one breath (EN and ES) | About (drawer and page) |
-| q02 | From brand jobs to "more than a role, it's a mission" | Cultural Center story, the bridge, About bio |
+| q02 | From brand jobs to "more than a role, it's a mission" | Cultural Center story, the bridge, About bio; the back of the Center's card |
 | q03 | Herencia Viva | Herencia Viva story and lead |
-| q04 | Iyuana; how to credit her role beside the Sápara artists | Iyuana story, lead, credits; "How I work with artists" |
-| q05 | The Ayazamana night | Ayazamana story, lead, "her role on the night" |
-| q06 | The poster process | "How the poster was made" credit on each program; "How I work with artists" |
+| q04 | Iyuana; how to credit her role beside the Sápara artists | Iyuana story, lead, credits; "How I work with artists"; the back of its poster |
+| q05 | The Ayazamana night | Ayazamana story, lead, "her role on the night"; the back of its poster |
+| q06 | The poster process | "How the poster was made" credit on each program; "How I work with artists"; the back of the Herencia Viva poster |
 | q07 | Brand habits brought into a gallery | Brand work intro, the bridge |
 | q08 | A brand case | The Flywheel case: objective, insight, idea |
 | q09 | What she'd never say; where home shows | About bio |
@@ -152,6 +158,9 @@ when the switches are mixed, neither button is pressed and each switch is writte
 
 | Switch | Link value | Options |
 |---|---|---|
+| Home: posters at the side | `crease` | `sides` (default: rolled and creased at the side, flat at the centre), `off` (every poster smooth, as before) |
+| Poster back | `back` | `note` (default: her note, signed), `facts` (the title and fact lines it had before) |
+| Home: field colour | `field` | `off` (default: paper), `ink` (the ground takes one ink from the centred poster) |
 | Home: poster under the pointer | `pin` | `hover` (default: the centred poster sticks flat to the wall under the pointer), `off` (it lifts) |
 | Home: tape on the stuck poster | `tape` | `off` (default), `on` (four tapes press on) |
 | Home: wheel | `step` | `free` (default: free scroll that snaps to a poster), `notch` (one notch, one poster, with the flock) |
@@ -235,3 +244,11 @@ Defaults: Gambetta titles, stone paper, free wheel on home. The lab's Compare ro
 ## Home's statement and the next poster (Nov 5)
 
 Home opens at `INTRO` (position -1 in the carousel): the statement in the middle and the first poster waiting at the top right, in the slot the next poster always uses. The first scroll, swipe, key or click on the poster goes on to it; scrolling back returns. The name in the nav goes to the statement, Curation to the posters. "I curate experiences and brand your program" is a placeholder line until her words arrive. At the foot of a program page the next poster itself is the link (`.p-next__link` over `slot--next`); the name above it is a label.
+
+## Home v2 (Nov 10): creased sides, her note on the back, the field
+
+**Crumpled sides, flat centre** (default; lab `crease`). Learned from Justine Soulié's carousel, recorded live: the posters at the side are rolled and creased paper, and only the centred one is flat. Each poster has its own folds (`foldsFor` in `app.js`, seeded, so it creases the same way every visit): four long soft ones, sixteen short wrinkles on the slant the roll left, and a bend at each corner, with the top and bottom edges remembering the tube. The shader moves the paper by them and works out their light per pixel, so a crest catches the light and stays sharp at any pixel ratio. How creased a poster is follows its live distance from the centre, so the flattening travels with it: an incoming poster is about three quarters flat by 80% of its way and keeps a faint memory of its folds at the centre; pressed to the wall under the pointer it is fully flat. A click on a side poster brings it to the centre with the wheel's own glide, whatever `pin` says.
+
+**A story on the back** (default; lab `back`). Learned from Half of Eight's stories on the flip side. Each back is the reverse of the same printed sheet: the front shows faintly through, mirrored and softened, the way ink shows through paper, and her note is printed on it at reading size in the title serif, signed with her name in its italic over a small place-and-date line, with the poster's number and name as a running head. The notes are her own answers, lightly edited in her voice (`PROGRAMS[].back.note`; `q` names the question): Iyuana q04, Herencia Viva q06, Ayazamana q05, the Center q02. A program without a note keeps the facts back. The canvas is sized for the pixel ratio (1000 to 1600 px wide), and the backs are printed again when the lab changes the title type. On home a back is seen by dragging the centred poster over (hover it to read it flat); on a program page it flashes past in the turn.
+
+**Field colour per poster** (lab `field=ink`, default off). Learned from Francobolli Monti Lessini, where each stamp has its own flat field and a partner colour for its type. Home's ground takes one ink sampled from the centred poster (`PROGRAMS[].field`): Iyuana's title gold, Herencia Viva's cobalt, Ayazamana's yellow, the Center's oxblood; the type takes a partner ink from the same poster (black, the poster's white, the costume's wine, the card's paper). Francobolli only tweens the colour; here each new ink is laid in one pass on a straight edge, timed on Sculpting Harmony's grounds (0.62 s, nearly even, easing out): the edge stands at right angles to the line the posters hang on and comes in from the side the new poster arrives from, and each piece of type changes ink as the edge crosses it. On phones the nav keeps its pill. Leaving home, the field fades with the page; with reduced motion the ink changes at once.

@@ -1,15 +1,30 @@
 /* The home opening. A V and an E made of eight plain bars, cut out of the paper. Behind the paper sits a black sheet with
-   Curation and Branding on it, so the words only ever show through the bars. As you scroll the bars turn, grow into four
-   columns and flood the page, then the black lifts off the first poster.
-   Everything drawn is a pure function of one value, q (0 to 1), so scrolling back plays it in reverse. */
+   Curation and Branding on it, so the words only ever show through the bars. It plays by itself on every full load of home:
+   the bars turn, lock into four columns and flood the page, then the black lifts off the first poster.
+   Everything drawn is a pure function of one value, q (0 to 1), and the score below turns time into q. */
 
 const WORDS = ['Curation', 'Branding'];
 const INKS = ['#e8502a', '#f0a31c'];
 const FONT = 'Gambetta';
-const TRAVEL = 3.2; // screens of scrolling from the letters to the first poster
-const TAU = 0.16; // the lag of the site's other scrubbed motion
-const SWIPE = 1.5, FLICK = 120; // a finger moves it further than a wheel does, and a flick carries on
-const T = { go: 0.012, pose: 0.42, lock: 0.56, flood: 0.58, full: 0.88, lift: 0.905 }; // the score, in q
+const T = { go: 0.012, pose: 0.42, settle: 0.46, lock: 0.56, flood: 0.58, full: 0.88, lift: 0.905 }; // the moves, in q
+// The score, in ms: each beat runs q up to its `to`. barAt and the lift ease inside their own segments, so q stays linear
+// through them; the flood's curves only ease in, so `out` gives it an ease-out on q. The timings are still to be tuned.
+const SCORE = [
+  { beat: 'rest', ms: 450, to: 0 },
+  { beat: 'dance', ms: 950, to: T.settle },
+  { beat: 'lock', ms: 280, to: T.lock },
+  { beat: 'columns', ms: 500, to: T.flood }, // the score holds at the end of this beat until the posters are hung
+  { beat: 'flood', ms: 550, to: T.full, out: true },
+  { beat: 'black', ms: 150, to: T.lift },
+  { beat: 'lift', ms: 500, to: 1 },
+];
+const at = (name) => SCORE.slice(0, SCORE.findIndex((b) => b.beat === name)).reduce((t, b) => t + b.ms, 0);
+const GATE = at('flood'), LAND = at('lift'), TOTAL = SCORE.reduce((t, b) => t + b.ms, 0);
+const FONT_CAP = 1200; // the longest the score waits for Gambetta Bold
+const SIGN_AFTER = 1200; // how long it holds on the columns before a bar shows it is still alive
+const SKIP_RUN = 400, SKIP_END = 300; // a skip: everything up to the lift, then the lift itself
+const STILL = 1200, FADE = 500; // without motion: the still columns, then a plain fade
+const AGAIN = 350; // a replay fades in over the home, so the rest is this much longer
 
 // V stem, V hidden, V diagonal, V hidden, E stem, E top, E middle, E bottom. The two hidden bars sit behind the V at rest.
 const COL = [1, 0, 0, 1, 2, 3, 3, 2]; // where each bar ends: the two stems carry the words in the inner columns
@@ -29,10 +44,12 @@ const rad = (d) => (d * Math.PI) / 180;
 
 function createOpening(host) {
   const cv = host.querySelector('canvas'), ctx = cv.getContext('2d');
-  const links = [...host.querySelectorAll('.opening__word')];
+  const body = document.body;
   let W = 0, H = 0, D = 1, M = 0, cx = 0, cy = 0, words = [], cols = [], flood = null, bars = [];
   let paper = '#e3dfd8', black = '#121110';
-  let on = false, q = 0, target = 0, tw = null, raf = 0, last = 0, hover = -1, dir = 1, settle = 0;
+  // t: where the score is. armed: the font gate has passed. homeReady: the poster gate has passed. skipFrom: where a skip began.
+  // waited: time spent held at the poster gate.
+  let on = false, q = 0, t = 0, raf = 0, last = 0, armed = false, homeReady = false, skipFrom = null, byWheel = false, landing = false, waited = 0;
 
   function layout() {
     W = innerWidth; H = innerHeight; D = Math.min(devicePixelRatio || 1, 2);
@@ -45,7 +62,8 @@ function createOpening(host) {
     // The words stay small: the blocks are the scale of this page and the words are the labels on them.
     const fs = Math.min(W * (phone ? 0.046 : 0.034), H * 0.062) * 1.14;
     ctx.font = `700 ${fs}px ${FONT}`;
-    words = WORDS.map((s) => { const m = ctx.measureText(s); return { s, fs, up: (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2, width: m.width }; });
+    const c = ctx.measureText(WORDS[0]), up = (c.actualBoundingBoxAscent - c.actualBoundingBoxDescent) / 2; // one baseline: the g must not lift Branding
+    words = WORDS.map((s) => ({ s, fs, up, width: ctx.measureText(s).width }));
 
     // Where the blocks lock: four tall columns.
     const cw = W * (phone ? 0.25 : 0.17), cg = W * (phone ? 0.02 : 0.03), ch = Math.min(H * 0.56, cw * (phone ? 2.2 : 1.9)), d = cw + cg;
@@ -73,11 +91,6 @@ function createOpening(host) {
       const rm = Math.round((p.r + rad(SPIN[i])) / rad(90)) * rad(90); // the pose: square to the page
       const r2 = Math.round(rm / Math.PI + 0.26) * Math.PI; // the lock: upright
       return { p, g, a0, a1, r0: Math.hypot(p.x - cx, p.y - cy), r1: Math.hypot(g.x - cx, g.y - cy), rm, r2, d: STAG[i], fd: LATE[COL[i]], swing: rad(SWING[i]), bulge: BULGE[i] * M, wm: p.w * 2.2, hm: p.h * 1.22 };
-    });
-
-    links.forEach((a, i) => {
-      const w = words[i];
-      a.style.cssText = `left:${cols[i ? 2 : 1].x - w.width / 2 - 10}px;top:${cy - w.fs * 0.8}px;width:${w.width + 20}px;height:${w.fs * 1.6}px;font:700 ${w.fs}px/${w.fs * 1.6}px ${FONT}`;
     });
   }
 
@@ -119,99 +132,118 @@ function createOpening(host) {
     const rise = Math.pow(1 - seg(q, 0.012, 0.3), 2) * M * 0.74;
     ctx.textAlign = 'center';
     words.forEach((w, i) => {
-      const x = cols[i ? 2 : 1].x, y = cy + w.up + rise;
       ctx.font = `700 ${w.fs}px ${FONT}`;
       ctx.fillStyle = INKS[i];
-      ctx.fillText(w.s, x, y);
-      if (hover === i) ctx.fillRect(x - w.width / 2, y + w.fs * 0.17, w.width, Math.max(1.5, w.fs * 0.045));
+      ctx.fillText(w.s, cols[i ? 2 : 1].x, cy + w.up + rise);
     });
     ctx.restore();
-    host.classList.toggle('is-moving', q > 0.01);
-    host.classList.toggle('is-live', q > 0.2 && q < T.lift);
+    // a long wait for the posters: one thin ink bar under the columns, so the still frame reads as alive
+    if (!homeReady && waited > SIGN_AFTER) {
+      const c = cols[0], m = Math.max(c.x - c.w / 2, 16), span = W - m * 2;
+      ctx.fillStyle = black;
+      ctx.fillRect(m, c.y + c.h / 2 + Math.min(28, H * 0.03), span * (1 - Math.exp(-(waited - SIGN_AFTER) / 2500)), 2);
+    }
   }
 
+  function qAt(v) {
+    let from = 0, t0 = 0;
+    for (const b of SCORE) {
+      if (v < t0 + b.ms) { const k = clamp((v - t0) / b.ms); return lerp(from, b.to, b.out ? 1 - (1 - k) * (1 - k) : k); }
+      from = b.to; t0 += b.ms;
+    }
+    return 1;
+  }
+  // a skip runs the rest of the score fast, but the lift keeps enough time to be seen
+  const pace = () => (skipFrom === null ? 1 : t < LAND ? Math.max(1, (LAND - skipFrom) / SKIP_RUN) : Math.max(1, (TOTAL - LAND) / SKIP_END));
+  function advance(ms) {
+    t += ms * pace();
+    if (t > GATE && !homeReady) { t = GATE; waited += ms; }
+    q = qAt(t);
+    if (t >= LAND && !landing) land();
+    if (t >= TOTAL) finish();
+  }
+  // without motion the clock only counts the still frame; once it is up and the posters are hung, the page fades through
+  function advanceStill(ms) {
+    t += ms;
+    if (landing) { if (t >= STILL + FADE) finish(); return; }
+    if (t < STILL && skipFrom === null) return;
+    if (!homeReady) { waited += ms; return; }
+    t = STILL; landing = true;
+    host.classList.add('is-fading'); body.classList.remove('is-opening');
+    api.onLand();
+  }
+  function land() {
+    landing = true;
+    body.classList.remove('is-opening'); body.classList.add('is-landing');
+    api.onLand();
+  }
+
+  // The clock counts its own time from a clamped dt: a hidden tab, a bfcache restore or a stall reads as a pause, never a jump.
   function loop(now) {
     raf = 0;
     if (!on) return;
-    const dt = Math.min(0.05, (now - last) / 1000 || 0.016); last = now;
-    if (tw) {
-      const t = clamp((now - tw.t0) / tw.ms);
-      q = target = lerp(tw.from, tw.to, ease(t));
-      if (t >= 1) tw = null;
-    } else {
-      q += (target - q) * (1 - Math.exp(-dt / TAU));
-      if (Math.abs(target - q) < 0.0005) q = target;
-    }
+    const ms = Math.min(50, now - last || 16); last = now;
+    if (armed) (reduced ? advanceStill : advance)(ms);
+    if (!on) return;
     draw();
-    if (q >= 1 && !tw) { finish(); return; } // a rewind starts at 1, so a running tween is not the end
-    if (tw || q !== target) wake();
+    wake();
   }
   function wake() { if (!raf) raf = requestAnimationFrame(loop); }
 
-  function start(fade = false) {
-    on = true; tw = null; q = target = reduced ? T.lock : 0; // without motion: the columns, still, with the two words
-    host.hidden = false; host.classList.toggle('is-in', fade);
-    layout(); draw();
+  // Any wheel, touch, click or key skips, from the first frame: the site's own input is not listening yet.
+  function skip(wheel = false) {
+    if (!on) return;
+    byWheel ||= wheel;
+    if (skipFrom === null) skipFrom = Math.max(0, t);
   }
-  // from the first poster, in reverse
-  function back() {
-    if (on) return;
-    if (reduced) { start(); return; }
-    on = true; tw = null; q = target = 1;
-    host.hidden = false; host.classList.remove('is-in');
+  const inLab = (e) => e.target.closest?.('.lab');
+  const onWheel = (e) => { if (inLab(e)) return; e.preventDefault(); skip(true); };
+  const onPress = (e) => { if (!inLab(e)) skip(); };
+  const onKey = (e) => { if (e.key !== 'Tab' && !/^(Shift|Control|Alt|Meta)$/.test(e.key) && !e.metaKey && !e.ctrlKey && !e.altKey) skip(); };
+  function listen(v) {
+    const set = v ? addEventListener : removeEventListener;
+    set('wheel', onWheel, { passive: false, capture: true });
+    set('pointerdown', onPress, true);
+    set('keydown', onKey, true);
+  }
+
+  function start(fade = false) {
+    if (on) stop();
+    on = true; skipFrom = null; byWheel = false; landing = false; waited = 0;
+    t = fade ? -AGAIN : 0; q = reduced ? T.lock : 0; // without motion: the columns, still, with the two words
+    host.hidden = false; host.classList.toggle('is-in', fade);
+    body.classList.add('is-opening');
     layout(); draw();
+    listen(true);
+    last = performance.now();
+    wake();
+  }
+  function stop() {
+    on = false; landing = false;
+    cancelAnimationFrame(raf); raf = 0;
+    host.hidden = true; host.classList.remove('is-in', 'is-fading');
+    body.classList.remove('is-opening', 'is-landing');
+    listen(false);
   }
   function finish() {
-    on = false; tw = null; q = target = 1;
-    host.hidden = true;
-    api.onEnd();
+    q = 1;
+    stop();
+    api.onEnd(byWheel);
   }
-  function to(v, ms) {
-    if (reduced) { if (v >= 1) finish(); else start(); return; }
-    clearTimeout(settle);
-    tw = { from: q, to: v, t0: performance.now(), ms };
-    wake();
-  }
-  function scroll(px) {
-    if (reduced) { if (px > 0) finish(); return; }
-    tw = null;
-    if (px) dir = Math.sign(px);
-    target = clamp(target + px / (TRAVEL * H));
-    wake();
-    // the black never stops half lifted: the poster under it has to be there to click
-    clearTimeout(settle);
-    settle = setTimeout(() => { if (on && !tw && target > T.lift && target < 1) to(dir > 0 ? 1 : T.full, 500); }, 260);
-  }
-
-  links[0].addEventListener('click', (e) => { e.preventDefault(); to(1, 1400); });
-  links.forEach((a, i) => {
-    a.addEventListener('pointerenter', () => { hover = i; if (on) draw(); });
-    a.addEventListener('pointerleave', () => { hover = -1; if (on) draw(); });
-  });
-
-  // a finger scrubs it; the wheel and the keys come in through scroll() from the site
-  let touch = null;
-  host.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse') touch = { y: e.clientY, t: e.timeStamp, v: 0 }; });
-  host.addEventListener('pointermove', (e) => {
-    if (!touch) return;
-    const dy = touch.y - e.clientY, ms = Math.max(1, e.timeStamp - touch.t);
-    touch.v = lerp(touch.v, dy / ms, 0.4); touch.y = e.clientY; touch.t = e.timeStamp;
-    if (dy) scroll(dy * SWIPE);
-  });
-  const lift = () => { if (touch && Math.abs(touch.v) > 0.15) scroll(touch.v * FLICK * SWIPE); touch = null; };
-  host.addEventListener('pointerup', lift);
-  host.addEventListener('pointercancel', () => { touch = null; });
 
   addEventListener('resize', () => { if (on) { layout(); draw(); } });
-  document.fonts.load(`700 100px ${FONT}`).then(() => { if (on) { layout(); draw(); } }).catch(() => {});
+  // The font gate. Whatever the cap decided, the words are measured again when Gambetta Bold does arrive.
+  const font = document.fonts.load(`700 100px ${FONT}`).then(() => { if (on) { layout(); draw(); } }).catch(() => {});
+  Promise.race([font, new Promise((r) => setTimeout(r, FONT_CAP))]).then(() => { armed = true; });
 
   const api = {
     get on() { return on; },
-    onEnd() {},
-    start, back, finish, scroll, to,
-    nudge: (d) => scroll(d * TRAVEL * H * 0.14),
-    skip: () => to(1, 1400),
-    rewind: () => { back(); to(0, 1500); },
+    onLand() {}, // the lift is starting
+    onEnd() {}, // the black has gone; true if a wheel skipped it, so its tail is still coming
+    start, skip,
+    ready: () => { homeReady = true; }, // the poster gate: boot calls this when the posters are hung
+    replay: () => start(true),
+    end: () => { if (on) stop(); }, // a route left home: no trace of the opening stays behind
     repaint: () => { if (on) { layout(); draw(); } },
   };
   return api;
