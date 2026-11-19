@@ -1111,6 +1111,9 @@ export function createAboutController(ctx = {}) {
       stageEl.setAttribute('aria-hidden', 'true');
     }
     ctx?.requestRender?.();
+    // Tell the landing, whichever way About was closed (its own Close button and a click outside end here too).
+    // Without this the landing kept behaving as if About were open: the address stayed on #about and the masthead stayed covered.
+    ctx?.onCloseStateChange?.(false);
   }
 
   function tick(nowMs = performance.now(), dtArg = 1 / 60) {
