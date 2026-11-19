@@ -560,6 +560,13 @@ body.clean-hud .bench, body.in-film .bench { opacity: 0; pointer-events: none; t
   background: #151310; color: #f8f5ef; border-color: #151310;
 }
 
+/* Phones: the three film buttons stay on one line and inside the screen */
+@media (max-width: 520px) {
+  .film-nav { top: 12px; left: 10px; right: 10px; gap: 6px; }
+  .film-return, .film-media, .film-next { padding: 7px 10px; gap: 5px; font-size: 11.5px; white-space: nowrap; }
+  .film-next { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+}
+
 @media (max-width: 860px) {
   .placard {
     top: auto; bottom: 58px; left: var(--gutter); right: var(--gutter);

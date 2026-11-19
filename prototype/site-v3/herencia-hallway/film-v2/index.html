@@ -827,6 +827,57 @@ import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
     return { ...fl, yaw: fl.yaw + flightYawShift, t: tc };
   }
 
+  /* =========================================================================
+   * TALL SCREENS (PHONES)
+   * The film is composed for a wide screen. Held upright, a phone keeps the height and loses the sides, so
+   * the two women became two cut strips and the poster stood half off the edge. On a tall screen the lens
+   * widens and the camera re-aims at each scene's subject. A wide screen (width >= height) is untouched.
+   *   widen: how much more the lens takes in, as a multiple of its tangent, tuned on a 390 x 844 phone.
+   *          Other tall screens get the same view from side to side, never a narrower lens than the film's.
+   *   ds, dx: metres added along / across the hall      yaw, pitch: degrees added
+   * Opening: the two paintings by the door cannot both fit, so the phone opens on the one the poster is made from.
+   * Two women: 2.9 m of paintings in a room 1.7 m deep. The camera arrives on the second woman as her eyes
+   * turn, then slides, square to the wall, onto the first, where the doves leave.
+   * ========================================================================= */
+  const PHONE_KEYS = [
+    { t: 0.0,                   widen: 1.75, ds: -0.76, dx: 0.00, yaw:  0.0, pitch:  0.0 },
+    { t: 1.5,                   widen: 1.75, ds: -0.82, dx: 0.00, yaw:  0.0, pitch:  0.0 },
+    { t: 3.0,                   widen: 1.65, ds:  0.00, dx: 0.00, yaw:  0.0, pitch:  0.0 },
+    { t: T_CRAB_START,          widen: 1.60, ds:  0.00, dx: 0.00, yaw:  0.0, pitch:  0.0 },
+    { t: T_CRAB_END,            widen: 1.60, ds:  0.00, dx: 0.00, yaw:  0.0, pitch:  0.0 },
+    { t: T_EYES_START,          widen: 2.03, ds:  0.74, dx: 0.00, yaw:  0.0, pitch:  0.0 },
+    { t: T_EYES_START + 0.25,   widen: 2.03, ds:  0.74, dx: 0.00, yaw:  0.0, pitch:  0.0 },
+    { t: T_BLINK_START + 0.20,  widen: 1.95, ds: -0.72, dx: 0.00, yaw:  0.0, pitch:  0.0 },
+    { t: T_RELEASE + 0.10,      widen: 1.95, ds: -0.72, dx: 0.00, yaw:  0.0, pitch:  0.0 },
+    { t: T_RELEASE + 1.60,      widen: 1.35, ds:  0.00, dx: 0.00, yaw:  0.0, pitch:  0.0 },
+    { t: T_LANDING - 3.20,      widen: 1.30, ds:  0.00, dx: 0.00, yaw:  0.0, pitch:  0.0 },
+    { t: T_LANDING,             widen: 1.18, ds:  0.00, dx: 0.10, yaw:  9.0, pitch: -2.0 },
+  ];
+  const PHONE_FIELDS = ['widen', 'ds', 'dx', 'yaw', 'pitch'];
+  const PHONE_ASPECT = 390 / 844;
+  function phoneFraming(c, t) {
+    const aspect = window.innerWidth / Math.max(1, window.innerHeight);
+    if (aspect >= 1.0) return c;
+    const p = 1.0 - sm5((aspect - 0.80) / 0.20);       // re-aiming is fully on for every upright phone and tablet
+    let i = 0;
+    while (i < PHONE_KEYS.length - 2 && PHONE_KEYS[i + 1].t < t) i++;
+    const a = PHONE_KEYS[i], b = PHONE_KEYS[i + 1];
+    const x = clamp((t - a.t) / Math.max(1e-4, b.t - a.t), 0, 1);
+    const u = x * x * (3 - 2 * x);
+    const k = {};
+    for (const f of PHONE_FIELDS) k[f] = a[f] + (b[f] - a[f]) * u;
+    const tan0 = Math.tan(THREE.MathUtils.degToRad(c.fov) * 0.5);
+    const tanV = Math.max(tan0, tan0 * k.widen * PHONE_ASPECT / aspect);
+    return {
+      ...c,
+      fov: THREE.MathUtils.radToDeg(2 * Math.atan(tanV)),
+      s: c.s + k.ds * p,
+      x: c.x + k.dx * p,
+      yaw: c.yaw + k.yaw * p,
+      pitch: c.pitch + k.pitch * p,
+    };
+  }
+
   // Continuous Whole-Movie Sun Trajectory: Full-Height Right-Wall Komorebi Dapple during Opening & Crab -> Exact (9.8°, -4.9°) Landing!
   const SUN_MOVIE_KEYS = [
     { t: 0.00,                                  elev: 8.40, az:  6.90 },
@@ -4418,7 +4469,7 @@ import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 
   function evaluateAndRenderScene(animClockSec, livingClock = animClockSec) {
     const t = STATE.t;
-    const c = evalMovieCam(t);
+    const c = phoneFraming(evalMovieCam(t), t);
     camera.fov = c.fov;
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
@@ -4948,6 +4999,7 @@ import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
       return true;
     },
     evalMovieCam,
+    phoneKeys: PHONE_KEYS,
     evalSunAtMovieTime,
     sampleRightWallSunAt,
     setLook: async (look = {}) => {

@@ -352,14 +352,40 @@ scene.fog = new THREE.FogExp2(0x040303, 0.0195);
 const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.08, 80);
 camera.rotation.order = 'YXZ';
 
-let portraitFovBoost = 0;
 let needsRender = true;
 function resize() {
   renderer.setSize(innerWidth, innerHeight, false);
   camera.aspect = innerWidth / Math.max(1, innerHeight);
-  portraitFovBoost = camera.aspect < 1.0 ? clamp((1.0 - camera.aspect) * 26, 0, 18) : 0;
   camera.updateProjectionMatrix();
   needsRender = true;
+}
+
+// ---- TALL SCREENS (PHONES) ----
+// The film is composed for a wide screen. Held upright, a phone keeps the height and loses the sides: the stage
+// picture ran off the right edge and the closing poster off the left. On a tall screen the camera turns to put
+// the subject in the middle (the stage, then the poster by the doors), and the lens opens just enough to hold
+// the whole stage picture. A wide screen (width >= height) is untouched.
+const TALL = { stageX: 0.0, stageHalfW: 3.675, stageZ: -5.95, posterX: 2.19, posterZ: 12.76 };
+function frameForTallScreen(u, fov, pos, look) {
+  const aspect = camera.aspect;
+  if (aspect >= 1.0) return fov;
+  const p = 1.0 - sm5((aspect - 0.80) / 0.20);
+  const bearing = (x, z) => Math.atan2(x - pos.x, -(z - pos.z)); // angle of a point, seen from above, from straight ahead
+  const b0 = bearing(look.x, look.z);
+  const bL = bearing(TALL.stageX - TALL.stageHalfW, TALL.stageZ);
+  const bR = bearing(TALL.stageX + TALL.stageHalfW, TALL.stageZ);
+  const wStage = 1.0 - ss(0.66, 0.78, u);
+  const wPoster = ss(13.4, 15.6, pos.z);                           // only once the camera has backed out past the doors
+  const turn = (((bL + bR) * 0.5 - b0) * wStage + (bearing(TALL.posterX, TALL.posterZ) - b0) * wPoster) * p;
+  const r = Math.hypot(look.x - pos.x, look.z - pos.z), b1 = b0 + turn;
+  look.set(pos.x + r * Math.sin(b1), look.y, pos.z - r * Math.cos(b1));
+  // Lens: the stage fills about three quarters of the width from the booth and the whole width up close,
+  // then eases back to the film's own lens as the camera leaves.
+  const tan0 = Math.tan(fov * Math.PI / 360);
+  const tanFit = Math.tan((bR - bL) * 0.5) * 1.06 / aspect * lerp(1.30, 1.0, ss(0.0, 0.34, u));
+  const wFit = (1.0 - ss(0.50, 0.70, u)) * p;
+  const tanV = Math.min(Math.tan(40 * Math.PI / 180), Math.max(tan0, lerp(tan0, tanFit, wFit)));
+  return Math.atan(tanV) * 360 / Math.PI;
 }
 window.addEventListener('resize', resize);
 // Keep the film smooth: when frames run late, draw at a lower resolution (shared helper; ?pace=off on the address disables it)
@@ -913,7 +939,7 @@ function applyMovieTime(tSec) {
   const { fov } = activeTraj.sampleAtTime01(u, _pos, _look);
 
   camera.position.copy(_pos);
-  camera.fov = fov + portraitFovBoost;
+  camera.fov = frameForTallScreen(u, fov, _pos, _look);
   camera.updateProjectionMatrix();
   camera.lookAt(_look);
 

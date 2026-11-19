@@ -1304,7 +1304,7 @@ addEventListener('popstate', () => siteNav.onPop());
 
 /* In the visitor's view (?clean=1, or H) a film's own review controls are hidden too. They stay in the page, because the
    end of a film is read from its time label. The films themselves are not edited: the rule is added to the film's page here. */
-const FILM_CLEAN_CSS = 'html.site-clean .cinema-pill, html.site-clean .review-pill, html.site-clean #hud, html.site-clean #hudMin, html.site-clean .prog-bar { visibility: hidden !important; pointer-events: none !important; }';
+const FILM_CLEAN_CSS = 'html.site-clean .cinema-pill, html.site-clean .review-pill, html.site-clean #hud, html.site-clean #hudMin, html.site-clean .prog-bar { visibility: hidden !important; pointer-events: none !important; } @media (max-width: 520px) { html.site-clean #head { top: 54px !important; } }';  // on a phone the film's corner title sits below the site's buttons
 function dressFilm(ifr = filmFrame()) {
   try {
     const d = ifr && ifr.contentDocument; if (!d || !d.head) return;
