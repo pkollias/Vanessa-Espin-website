@@ -1,0 +1,1043 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/Vanessa-Espin-website/favicon.ico">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ayazamana — Traditional Dance</title>
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=gambetta@300,400&f[]=switzer@400,500&display=swap">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+  }
+}
+</script>
+<style>
+  :root {
+    --paper: #ece4d7;
+    --soft: rgba(236, 228, 215, 0.66);
+    --faint: rgba(236, 228, 215, 0.38);
+    --night: #040303;
+    --accent: #d6a85a;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+    background: var(--night);
+    color: var(--paper);
+    font-family: Switzer, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "kern", "liga";
+  }
+
+  #gl {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100lvh;
+    display: block;
+    z-index: 0;
+  }
+
+  .ui {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .ui > * {
+    position: absolute;
+    will-change: opacity, transform;
+  }
+
+  .intro {
+    left: clamp(22px, 6.2vw, 96px);
+    bottom: clamp(42px, 7.8vh, 84px);
+    max-width: 680px;
+    opacity: 1;
+    text-shadow: 0 2px 32px rgba(4, 3, 3, 0.92);
+  }
+  .intro .k {
+    margin: 0 0 1.4em;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--soft);
+  }
+  .intro h1 {
+    margin: 0;
+    font-family: Gambetta, Georgia, serif;
+    font-weight: 300;
+    font-size: clamp(58px, 8.8vw, 138px);
+    line-height: 0.88;
+    letter-spacing: -0.028em;
+  }
+  .intro .s {
+    margin: 0.48em 0 0;
+    font-family: Gambetta, Georgia, serif;
+    font-weight: 300;
+    font-size: clamp(19px, 1.85vw, 27px);
+    line-height: 1.25;
+    letter-spacing: 0.004em;
+    color: rgba(236, 228, 215, 0.88);
+    max-width: 34ch;
+  }
+  .intro .f {
+    margin: 2.1em 0 0;
+    font-size: 12px;
+    letter-spacing: 0.07em;
+    color: var(--soft);
+    font-variant-numeric: lining-nums;
+  }
+  .scroll-cue {
+    margin-top: 1.4em;
+    font-size: 10.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  .head {
+    top: 26px;
+    left: clamp(20px, 2.4vw, 36px);
+    display: flex;
+    gap: 12px;
+    align-items: baseline;
+    opacity: 0;
+    text-shadow: 0 1px 18px rgba(4, 3, 3, 0.9);
+  }
+  .head .t { font-family: Gambetta, Georgia, serif; font-size: 18px; }
+  .head .s { font-family: Gambetta, Georgia, serif; font-weight: 300; font-size: 15px; color: var(--soft); }
+
+  .line {
+    left: clamp(22px, 5.2vw, 82px);
+    bottom: clamp(44px, 8vh, 84px);
+    margin: 0;
+    width: min(29vw, 400px);
+    opacity: 0;
+    text-shadow: 0 2px 28px rgba(4, 3, 3, 0.95);
+  }
+  .line p {
+    margin: 0;
+    font-family: Gambetta, Georgia, serif;
+    font-weight: 300;
+    font-size: clamp(18px, 1.55vw, 24px);
+    line-height: 1.35;
+    letter-spacing: -0.002em;
+    text-indent: -0.38em;
+    text-wrap: pretty;
+  }
+  .line cite {
+    display: block;
+    margin-top: 0.85em;
+    font-style: normal;
+    font-family: Switzer, sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  .label {
+    left: clamp(22px, 3.8vw, 60px);
+    bottom: clamp(34px, 6.5vh, 68px);
+    width: min(23vw, 310px);
+    opacity: 0;
+    text-shadow: 0 2px 26px rgba(4, 3, 3, 0.95);
+  }
+  .label .t { margin: 0; font-family: Gambetta, Georgia, serif; font-size: 26px; line-height: 1.05; }
+  .label .s { margin: 0.28em 0 0; font-family: Gambetta, Georgia, serif; font-weight: 300; font-size: 16px; color: var(--soft); }
+  .label .w { margin: 1.5em 0 0; font-size: 12px; line-height: 1.6; letter-spacing: 0.04em; color: var(--soft); font-variant-numeric: lining-nums; }
+  .label .k { margin: 1.5em 0 0.55em; font-size: 10px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--faint); }
+  .label ul { list-style: none; margin: 0; padding: 0; font-size: 13px; line-height: 1.68; letter-spacing: 0.01em; }
+  .label ul span { color: var(--soft); }
+
+  .review-pill {
+    position: fixed;
+    top: 20px;
+    right: 22px;
+    z-index: 10;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    background: rgba(12, 10, 9, 0.82);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(236, 228, 215, 0.14);
+    border-radius: 999px;
+    padding: 5px 11px;
+    font-size: 11.5px;
+    color: var(--soft);
+  }
+  body.clean .review-pill { display: none; }
+  .review-pill button, .review-pill a {
+    background: transparent;
+    border: 0;
+    color: var(--soft);
+    font: inherit;
+    cursor: pointer;
+    padding: 2px 7px;
+    border-radius: 999px;
+    text-decoration: none;
+  }
+  .review-pill button:hover, .review-pill a:hover { color: var(--paper); }
+  .review-pill button.active {
+    background: rgba(214, 168, 90, 0.22);
+    color: #f6dfaf;
+  }
+  .review-pill select {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(236, 228, 215, 0.20);
+    color: var(--paper);
+    font: inherit;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    cursor: pointer;
+    outline: none;
+  }
+  .review-pill select option { background: #141110; color: #ece4d7; }
+  .review-pill .sep { opacity: 0.28; }
+  .review-pill .time {
+    font-variant-numeric: tabular-nums;
+    color: var(--faint);
+    padding: 0 3px;
+    min-width: 68px;
+    text-align: center;
+  }
+
+  .prog-bar {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    height: 10px;
+    width: 100%;
+    z-index: 8;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-end;
+  }
+  body.clean .prog-bar { display: none; }
+  .prog-track {
+    width: 100%;
+    height: 2px;
+    background: rgba(236, 228, 215, 0.08);
+    transition: height 0.15s ease;
+  }
+  .prog-bar:hover .prog-track { height: 4px; }
+  .prog-fill {
+    height: 100%;
+    width: 0%;
+    background: rgba(214, 168, 90, 0.78);
+  }
+
+  @media (max-aspect-ratio: 1/1) {
+    .head { top: 18px; left: 16px; }
+    .head .s { display: none; }
+    .intro { left: 18px; right: 18px; bottom: 56px; }
+    .line { left: 18px; right: 18px; width: auto; bottom: 52px; }
+    .label { left: 18px; right: 18px; width: auto; bottom: 28px; }
+    .label .t, .label .s { display: none; }
+  }
+</style>
+<style>.cinema-pill, .review-pill, #hud, #hudMin, .prog-bar { visibility: hidden !important; pointer-events: none !important; }</style>
+</head>
+<body>
+
+<canvas id="gl" aria-hidden="true"></canvas>
+
+<main class="ui">
+  <section class="intro" id="intro">
+    <p class="k">Traditional Dance &amp; Live Music</p>
+    <h1>Ayazamana</h1>
+    <p class="s">Ecuadorian traditional dance from all regions, brought to New York City.</p>
+    <p class="f">Ecuadorian American Cultural Center&ensp;&middot;&ensp;Flushing Town Hall</p>
+  </section>
+
+  <div class="head" id="head">
+    <span class="t">Ayazamana</span>
+    <span class="s">Traditional Dance</span>
+  </div>
+
+  <blockquote class="line" id="line-pride">
+    <p>&ldquo;Our goal was to make sure the audience felt pride in where they come from, in an artful, lively manner.&rdquo;</p>
+    <cite>Vanessa Esp&iacute;n &middot; Identity, Poster &amp; Curation</cite>
+  </blockquote>
+
+  <blockquote class="line" id="line-booth">
+    <p>&ldquo;I was in the tech room above, handling the visuals after every dance. My job was to make sure everything went smoothly so the audience could enjoy every performance.&rdquo;</p>
+    <cite>Backstage w/ Crew &middot; Flushing Town Hall</cite>
+  </blockquote>
+
+  <section class="label" id="label">
+    <p class="t">Ayazamana</p>
+    <p class="s">Traditional Dance</p>
+    <p class="w">Ecuadorian American Cultural Center<br>Flushing Town Hall, Queens</p>
+    <p class="k">Credits</p>
+    <ul>
+      <li><span>Identity, Poster &amp; Curation</span> &mdash; Vanessa Esp&iacute;n</li>
+      <li><span>Dance</span> &mdash; Ayazamana Dance Group</li>
+      <li><span>Live Music</span> &mdash; Amawta Roots</li>
+    </ul>
+  </section>
+</main>
+
+<div class="review-pill" id="review-pill">
+  <button id="btn-play" class="active" title="Play / Pause (Space)">Pause</button>
+  <button id="btn-replay" title="Replay from beginning">&#8634; Replay</button>
+  <span class="time" id="time-lbl">0.0s / 26.0s</span>
+  <span class="sep">|</span>
+  <a href="/Vanessa-Espin-website/flushing-theater/trajectories/" style="color:#93c5fd;font-weight:500">3D Plot &nearr;</a>
+  <span class="sep">|</span>
+  <button class="active" data-fmt="01">01 Wash</button>
+  <button data-fmt="02">02 Banners</button>
+  <span class="sep">|</span>
+  <button class="active" id="btn-tex" title="Toggle zero-VRAM tactile shaders & contact shadows (or press T)">Tex: ON</button>
+  <span class="sep">|</span>
+  <a href="/Vanessa-Espin-website/flushing-theater/">&larr; Lab</a>
+</div>
+
+<div class="prog-bar" id="prog-bar" title="Click or drag to scrub movie"><div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div></div>
+
+<!-- Event media: the "Media" link, the strip and the pop-up (shared module in /event-media/).
+     It loads before the film's own script so it can pause the film's video while the viewer is open. -->
+<script type="module">import { mountEventMedia } from '/Vanessa-Espin-website/event-media/event-media.js?v=6'; mountEventMedia({ manifest: '/Vanessa-Espin-website/event-media/manifests/ayazamana.json' });</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { TRAJECTORIES, DEFAULT_FILM_DURATION } from '../trajectories/paths.js';
+import { addPavlosSeatRoseEasterEgg } from '../trajectories/rose.js';
+import { createTactileMaterialRig } from '../trajectories/tactile.js';
+
+const qs = new URLSearchParams(location.search);
+if (qs.get('clean') === '1') document.body.classList.add('clean');
+const tactileRig = createTactileMaterialRig(qs.get('tex') !== '0');
+
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ss = (a, b, x) => { const t = clamp((x - a) / (b - a)); return t * t * (3 - 2 * t); };
+
+const canvas = document.getElementById('gl');
+const introEl = document.getElementById('intro');
+const headEl = document.getElementById('head');
+const lineBoothEl = document.getElementById('line-booth');
+const linePrideEl = document.getElementById('line-pride');
+const labelEl = document.getElementById('label');
+const progFillEl = document.getElementById('prog-fill');
+
+// Fast, high-contrast renderer: NO RoomEnvironment studio IBL, capped DPR<=1.5, hardware PCFSoftShadowMap, 15% subtle lift (0.98 exposure)!
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance', stencil: false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.98;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFShadowMap;   // this three.js version has folded the soft variant into this one; naming it directly avoids a console warning
+const maxAniso = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x030202);
+scene.fog = new THREE.FogExp2(0x040303, 0.0195);
+
+const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.08, 80);
+camera.rotation.order = 'YXZ';
+
+let portraitFovBoost = 0;
+let needsRender = true;
+function resize() {
+  renderer.setSize(innerWidth, innerHeight, false);
+  camera.aspect = innerWidth / Math.max(1, innerHeight);
+  portraitFovBoost = camera.aspect < 1.0 ? clamp((1.0 - camera.aspect) * 26, 0, 18) : 0;
+  camera.updateProjectionMatrix();
+  needsRender = true;
+}
+window.addEventListener('resize', resize);
+// Keep the film smooth: when frames run late, draw at a lower resolution (shared helper; ?pace=off on the address disables it)
+import('/Vanessa-Espin-website/shared/film-pace.js').then(({ keepPace }) => keepPace({ renderer, min: 1, apply: resize })).catch(() => {});
+resize();
+
+// ---- DARK BLENDER CHIAROSCURO LIGHT RIG (+15% WHISPER OF SHADOW SEPARATION OVER ORIGINAL) ----
+const hemiSky = new THREE.Color().setRGB(0.023, 0.014, 0.024, THREE.LinearSRGBColorSpace);
+const hemiGnd = new THREE.Color().setRGB(0.006, 0.004, 0.004, THREE.LinearSRGBColorSpace);
+const hemiLight = new THREE.HemisphereLight(hemiSky, hemiGnd, 0.19);
+scene.add(hemiLight);
+
+function linColor(r, g, b) {
+  return new THREE.Color().setRGB(r, g, b, THREE.LinearSRGBColorSpace);
+}
+
+function addBlenderSpot(x, y, z, tx, ty, tz, r, g, b, watts, fullConeDeg, blend = 0.62, castShadow = false) {
+  const candela = watts / (4.0 * Math.PI);
+  const halfAngleRad = THREE.MathUtils.degToRad(fullConeDeg * 0.5);
+  const sp = new THREE.SpotLight(linColor(r, g, b), candela, 0.0, halfAngleRad, blend, 2.0);
+  sp.position.set(x, y, z);
+  sp.target.position.set(tx, ty, tz);
+  if (castShadow) {
+    sp.castShadow = true;
+    sp.shadow.mapSize.set(1024, 1024);
+    sp.shadow.camera.near = 0.4;
+    sp.shadow.camera.far = 22.0;
+    sp.shadow.bias = -0.0004;
+  }
+  scene.add(sp, sp.target);
+  return sp;
+}
+
+function addBlenderPoint(x, y, z, r, g, b, watts) {
+  const pt = new THREE.PointLight(linColor(r, g, b), watts / (4.0 * Math.PI), 0.0, 2.0);
+  pt.position.set(x, y, z);
+  scene.add(pt);
+  return pt;
+}
+
+// 1. Left Arch Grazes (`110W`) & Right Terracotta Aisle Pools (`177W`) + Single Seat Rim Fill (`45W` — exact 15% step above original):
+for (const zArch of [2.5, 6.5, 10.2]) {
+  addBlenderSpot(-5.9, 5.1, zArch, -7.3, 1.5, zArch, 1.0, 0.70, 0.40, 110.0, 52.0, 0.72, false);
+  addBlenderSpot(4.3, 5.3, zArch, 4.4, 0.0, zArch, 1.0, 0.78, 0.50, 177.0, 46.0, 0.68, false);
+}
+addBlenderPoint(-0.8, 4.8, 6.0, 1.0, 0.72, 0.46, 45.0);
+
+// 2. Twin FOH Warm Curtain Spotlights (`620W` + `540W`) + Theatrical Plum Rim (`340W`):
+const fohWarm = addBlenderSpot(-2.2, 5.2, 2.6, 0.30, 2.30, -0.25, 1.0, 0.80, 0.56, 620.0, 50.0, 0.58, true);
+const fohWarmR = addBlenderSpot(3.6, 4.9, 3.4, 2.70, 2.25, -0.24, 1.0, 0.79, 0.54, 540.0, 48.0, 0.62, false);
+const fohViolet = addBlenderSpot(2.6, 5.2, 2.4, -0.50, 2.40, -0.40, 0.95, 0.35, 0.72, 340.0, 52.0, 0.62, false);
+const stageMintBack = addBlenderSpot(0.0, 4.9, -4.2, 0.0, 1.0, -1.2, 0.45, 0.96, 0.85, 420.0, 66.0, 0.65, false);
+
+// 3. Intimate Foyer Sconces (`27W`) + Brass Picture-Light Halo (`260W`) + Pavlos's Seat Rose (dark until end spotlight!):
+addBlenderPoint(-2.5, 2.4, 14.8, 1.0, 0.74, 0.44, 27.0);
+addBlenderPoint(5.8, 2.4, 14.8, 1.0, 0.74, 0.44, 27.0);
+const pierPictureSpot = addBlenderSpot(2.19, 2.58, 14.55, 2.19, 1.62, 12.79, 1.0, 0.87, 0.66, 260.0, 62.0, 0.82, false);
+const roseEasterEgg = addPavlosSeatRoseEasterEgg(scene, 0.0);
+
+// ---- IYUANA BOARD-BY-BOARD PHOTOGRAPHED WOOD-STRIP FLOOR SHADER ----
+const texLoader = new THREE.TextureLoader();
+const iyuanaOakStripsTex = texLoader.load('../assets/textures/iyuana_oak_strips.jpg');
+iyuanaOakStripsTex.wrapS = THREE.ClampToEdgeWrapping;
+iyuanaOakStripsTex.wrapT = THREE.RepeatWrapping;
+iyuanaOakStripsTex.anisotropy = maxAniso;
+
+function applyIyuanaOakStripShader(mat, stripWidth = 0.064) {
+  const patched = mat.clone();
+  patched.map = null;
+  patched.normalMap = null;
+  patched.roughnessMap = null;
+  patched.color.setHex(0xffffff);
+  patched.roughness = 1.0;
+  patched.metalness = 0.0;
+
+  patched.onBeforeCompile = sh => {
+    sh.uniforms.uOakAtlas = { value: iyuanaOakStripsTex };
+    sh.uniforms.uStripW = { value: stripWidth };
+    sh.uniforms.uTex = tactileRig.uTex;
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vWorldFloor;')
+      .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvWorldFloor = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', `#include <common>
+        uniform sampler2D uOakAtlas;
+        uniform float uStripW;
+        uniform float uTex;
+        varying vec3 vWorldFloor;
+        float fh1(float n) { return fract(sin(n * 127.1) * 43758.5453); }
+        float fh2(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+        float gOakJoint = 1.0;
+        float gOakRough = 0.36;
+      `)
+      .replace('#include <map_fragment>', `
+        {
+          const float N_STRIPS = 7.0;
+          const float ALEN = 1.55;
+          vec2 fp = vWorldFloor.xz;
+          float si = floor(fp.x / uStripW);
+          float bLen = mix(0.62, 1.78, fh1(si * 7.13 + 3.1));
+          float zz = fp.y + fh1(si * 1.37) * 5.2;
+          float sj = floor(zz / bLen);
+          float u = fract(fp.x / uStripW);
+          float v = fract(zz / bLen);
+          float h = fh2(vec2(si, sj));
+          float k = floor(h * N_STRIPS);
+          float flipU = step(0.5, fract(h * 13.7));
+          float uu = mix(u, 1.0 - u, flipU);
+          float spanV = min(bLen / ALEN, 0.96);
+          float vo = fract(h * 31.3) * (1.0 - spanV);
+          vec2 auv = vec2((k + 0.10 + uu * 0.80) / 8.0, vo + v * spanV);
+          vec2 gx = vec2(dFdx(fp.x) / uStripW * 0.80 / 8.0, dFdx(fp.y) / ALEN);
+          vec2 gy = vec2(dFdy(fp.x) / uStripW * 0.80 / 8.0, dFdy(fp.y) / ALEN);
+          vec3 wood = textureGrad(uOakAtlas, auv, gx, gy).rgb;
+          float tone = mix(0.84, 1.13, fh2(vec2(sj * 3.1, si))) * (fh2(vec2(si, sj * 7.7)) < 0.07 ? 0.82 : 1.0);
+
+          float wu = fwidth(fp.x / uStripW);
+          float wv = fwidth(zz / bLen);
+          float eu = min(u, 1.0 - u);
+          float ev = min(v, 1.0 - v);
+          float ju = 1.0 - (1.0 - smoothstep(0.0, 0.032 + wu, eu)) * 0.52 / (1.0 + wu * 6.0);
+          float jv = 1.0 - (1.0 - smoothstep(0.0, 0.006 + wv, ev)) * 0.48 / (1.0 + wv * 6.0);
+          gOakJoint = ju * jv;
+          float lumW = dot(wood, vec3(0.3, 0.59, 0.11));
+          gOakRough = mix(0.24, 0.46, fh2(vec2(si + 9.0, sj))) - 0.06 * (lumW - 0.45) + (1.0 - gOakJoint) * 0.55;
+
+          // Analytic 16mm carpet-edge drop-shadow along runner_salmon borders (X = 3.38 & 5.12) + baseboard contact AO:
+          float carpAO = 1.0;
+          if (uTex > 0.001 && fp.y > 0.34 && fp.y < 20.82) {
+            float dCarp = min(abs(fp.x - 3.38), abs(fp.x - 5.12));
+            carpAO = 1.0 - 0.44 * (1.0 - smoothstep(0.0, 0.018, dCarp)) * uTex;
+          }
+          float wallAO = 1.0 - 0.28 * (1.0 - smoothstep(0.0, 0.045, abs(fp.y - 12.80))) * uTex;
+          diffuseColor.rgb *= pow(wood, vec3(2.2)) * 1.15 * tone * gOakJoint * carpAO * wallAO;
+        }
+      `)
+      .replace('#include <roughnessmap_fragment>', 'float roughnessFactor = clamp(gOakRough, 0.08, 0.95);');
+  };
+  return patched;
+}
+
+// ---- RIGHTS-CLEAN STAGE SEQUENCE (SYNCED PHOTOGRAPH + WOOD-STAGE REFLECTION + STAGE SPOTLIGHT PALETTE!) ----
+const STAGE_MOMENTS = [
+  { key: 'p03_s1',       url: '../assets/event-moments/outputs/pav_p03_mint_silhouettes_chiaroscuro.jpg', aspect: 1376 / 768, lightRGB: [0.42, 0.95, 0.82] },
+  { key: 'p08_tungsten', url: '../assets/event-moments/outputs/pav_p08_varA_tungsten_emerald.jpg',       aspect: 1376 / 768, lightRGB: [1.00, 0.72, 0.38] },
+  { key: 'p07_s1',       url: '../assets/event-moments/outputs/pav_p07_violet_mint_chiaroscuro.jpg',     aspect: 1376 / 768, lightRGB: [0.92, 0.66, 0.88] },
+  { key: 'p06_s1',       url: '../assets/event-moments/outputs/pav_p06_white_ruffles_chiaroscuro.jpg',   aspect: 1376 / 768, lightRGB: [0.98, 0.82, 0.72] },
+  { key: 'p09_platinum', url: '../assets/event-moments/outputs/p09_lr_bw_warm_platinum.jpg',             aspect: 1280 / 1263, lightRGB: [0.94, 0.88, 0.79] },
+];
+
+for (const m of STAGE_MOMENTS) {
+  const t = texLoader.load(m.url, loaded => {
+    if (loaded.image && loaded.image.width && loaded.image.height) {
+      m.aspect = loaded.image.width / loaded.image.height;
+    }
+    needsRender = true;
+  });
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = maxAniso;
+  m.tex = t;
+}
+
+const CYC_PLANE_ASPECT = 7.35 / 4.10;
+const cycShaderMat = new THREE.ShaderMaterial({
+  transparent: true,
+  depthWrite: false,
+  side: THREE.DoubleSide,
+  uniforms: {
+    tArtA: { value: STAGE_MOMENTS[0].tex },
+    tArtB: { value: STAGE_MOMENTS[1].tex },
+    uAspectA: { value: STAGE_MOMENTS[0].aspect },
+    uAspectB: { value: STAGE_MOMENTS[1].aspect },
+    uMix: { value: 0.0 },
+    uPlaneAspect: { value: CYC_PLANE_ASPECT },
+    uFeather: { value: 0.18 },
+  },
+  vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+  fragmentShader: `
+    uniform sampler2D tArtA;
+    uniform sampler2D tArtB;
+    uniform float uAspectA;
+    uniform float uAspectB;
+    uniform float uMix;
+    uniform float uPlaneAspect;
+    uniform float uFeather;
+    varying vec2 vUv;
+
+    vec4 sampleMoment(sampler2D tex, float imgAspect, vec2 uv0) {
+      vec2 sUv = uv0;
+      float inside = 1.0;
+      float ratio = imgAspect / uPlaneAspect;
+      if (ratio < 0.92) {
+        float xc = (uv0.x - 0.5) / ratio + 0.5;
+        sUv.x = clamp(xc, 0.0, 1.0);
+        float fe = max(0.03, uFeather * 0.65);
+        inside = smoothstep(0.0, fe, xc) * smoothstep(1.0, 1.0 - fe, xc);
+      } else if (ratio > 1.0) {
+        sUv.x = (uv0.x - 0.5) * (uPlaneAspect / imgAspect) + 0.5;
+      } else {
+        sUv.y = (uv0.y - 0.5) * ratio + 0.5;
+      }
+      // Note: tex.colorSpace = THREE.SRGBColorSpace (SRGB8_ALPHA8) ALREADY hardware-decodes sRGB -> linear!
+      // Never apply pow(c, 2.2) or tonemapping_fragment here — preserves 100% true-to-file color, skin tones & contrast!
+      vec3 c = texture2D(tex, clamp(sUv, 0.002, 0.998)).rgb;
+      return vec4(c, inside);
+    }
+
+    void main() {
+      vec2 uv0 = vec2(vUv.x, 1.0 - vUv.y);
+      vec4 a = sampleMoment(tArtA, uAspectA, uv0);
+      vec4 b = sampleMoment(tArtB, uAspectB, uv0);
+      vec3 col = mix(a.rgb * a.a, b.rgb * b.a, uMix);
+      float insideMask = mix(a.a, b.a, uMix);
+
+      float fx = max(0.004, uFeather);
+      float vig = smoothstep(0.0, fx, uv0.x)
+                * smoothstep(0.0, fx, 1.0 - uv0.x)
+                * smoothstep(0.0, fx * 0.52, uv0.y)
+                * smoothstep(0.0, fx * 1.22, 1.0 - uv0.y)
+                * insideMask;
+
+      gl_FragColor = vec4(col * vig, vig);
+      #include <colorspace_fragment>
+    }
+  `,
+});
+
+// Frame-locked dual-texture 5-tap stage-floor reflection (cross-dissolves by exact same uMix & parts/closes with uCurtain — zero time lag or pop!)
+const floorReflMesh = new THREE.Mesh(
+  new THREE.PlaneGeometry(7.35, 4.25),
+  new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    uniforms: {
+      tArtA: { value: STAGE_MOMENTS[0].tex },
+      tArtB: { value: STAGE_MOMENTS[1].tex },
+      uAspectA: { value: STAGE_MOMENTS[0].aspect },
+      uAspectB: { value: STAGE_MOMENTS[1].aspect },
+      uMix: { value: 0.0 },
+      uCurtain: { value: 0.0 },
+      uPlaneAspect: { value: CYC_PLANE_ASPECT },
+    },
+    vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+    fragmentShader: `
+      uniform sampler2D tArtA;
+      uniform sampler2D tArtB;
+      uniform float uAspectA;
+      uniform float uAspectB;
+      uniform float uMix;
+      uniform float uCurtain;
+      uniform float uPlaneAspect;
+      varying vec2 vUv;
+
+      vec3 sampleBlurredRefl(sampler2D tex, float imgAspect, vec2 baseUv) {
+        vec2 rUv = baseUv;
+        float ratio = imgAspect / uPlaneAspect;
+        float maskX = 1.0;
+        if (ratio < 0.92) {
+          float xc = (rUv.x - 0.5) / ratio + 0.5;
+          rUv.x = clamp(xc, 0.0, 1.0);
+          maskX = smoothstep(0.0, 0.12, xc) * smoothstep(1.0, 0.88, xc);
+        } else if (ratio > 1.0) {
+          rUv.x = (rUv.x - 0.5) * (uPlaneAspect / imgAspect) + 0.5;
+        } else {
+          rUv.y = (rUv.y - 0.5) * ratio + 0.5;
+        }
+        vec3 col = texture2D(tex, clamp(rUv, 0.01, 0.99)).rgb * 0.36
+                 + texture2D(tex, clamp(rUv + vec2(0.018, 0.025), 0.01, 0.99)).rgb * 0.16
+                 + texture2D(tex, clamp(rUv + vec2(-0.018, 0.025), 0.01, 0.99)).rgb * 0.16
+                 + texture2D(tex, clamp(rUv + vec2(0.0, -0.028), 0.01, 0.99)).rgb * 0.16
+                 + texture2D(tex, clamp(rUv + vec2(0.0, 0.050), 0.01, 0.99)).rgb * 0.16;
+        return col * maskX;
+      }
+
+      void main() {
+        vec2 rUv = vec2(vUv.x, (1.0 - vUv.y) * 0.55);
+        vec3 colA = sampleBlurredRefl(tArtA, uAspectA, rUv);
+        vec3 colB = sampleBlurredRefl(tArtB, uAspectB, rUv);
+        vec3 col = mix(colA, colB, uMix);
+
+        float fadeZ = smoothstep(0.04, 0.96, vUv.y);
+        float fadeX = smoothstep(0.0, 0.16, vUv.x) * smoothstep(1.0, 0.84, vUv.x);
+        // Physically open & close reflection aperture along with the parting/closing curtains (never snaps!):
+        float gapHalf = mix(0.0, 1.18, uCurtain);
+        float curtainGate = smoothstep(gapHalf + 0.16, gapHalf - 0.06, abs(vUv.x - 0.5) * 2.0) * smoothstep(0.01, 0.22, uCurtain);
+        gl_FragColor = vec4(col * 0.22 * fadeZ * fadeX * curtainGate, 1.0);
+        #include <colorspace_fragment>
+      }
+    `,
+  })
+);
+floorReflMesh.rotation.x = -Math.PI / 2;
+floorReflMesh.position.set(0, 1.004, -3.65);
+scene.add(floorReflMesh);
+
+const BANNER_SPECS = {
+  banner_linen_1: { aspect: 1.56 / 2.34, idx: 2 },
+  banner_linen_2: { aspect: 1.64 / 2.05, idx: 0 },
+  banner_linen_3: { aspect: 1.72 / 2.15, idx: 1 },
+  banner_linen_4: { aspect: 1.68 / 2.10, idx: 4 },
+};
+
+function makeLinenBannerMaterial(mObj, bannerAspect) {
+  return new THREE.ShaderMaterial({
+    side: THREE.DoubleSide,
+    uniforms: {
+      tArt: { value: mObj.tex },
+      uImgAspect: { value: mObj.aspect },
+      uBannerAspect: { value: bannerAspect },
+    },
+    vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+    fragmentShader: `
+      uniform sampler2D tArt;
+      uniform float uImgAspect;
+      uniform float uBannerAspect;
+      varying vec2 vUv;
+      void main() {
+        vec2 uv0 = vec2(vUv.x, 1.0 - vUv.y);
+        vec2 cUv = uv0;
+        if (uImgAspect > uBannerAspect) {
+          float span = uBannerAspect / uImgAspect;
+          cUv.x = clamp(0.5 + (uv0.x - 0.5) * span, 0.002, 0.998);
+        } else {
+          float span = uImgAspect / uBannerAspect;
+          cUv.y = clamp(0.5 + (uv0.y - 0.5) * span, 0.002, 0.998);
+        }
+        vec3 col = texture2D(tArt, cUv).rgb;
+        float weave = 0.96 + 0.04 * sin(uv0.x * 420.0) * sin(uv0.y * 520.0);
+        float hem = smoothstep(0.0, 0.025, uv0.x) * smoothstep(0.0, 0.025, 1.0 - uv0.x);
+        vec3 linenTint = vec3(1.0, 0.985, 0.955);
+        float spotFalloff = 0.88 + 0.14 * sin(uv0.y * 3.14159);
+        gl_FragColor = vec4(col * linenTint * weave * spotFalloff * (0.90 + 0.10 * hem), 1.0);
+        #include <colorspace_fragment>
+      }
+    `,
+  });
+}
+
+// ---- AUTOMATIC INSTANCEDMESH BATCHER (CUTS DRAW CALLS FROM 220 -> ~24 FOR 60-120 FPS!) ----
+function batchRepeatedMeshesIntoInstanced(root) {
+  root.updateMatrixWorld(true);
+  const buckets = new Map();
+  root.traverse(obj => {
+    if (!obj.isMesh || !obj.visible) return;
+    if (obj.name.startsWith('curtain_') || obj.name === 'stage_cyclorama' || obj.name.endsWith('_screen') || BANNER_SPECS[obj.name]) return;
+    // Skip objects under hidden or toggleable groups (`stage_banners_group`, `poster_*`, `tv_*`):
+    let p = obj.parent;
+    let skip = false;
+    while (p && p !== root) {
+      if (p.name === 'stage_banners_group' || p.name.startsWith('poster_') || p.name.startsWith('tv_')) { skip = true; break; }
+      p = p.parent;
+    }
+    if (skip || Array.isArray(obj.material)) return;
+    const key = obj.geometry.uuid + '|' + obj.material.uuid;
+    if (!buckets.has(key)) buckets.set(key, []);
+    buckets.get(key).push(obj);
+  });
+
+  for (const list of buckets.values()) {
+    if (list.length < 4) continue;
+    const proto = list[0];
+    const inst = new THREE.InstancedMesh(proto.geometry, proto.material, list.length);
+    inst.castShadow = false; // chairs/spotlights don't need shadow-map draw calls!
+    inst.receiveShadow = true;
+    inst.frustumCulled = false;
+    for (let i = 0; i < list.length; i++) {
+      inst.setMatrixAt(i, list[i].matrixWorld);
+      list[i].visible = false;
+    }
+    inst.instanceMatrix.needsUpdate = true;
+    tactileRig.registerInstancedBatch(inst, list);
+    scene.add(inst);
+  }
+}
+
+// ---- LOAD `flushing-theater.glb` v3 ----
+let stageCycMesh = null;
+let stageBannersGroup = null;
+let curtainL = null, curtainR = null;
+let stageFormat = qs.get('stage') === '02' ? '02' : '01';
+
+function syncFormatButtons() {
+  for (const b of document.querySelectorAll('#review-pill button[data-fmt]')) {
+    b.classList.toggle('active', b.dataset.fmt === stageFormat);
+  }
+  if (stageCycMesh) stageCycMesh.visible = (stageFormat === '01');
+  if (stageBannersGroup) stageBannersGroup.visible = (stageFormat === '02');
+}
+
+for (const b of document.querySelectorAll('#review-pill button[data-fmt]')) {
+  b.addEventListener('click', () => {
+    stageFormat = b.dataset.fmt;
+    syncFormatButtons();
+    needsRender = true;
+  });
+}
+
+const loader = new GLTFLoader();
+loader.load('../assets/flushing-theater.glb', gltf => {
+  const root = gltf.scene;
+  const floorOakShared = new Map();
+
+  root.traverse(obj => {
+    if (obj.isMesh) {
+      // Only large architectural shell & curtains cast shadows (keeps shadow pass sub-millisecond!):
+      obj.castShadow = obj.name.startsWith('curtain_') || obj.name === 'woodwork_boxes_and_doors';
+      obj.receiveShadow = obj.name !== 'stage_cyclorama' && !obj.name.endsWith('_screen');
+
+      const matsArr = Array.isArray(obj.material) ? obj.material : [obj.material];
+      const newMats = matsArr.map(m => {
+        if (!m) return m;
+        if (m.name === 'oak_floor' || m.name === 'stage_deck') {
+          if (!floorOakShared.has(m.name)) {
+            floorOakShared.set(m.name, applyIyuanaOakStripShader(m, m.name === 'stage_deck' ? 0.068 : 0.062));
+          }
+          // Immediately free ~26 MB of unused 2048x2048 & 1024x1024 embedded floor maps from GPU VRAM!
+          tactileRig.disposeUnusedMap(m.map);
+          tactileRig.disposeUnusedMap(m.normalMap);
+          tactileRig.disposeUnusedMap(m.roughnessMap);
+          return floorOakShared.get(m.name);
+        }
+        for (const tk of ['map', 'normalMap', 'roughnessMap']) {
+          if (m[tk]) m[tk].anisotropy = maxAniso;
+        }
+        tactileRig.patchSceneMaterial(m);
+        return m;
+      });
+      obj.material = Array.isArray(obj.material) ? newMats : newMats[0];
+    }
+
+    if (obj.name === 'stage_cyclorama') {
+      stageCycMesh = obj;
+      obj.material = cycShaderMat;
+    }
+    if (obj.name === 'stage_banners_group') stageBannersGroup = obj;
+    if (BANNER_SPECS[obj.name]) {
+      const sp = BANNER_SPECS[obj.name];
+      obj.material = makeLinenBannerMaterial(STAGE_MOMENTS[sp.idx], sp.aspect);
+    }
+    if (['poster_stand_A_apron', 'poster_stand_B_stage', 'poster_stand_C_arch', 'poster_stand_D_foyer', 'tv_monitor_A_apron', 'tv_monitor_D_foyer', 'tv_monitor_E_pier'].includes(obj.name)) {
+      obj.visible = false;
+    }
+    if (obj.name === 'curtain_main_L') curtainL = obj;
+    if (obj.name === 'curtain_main_R') curtainR = obj;
+  });
+
+  scene.add(root);
+  tactileRig.prepareChairDisorder(root, roseEasterEgg.root);
+  batchRepeatedMeshesIntoInstanced(root);
+  syncFormatButtons();
+  sceneReady = true;
+  needsRender = true;
+  clock.getDelta();
+});
+
+// ---- SILKY-SMOOTH 26.0s REAL-TIME CINEMA MOVIE (SINGLE LOCKED T2 TRAJECTORY + UNHURRIED 5-PHOTO STAGE HOLD + END SEAT SPOTLIGHT!) ----
+const FILM_DURATION = clamp(Number(qs.get('dur')) || DEFAULT_FILM_DURATION, 8.0, 60.0);
+const progBarEl = document.getElementById('prog-bar');
+const btnPlayEl = document.getElementById('btn-play');
+const btnReplayEl = document.getElementById('btn-replay');
+const timeLblEl = document.getElementById('time-lbl');
+
+let sceneReady = false;
+let filmTime = 0.0;
+let isPlaying = true;
+let isScrubbing = false;
+
+if (qs.has('t')) {
+  filmTime = clamp(Number(qs.get('t')), 0, FILM_DURATION);
+  if (qs.get('play') !== '1') isPlaying = false;
+} else if (qs.has('at')) {
+  filmTime = clamp(Number(qs.get('at')), 0, 1) * FILM_DURATION;
+  if (qs.get('play') !== '1') isPlaying = false;
+}
+
+function syncPlayUi() {
+  if (!btnPlayEl) return;
+  btnPlayEl.textContent = isPlaying ? 'Pause' : 'Play';
+  btnPlayEl.classList.toggle('active', isPlaying);
+}
+syncPlayUi();
+
+const sm5 = x => { const t = clamp(x, 0, 1); return t * t * t * (t * (t * 6 - 15) + 10); };
+
+const FOH_L_CD = 620.0 / (4.0 * Math.PI);
+const FOH_R_CD = 540.0 / (4.0 * Math.PI);
+const FOH_VIOLET_CD = 340.0 / (4.0 * Math.PI);
+const MINT_BACK_CD = 420.0 / (4.0 * Math.PI);
+
+const _pos = new THREE.Vector3();
+const _look = new THREE.Vector3();
+
+function applyMovieTime(tSec) {
+  const u = clamp(tSec / FILM_DURATION, 0, 1);
+  progFillEl.style.width = `${(u * 100).toFixed(2)}%`;
+  if (timeLblEl) timeLblEl.textContent = `${tSec.toFixed(1)}s / ${FILM_DURATION.toFixed(1)}s`;
+
+  // 1. Curtain & Spotlight Choreography (curtains open early at 0.9s..2.5s and stay open until 20.8s..23.1s so all 5 photos shine!):
+  const openIn = sm5((u - 0.035) / 0.060);
+  const closeOut = sm5((u - 0.80) / 0.09);
+  const curtainOpen = openIn * (1.0 - closeOut);
+  const sx = lerp(1.0, 0.14, curtainOpen);
+  if (curtainL) curtainL.scale.x = sx;
+  if (curtainR) curtainR.scale.x = sx;
+
+  fohWarm.intensity = FOH_L_CD;
+  fohWarmR.intensity = FOH_R_CD;
+  fohViolet.intensity = FOH_VIOLET_CD;
+  stageMintBack.intensity = MINT_BACK_CD * curtainOpen;
+  floorReflMesh.visible = (stageFormat === '01') && (curtainOpen > 0.01);
+
+  // End-of-movie Easter Egg Spotlight: completely OFF (`0.0`) at the start & during the dances (`u < 0.68`),
+  // then smoothly fades up onto Pavlos's Row 6 · Seat 14 + rose (`u = 0.68..0.78`, right as we glide back past the seat & out the doors!):
+  roseEasterEgg.setSpotlightLevel(sm5((u - 0.68) / 0.10));
+
+  // 2. Unhurried 5-Photo Stage Sequence (`u = 0.055 .. 0.56` reaches Photo 5 `p09_platinum` w/ Vanessa at `14.5s`
+  // while camera is STILL right up front at `Z ~ 6.2m`, holding Vanessa's portrait on stage for ~7 full seconds!):
+  const mProg = clamp((u - 0.055) / 0.505, 0, 0.9999) * (STAGE_MOMENTS.length - 1);
+  const idxA = Math.floor(mProg);
+  const idxB = Math.min(STAGE_MOMENTS.length - 1, idxA + 1);
+  const mixAB = sm5((mProg - idxA - 0.58) / 0.40);
+  const momA = STAGE_MOMENTS[idxA];
+  const momB = STAGE_MOMENTS[idxB];
+
+  cycShaderMat.uniforms.tArtA.value = momA.tex;
+  cycShaderMat.uniforms.tArtB.value = momB.tex;
+  cycShaderMat.uniforms.uAspectA.value = momA.aspect;
+  cycShaderMat.uniforms.uAspectB.value = momB.aspect;
+  cycShaderMat.uniforms.uMix.value = mixAB;
+
+  // Sync both the blurred stage-board reflection AND the overhead stage-deck wash light to the exact same `mixAB`!
+  const fu = floorReflMesh.material.uniforms;
+  fu.tArtA.value = momA.tex;
+  fu.tArtB.value = momB.tex;
+  fu.uAspectA.value = momA.aspect;
+  fu.uAspectB.value = momB.aspect;
+  fu.uMix.value = mixAB;
+  fu.uCurtain.value = curtainOpen;
+
+  stageMintBack.color.setRGB(
+    lerp(momA.lightRGB[0], momB.lightRGB[0], mixAB),
+    lerp(momA.lightRGB[1], momB.lightRGB[1], mixAB),
+    lerp(momA.lightRGB[2], momB.lightRGB[2], mixAB),
+    THREE.LinearSRGBColorSpace
+  );
+
+  // 3. Trajectory (`T2 · Pure Bezier Hook` default, or `?traj=T1..T8` from Trajectory Lab):
+  const activeTraj = TRAJECTORIES[(qs.get('traj') || 'T2').toUpperCase()] || TRAJECTORIES.T2;
+  const { fov } = activeTraj.sampleAtTime01(u, _pos, _look);
+
+  camera.position.copy(_pos);
+  camera.fov = fov + portraitFovBoost;
+  camera.updateProjectionMatrix();
+  camera.lookAt(_look);
+
+  // 4. Unhurried Editorial Typography Dissolves:
+  const introOp = 1.0 - sm5((u - 0.070) / 0.060);
+  introEl.style.opacity = introOp.toFixed(3);
+  introEl.style.transform = `translate3d(0, ${(-14 * (1 - introOp)).toFixed(1)}px, 0)`;
+
+  headEl.style.opacity = (ss(0.08, 0.13, u) * (1.0 - ss(0.86, 0.92, u))).toFixed(3);
+
+  const prideOp = ss(0.16, 0.21, u) * (1.0 - ss(0.37, 0.42, u));
+  linePrideEl.style.opacity = prideOp.toFixed(3);
+  linePrideEl.style.transform = `translate3d(0, ${(10 * (1 - prideOp)).toFixed(1)}px, 0)`;
+
+  const boothOp = ss(0.53, 0.58, u) * (1.0 - ss(0.75, 0.80, u));
+  lineBoothEl.style.opacity = boothOp.toFixed(3);
+  lineBoothEl.style.transform = `translate3d(0, ${(10 * (1 - boothOp)).toFixed(1)}px, 0)`;
+
+  const labelOp = sm5((u - 0.88) / 0.08);
+  labelEl.style.opacity = labelOp.toFixed(3);
+  labelEl.style.transform = `translate3d(0, ${(12 * (1 - labelOp)).toFixed(1)}px, 0)`;
+}
+
+function togglePlay() {
+  if (!isPlaying && filmTime >= FILM_DURATION - 0.02) {
+    filmTime = 0.0;
+  }
+  isPlaying = !isPlaying;
+  needsRender = true;
+  syncPlayUi();
+}
+
+function replayFilm() {
+  filmTime = 0.0;
+  isPlaying = true;
+  needsRender = true;
+  syncPlayUi();
+}
+
+const btnTexEl = document.getElementById('btn-tex');
+function syncTexUi() {
+  if (!btnTexEl) return;
+  const on = tactileRig.isEnabled();
+  btnTexEl.textContent = on ? 'Tex: ON' : 'Tex: Base';
+  btnTexEl.classList.toggle('active', on);
+}
+function toggleTexMode() {
+  tactileRig.setEnabled(!tactileRig.isEnabled());
+  syncTexUi();
+  needsRender = true;
+}
+syncTexUi();
+
+if (btnPlayEl) btnPlayEl.addEventListener('click', togglePlay);
+if (btnReplayEl) btnReplayEl.addEventListener('click', replayFilm);
+if (btnTexEl) btnTexEl.addEventListener('click', toggleTexMode);
+
+window.addEventListener('keydown', e => {
+  if (e.code === 'Space') {
+    e.preventDefault();
+    togglePlay();
+  } else if (e.code === 'KeyR') {
+    replayFilm();
+  } else if (e.code === 'KeyT') {
+    toggleTexMode();
+  }
+});
+
+function scrubFromEvent(e) {
+  const rect = progBarEl.getBoundingClientRect();
+  const u = clamp((e.clientX - rect.left) / Math.max(1, rect.width), 0, 1);
+  filmTime = u * FILM_DURATION;
+  needsRender = true;
+  applyMovieTime(filmTime);
+}
+
+if (progBarEl) {
+  progBarEl.addEventListener('pointerdown', e => {
+    isScrubbing = true;
+    isPlaying = false;
+    syncPlayUi();
+    progBarEl.setPointerCapture(e.pointerId);
+    scrubFromEvent(e);
+  });
+  progBarEl.addEventListener('pointermove', e => {
+    if (isScrubbing) scrubFromEvent(e);
+  });
+  progBarEl.addEventListener('pointerup', () => { isScrubbing = false; });
+}
+
+const clock = { last: performance.now(), getDelta() { const now = performance.now(), d = (now - this.last) / 1000; this.last = now; return d; } };   // THREE.Clock is deprecated; same getDelta()
+let rafId = 0;
+
+function tick() {
+  if (document.hidden) { rafId = 0; return; }
+  rafId = requestAnimationFrame(tick);
+  const dt = Math.min(clock.getDelta(), 0.05);
+
+  if (sceneReady && isPlaying && !isScrubbing) {
+    filmTime += dt;
+    needsRender = true;
+    if (filmTime >= FILM_DURATION) {
+      filmTime = FILM_DURATION;
+      isPlaying = false;
+      syncPlayUi();
+    }
+  }
+
+  if (!isPlaying && !isScrubbing && !needsRender) return;
+  needsRender = false;
+  applyMovieTime(filmTime);
+  renderer.render(scene, camera);
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    needsRender = true;
+    if (!rafId) {
+      clock.getDelta();
+      tick();
+    }
+  }
+});
+tick();
+</script>
+</body>
+</html>

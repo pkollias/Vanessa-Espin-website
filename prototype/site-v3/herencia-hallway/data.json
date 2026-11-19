@@ -1,0 +1,1046 @@
+{
+"items": [
+{
+"id": "000",
+"src": "thumbs/000.jpg",
+"w": 1760,
+"h": 2200,
+"kind": "design",
+"tier": "document",
+"what": "save-the-dates card; three venues",
+"note": "Final dates card with hours; 1080x1350 export"
+},
+{
+"id": "001",
+"src": "thumbs/001.jpg",
+"w": 1760,
+"h": 2200,
+"kind": "design",
+"tier": "archive",
+"what": "save-the-dates card",
+"note": "Duplicate of #0"
+},
+{
+"id": "002",
+"src": "thumbs/002.jpg",
+"w": 2200,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "paintings; artist signature on wall",
+"note": "Signature lettering on the wall; square crop"
+},
+{
+"id": "003",
+"src": "thumbs/003.jpg",
+"w": 2036,
+"h": 2200,
+"kind": "photo",
+"tier": "feature",
+"what": "painting: woman in blue headcloth, doves",
+"note": "Painting file, 1.5 MP; keep whole, show small"
+},
+{
+"id": "004",
+"src": "thumbs/004.jpg",
+"w": 2036,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "painting: woman in blue headcloth, doves",
+"note": "Duplicate of #3"
+},
+{
+"id": "005",
+"src": "thumbs/005.jpg",
+"w": 1238,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "selfie; Consulate room",
+"note": "Her selfie at the Consulate; big smile, wide lens"
+},
+{
+"id": "006",
+"src": "thumbs/006.jpg",
+"w": 1939,
+"h": 2200,
+"kind": "photo",
+"tier": "feature",
+"what": "painting: red tree with doves",
+"note": "Painting file, 2.2 MP; keep whole"
+},
+{
+"id": "007",
+"src": "thumbs/007.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "with the artist; paintings",
+"note": "She points to a painting; #89 has the better smile"
+},
+{
+"id": "008",
+"src": "thumbs/008.jpg",
+"w": 1237,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "balcony speech; microphone",
+"note": "0.6 MP copy; #62 is the same moment, sharper"
+},
+{
+"id": "009",
+"src": "thumbs/009.jpg",
+"w": 2200,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "the hang: paintings in rows",
+"note": "Rows along the corridor; wide angle, grey"
+},
+{
+"id": "010",
+"src": "thumbs/010.jpg",
+"w": 2054,
+"h": 2200,
+"kind": "photo",
+"tier": "feature",
+"what": "painting: woman with fruit-tree hair, parrot",
+"note": "Painting file, 1.5 MP; keep whole"
+},
+{
+"id": "011",
+"src": "thumbs/011.jpg",
+"w": 1760,
+"h": 2200,
+"kind": "design",
+"tier": "document",
+"what": "Consulate poster, green variant",
+"note": "Green venue variant of the window system"
+},
+{
+"id": "012",
+"src": "thumbs/012.jpg",
+"w": 1466,
+"h": 2200,
+"kind": "design",
+"tier": "feature",
+"what": "Flushing poster, pink variant",
+"note": "Pink variant, 1200x1800; organic window system"
+},
+{
+"id": "013",
+"src": "thumbs/013.jpg",
+"w": 1466,
+"h": 2200,
+"kind": "design",
+"tier": "document",
+"what": "opening reception invitation",
+"note": "Invitation with painting band; 1200x1800"
+},
+{
+"id": "014",
+"src": "thumbs/014.jpg",
+"w": 1760,
+"h": 2200,
+"kind": "design",
+"tier": "feature",
+"what": "LIC poster, green variant",
+"note": "First venue poster; 1080x1350 export"
+},
+{
+"id": "015",
+"src": "thumbs/015.jpg",
+"w": 1760,
+"h": 2200,
+"kind": "design",
+"tier": "hero",
+"what": "key poster: fish painting in organic window",
+"note": "Series key visual; hero only at native size"
+},
+{
+"id": "016",
+"src": "thumbs/016.jpg",
+"w": 1760,
+"h": 2200,
+"kind": "design",
+"tier": "archive",
+"what": "save-the-dates card, first version",
+"note": "Earlier dates card, superseded by #0"
+},
+{
+"id": "017",
+"src": "thumbs/017.jpg",
+"w": 1760,
+"h": 2200,
+"kind": "design",
+"tier": "document",
+"what": "carousel card with visitor photo",
+"note": "Photo plus title; weaker than the window posters"
+},
+{
+"id": "018",
+"src": "thumbs/018.jpg",
+"w": 1760,
+"h": 2200,
+"kind": "design",
+"tier": "document",
+"what": "reception poster, pink",
+"note": "Reception card in the same system as #12"
+},
+{
+"id": "019",
+"src": "thumbs/019.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "merch t-shirts; Queens Museum",
+"note": "Near-duplicate of #61"
+},
+{
+"id": "020",
+"src": "thumbs/020.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "her poster on the LIC door",
+"note": "Poster on the gallery door, May 15; soft focus"
+},
+{
+"id": "021",
+"src": "thumbs/021.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "paintings among architects' desks; prints, flowers",
+"note": "Window light; paintings in a working studio"
+},
+{
+"id": "022",
+"src": "thumbs/022.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "print edition laid out; postcards",
+"note": "Print edition on the table, from above"
+},
+{
+"id": "023",
+"src": "thumbs/023.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "prints on a table",
+"note": "Near-duplicate of #22"
+},
+{
+"id": "024",
+"src": "thumbs/024.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "LIC studio; paintings",
+"note": "Without glasses; the lip ring confirms her"
+},
+{
+"id": "025",
+"src": "thumbs/025.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "LIC studio",
+"note": "Soft, shaken; visitors in the studio"
+},
+{
+"id": "026",
+"src": "thumbs/026.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "prints; certificate of authenticity",
+"note": "Certificate of authenticity beside the prints"
+},
+{
+"id": "027",
+"src": "thumbs/027.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "LIC studio; landscape painting",
+"note": "Posed pair; her smile without glasses"
+},
+{
+"id": "028",
+"src": "thumbs/028.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "painting with wall label; LIC studio",
+"note": "With a guest beside a labelled painting"
+},
+{
+"id": "029",
+"src": "thumbs/029.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "greeting hug; LIC studio",
+"note": "Her hugging a visitor, glasses on; real joy"
+},
+{
+"id": "030",
+"src": "thumbs/030.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "greeting visitors; LIC studio",
+"note": "Same greeting as #29, before the peak"
+},
+{
+"id": "031",
+"src": "thumbs/031.jpg",
+"w": 1015,
+"h": 2200,
+"kind": "screenshot",
+"tier": "archive",
+"what": "visitor reading beside a painting",
+"note": "Screenshot with crop interface"
+},
+{
+"id": "032",
+"src": "thumbs/032.jpg",
+"w": 1015,
+"h": 2200,
+"kind": "screenshot",
+"tier": "archive",
+"what": "painting and visitor",
+"note": "Screenshot with black bars"
+},
+{
+"id": "033",
+"src": "thumbs/033.jpg",
+"w": 1015,
+"h": 2200,
+"kind": "screenshot",
+"tier": "archive",
+"what": "iCloud view of a studio photo",
+"note": "iCloud screenshot of a studio photo"
+},
+{
+"id": "034",
+"src": "thumbs/034.jpg",
+"w": 1015,
+"h": 2200,
+"kind": "screenshot",
+"tier": "archive",
+"what": "iCloud view of a studio photo",
+"note": "iCloud screenshot of a studio photo"
+},
+{
+"id": "035",
+"src": "thumbs/035.jpg",
+"w": 1015,
+"h": 2200,
+"kind": "screenshot",
+"tier": "archive",
+"what": "iCloud view of a studio photo",
+"note": "iCloud screenshot of a studio photo"
+},
+{
+"id": "036",
+"src": "thumbs/036.jpg",
+"w": 1015,
+"h": 2200,
+"kind": "screenshot",
+"tier": "archive",
+"what": "iCloud view of a studio photo",
+"note": "iCloud screenshot of a studio photo"
+},
+{
+"id": "037",
+"src": "thumbs/037.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "hanging a painting; Consulate wood-slat wall",
+"note": "Her installing the Consulate show; teal top matches selfie"
+},
+{
+"id": "038",
+"src": "thumbs/038.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "installation; Consulate",
+"note": "Installing at the Consulate; distorted wide angle"
+},
+{
+"id": "039",
+"src": "thumbs/039.jpg",
+"w": 1237,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "couple at the Andean Mona Lisa; corridor",
+"note": "Couple before the Andean Mona Lisa"
+},
+{
+"id": "041",
+"src": "thumbs/041.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "viewer at tree painting",
+"note": "Viewer at tree painting; #74 stronger"
+},
+{
+"id": "042",
+"src": "thumbs/042.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "conversation at the red tree painting",
+"note": "Visitors talking at the red tree"
+},
+{
+"id": "043",
+"src": "thumbs/043.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "viewer at rows of paintings",
+"note": "Viewer at the rows; repeats #41"
+},
+{
+"id": "044",
+"src": "thumbs/044.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "corridor with visitors",
+"note": "Corridor with visitors; repeats #46"
+},
+{
+"id": "045",
+"src": "thumbs/045.jpg",
+"w": 1237,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "visitor photographing a painting; corridor",
+"note": "Phone raised to a painting; cowboy boots"
+},
+{
+"id": "046",
+"src": "thumbs/046.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "the hang with one visitor",
+"note": "The hang with one visitor; #77 shows it cleaner"
+},
+{
+"id": "047",
+"src": "thumbs/047.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "the hang with one visitor",
+"note": "Near-duplicate of #46"
+},
+{
+"id": "048",
+"src": "thumbs/048.jpg",
+"w": 1237,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "courtyard dance",
+"note": "Same dance as #49, softer"
+},
+{
+"id": "049",
+"src": "thumbs/049.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "feature",
+"what": "courtyard dance; shawls and skirts",
+"note": "Dancer's smile, orange shawl mid-swirl; heads in front"
+},
+{
+"id": "050",
+"src": "thumbs/050.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "courtyard dance",
+"note": "Near-duplicate of #49"
+},
+{
+"id": "051",
+"src": "thumbs/051.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "costumes: sequins, beads, embroidery",
+"note": "Costume detail sharp; photographer's head in frame"
+},
+{
+"id": "052",
+"src": "thumbs/052.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "crowd watching the courtyard dance",
+"note": "Backs of the crowd; dancers small"
+},
+{
+"id": "053",
+"src": "thumbs/053.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "crowd watching the courtyard dance",
+"note": "Backs of the crowd; dancers small"
+},
+{
+"id": "054",
+"src": "thumbs/054.jpg",
+"w": 1237,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "crowd watching the courtyard dance",
+"note": "Backs of the crowd; dancers small"
+},
+{
+"id": "055",
+"src": "thumbs/055.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "posed in the corridor",
+"note": "Posed smile; #89 preferred"
+},
+{
+"id": "056",
+"src": "thumbs/056.jpg",
+"w": 2200,
+"h": 1807,
+"kind": "photo",
+"tier": "archive",
+"what": "posed with a friend",
+"note": "Posed smile with a friend; lip ring visible"
+},
+{
+"id": "057",
+"src": "thumbs/057.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "feature",
+"what": "her poster on a street board; night, steps",
+"note": "Her pink poster on the sidewalk at night"
+},
+{
+"id": "058",
+"src": "thumbs/058.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "corridor at night",
+"note": "One-point corridor at night"
+},
+{
+"id": "059",
+"src": "thumbs/059.jpg",
+"w": 1998,
+"h": 2200,
+"kind": "design",
+"tier": "document",
+"what": "merch t-shirt with painting print",
+"note": "Merch post; phone-width export"
+},
+{
+"id": "060",
+"src": "thumbs/060.jpg",
+"w": 2012,
+"h": 2200,
+"kind": "design",
+"tier": "archive",
+"what": "merch t-shirt, front",
+"note": "Pair of #59, front view"
+},
+{
+"id": "061",
+"src": "thumbs/061.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "merch at the Queens Museum",
+"note": "Merch shirts against the green museum backdrop"
+},
+{
+"id": "062",
+"src": "thumbs/062.jpg",
+"w": 2200,
+"h": 1650,
+"kind": "photo",
+"tier": "feature",
+"what": "speech from the balcony; red-brick façade",
+"note": "Artist speaks, she listens; cast-iron balcony, brick"
+},
+{
+"id": "063",
+"src": "thumbs/063.jpg",
+"w": 2200,
+"h": 1650,
+"kind": "photo",
+"tier": "document",
+"what": "selfie by a painting",
+"note": "Warm selfie with the artist; soft, warm cast"
+},
+{
+"id": "064",
+"src": "thumbs/064.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "conversation in the LIC studio",
+"note": "Laughing with a visitor; sunglasses up, lip ring"
+},
+{
+"id": "065",
+"src": "thumbs/065.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "painting on a column; bookshelves, window",
+"note": "Paintings among the architects' shelves"
+},
+{
+"id": "066",
+"src": "thumbs/066.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "print table, stairs",
+"note": "Print table; #70 shows it better"
+},
+{
+"id": "067",
+"src": "thumbs/067.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "visitor photographing a painting",
+"note": "Visitor photographing; #45 stronger"
+},
+{
+"id": "068",
+"src": "thumbs/068.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "viewer at paintings",
+"note": "Viewer at the paintings; repeats others"
+},
+{
+"id": "069",
+"src": "thumbs/069.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "matching striped shirts at the Mona Lisa",
+"note": "Two striped shirts at the Mona Lisa"
+},
+{
+"id": "070",
+"src": "thumbs/070.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "print table; pink cards on the wall",
+"note": "Her pink cards gridded above the print table"
+},
+{
+"id": "071",
+"src": "thumbs/071.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "visitor at the village landscape",
+"note": "Clean pairing of viewer and painting"
+},
+{
+"id": "072",
+"src": "thumbs/072.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "two visitors at a painting",
+"note": "Two visitors at a painting"
+},
+{
+"id": "073",
+"src": "thumbs/073.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "visitor at paintings",
+"note": "Visitor in denim at the paintings"
+},
+{
+"id": "074",
+"src": "thumbs/074.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "visitor at the big tree painting",
+"note": "Red sweatshirt against the green tree"
+},
+{
+"id": "075",
+"src": "thumbs/075.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "visitor at paintings",
+"note": "Same visitor as #2"
+},
+{
+"id": "076",
+"src": "thumbs/076.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "feature",
+"what": "Flushing Town Hall corridor; arched window",
+"note": "Symmetric corridor ending in an arched window"
+},
+{
+"id": "077",
+"src": "thumbs/077.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "the hang in rows; corridor wall",
+"note": "Empty wall shows the hanging grid"
+},
+{
+"id": "079",
+"src": "thumbs/079.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "group on the courtyard lawn",
+"note": "Group on the lawn; #83 is closer"
+},
+{
+"id": "080",
+"src": "thumbs/080.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "group on the courtyard lawn",
+"note": "Group on the lawn; #83 is closer"
+},
+{
+"id": "081",
+"src": "thumbs/081.jpg",
+"w": 2200,
+"h": 1650,
+"kind": "photo",
+"tier": "archive",
+"what": "group on the courtyard lawn",
+"note": "Group on the lawn; #83 is closer"
+},
+{
+"id": "082",
+"src": "thumbs/082.jpg",
+"w": 2200,
+"h": 1650,
+"kind": "photo",
+"tier": "archive",
+"what": "group on the courtyard lawn",
+"note": "Group on the lawn; #83 is closer"
+},
+{
+"id": "083",
+"src": "thumbs/083.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "group with her poster on an easel",
+"note": "Dancers' shawls and her poster on an easel"
+},
+{
+"id": "084",
+"src": "thumbs/084.jpg",
+"w": 1760,
+"h": 2200,
+"kind": "design",
+"tier": "document",
+"what": "Consulate invitation with artist photo",
+"note": "Invitation; artist painting photo in window shape"
+},
+{
+"id": "085",
+"src": "thumbs/085.jpg",
+"w": 2059,
+"h": 2200,
+"kind": "photo",
+"tier": "feature",
+"what": "painting: two women in blue, doves, church",
+"note": "Painting file, 1.5 MP; keep whole"
+},
+{
+"id": "086",
+"src": "thumbs/086.jpg",
+"w": 2069,
+"h": 2200,
+"kind": "photo",
+"tier": "feature",
+"what": "painting: fish blowing bubbles over a field",
+"note": "Key painting of her posters; 1.5 MP"
+},
+{
+"id": "087",
+"src": "thumbs/087.jpg",
+"w": 2011,
+"h": 2200,
+"kind": "photo",
+"tier": "feature",
+"what": "painting: two figures, orange ball, sky",
+"note": "Painting file, 1.5 MP; keep whole"
+},
+{
+"id": "088",
+"src": "thumbs/088.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "archive",
+"what": "artist at his Mona Lisa",
+"note": "Artist with a guest at the Mona Lisa"
+},
+{
+"id": "089",
+"src": "thumbs/089.jpg",
+"w": 1650,
+"h": 2200,
+"kind": "photo",
+"tier": "document",
+"what": "with the artist before his paintings",
+"note": "Her real smile beside the artist; sharp"
+},
+{
+"id": "090",
+"src": "thumbs/090.jpg",
+"w": 2058,
+"h": 2200,
+"kind": "photo",
+"tier": "feature",
+"what": "painting: Andean Mona Lisa with hens",
+"note": "Painting file, 2.3 MP; keep whole"
+},
+{
+"id": "site-01-threads-of-memory",
+"src": "thumbs/site-01-threads-of-memory.jpg",
+"w": 1060,
+"h": 1412,
+"kind": "site",
+"tier": "site",
+"what": "threads of memory",
+"note": "prototype/printed-matter/img/herencia-viva/01-threads-of-memory.jpg"
+},
+{
+"id": "site-02-gallery-wall",
+"src": "thumbs/site-02-gallery-wall.jpg",
+"w": 552,
+"h": 526,
+"kind": "site",
+"tier": "site",
+"what": "gallery wall",
+"note": "prototype/printed-matter/img/herencia-viva/02-gallery-wall.jpg"
+},
+{
+"id": "site-03-meninas-detail",
+"src": "thumbs/site-03-meninas-detail.jpg",
+"w": 550,
+"h": 666,
+"kind": "site",
+"tier": "site",
+"what": "meninas detail",
+"note": "prototype/printed-matter/img/herencia-viva/03-meninas-detail.jpg"
+},
+{
+"id": "site-04-andean-figures",
+"src": "thumbs/site-04-andean-figures.jpg",
+"w": 554,
+"h": 662,
+"kind": "site",
+"tier": "site",
+"what": "andean figures",
+"note": "prototype/printed-matter/img/herencia-viva/04-andean-figures.jpg"
+},
+{
+"id": "site-05-village-painting",
+"src": "thumbs/site-05-village-painting.jpg",
+"w": 402,
+"h": 430,
+"kind": "site",
+"tier": "site",
+"what": "village painting",
+"note": "prototype/printed-matter/img/herencia-viva/05-village-painting.jpg"
+},
+{
+"id": "site-06-fish-in-the-city",
+"src": "thumbs/site-06-fish-in-the-city.jpg",
+"w": 550,
+"h": 670,
+"kind": "site",
+"tier": "site",
+"what": "fish in the city",
+"note": "prototype/printed-matter/img/herencia-viva/06-fish-in-the-city.jpg"
+},
+{
+"id": "site-07-shirt-back",
+"src": "thumbs/site-07-shirt-back.jpg",
+"w": 552,
+"h": 670,
+"kind": "site",
+"tier": "site",
+"what": "shirt back",
+"note": "prototype/printed-matter/img/herencia-viva/07-shirt-back.jpg"
+},
+{
+"id": "site-08-studio",
+"src": "thumbs/site-08-studio.jpg",
+"w": 552,
+"h": 666,
+"kind": "site",
+"tier": "site",
+"what": "studio",
+"note": "prototype/printed-matter/img/herencia-viva/08-studio.jpg"
+},
+{
+"id": "site-big-encuentro",
+"src": "thumbs/site-big-encuentro.jpg",
+"w": 778,
+"h": 821,
+"kind": "site",
+"tier": "site",
+"what": "encuentro",
+"note": "prototype/printed-matter/img/herencia-viva/big/encuentro.jpg"
+},
+{
+"id": "site-big-ladder-bw",
+"src": "thumbs/site-big-ladder-bw.jpg",
+"w": 1800,
+"h": 2312,
+"kind": "site",
+"tier": "site",
+"what": "ladder bw",
+"note": "prototype/printed-matter/img/herencia-viva/big/ladder-bw.jpg"
+},
+{
+"id": "site-big-ladder",
+"src": "thumbs/site-big-ladder.jpg",
+"w": 1800,
+"h": 2312,
+"kind": "site",
+"tier": "site",
+"what": "ladder",
+"note": "prototype/printed-matter/img/herencia-viva/big/ladder.jpg"
+},
+{
+"id": "site-big-mona-print",
+"src": "thumbs/site-big-mona-print.jpg",
+"w": 1800,
+"h": 2312,
+"kind": "site",
+"tier": "site",
+"what": "mona print",
+"note": "prototype/printed-matter/img/herencia-viva/big/mona-print.jpg"
+},
+{
+"id": "site-big-oranges",
+"src": "thumbs/site-big-oranges.jpg",
+"w": 1800,
+"h": 2312,
+"kind": "site",
+"tier": "site",
+"what": "oranges",
+"note": "prototype/printed-matter/img/herencia-viva/big/oranges.jpg"
+},
+{
+"id": "site-big-pointing",
+"src": "thumbs/site-big-pointing.jpg",
+"w": 1800,
+"h": 2312,
+"kind": "site",
+"tier": "site",
+"what": "pointing",
+"note": "prototype/printed-matter/img/herencia-viva/big/pointing.jpg"
+}
+],
+"videos": [
+{
+"id": "v040",
+"src": "/Vanessa-Espin-website/concepts/herencia/assets/v040.mp4",
+"what": ""
+},
+{
+"id": "v078",
+"src": "/Vanessa-Espin-website/concepts/herencia/assets/v078.mp4",
+"what": ""
+}
+]
+}

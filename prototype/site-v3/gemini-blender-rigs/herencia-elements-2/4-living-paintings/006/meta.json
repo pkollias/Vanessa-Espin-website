@@ -1,0 +1,98 @@
+{
+  "painting_id": "006",
+  "title": "Red Tree \u2014 Swaying Canopy & Perched Sparrows (0 Falling Leaves)",
+  "source_file": "reference/vision-board/board/concepts/herencia/assets/006.jpg",
+  "dimensions_wh": [
+    1939,
+    2200
+  ],
+  "curated_hang": {
+    "wall": "R",
+    "s": 1.171,
+    "y": 1.6,
+    "w_m": 1.37
+  },
+  "mm_per_source_px": 0.7065,
+  "loop_frames": 24,
+  "fps": 12,
+  "loop_seconds": 2.0,
+  "strip_grid": {
+    "cols": 6,
+    "rows": 4,
+    "frames": 24
+  },
+  "mask_file": "006/mask.png",
+  "faces_hands_mask_file": "006/faces_hands_mask.png",
+  "mask_bbox_xywh": [
+    23,
+    28,
+    1916,
+    1312
+  ],
+  "web_scale": 0.42,
+  "web_dimensions_wh": [
+    814,
+    924
+  ],
+  "web_mask_bbox_xywh": [
+    9,
+    11,
+    805,
+    552
+  ],
+  "masked_pixels": 2007326,
+  "masked_share_pct": 47.0563,
+  "faces_hands_protected_pixels": 1749668,
+  "outside_mask_max_abs_diff": 0,
+  "faces_hands_max_diff": 0,
+  "preview_3strengths_mp4": "006/preview_3strengths.mp4",
+  "sheet_4x_file": "006/4x_frames_sheet.jpg",
+  "layers": [
+    "red_canopy: multi-bough radial wind-wave across 7 angular crown sectors over clean exemplar sky (0 detached/falling leaves per #62/#63; trunk, clock, angel & orange cores 100% locked)",
+    "sparrow_01 & sparrow_14: skyward singing head tilt + 3-chirp lower-mandible beak motion + tail flick",
+    "sparrow_16_17: unified contiguous snuggling pair cutout (zero chest gap) rocking & nuzzling together",
+    "sparrow_02..19: alert head cocks, tail flicks & subtle branch bounce riding on swaying boughs"
+  ],
+  "occlusion_plate_provenance": "Local multi-scale Medina exemplar sky & foliage synthesis + 1:1 2000px canvas-weave transfer strictly inside revealed crescent behind swaying crown boughs and perched sparrows (0 detached leaves; winged figure, clock, trunk, oranges & mountains 100% untouched, 0 diff).",
+  "strengths": {
+    "s1": {
+      "label": "1 \u00b7 Doubt (barely stirring crown)",
+      "strip_file": "006/s1_strip.png",
+      "web_strip_file": "006/s1_strip_web.jpg",
+      "preview_mp4": "006/preview_s1.mp4",
+      "peak_displacement_px": 5.73,
+      "peak_displacement_hung_mm": 4.05,
+      "changed_pixels_union": 1828302,
+      "changed_share_pct": 42.8595,
+      "max_rgb_diff": 199,
+      "outside_mask_max_abs_diff": 0,
+      "faces_hands_max_diff": 0
+    },
+    "s2": {
+      "label": "2 \u00b7 Alive (boughs & sparrows awake)",
+      "strip_file": "006/s2_strip.png",
+      "web_strip_file": "006/s2_strip_web.jpg",
+      "preview_mp4": "006/preview_s2.mp4",
+      "peak_displacement_px": 25.43,
+      "peak_displacement_hung_mm": 17.97,
+      "changed_pixels_union": 1915068,
+      "changed_share_pct": 44.8935,
+      "max_rgb_diff": 241,
+      "outside_mask_max_abs_diff": 0,
+      "faces_hands_max_diff": 0
+    },
+    "s3": {
+      "label": "3 \u00b7 Windy (emphatic wind wake)",
+      "strip_file": "006/s3_strip.png",
+      "web_strip_file": "006/s3_strip_web.jpg",
+      "preview_mp4": "006/preview_s3.mp4",
+      "peak_displacement_px": 54.83,
+      "peak_displacement_hung_mm": 38.74,
+      "changed_pixels_union": 1986887,
+      "changed_share_pct": 46.5771,
+      "max_rgb_diff": 253,
+      "outside_mask_max_abs_diff": 0,
+      "faces_hands_max_diff": 0
+    }
+  }
+}

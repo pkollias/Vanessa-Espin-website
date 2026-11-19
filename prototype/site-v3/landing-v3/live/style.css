@@ -1,0 +1,574 @@
+/* Vanessa Espín — Landing v3 Live Prototype
+   8 Curatorial Concepts × 4 Graphical Film Portals × 3 Bio Sidebars */
+
+:root {
+  --bg: #e6e1d7;
+  --ink: #151310;
+  --muted: rgba(21, 19, 16, 0.58);
+  --rule: rgba(21, 19, 16, 0.18);
+  --accent: #7a261d;
+  --serif: 'Gambetta', Georgia, serif;
+  --zodiak: 'Zodiak', Georgia, serif;
+  --sans: 'Switzer', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  --ease-out: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-glide: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-drawer: cubic-bezier(0.165, 0.84, 0.44, 1);
+  --gutter: clamp(18px, 2.6vw, 42px);
+  --hair: 1px;
+}
+@media (min-resolution: 2dppx) {
+  :root { --hair: 0.5px; }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0; width: 100%; height: 100%;
+  overflow: hidden; overscroll-behavior: none;
+  background: var(--bg); color: var(--ink);
+  font-family: var(--sans); font-weight: 500;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+:focus-visible { outline: 1.5px solid currentColor; outline-offset: 4px; }
+
+/* ---------- Film Stage (underneath for curtain lift, or above when active) ---------- */
+.film-stage {
+  position: fixed; inset: 0; z-index: 0;
+  background: #070605; opacity: 0; pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+.film-stage.is-under { opacity: 1; z-index: 1; }
+.film-stage.is-active { opacity: 1; z-index: 60; pointer-events: auto; }
+.film-stage iframe {
+  width: 100%; height: 100%; border: 0; display: block; background: transparent;
+}
+.film-nav {
+  position: fixed; top: 18px; left: 20px; z-index: 65;
+  display: inline-flex; align-items: center; gap: 8px;
+  opacity: 0; pointer-events: none; transform: translateY(-6px);
+  transition: opacity 0.4s var(--ease-out), transform 0.4s var(--ease-out);
+}
+body.in-film .film-nav { opacity: 1; pointer-events: auto; transform: none; }
+.film-return,
+.film-media,
+.film-next {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 14px; border-radius: 999px;
+  background: rgba(14, 12, 10, 0.54); color: rgba(238, 232, 221, 0.80);
+  border: var(--hair) solid rgba(238, 232, 221, 0.22);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  font: 500 12.5px/1 var(--sans); letter-spacing: 0.02em;
+  opacity: 0.64;
+  transition: opacity 0.3s ease, background 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.25s ease;
+}
+.film-media[hidden] { display: none; }
+body.media-open .film-nav { opacity: 0; pointer-events: none; }   /* the event's media viewer is open inside the film */
+.film-return:hover,
+.film-media:hover,
+.film-next:hover,
+.film-nav.is-ended .film-media,
+.film-nav.is-ended .film-return {
+  opacity: 1;
+  background: rgba(20, 17, 15, 0.88); color: #f6f2ea;
+  border-color: rgba(246, 242, 234, 0.52);
+}
+.film-nav.is-ended .film-next {
+  opacity: 1;
+  background: rgba(24, 20, 16, 0.94); color: #f5d284;
+  border-color: rgba(245, 210, 132, 0.68);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.36);
+}
+
+/* ---------- Landing Shell (lifts as a whole in Portal P2 Curtain) ---------- */
+.landing-shell {
+  position: fixed; inset: 0; z-index: 5;
+  will-change: transform, opacity, filter;
+}
+.landing-shell.is-curtain-lifting {
+  transition: transform 0.48s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.48s ease;
+  transform: translateY(-103%);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+
+/* ---------- Backdrop Canvas (Komorebi, Watercolour Wash, Spotlight, Aura, Field) ---------- */
+#backdrop {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  z-index: 1; display: block; pointer-events: none;
+}
+
+/* ---------- Monumental Split Type Behind/Around Poster (C3 Split-type) ---------- */
+.split-stage {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  display: none; flex-direction: column; justify-content: space-between; align-items: center;
+  padding: clamp(54px, 6.8vh, 78px) var(--gutter) clamp(38px, 5.2vh, 62px);
+}
+body[data-concept="c3"] .split-stage { display: flex; }
+.split-word {
+  margin: 0; font-family: var(--serif); font-weight: 700;
+  font-size: clamp(64px, 13.4vw, 205px); line-height: 0.78;
+  letter-spacing: -0.045em; text-transform: uppercase;
+  color: var(--ink); user-select: none; white-space: nowrap;
+  transition: color 0.42s ease, transform 0.52s var(--ease-glide), opacity 0.35s ease;
+}
+.split-word--top { transform-origin: 50% 0%; }
+.split-word--bot { transform-origin: 50% 100%; }
+.landing-shell.is-curtain-lifting .split-word--top { transform: translateY(-28%) scaleY(1.08); }
+.landing-shell.is-curtain-lifting .split-word--bot { transform: translateY(-18%) scaleY(0.94); }
+
+/* ---------- WebGL Poster Stage ---------- */
+#gl {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  z-index: 4; display: block; cursor: grab; touch-action: none;
+}
+#gl.is-over { cursor: pointer; }
+#gl.is-dragging { cursor: grabbing; }
+
+/* ---------- Masking Tape SVG Overlay ---------- */
+.pins-svg {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  z-index: 5; pointer-events: none; overflow: visible;
+}
+.tape-poly {
+  fill: #e8dec5; fill-opacity: 0.86;
+  filter: drop-shadow(0px 2px 3px rgba(20, 16, 12, 0.22));
+}
+
+/* ---------- Portal FX Canvas (Threshold Veil, Spotlight Dim & Pigment Dissolve) ---------- */
+#portal-fx {
+  position: fixed; inset: 0; width: 100%; height: 100%;
+  z-index: 62; pointer-events: none; display: block;
+}
+
+/* ---------- Unified Paper Grain ---------- */
+.grain {
+  position: absolute; inset: -3rem; z-index: 12; pointer-events: none;
+  background-image: url(../img/noise.png); background-size: 150px 150px;
+  opacity: 0.11; mix-blend-mode: multiply;
+}
+body[data-tone="dark"] .grain {
+  opacity: 0.08; mix-blend-mode: screen;
+}
+
+/* ---------- Balanced 3-Point Masthead (Left Name · Center Event Planning Dropdown · Right About) ---------- */
+.masthead {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 15;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: clamp(16px, 2.2vh, 26px) var(--gutter);
+  pointer-events: none;
+  transition: color 0.38s ease, opacity 0.3s ease;
+}
+.masthead > * { pointer-events: auto; }
+.masthead__brand {
+  display: inline-flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+}
+.masthead__name {
+  font: 400 clamp(20px, 1.65vw, 25px)/1 var(--serif);
+  letter-spacing: -0.02em;
+}
+.masthead__center,
+.masthead__center.index-wrap {
+  position: absolute; left: 50%; transform: translateX(-50%);
+}
+.masthead__nav {
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.nav-btn {
+  position: relative; display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 999px;
+  font: 500 13.5px/1 var(--sans); letter-spacing: -0.005em;
+  color: var(--ink); transition: background 0.25s, color 0.25s, border-color 0.25s, opacity 0.25s;
+}
+.nav-btn:hover { background: var(--rule); }
+.nav-btn--center {
+  border: var(--hair) solid var(--rule);
+  padding: 7px 15px;
+  letter-spacing: 0.01em;
+}
+.nav-caret { font-size: 11px; opacity: 0.68; transition: transform 0.22s ease; }
+.nav-btn--center[aria-expanded="true"] .nav-caret { transform: rotate(180deg); }
+.nav-btn--bio {
+  border: var(--hair) solid var(--rule);
+  padding: 7px 15px;
+}
+
+/* Fade stage chrome gracefully while About or Event Entry is open */
+body.about-open .placard,
+body.about-open .triptych-bar,
+body.about-open .broadsheet-rail,
+body.about-open .corner-bar,
+body.about-open .masthead__center,
+body.about-open .masthead__nav {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.24s ease !important;
+}
+
+/* Brisk UI fade when entering an event so the poster owns the frame immediately */
+body.is-entering .masthead,
+body.is-entering .placard,
+body.is-entering .triptych-bar,
+body.is-entering .broadsheet-rail,
+body.is-entering .corner-bar,
+body.is-entering .bench {
+  opacity: 0 !important;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.22s ease !important;
+}
+
+/* Centered Event Planning Dropdown Menu (Dark Gallery Palette) */
+.index-wrap { position: relative; }
+.masthead__center.index-wrap {
+  position: absolute; left: 50%; transform: translateX(-50%);
+}
+.index-pop {
+  position: absolute; top: calc(100% + 10px); right: 0;
+  width: 348px; padding: 7px; border-radius: 10px;
+  background: #14110f; color: #f2ebe0;
+  box-shadow: 0 20px 52px rgba(6, 5, 4, 0.42), 0 0 0 var(--hair) rgba(238, 224, 198, 0.20);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+}
+.index-pop--center {
+  left: 50%; right: auto; transform: translateX(-50%);
+}
+.index-pop[hidden] { display: none; }
+.index-pop__hdr {
+  padding: 7px 11px 6px; font: 400 10px/1 var(--serif);
+  letter-spacing: 0.22em; text-transform: uppercase; color: rgba(242,235,224,0.52);
+  border-bottom: var(--hair) solid rgba(242,235,224,0.12); margin-bottom: 4px;
+}
+.index-row {
+  width: 100%; display: grid; gap: 2px;
+  padding: 9px 11px; border-radius: 6px; text-align: left;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+.index-row__top {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 10px;
+  font: 500 14px/1.2 var(--sans); color: #f4ede2;
+}
+.index-row__top em {
+  font-style: normal; font-size: 11px; color: rgba(244,237,226,0.52); font-variant-numeric: tabular-nums;
+}
+.index-row__sub {
+  font: 400 12px/1.3 var(--sans); color: rgba(244,237,226,0.62);
+}
+.index-row:hover, .index-row.is-current {
+  background: rgba(244, 230, 204, 0.13);
+}
+.index-row.is-current .index-row__top { color: #f5d284; }
+
+/* ---------- Uniform Left Curatorial Placard (L1..L4) ---------- */
+.placard {
+  position: absolute; z-index: 10; pointer-events: none;
+  left: var(--gutter); top: clamp(66px, 9vh, 98px); transform: none;
+  width: max-content; max-width: min(24.5rem, 31vw);
+  transition: opacity 0.34s var(--ease-out), transform 0.42s var(--ease-out), color 0.38s ease;
+}
+.placard.is-swapping { opacity: 0; transform: translateY(6px); }
+.placard__title {
+  margin: 0; font-family: var(--serif); font-weight: 300;
+  font-size: clamp(32px, 3.3vw, 52px); line-height: 0.96; letter-spacing: -0.026em;
+}
+.placard__sub {
+  margin: 7px 0 0; font-family: var(--sans); font-style: normal; font-weight: 400;
+  font-size: clamp(13px, 0.98vw, 14.5px); line-height: 1.38; letter-spacing: 0.005em;
+  color: var(--muted); max-width: 32ch;
+}
+body[data-copy="l3"] .placard__sub {
+  font-family: var(--serif); font-style: italic;
+  font-size: clamp(15.5px, 1.2vw, 18.5px); line-height: 1.32; color: var(--ink); opacity: 0.88;
+  max-width: 28ch;
+}
+body[data-copy="l4"] .placard__title,
+body[data-copy="l4"] .placard__sub {
+  display: none;
+}
+body[data-copy="l4"] .placard__actions { margin-top: 0; }
+.placard__actions {
+  margin-top: 14px; display: inline-flex; align-items: center; gap: 8px; pointer-events: auto;
+}
+.enter-btn {
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 10px 18px; border-radius: 999px;
+  background: var(--ink); color: var(--bg);
+  font: 500 13px/1 var(--sans); letter-spacing: 0.02em;
+  transition: transform 0.25s var(--ease-out), opacity 0.25s, background 0.35s, color 0.35s;
+}
+.enter-btn:hover { transform: translateX(3px); }
+.enter-btn__dur {
+  font-size: 11px; opacity: 0.72; font-variant-numeric: tabular-nums;
+}
+.flip-btn {
+  padding: 9px 13px; border-radius: 999px;
+  border: var(--hair) solid var(--rule);
+  font: 500 12px/1 var(--sans); color: var(--muted);
+  transition: color 0.25s, border-color 0.25s;
+}
+.flip-btn:hover { color: var(--ink); border-color: currentColor; }
+
+/* ---------- Concept-Specific Layout Overrides ---------- */
+
+/* C2 Chiaroscuro: Title sits lower-left like Iyuana & Flushing Theater opening cards! */
+body[data-concept="c2"] .placard {
+  top: auto; bottom: clamp(38px, 6.5vh, 72px); transform: none;
+  width: min(29rem, 36vw);
+}
+body[data-concept="c2"] .placard.is-swapping { transform: translateY(8px); }
+body[data-concept="c2"] .placard__title { font-size: clamp(46px, 5.2vw, 84px); }
+body[data-concept="c2"] .placard__meta {
+  display: flex; flex-wrap: wrap; gap: 6px 16px; border-top: 0; padding-top: 4px; margin-top: 12px;
+  color: var(--muted); font-size: 12.5px;
+}
+body[data-concept="c2"] .placard__row { gap: 6px; }
+body[data-concept="c2"] .placard__row dt { display: none; }
+body[data-concept="c2"] .placard__row dd::after { content: ' ·'; opacity: 0.5; }
+body[data-concept="c2"] .placard__row:last-child dd::after { content: ''; }
+
+/* C3 Split-type: Monumental split type owns top/bottom; placard becomes compact side margin stamp */
+body[data-concept="c3"] .placard {
+  width: min(17.5rem, 22vw); top: auto; bottom: clamp(56px, 9vh, 92px);
+}
+body[data-concept="c3"] .placard__title,
+body[data-concept="c3"] .placard__sub { display: none; }
+body[data-concept="c3"] .placard__meta { border-top: 0; padding-top: 0; margin-top: 4px; }
+
+/* C4 Salon Triptych: Individual museum labels directly beneath the 3 hanging posters! */
+body[data-concept="c4"] .placard { display: none; }
+.triptych-bar {
+  position: absolute; left: 0; right: 0; bottom: clamp(28px, 5.2vh, 56px); z-index: 10;
+  display: none; justify-content: center; gap: clamp(24px, 5.5vw, 96px);
+  padding: 0 var(--gutter); pointer-events: none;
+}
+body[data-concept="c4"] .triptych-bar { display: flex; }
+.triptych-cap {
+  width: min(18rem, 25vw); text-align: center; pointer-events: auto; cursor: pointer;
+  opacity: 0.48; transform: translateY(4px);
+  transition: opacity 0.32s var(--ease-out), transform 0.32s var(--ease-out);
+}
+.triptych-cap.is-active, .triptych-cap:hover { opacity: 1; transform: none; }
+.triptych-cap__num { font: 400 10.5px/1 var(--serif); letter-spacing: 0.22em; color: var(--muted); }
+.triptych-cap__title { margin: 5px 0 2px; font: 400 clamp(20px, 1.8vw, 28px)/1.05 var(--serif); }
+.triptych-cap__meta { font: 500 12px/1.35 var(--sans); color: var(--muted); }
+.triptych-cap__go {
+  display: inline-block; margin-top: 8px; padding: 5px 12px; border-radius: 999px;
+  border: var(--hair) solid var(--rule); font: 500 11.5px/1 var(--sans);
+}
+.triptych-cap.is-active .triptych-cap__go { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+/* C7 Curatorial Broadsheet & Voice Rail */
+.broadsheet-rail {
+  position: absolute; left: var(--gutter); top: clamp(72px, 10.5vh, 108px); bottom: clamp(54px, 8vh, 84px);
+  width: min(31rem, 40vw); z-index: 11; display: none; flex-direction: column; justify-content: space-between;
+  border-top: var(--hair) solid var(--rule); border-bottom: var(--hair) solid var(--rule);
+  padding: 18px 0; pointer-events: auto;
+}
+body[data-concept="c7"] .placard { display: none; }
+body[data-concept="c7"] .broadsheet-rail { display: flex; }
+.bs-list { display: grid; gap: 2px; }
+.bs-item {
+  display: grid; grid-template-columns: 34px 1fr auto; align-items: baseline; gap: 10px;
+  padding: 11px 10px; border-bottom: var(--hair) solid var(--rule);
+  text-align: left; opacity: 0.52; transition: opacity 0.25s, background 0.25s, padding-left 0.25s;
+}
+.bs-item:hover, .bs-item.is-active { opacity: 1; background: rgba(21,19,16,0.045); padding-left: 15px; }
+.bs-item__n { font: 400 12px/1 var(--serif); letter-spacing: 0.14em; color: var(--muted); }
+.bs-item__t { font: 300 clamp(24px, 2.5vw, 38px)/0.96 var(--serif); letter-spacing: -0.025em; }
+.bs-item__d { font: 500 12px/1 var(--sans); color: var(--muted); }
+.bs-voice { margin: auto 0; padding: 18px 4px 10px; }
+.bs-voice__eyebrow {
+  display: block; margin-bottom: 8px; font: 400 10.5px/1 var(--serif);
+  letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted);
+}
+.bs-voice__text {
+  margin: 0; font: italic 400 clamp(17px, 1.45vw, 22px)/1.36 var(--serif);
+  color: var(--ink);
+}
+.bs-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 12px; }
+.bs-foot__venue { font: 500 12.5px/1.35 var(--sans); color: var(--muted); }
+
+/* ---------- Bottom Corner Counter & Hint ---------- */
+.corner-bar {
+  position: absolute; left: var(--gutter); right: var(--gutter); bottom: clamp(14px, 2vh, 24px);
+  z-index: 10; display: flex; justify-content: space-between; align-items: flex-end;
+  pointer-events: none; font-size: 12px; color: var(--muted);
+  transition: color 0.38s ease;
+}
+body[data-concept="c2"] .corner-bar__left { opacity: 0; }
+body[data-concept="c4"] .corner-bar__right { opacity: 0.65; }
+.corner-bar__left { max-width: 24rem; }
+.corner-bar__right { text-align: right; display: flex; align-items: baseline; gap: 14px; pointer-events: auto; }
+.corner-count {
+  font: 300 22px/1 var(--serif); color: var(--ink); font-variant-numeric: lining-nums tabular-nums;
+}
+.corner-next {
+  padding-left: 12px; border-left: var(--hair) solid var(--rule);
+  font: 500 12px/1 var(--sans); color: var(--ink); opacity: 0.78;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+.corner-next:hover { opacity: 1; transform: translateX(2px); }
+
+/* ---------- About / Bio Sidebar (3 Distinct Styles: dossier | nocturne | colophon) ---------- */
+.drawer-scrim {
+  position: fixed; inset: 0; z-index: 40;
+  background: rgba(16, 14, 12, 0.44); opacity: 0; pointer-events: none;
+  transition: opacity 0.48s var(--ease-drawer);
+}
+.drawer-scrim.is-open { opacity: 1; pointer-events: auto; }
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 45;
+  width: 450px; max-width: 100vw; overflow-y: auto; overscroll-behavior: contain;
+  background: #f5f1ea; color: #161412;
+  transform: translateX(102%);
+  transition: transform 0.5s var(--ease-drawer), background 0.35s ease, color 0.35s ease;
+  box-shadow: -18px 0 48px rgba(12, 10, 8, 0.24);
+}
+.drawer.is-open { transform: none; }
+.drawer[data-bio="nocturne"] {
+  background: #13110f; color: #ece4d7;
+  box-shadow: -20px 0 54px rgba(0, 0, 0, 0.62);
+  border-left: var(--hair) solid rgba(236, 228, 215, 0.14);
+}
+.drawer[data-bio="colophon"] {
+  background: #f0ece3; color: #1c1916;
+  background-image: radial-gradient(rgba(28,25,22,0.045) 1px, transparent 0);
+  background-size: 14px 14px;
+}
+
+.drawer__in { padding: 22px 28px 36px; display: flex; flex-direction: column; gap: 20px; }
+.drawer__top {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-bottom: 12px; border-bottom: var(--hair) solid currentColor; opacity: 0.85;
+}
+.drawer__eyebrow {
+  font: 400 10.5px/1 var(--serif); letter-spacing: 0.22em; text-transform: uppercase; opacity: 0.68;
+}
+.drawer__close {
+  font: 500 13px/1 var(--sans); padding: 4px 10px; border-radius: 999px;
+  border: var(--hair) solid rgba(128,120,110,0.38);
+}
+.drawer__bio-switch {
+  display: flex; gap: 5px; flex-wrap: wrap;
+}
+.drawer__bio-pill {
+  padding: 4px 9px; border-radius: 999px; font: 500 11px/1 var(--sans);
+  border: var(--hair) solid rgba(128,120,110,0.38); opacity: 0.68;
+}
+.drawer__bio-pill.is-on { opacity: 1; background: currentColor; }
+.drawer__bio-pill.is-on span { filter: invert(1); }
+
+.drawer__name {
+  margin: 2px 0 0; font: 300 54px/0.88 var(--serif); letter-spacing: -0.035em;
+}
+.drawer[data-bio="colophon"] .drawer__name { text-transform: uppercase; font-size: 46px; }
+.drawer__sub {
+  margin: -10px 0 0; font: 500 12px/1.4 var(--sans); letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.65;
+}
+.drawer__portrait-wrap {
+  position: relative; margin: 2px 0; border-radius: 3px; overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+}
+.drawer[data-bio="colophon"] .drawer__portrait-wrap {
+  padding: 10px 10px 26px; background: #faf8f3; border: var(--hair) solid rgba(28,25,22,0.18);
+}
+.drawer__portrait {
+  display: block; width: 100%; height: 270px; object-fit: cover; object-position: 50% 24%;
+  transition: filter 0.35s ease;
+}
+.drawer__portrait.is-bw { filter: grayscale(1) contrast(1.05); }
+.drawer__photo-cap {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 6px; font: 400 10px/1.2 var(--serif); letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.62;
+}
+.drawer__tone-toggle {
+  font: 500 10.5px/1 var(--sans); text-decoration: underline; opacity: 0.85;
+}
+
+.drawer__lead {
+  margin: 0; font: 400 18.5px/1.38 var(--serif); letter-spacing: -0.005em;
+}
+.drawer[data-bio="colophon"] .drawer__lead { font-style: italic; }
+.drawer__body {
+  margin: 0; font: 400 14.5px/1.5 var(--sans); opacity: 0.86;
+}
+.drawer__sig {
+  display: none; font: italic 400 24px/1 var(--serif); margin-top: -4px;
+}
+.drawer[data-bio="colophon"] .drawer__sig { display: block; }
+
+.drawer__sec {
+  padding-top: 14px; border-top: var(--hair) solid rgba(128,120,110,0.28);
+}
+.drawer__table {
+  margin-top: 10px; display: grid; gap: 0;
+}
+.drawer__trow {
+  display: grid; grid-template-columns: 1.25fr 1fr auto; gap: 8px; align-items: baseline;
+  padding: 7px 0; border-bottom: var(--hair) solid rgba(128,120,110,0.18);
+  font-size: 12.5px; line-height: 1.3;
+}
+.drawer__trow b { font-weight: 600; }
+.drawer__trow span:nth-child(2) { opacity: 0.72; }
+.drawer__trow span:last-child { opacity: 0.55; font-variant-numeric: tabular-nums; text-align: right; }
+
+.drawer__details summary {
+  cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center;
+  font: 400 10.5px/1 var(--serif); letter-spacing: 0.2em; text-transform: uppercase; opacity: 0.75;
+}
+.drawer__details summary::-webkit-details-marker { display: none; }
+.drawer__foot {
+  padding-top: 14px; border-top: var(--hair) solid rgba(128,120,110,0.28);
+  display: flex; justify-content: space-between; align-items: center; font-size: 13px;
+}
+.drawer__linkedin {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 15px; border-radius: 999px;
+  border: var(--hair) solid currentColor; font: 500 12.5px/1 var(--sans);
+}
+
+/* ---------- Collapsible Workbench Switcher Pill (Hidden with ?clean=1 or H key) ---------- */
+.bench {
+  position: fixed; right: 16px; bottom: 48px; z-index: 35;
+  width: 316px; max-width: calc(100vw - 32px);
+  background: rgba(248, 245, 239, 0.92); color: #151310;
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-radius: 10px; padding: 10px 12px;
+  box-shadow: 0 12px 36px rgba(12, 10, 8, 0.18), 0 0 0 var(--hair) rgba(18, 16, 14, 0.16);
+  font: 500 12px/1.3 var(--sans);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+body.clean-hud .bench, body.in-film .bench { opacity: 0; pointer-events: none; transform: translateY(8px); }
+.bench.is-min .bench__body { display: none; }
+.bench__hdr { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.bench__title { font: 600 11px/1 var(--sans); letter-spacing: 0.08em; text-transform: uppercase; }
+.bench__hdr-btns { display: flex; gap: 6px; align-items: center; }
+.bench__hdr-btns a, .bench__hdr-btns button {
+  padding: 4px 7px; border-radius: 4px; font-size: 11px;
+  background: rgba(21,19,16,0.07);
+}
+.bench__body { margin-top: 8px; display: grid; gap: 8px; }
+.bench__grp-lbl {
+  display: block; margin-bottom: 4px; font-size: 10.5px; color: rgba(21,19,16,0.58);
+}
+.bench__pills { display: flex; flex-wrap: wrap; gap: 4px; }
+.bench__pill {
+  padding: 5px 7px; border-radius: 5px; font-size: 11px; line-height: 1.1;
+  border: var(--hair) solid rgba(21,19,16,0.22); background: transparent; color: #151310;
+}
+.bench__pill[aria-pressed="true"] {
+  background: #151310; color: #f8f5ef; border-color: #151310;
+}
+
+@media (max-width: 860px) {
+  .placard {
+    top: auto; bottom: 58px; left: var(--gutter); right: var(--gutter);
+    width: auto; transform: none;
+  }
+  .placard__meta { display: none; }
+  .broadsheet-rail {
+    top: auto; bottom: 52px; left: var(--gutter); right: var(--gutter); width: auto; height: 38vh;
+  }
+  .triptych-bar { gap: 12px; }
+  .bench { top: 58px; bottom: auto; }
+}

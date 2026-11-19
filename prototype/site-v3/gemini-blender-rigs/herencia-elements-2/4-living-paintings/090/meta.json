@@ -1,0 +1,98 @@
+{
+  "painting_id": "090",
+  "title": "Andean Mona Lisa \u2014 Tree-Tomato Bough & Pendulum Fruits (Hens Locked)",
+  "source_file": "reference/vision-board/board/concepts/herencia/assets/090.jpg",
+  "dimensions_wh": [
+    2058,
+    2200
+  ],
+  "curated_hang": {
+    "wall": "L",
+    "s": 9.418,
+    "y": 1.6,
+    "w_m": 1.809
+  },
+  "mm_per_source_px": 0.879,
+  "loop_frames": 24,
+  "fps": 12,
+  "loop_seconds": 2.0,
+  "strip_grid": {
+    "cols": 6,
+    "rows": 4,
+    "frames": 24
+  },
+  "mask_file": "090/mask.png",
+  "faces_hands_mask_file": "090/faces_hands_mask.png",
+  "mask_bbox_xywh": [
+    231,
+    0,
+    1827,
+    1102
+  ],
+  "web_scale": 0.42,
+  "web_dimensions_wh": [
+    864,
+    924
+  ],
+  "web_mask_bbox_xywh": [
+    97,
+    0,
+    767,
+    463
+  ],
+  "masked_pixels": 620967,
+  "masked_share_pct": 13.7151,
+  "faces_hands_protected_pixels": 2744127,
+  "outside_mask_max_abs_diff": 0,
+  "faces_hands_max_diff": 0,
+  "preview_3strengths_mp4": "090/preview_3strengths.mp4",
+  "sheet_4x_file": "090/4x_frames_sheet.jpg",
+  "layers": [
+    "tree_canopy: lush green tree-tomato bough swaying from trunk fork over exemplar cerulean sky/lake (SDF-pinned near locked white hat & blue veil)",
+    "tom_lower_l, tom_upper_l, tom_upper_r: 3 solid smooth red-orange tree-tomatoes swinging rigidly like weighted pendulums over leaf-repaired canopy",
+    "sky_tom_1 & sky_tom_2: floating sky fruits bobbing on highland wind",
+    "STATIC LOCK (#63): Mona Lisa's face, neck, folded hands, rooster, rainbow tail & white chicken are 100% static (`0` pixel diff)!"
+  ],
+  "occlusion_plate_provenance": "Local multi-scale Medina exemplar sky & leaf synthesis + 1:1 2000px canvas-weave transfer strictly inside revealed crescent behind tree-tomato bough and swinging fruits (Mona Lisa face/neck/hands + rooster + white chicken 100% untouched, 0 diff per Pavlos #63).",
+  "strengths": {
+    "s1": {
+      "label": "1 \u00b7 Doubt (subtle stir)",
+      "strip_file": "090/s1_strip.png",
+      "web_strip_file": "090/s1_strip_web.jpg",
+      "preview_mp4": "090/preview_s1.mp4",
+      "peak_displacement_px": 8.45,
+      "peak_displacement_hung_mm": 7.43,
+      "changed_pixels_union": 554914,
+      "changed_share_pct": 12.2563,
+      "max_rgb_diff": 162,
+      "outside_mask_max_abs_diff": 0,
+      "faces_hands_max_diff": 0
+    },
+    "s2": {
+      "label": "2 \u00b7 Alive (bough & tree-tomatoes)",
+      "strip_file": "090/s2_strip.png",
+      "web_strip_file": "090/s2_strip_web.jpg",
+      "preview_mp4": "090/preview_s2.mp4",
+      "peak_displacement_px": 37.43,
+      "peak_displacement_hung_mm": 32.9,
+      "changed_pixels_union": 586731,
+      "changed_share_pct": 12.959,
+      "max_rgb_diff": 200,
+      "outside_mask_max_abs_diff": 0,
+      "faces_hands_max_diff": 0
+    },
+    "s3": {
+      "label": "3 \u00b7 Windy (emphatic highland breeze)",
+      "strip_file": "090/s3_strip.png",
+      "web_strip_file": "090/s3_strip_web.jpg",
+      "preview_mp4": "090/preview_s3.mp4",
+      "peak_displacement_px": 80.48,
+      "peak_displacement_hung_mm": 70.75,
+      "changed_pixels_union": 611814,
+      "changed_share_pct": 13.513,
+      "max_rgb_diff": 244,
+      "outside_mask_max_abs_diff": 0,
+      "faces_hands_max_diff": 0
+    }
+  }
+}

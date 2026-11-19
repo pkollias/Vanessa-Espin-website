@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/Vanessa-Espin-website/favicon.ico">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Iyuana — El Retorno de los Sueños (Movie)</title>
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=gambetta@300,400&f[]=switzer@400,500&display=swap">
+<style>
+  :root {
+    --paper: #ece4d7;
+    --soft: rgba(236, 228, 215, 0.62);
+    --faint: rgba(236, 228, 215, 0.36);
+    --night: #070605;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; background: var(--night); }
+  body {
+    margin: 0; color: var(--paper);
+    font-family: Switzer, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+    font-feature-settings: "kern", "liga";
+  }
+  #gl { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100lvh; display: block; z-index: 0; }
+  .ui { position: fixed; inset: 0; pointer-events: none; z-index: 1; }
+  .ui > * { position: absolute; will-change: opacity, transform; }
+
+  /* the threshold: the title stands over the aisle like a title card over a picture */
+  .intro { left: clamp(20px, 6.2vw, 96px); bottom: clamp(40px, 7.5vh, 80px); max-width: 640px; opacity: 0; text-shadow: 0 0 28px rgba(7, 6, 5, 0.55); }
+  .intro .k { margin: 0 0 1.5em; font-size: 11px; font-weight: 500; letter-spacing: 0.24em; text-transform: uppercase; color: var(--soft); }
+  .intro h1 { margin: 0; font-family: Gambetta, Georgia, serif; font-weight: 300; font-size: clamp(64px, 9.4vw, 148px); line-height: 0.86; letter-spacing: -0.028em; }
+  .intro .s { margin: 0.42em 0 0; font-family: Gambetta, Georgia, serif; font-weight: 300; font-size: clamp(20px, 1.9vw, 29px); letter-spacing: 0.004em; }
+  .intro .f { margin: 2.2em 0 0; font-size: 12px; letter-spacing: 0.07em; color: var(--soft); font-variant-numeric: lining-nums; }
+
+  /* ?open=photo: the title is printed over the first photograph's pale wall, in ink, until the walk pulls back */
+  .open-photo .intro { color: #1c1916; text-shadow: none; }
+  .open-photo .intro .k, .open-photo .intro .f { color: rgba(28, 25, 22, 0.72); }
+  /* running head */
+  .head { top: 26px; left: clamp(20px, 2.4vw, 34px); display: flex; gap: 12px; align-items: baseline; opacity: 0; }
+  .head .t { font-family: Gambetta, Georgia, serif; font-size: 18px; }
+  .head .s { font-family: Gambetta, Georgia, serif; font-weight: 300; font-size: 15px; color: var(--soft); }
+
+  /* her one line, beside the film */
+  .line { margin: 0; width: min(25vw, 360px); opacity: 0; }
+  .line p { margin: 0; font-family: Gambetta, Georgia, serif; font-weight: 400; font-size: clamp(19px, 1.62vw, 25px); line-height: 1.32; letter-spacing: -0.002em; text-indent: -0.42em; text-wrap: pretty; }
+
+  /* the wall label beside the poster */
+  .label { width: min(22vw, 300px); opacity: 0; }
+  .label .t { margin: 0; font-family: Gambetta, Georgia, serif; font-size: 25px; line-height: 1.05; }
+  .label .s { margin: 0.28em 0 0; font-family: Gambetta, Georgia, serif; font-weight: 300; font-size: 16.5px; color: var(--soft); }
+  .label .w { margin: 1.7em 0 0; font-size: 12px; line-height: 1.6; letter-spacing: 0.04em; color: var(--soft); font-variant-numeric: lining-nums; }
+  .label .k { margin: 1.9em 0 0.7em; font-size: 10.5px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--faint); }
+  .label ul { list-style: none; margin: 0; padding: 0; font-size: 13.5px; line-height: 1.72; letter-spacing: 0.01em; }
+  /* when the walk pulls back to show the room, the label leaves the wall for the corner, where the title began */
+  .label.corner { left: clamp(20px, 3.4vw, 56px); bottom: clamp(36px, 7vh, 72px); width: min(20vw, 270px); text-shadow: 0 0 24px rgba(7, 6, 5, 0.6); }
+
+  /* one grain over everything, the type included */
+  .grain { position: fixed; left: -50%; top: -50%; width: 200%; height: 200%; pointer-events: none; z-index: 5; opacity: 0.16; mix-blend-mode: overlay; background-repeat: repeat; }
+  .grain.shade { opacity: 0.05; mix-blend-mode: screen; }
+
+  .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .fallback { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; gap: 48px; padding: 24px; }
+  .fallback img { width: min(60vw, 420px); height: auto; }
+  body.nogl .fallback { display: flex; }
+
+  /* cinema playback pill & scrub bar */
+  .cinema-pill {
+    position: fixed; top: 20px; right: 20px; z-index: 12;
+    display: flex; align-items: center; gap: 6px; padding: 5px 8px;
+    background: rgba(12, 10, 9, 0.62); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(236, 228, 215, 0.14); border-radius: 999px;
+    font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    transition: opacity 0.25s ease;
+  }
+  .cinema-pill button {
+    appearance: none; border: 0; background: transparent; color: var(--soft);
+    font: inherit; letter-spacing: inherit; text-transform: inherit;
+    padding: 5px 10px; border-radius: 999px; cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .cinema-pill button:hover, .cinema-pill a:hover { color: var(--paper); background: rgba(236, 228, 215, 0.08); }
+  .cinema-pill button.active { background: var(--paper); color: var(--night); font-weight: 500; }
+  .cinema-pill select {
+    appearance: none; -webkit-appearance: none; border: 1px solid rgba(236, 228, 215, 0.22);
+    background: rgba(20, 18, 16, 0.85); color: var(--paper); font: inherit; font-size: 10.5px;
+    letter-spacing: 0.04em; text-transform: none; padding: 4px 9px; border-radius: 999px; cursor: pointer;
+  }
+  .cinema-pill a {
+    color: var(--soft); text-decoration: none; padding: 5px 9px; border-radius: 999px;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .cinema-pill .sep { width: 1px; height: 14px; background: rgba(236, 228, 215, 0.16); margin: 0 2px; }
+  .cinema-pill .time-lbl { color: var(--soft); font-variant-numeric: tabular-nums; padding: 0 6px; font-size: 10.5px; letter-spacing: 0.06em; }
+  body.clean .cinema-pill { display: none; }
+
+  .prog-bar {
+    position: fixed; left: 0; right: 0; bottom: 0; height: 22px; z-index: 10;
+    cursor: pointer; display: flex; align-items: flex-end;
+  }
+  .prog-track { width: 100%; height: 2px; background: rgba(236, 228, 215, 0.14); transition: height 0.18s ease; }
+  .prog-bar:hover .prog-track { height: 5px; }
+  .prog-fill { height: 100%; width: 0%; background: rgba(236, 228, 215, 0.72); }
+  body.clean .prog-bar { display: none; }
+
+  @media (max-aspect-ratio: 1/1) {
+    .cinema-pill { top: 14px; right: 14px; }
+    .head { top: 18px; left: 16px; }
+    .head .s { display: none; }
+    .intro { left: 16px; right: 16px; bottom: 64px; }
+    .intro .f { margin-top: 1.6em; }
+    .line { width: auto; }
+    .line p { font-size: 19px; }
+    .label { width: auto; }
+    .label .t, .label .s { display: none; }
+    .label .w { margin: 0; }
+    .label .k { margin: 1em 0 0.4em; }
+    .label ul { font-size: 13px; line-height: 1.55; }
+  }
+</style>
+<style>.cinema-pill, .review-pill, #hud, #hudMin, .prog-bar { visibility: hidden !important; pointer-events: none !important; }</style>
+</head>
+<body>
+<canvas id="gl" aria-hidden="true"></canvas>
+
+<main class="ui">
+  <section class="intro" id="intro">
+    <p class="k">Film and photography exhibition</p>
+    <h1>Iyuana</h1>
+    <p class="s">El Retorno de los Sueños</p>
+    <p class="f">Long Island City, Queens&ensp;·&ensp;August 18–24, 2026</p>
+  </section>
+
+  <div class="head" id="head"><span class="t">Iyuana</span><span class="s">El Retorno de los Sueños</span></div>
+
+  <blockquote class="line" id="line"><p>“I curated the exhibition so that the images and the film could tell most of the story.”</p></blockquote>
+
+  <section class="label" id="label">
+    <p class="t">Iyuana</p>
+    <p class="s">El Retorno de los Sueños</p>
+    <p class="w">August 18–24, 2026<br>Long Island City, Queens</p>
+    <p class="k">Artists</p>
+    <ul>
+      <li>Yanda Montahuano</li>
+      <li>Li Can Vega</li>
+      <li>Armando Vega</li>
+      <li>Israel Vargas “Panchis”</li>
+    </ul>
+  </section>
+  <p class="vh" aria-live="polite" id="live"></p>
+</main>
+
+<div class="grain shade" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<div class="fallback">
+  <img src="../assets/212.jpg" alt="Iyuana, El Retorno de los Sueños: the exhibition poster">
+</div>
+
+<div class="cinema-pill" id="cinema-pill">
+  <button id="btn-play" class="active" title="Play / Pause (Space)">Pause</button>
+  <button id="btn-replay" title="Replay from beginning (R)">&#8634; Replay</button>
+  <span class="sep"></span>
+  <select id="traj-sel" title="Camera Trajectory"></select>
+  <a href="../trajectories/" title="Open White 3D Trajectory Plot Lab">3D Lab</a>
+  <span class="sep"></span>
+  <span class="time-lbl" id="time-lbl">0.0s / 24.0s</span>
+</div>
+<div class="prog-bar" id="prog-bar" title="Click or drag to scrub movie"><div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div></div>
+
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js" } }
+</script>
+<!-- Event media: the "Media" link, the strip and the pop-up (shared module in /event-media/).
+     It loads before the film's own script so it can pause the film's video while the viewer is open. -->
+<script type="module">import { mountEventMedia } from '/Vanessa-Espin-website/event-media/event-media.js?v=6'; mountEventMedia({ manifest: '/Vanessa-Espin-website/event-media/manifests/iyuana.json' });</script>
+<script type="module" src="./main.js"></script>
+</body>
+</html>

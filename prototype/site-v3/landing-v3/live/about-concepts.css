@@ -1,0 +1,1826 @@
+/* Vanessa Espín — 8 Divergent Dark-Gallery About Concepts (a1–a8)
+   Nocturnal museum surfaces, natural-colour uncropped archival portrait, 60fps GPU choreography */
+
+#aboutStage {
+  --ab-serif: 'Gambetta', Georgia, serif;
+  --ab-zodiak: 'Zodiak', Georgia, serif;
+  --ab-sans: 'Switzer', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  --ab-ivory: #f4ede2;
+  --ab-parchment: #efe7da;
+  --ab-body: rgba(239, 231, 218, 0.84);
+  --ab-stone: rgba(239, 231, 218, 0.58);
+  --ab-faint: rgba(239, 231, 218, 0.38);
+  --ab-brass: #dcc094;
+  --ab-rule: rgba(236, 216, 182, 0.22);
+  --ab-rule-strong: rgba(236, 216, 182, 0.34);
+  --ab-rule-soft: rgba(236, 216, 182, 0.14);
+  --ab-hair: var(--hair, 0.5px);
+  --ab-ease-out: cubic-bezier(0.19, 1, 0.22, 1);
+  --ab-ease-glide: cubic-bezier(0.32, 0.72, 0, 1);
+  --ab-ease-settle: cubic-bezier(0.22, 1, 0.36, 1);
+
+  position: fixed;
+  inset: 0;
+  z-index: 44;
+  color: var(--ab-parchment);
+  font-family: var(--ab-sans);
+  font-weight: 400;
+  visibility: hidden;
+  pointer-events: none;
+  opacity: 0;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+#aboutStage.is-open {
+  visibility: visible;
+  opacity: 1;
+}
+
+#aboutStage.is-closing {
+  visibility: visible;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.44s var(--ab-ease-out), visibility 0s linear 0.45s;
+}
+
+body.is-entering #aboutStage,
+body.in-film #aboutStage {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.18s ease !important;
+}
+
+/* Instant settled state for ?openbio=1 static captures */
+#aboutStage.is-instant,
+#aboutStage.is-instant *,
+#aboutStage.is-instant *::before,
+#aboutStage.is-instant *::after {
+  animation-duration: 0.001s !important;
+  animation-delay: 0s !important;
+  transition-duration: 0.001s !important;
+  transition-delay: 0s !important;
+}
+
+/* Shared tactile nocturnal plaster/cotton grain */
+.ab-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;
+  background-image: url(../img/noise.png);
+  background-size: 150px 150px;
+  mix-blend-mode: screen;
+  opacity: 0.065;
+}
+
+/* Open Left Gallery Bay (used in a1, a2, a4, a8) */
+.ab-open-bay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  pointer-events: auto;
+  cursor: default;
+}
+
+.ab-open-bay.is-over-poster {
+  cursor: pointer;
+}
+
+.ab-bay-cue {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(22px, 3.4vh, 36px);
+  transform: translate(-50%, 4px);
+  padding: 6px 13px;
+  border-radius: 999px;
+  background: rgba(17, 14, 12, 0.78);
+  border: var(--ab-hair) solid var(--ab-rule-strong);
+  color: var(--ab-ivory);
+  font: 500 11.5px/1 var(--ab-sans);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.24s ease, transform 0.24s var(--ab-ease-out);
+}
+
+.ab-open-bay.is-over-poster .ab-bay-cue {
+  opacity: 0.94;
+  transform: translate(-50%, 0);
+}
+
+/* Shared Museum Controls & Atoms */
+.ab-eyebrow {
+  display: block;
+  margin: 0;
+  font: 400 10.5px/1.2 var(--ab-serif);
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  color: var(--ab-stone);
+}
+
+.ab-eyebrow--brass {
+  color: rgba(226, 198, 152, 0.78);
+}
+
+.ab-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: var(--ab-hair) solid var(--ab-rule-strong);
+  background: rgba(20, 16, 13, 0.56);
+  color: var(--ab-ivory);
+  font: 500 12.5px/1 var(--ab-sans);
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.24s ease, border-color 0.24s ease, color 0.24s ease;
+}
+
+.ab-close:hover {
+  background: rgba(236, 216, 182, 0.14);
+  border-color: rgba(236, 216, 182, 0.58);
+  color: #ffffff;
+}
+
+.ab-linkedin {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: var(--ab-hair) solid var(--ab-rule-strong);
+  background: rgba(236, 216, 182, 0.05);
+  color: var(--ab-ivory);
+  font: 500 12.5px/1 var(--ab-sans);
+  letter-spacing: 0.015em;
+  transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.25s var(--ab-ease-out);
+}
+
+.ab-linkedin:hover {
+  background: var(--ab-ivory);
+  border-color: var(--ab-ivory);
+  color: #120f0c;
+  transform: translateY(-1px);
+}
+
+/* Archival Uncropped Natural-Colour Portrait Integrity (773×806, ZERO zoom, ZERO crop) */
+.ab-portrait-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 773 / 806;
+  object-fit: contain;
+  filter: none;
+  transform: none !important;
+  user-select: none;
+}
+
+.ab-brass-rule {
+  width: 100%;
+  height: var(--ab-hair);
+  background: linear-gradient(90deg, var(--ab-rule-strong) 0%, var(--ab-rule) 65%, rgba(236, 216, 182, 0.06) 100%);
+  transform-origin: 0% 50%;
+}
+
+/* Interactive "Where I Stood" Exhibition Rows */
+.ab-stood-list {
+  display: grid;
+  gap: 0;
+}
+
+.ab-stood-item {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 26px 1fr;
+  gap: 8px;
+  align-items: baseline;
+  text-align: left;
+  padding: 8px 10px;
+  margin: 0 -10px;
+  border-radius: 4px;
+  border-bottom: var(--ab-hair) solid var(--ab-rule-soft);
+  color: var(--ab-parchment);
+  cursor: pointer;
+  transition: background 0.22s ease, border-color 0.22s ease;
+}
+
+.ab-stood-item:last-child {
+  border-bottom-color: transparent;
+}
+
+.ab-stood-item:hover,
+.ab-stood-item:focus-visible,
+.ab-stood-item.is-active-ex {
+  background: rgba(236, 216, 182, 0.065);
+}
+
+.ab-stood-num {
+  font: 400 11px/1 var(--ab-serif);
+  letter-spacing: 0.14em;
+  color: var(--ab-brass);
+  opacity: 0.82;
+}
+
+.ab-stood-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+
+.ab-stood-title {
+  font: 500 12.5px/1.2 var(--ab-sans);
+  color: var(--ab-ivory);
+}
+
+.ab-stood-place {
+  font: 400 11px/1.2 var(--ab-sans);
+  color: var(--ab-stone);
+}
+
+.ab-stood-go {
+  font: 500 11px/1 var(--ab-sans);
+  color: var(--ab-brass);
+  opacity: 0;
+  transform: translateX(-3px);
+  transition: opacity 0.2s ease, transform 0.2s var(--ab-ease-out);
+}
+
+.ab-stood-item:hover .ab-stood-go,
+.ab-stood-item:focus-visible .ab-stood-go,
+.ab-stood-item.is-active-ex .ab-stood-go {
+  opacity: 0.92;
+  transform: translateX(0);
+}
+
+.ab-stood-text {
+  margin: 0;
+  font: 400 12.6px/1.44 var(--ab-sans);
+  color: var(--ab-body);
+}
+
+/* Masked Line-Rise Helper */
+.ab-ln {
+  display: block;
+  overflow: hidden;
+  padding-top: 0.03em;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.06em;
+}
+
+.ab-ln > span {
+  display: block;
+  will-change: transform, opacity;
+}
+
+/* =========================================================================
+   KEYFRAMES (GPU-friendly transform, opacity, clip-path)
+   ========================================================================= */
+@keyframes abFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes abRiseUp {
+  from { opacity: 0; transform: translate3d(0, 16px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes abLineMask {
+  from { transform: translate3d(0, 112%, 0); opacity: 0.15; }
+  to { transform: translate3d(0, 0, 0); opacity: 1; }
+}
+
+@keyframes abRuleDraw {
+  from { transform: scaleX(0); opacity: 0.3; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+
+@keyframes abCurtainFly {
+  from { transform: translate3d(0, -102%, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+
+@keyframes abColUnveil {
+  from { opacity: 0; transform: translate3d(0, 18px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes abAlcovePush {
+  from { transform: translate3d(100%, 0, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+
+@keyframes abIrisBloom {
+  from { clip-path: circle(0% at 32% 38%); opacity: 0.45; }
+  to { clip-path: circle(138% at 32% 38%); opacity: 1; }
+}
+
+@keyframes abShutterWipe {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0% 0 0); }
+}
+
+@keyframes abCardLayLeft {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 26px, 0) scale(1.035) rotate(-2.4deg);
+    box-shadow: 0 34px 78px rgba(0, 0, 0, 0.72), 0 12px 28px rgba(0, 0, 0, 0.42);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1) rotate(-1.2deg);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.62), 0 16px 34px rgba(0, 0, 0, 0.56), 0 32px 60px rgba(0, 0, 0, 0.38);
+  }
+}
+
+@keyframes abCardLayCenter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 26px, 0) scale(1.035) rotate(0.4deg);
+    box-shadow: 0 38px 84px rgba(0, 0, 0, 0.74), 0 14px 30px rgba(0, 0, 0, 0.44);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.64), 0 18px 38px rgba(0, 0, 0, 0.58), 0 34px 66px rgba(0, 0, 0, 0.42);
+  }
+}
+
+@keyframes abCardLayRight {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 26px, 0) scale(1.035) rotate(2.6deg);
+    box-shadow: 0 34px 78px rgba(0, 0, 0, 0.72), 0 12px 28px rgba(0, 0, 0, 0.42);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1) rotate(1.4deg);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.62), 0 16px 34px rgba(0, 0, 0, 0.56), 0 32px 60px rgba(0, 0, 0, 0.38);
+  }
+}
+
+/* =========================================================================
+   CONCEPT a1 — Lights-Go-Off Asymmetric Salon ★ (Default Lead)
+   Open left 38vw dark spotlight bay + Right 62vw espresso-umber salon (#110e0c)
+   ========================================================================= */
+.a1-bay {
+  width: 38vw;
+}
+
+.a1-salon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 62vw;
+  z-index: 4;
+  pointer-events: auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background-color: #110e0c;
+  background-image:
+    radial-gradient(ellipse 84% 56% at 34% 4%, rgba(218, 162, 98, 0.14) 0%, rgba(126, 82, 44, 0.05) 46%, transparent 78%),
+    linear-gradient(180deg, #14100d 0%, #100d0b 58%, #0c0a08 100%);
+  border-left: var(--ab-hair) solid rgba(236, 216, 182, 0.24);
+  box-shadow: -38px 0 76px rgba(5, 4, 3, 0.72);
+}
+
+#aboutStage.is-open[data-about="a1"] .a1-salon {
+  animation: abFadeIn 0.54s var(--ab-ease-out) both;
+}
+
+.a1-inner {
+  position: relative;
+  z-index: 8;
+  min-height: 100%;
+  padding: clamp(20px, 2.6vh, 30px) clamp(26px, 3.3vw, 48px) clamp(22px, 2.8vh, 32px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(14px, 1.9vh, 22px);
+}
+
+.a1-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.a1-hero {
+  display: grid;
+  grid-template-columns: clamp(178px, 14.4vw, 210px) 1fr;
+  gap: clamp(20px, 2.3vw, 34px);
+  align-items: center;
+}
+
+.a1-mat {
+  margin: 0;
+  padding: 7px 7px 9px;
+  background: #181411;
+  border: var(--ab-hair) solid rgba(236, 216, 182, 0.28);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.52);
+}
+
+#aboutStage.is-open[data-about="a1"] .a1-mat {
+  animation: abRiseUp 0.54s var(--ab-ease-out) 0.06s both;
+}
+
+.a1-mat__cap {
+  margin-top: 6px;
+  font: 400 9.5px/1.2 var(--ab-serif);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ab-stone);
+  text-align: center;
+}
+
+.a1-hero-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.a1-statement {
+  margin: 0;
+  font: 300 clamp(28px, 2.95vw, 44px)/0.95 var(--ab-serif);
+  letter-spacing: -0.026em;
+  text-transform: uppercase;
+  color: var(--ab-ivory);
+}
+
+#aboutStage.is-open[data-about="a1"] .a1-statement .ab-ln:nth-child(1) > span {
+  animation: abLineMask 0.54s var(--ab-ease-glide) 0.10s both;
+}
+
+#aboutStage.is-open[data-about="a1"] .a1-statement .ab-ln:nth-child(2) > span {
+  animation: abLineMask 0.54s var(--ab-ease-glide) 0.17s both;
+}
+
+.a1-door {
+  margin: 2px 0 0;
+  max-width: 44ch;
+  font: 400 clamp(15px, 1.18vw, 17.5px)/1.38 var(--ab-serif);
+  color: #e9dfd0;
+}
+
+#aboutStage.is-open[data-about="a1"] .a1-door,
+#aboutStage.is-open[data-about="a1"] .a1-hero-copy .ab-eyebrow {
+  animation: abRiseUp 0.50s var(--ab-ease-out) 0.18s both;
+}
+
+#aboutStage.is-open[data-about="a1"] .ab-brass-rule {
+  animation: abRuleDraw 0.54s var(--ab-ease-glide) 0.12s both;
+}
+
+.a1-spread {
+  display: grid;
+  grid-template-columns: 0.90fr 1.10fr;
+  gap: clamp(22px, 2.6vw, 38px);
+  align-items: start;
+}
+
+.a1-col-left {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+#aboutStage.is-open[data-about="a1"] .a1-col-left {
+  animation: abRiseUp 0.52s var(--ab-ease-out) 0.22s both;
+}
+
+.a1-prose {
+  margin: 0;
+  font: 400 clamp(12.8px, 0.94vw, 13.8px)/1.54 var(--ab-sans);
+  color: var(--ab-body);
+}
+
+.a1-foot {
+  margin-top: 6px;
+  padding-top: 12px;
+  border-top: var(--ab-hair) solid var(--ab-rule-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.a1-foot__city {
+  font: 400 11.5px/1.2 var(--ab-sans);
+  color: var(--ab-stone);
+}
+
+.a1-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+#aboutStage.is-open[data-about="a1"] .a1-col-right {
+  animation: abRiseUp 0.52s var(--ab-ease-out) 0.28s both;
+}
+
+.a1-letter {
+  padding: 13px 16px 14px;
+  background: linear-gradient(160deg, #1b1612 0%, #14100d 100%);
+  border: var(--ab-hair) solid rgba(236, 216, 182, 0.25);
+  border-radius: 3px;
+  box-shadow: inset 0 1px 0 rgba(255, 244, 224, 0.04), 0 10px 26px rgba(0, 0, 0, 0.34);
+}
+
+.a1-letter__sal {
+  margin: 7px 0 3px;
+  font: italic 400 15px/1.3 var(--ab-serif);
+  color: var(--ab-ivory);
+}
+
+.a1-letter__body {
+  margin: 0;
+  font: italic 400 clamp(13.8px, 1.02vw, 15px)/1.42 var(--ab-serif);
+  color: #ebe2d3;
+}
+
+/* =========================================================================
+   CONCEPT a2 — 3D WebGL Portrait Sheet & Nocturne Wall ★
+   Transparent left 44vw for real 3D WebGL portrait + Right 56vw unboxed ivory type
+   ========================================================================= */
+.a2-bay {
+  width: 44vw;
+}
+
+.a2-3d-caption {
+  position: absolute;
+  left: 28vw;
+  top: calc(50vh + 27vh);
+  transform: translateX(-50%);
+  z-index: 5;
+  pointer-events: none;
+  text-align: center;
+  padding-top: 8px;
+  border-top: var(--ab-hair) solid var(--ab-rule);
+}
+
+#aboutStage.is-open[data-about="a2"] .a2-3d-caption {
+  animation: abCaptionFloat 0.58s var(--ab-ease-out) 0.20s both;
+}
+
+@keyframes abCaptionFloat {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.a2-3d-caption__name {
+  display: block;
+  font: 400 12px/1.2 var(--ab-serif);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ab-ivory);
+}
+
+.a2-3d-caption__sub {
+  display: block;
+  margin-top: 3px;
+  font: 400 11px/1.2 var(--ab-sans);
+  color: var(--ab-stone);
+}
+
+.a2-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(10, 9, 8, 0) 0%, rgba(10, 9, 8, 0.08) 36%, rgba(11, 10, 9, 0.76) 52%, rgba(11, 10, 9, 0.90) 100%);
+}
+
+.a2-float {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 56vw;
+  z-index: 4;
+  pointer-events: auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: clamp(22px, 2.8vh, 34px) clamp(28px, 3.8vw, 56px) clamp(24px, 3vh, 34px) clamp(18px, 2vw, 28px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(14px, 1.9vh, 22px);
+}
+
+.a2-mobile-portrait {
+  display: none;
+  margin: 0;
+  max-width: 220px;
+  padding: 6px;
+  background: #15120f;
+  border: var(--ab-hair) solid var(--ab-rule);
+}
+
+.a2-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.a2-head {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.a2-statement {
+  margin: 0;
+  font: 300 clamp(34px, 3.55vw, 52px)/0.97 var(--ab-serif);
+  letter-spacing: -0.03em;
+  color: var(--ab-ivory);
+}
+
+.a2-door {
+  margin: 0;
+  max-width: 48ch;
+  font: 400 clamp(16px, 1.25vw, 18.5px)/1.4 var(--ab-serif);
+  color: #ebe2d4;
+}
+
+.a2-grid {
+  display: grid;
+  grid-template-columns: 0.94fr 1.06fr;
+  gap: clamp(22px, 2.6vw, 36px);
+  align-items: start;
+}
+
+.a2-left,
+.a2-right {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.a2-prose {
+  margin: 0;
+  font: 400 clamp(12.8px, 0.95vw, 13.8px)/1.54 var(--ab-sans);
+  color: var(--ab-body);
+}
+
+.a2-letter {
+  padding-left: 16px;
+  border-left: 1px solid rgba(220, 192, 148, 0.44);
+}
+
+.a2-letter__body {
+  margin: 6px 0 0;
+  font: italic 400 clamp(14.5px, 1.1vw, 16.5px)/1.44 var(--ab-serif);
+  color: var(--ab-ivory);
+}
+
+.a2-pills {
+  display: grid;
+  gap: 7px;
+}
+
+.a2-pill {
+  width: 100%;
+  text-align: left;
+  padding: 9px 12px;
+  border-radius: 5px;
+  background: rgba(24, 20, 17, 0.62);
+  border: var(--ab-hair) solid var(--ab-rule);
+  cursor: pointer;
+  transition: background 0.24s ease, border-color 0.24s ease;
+}
+
+.a2-pill:hover,
+.a2-pill:focus-visible,
+.a2-pill.is-active-ex {
+  background: rgba(38, 31, 25, 0.85);
+  border-color: rgba(220, 192, 148, 0.52);
+}
+
+.a2-pill__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+
+.a2-pill__name {
+  font: 500 12px/1.2 var(--ab-sans);
+  color: var(--ab-brass);
+  letter-spacing: 0.03em;
+}
+
+.a2-pill__place {
+  font: 400 11px/1.2 var(--ab-sans);
+  color: var(--ab-stone);
+}
+
+.a2-pill__txt {
+  margin: 0;
+  font: 400 12.2px/1.4 var(--ab-sans);
+  color: var(--ab-body);
+}
+
+#aboutStage.is-open[data-about="a2"] .a2-stagger-1 { animation: abRiseUp 0.54s var(--ab-ease-out) 0.06s both; }
+#aboutStage.is-open[data-about="a2"] .a2-stagger-2 { animation: abRiseUp 0.56s var(--ab-ease-out) 0.13s both; }
+#aboutStage.is-open[data-about="a2"] .a2-stagger-3 { animation: abRuleDraw 0.56s var(--ab-ease-glide) 0.18s both; }
+#aboutStage.is-open[data-about="a2"] .a2-stagger-4 { animation: abRiseUp 0.58s var(--ab-ease-out) 0.23s both; }
+#aboutStage.is-open[data-about="a2"] .a2-stagger-5 { animation: abRiseUp 0.58s var(--ab-ease-out) 0.30s both; }
+
+/* =========================================================================
+   CONCEPT a3 — Dark Monograph (Full-Canvas 3-Column + Sticky Rail)
+   Full-viewport matte obsidian-linen (#0b0a09) + Fly-curtain descend
+   ========================================================================= */
+.a3-monograph {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  background-color: #0b0a09;
+  background-image:
+    radial-gradient(ellipse 60% 70% at 32% 46%, rgba(196, 148, 92, 0.08) 0%, transparent 72%),
+    linear-gradient(180deg, #0e0c0a 0%, #0b0a09 100%);
+  will-change: transform;
+}
+
+#aboutStage.is-open[data-about="a3"] .a3-monograph {
+  animation: abCurtainFly 0.50s var(--ab-ease-glide) both;
+}
+
+.a3-mast {
+  position: relative;
+  z-index: 8;
+  height: 52px;
+  flex-shrink: 0;
+  padding: 0 clamp(22px, 3vw, 44px);
+  border-bottom: var(--ab-hair) solid var(--ab-rule);
+  display: grid;
+  grid-template-columns: 15% 35% 50%;
+  align-items: center;
+}
+
+.a3-mast__brand {
+  font: 400 17px/1 var(--ab-serif);
+  color: var(--ab-ivory);
+  letter-spacing: -0.015em;
+}
+
+.a3-mast__role {
+  padding-left: 28px;
+  font: 400 10.5px/1 var(--ab-serif);
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  color: var(--ab-stone);
+}
+
+.a3-mast__end {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.a3-cols {
+  position: relative;
+  z-index: 8;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 15% 35% 50%;
+}
+
+.a3-rail {
+  padding: clamp(24px, 3.4vh, 38px) clamp(18px, 2.2vw, 34px);
+  border-right: var(--ab-hair) solid var(--ab-rule);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.a3-chaps {
+  display: grid;
+  gap: 6px;
+}
+
+.a3-chap-btn {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  padding: 7px 0;
+  text-align: left;
+  border-bottom: var(--ab-hair) solid var(--ab-rule-soft);
+  font: 500 11px/1.2 var(--ab-sans);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--ab-stone);
+  cursor: pointer;
+  transition: color 0.22s ease, padding-left 0.22s var(--ab-ease-out);
+}
+
+.a3-chap-btn span:first-child {
+  font: 400 10.5px/1 var(--ab-serif);
+  color: var(--ab-brass);
+}
+
+.a3-chap-btn:hover,
+.a3-chap-btn.is-current {
+  color: var(--ab-ivory);
+  padding-left: 5px;
+}
+
+.a3-rail__foot {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.a3-plate {
+  padding: clamp(24px, 3.4vh, 38px) clamp(24px, 3vw, 44px);
+  border-right: var(--ab-hair) solid var(--ab-rule);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at 50% 42%, rgba(212, 162, 102, 0.08), transparent 68%);
+}
+
+.a3-plate__fig {
+  margin: 0;
+  width: min(100%, 340px);
+  padding: 10px;
+  background: #14110e;
+  border: var(--ab-hair) solid rgba(236, 216, 182, 0.26);
+  box-shadow: 0 22px 52px rgba(0, 0, 0, 0.58);
+}
+
+.a3-plate__cap {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  font: 400 10.5px/1.3 var(--ab-serif);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ab-stone);
+}
+
+.a3-body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: clamp(26px, 3.6vh, 40px) clamp(32px, 4.2vw, 64px) clamp(32px, 4.2vh, 48px) clamp(28px, 3.4vw, 48px);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.a3-sec {
+  scroll-margin-top: 24px;
+}
+
+.a3-sec + .a3-sec {
+  padding-top: 18px;
+  border-top: var(--ab-hair) solid var(--ab-rule);
+}
+
+.a3-statement {
+  margin: 8px 0 12px;
+  font: 300 clamp(32px, 3.2vw, 48px)/0.97 var(--ab-serif);
+  letter-spacing: -0.028em;
+  color: var(--ab-ivory);
+}
+
+.a3-lead {
+  margin: 0 0 10px;
+  font: 400 clamp(16px, 1.2vw, 18px)/1.42 var(--ab-serif);
+  color: #ece3d5;
+}
+
+.a3-hang {
+  margin: 0;
+  text-indent: 2.2em;
+  font: 400 13.6px/1.56 var(--ab-sans);
+  color: var(--ab-body);
+}
+
+.a3-letter-box {
+  margin-top: 8px;
+  padding: 15px 18px;
+  background: #13100d;
+  border: var(--ab-hair) solid rgba(236, 216, 182, 0.26);
+}
+
+.a3-letter-box p {
+  margin: 0;
+  font: italic 400 clamp(15px, 1.12vw, 17px)/1.45 var(--ab-serif);
+  color: var(--ab-ivory);
+}
+
+.a3-letter-box p + p {
+  margin-top: 5px;
+}
+
+#aboutStage.is-open[data-about="a3"] .a3-rail { animation: abColUnveil 0.46s var(--ab-ease-out) 0.12s both; }
+#aboutStage.is-open[data-about="a3"] .a3-plate { animation: abColUnveil 0.46s var(--ab-ease-out) 0.175s both; }
+#aboutStage.is-open[data-about="a3"] .a3-body { animation: abColUnveil 0.46s var(--ab-ease-out) 0.23s both; }
+
+/* =========================================================================
+   CONCEPT a4 — Elevated Dark Gallery Alcove (Refined Right Panel + Room Push)
+   Open left 46vw+ bay + Right min(660px, 54vw) dark lime-wash alcove (#13100e)
+   ========================================================================= */
+.a4-bay {
+  left: 0;
+  right: min(660px, 54vw);
+}
+
+.a4-alcove {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(660px, 54vw);
+  z-index: 4;
+  pointer-events: auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background-color: #13100e;
+  background-image:
+    radial-gradient(circle at 16% 10%, rgba(224, 174, 114, 0.12) 0%, transparent 58%),
+    linear-gradient(180deg, #16120f 0%, #110e0c 100%);
+  border-left: var(--ab-hair) solid rgba(236, 216, 182, 0.32);
+  box-shadow: -28px 0 64px rgba(0, 0, 0, 0.62);
+  will-change: transform;
+}
+
+#aboutStage.is-open[data-about="a4"] .a4-alcove {
+  animation: abAlcovePush 0.50s var(--ab-ease-out) both;
+}
+
+.a4-inner {
+  position: relative;
+  z-index: 8;
+  min-height: 100%;
+  padding: clamp(18px, 2.2vh, 26px) clamp(24px, 2.6vw, 36px) clamp(20px, 2.4vh, 28px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(12px, 1.6vh, 18px);
+}
+
+.a4-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.a4-header {
+  display: grid;
+  grid-template-columns: clamp(154px, 12vw, 175px) 1fr;
+  gap: 20px;
+  align-items: center;
+}
+
+.a4-portrait-card {
+  margin: 0;
+  padding: 6px;
+  background: #1a1512;
+  border: var(--ab-hair) solid rgba(236, 216, 182, 0.28);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.46);
+}
+
+.a4-head-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.a4-statement {
+  margin: 0;
+  font: 300 clamp(24px, 2.25vw, 33px)/0.97 var(--ab-serif);
+  letter-spacing: -0.025em;
+  text-transform: uppercase;
+  color: var(--ab-ivory);
+}
+
+.a4-door {
+  margin: 0;
+  font: 400 clamp(13.8px, 1.02vw, 15px)/1.4 var(--ab-serif);
+  color: #e8dfd1;
+}
+
+.a4-cols {
+  display: grid;
+  grid-template-columns: 0.94fr 1.06fr;
+  gap: 22px;
+  align-items: start;
+}
+
+.a4-left,
+.a4-right {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.a4-prose {
+  margin: 0;
+  font: 400 12.6px/1.48 var(--ab-sans);
+  color: var(--ab-body);
+}
+
+.a4-foot {
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: var(--ab-hair) solid var(--ab-rule-soft);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.a4-recess {
+  padding: 11px 14px 12px;
+  background: #0c0a08;
+  border: var(--ab-hair) solid rgba(236, 216, 182, 0.24);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.52);
+  border-radius: 3px;
+}
+
+.a4-recess__txt {
+  margin: 5px 0 0;
+  font: italic 400 13.6px/1.4 var(--ab-serif);
+  color: var(--ab-ivory);
+}
+
+.a4-stood .ab-stood-item {
+  padding: 6px 8px;
+  margin: 0 -8px;
+}
+
+.a4-stood .ab-stood-text {
+  font-size: 12px;
+  line-height: 1.38;
+}
+
+#aboutStage.is-open[data-about="a4"] .a4-header { animation: abRiseUp 0.46s var(--ab-ease-out) 0.12s both; }
+#aboutStage.is-open[data-about="a4"] .ab-brass-rule { animation: abRuleDraw 0.48s var(--ab-ease-glide) 0.16s both; }
+#aboutStage.is-open[data-about="a4"] .a4-cols { animation: abRiseUp 0.48s var(--ab-ease-out) 0.22s both; }
+
+/* =========================================================================
+   CONCEPT a5 — Chiaroscuro & Stipple Light (Velvet Black + Pointillist Halo)
+   Velvet black (#080706) + 2D Stipple Canvas + Optical Iris Aperture (0.56s)
+   ========================================================================= */
+.a5-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background-color: #080706;
+  background-image: radial-gradient(ellipse 56% 58% at 32% 38%, #15100b 0%, #0b0907 52%, #070605 100%);
+}
+
+#aboutStage.is-open[data-about="a5"] .a5-stage {
+  animation: abIrisBloom 0.56s var(--ab-ease-settle) both;
+}
+
+.ab-stipple-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+  display: block;
+}
+
+.a5-inner {
+  position: relative;
+  z-index: 8;
+  max-width: 1240px;
+  min-height: 100%;
+  margin: 0 auto;
+  padding: clamp(20px, 2.6vh, 30px) clamp(26px, 3.6vw, 52px) clamp(22px, 3vh, 34px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(16px, 2.2vh, 26px);
+}
+
+.a5-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.a5-focal {
+  display: grid;
+  grid-template-columns: clamp(205px, 17.5vw, 252px) 1fr;
+  gap: clamp(28px, 3.8vw, 56px);
+  align-items: center;
+  padding-left: clamp(8px, 3.2vw, 48px);
+}
+
+.a5-portrait-frame {
+  margin: 0;
+  padding: 9px;
+  background: rgba(18, 14, 11, 0.92);
+  border: var(--ab-hair) solid rgba(236, 206, 158, 0.34);
+  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.72), 0 0 42px rgba(218, 158, 82, 0.08);
+}
+
+.a5-portrait-cap {
+  margin-top: 7px;
+  font: 400 10px/1.2 var(--ab-serif);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ab-stone);
+  text-align: center;
+}
+
+.a5-hero-text {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.a5-statement {
+  margin: 0;
+  font: 300 clamp(34px, 3.9vw, 56px)/0.96 var(--ab-serif);
+  letter-spacing: -0.03em;
+  color: #f6efe4;
+}
+
+.a5-door {
+  margin: 0;
+  max-width: 46ch;
+  font: 400 clamp(16px, 1.25vw, 18.5px)/1.42 var(--ab-serif);
+  color: #e9dfd0;
+}
+
+.a5-catalogue {
+  padding-top: clamp(16px, 2.2vh, 24px);
+  border-top: var(--ab-hair) solid var(--ab-rule);
+  display: grid;
+  grid-template-columns: 1.04fr 1.04fr 0.96fr;
+  gap: clamp(22px, 2.6vw, 36px);
+  align-items: start;
+}
+
+.a5-serif-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.a5-serif-prose {
+  margin: 0;
+  font: 300 clamp(13.2px, 0.98vw, 14.2px)/1.54 var(--ab-zodiak);
+  color: #ebe2d3;
+}
+
+.a5-colophon {
+  padding: 16px 18px;
+  background: rgba(17, 13, 10, 0.84);
+  border: var(--ab-hair) solid rgba(236, 206, 158, 0.32);
+  outline: var(--ab-hair) solid rgba(236, 206, 158, 0.14);
+  outline-offset: -5px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.a5-colophon__body {
+  margin: 0;
+  font: italic 400 clamp(14.2px, 1.06vw, 15.8px)/1.44 var(--ab-serif);
+  color: var(--ab-ivory);
+}
+
+.a5-colophon__foot {
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: var(--ab-hair) solid var(--ab-rule-soft);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.a5-sig {
+  font: italic 400 17px/1 var(--ab-serif);
+  color: var(--ab-brass);
+}
+
+/* =========================================================================
+   CONCEPT a6 — Zero-Scroll Three-Bay Tech Booth (Architectural 3-Shutter)
+   Full-screen nocturnal triptych (#0d0b0a), 0 vertical scroll, 3-bay wipe
+   ========================================================================= */
+.a6-booth {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #0d0b0a;
+}
+
+.a6-mast {
+  position: relative;
+  z-index: 8;
+  height: 50px;
+  flex-shrink: 0;
+  padding: 0 clamp(20px, 2.6vw, 36px);
+  border-bottom: var(--ab-hair) solid var(--ab-rule-strong);
+  background: #0b0908;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.a6-mast__left {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.a6-mast__title {
+  font: 400 18px/1 var(--ab-serif);
+  color: var(--ab-ivory);
+}
+
+.a6-bays {
+  position: relative;
+  z-index: 8;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.a6-bay {
+  min-height: 0;
+  padding: clamp(18px, 2.4vh, 28px) clamp(22px, 2.5vw, 36px);
+  border-right: var(--ab-hair) solid var(--ab-rule);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(10px, 1.5vh, 18px);
+  will-change: clip-path;
+}
+
+.a6-bay--1 {
+  background: linear-gradient(180deg, #100d0b 0%, #0c0a09 100%);
+}
+
+.a6-bay--2 {
+  background: linear-gradient(180deg, #13100d 0%, #0e0c0a 100%);
+}
+
+.a6-bay--3 {
+  border-right: 0;
+  background-color: #17130f;
+  background-image: radial-gradient(ellipse 80% 55% at 50% 18%, rgba(224, 170, 104, 0.11) 0%, transparent 72%);
+}
+
+#aboutStage.is-open[data-about="a6"] .a6-bay--1 { animation: abShutterWipe 0.54s var(--ab-ease-glide) 0s both; }
+#aboutStage.is-open[data-about="a6"] .a6-bay--2 { animation: abShutterWipe 0.54s var(--ab-ease-glide) 0.065s both; }
+#aboutStage.is-open[data-about="a6"] .a6-bay--3 { animation: abShutterWipe 0.54s var(--ab-ease-glide) 0.13s both; }
+
+.a6-statement {
+  margin: 6px 0 0;
+  font: 300 clamp(25px, 2.4vw, 36px)/0.95 var(--ab-serif);
+  letter-spacing: -0.026em;
+  text-transform: uppercase;
+  color: var(--ab-ivory);
+}
+
+.a6-portrait-box {
+  margin: 0 auto;
+  width: min(100%, 34vh);
+  padding: 7px;
+  background: #181411;
+  border: var(--ab-hair) solid rgba(236, 216, 182, 0.28);
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.54);
+}
+
+.a6-door {
+  margin: 0;
+  font: 400 clamp(14.5px, 1.12vw, 16.5px)/1.38 var(--ab-serif);
+  color: #ebe2d3;
+}
+
+.a6-monitors {
+  display: grid;
+  gap: 8px;
+}
+
+.a6-mon-card {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 12px;
+  align-items: center;
+  text-align: left;
+  padding: 8px 10px;
+  background: rgba(26, 21, 17, 0.72);
+  border: var(--ab-hair) solid var(--ab-rule);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.22s ease, border-color 0.22s ease;
+}
+
+.a6-mon-card:hover,
+.a6-mon-card:focus-visible,
+.a6-mon-card.is-active-ex {
+  background: rgba(42, 34, 27, 0.88);
+  border-color: rgba(220, 192, 148, 0.54);
+}
+
+.a6-mon-thumb {
+  display: block;
+  width: 40px;
+  height: auto;
+  object-fit: contain;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.55);
+  transform: none !important;
+}
+
+.a6-mon-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.a6-mon-name {
+  font: 500 12px/1.2 var(--ab-sans);
+  color: var(--ab-ivory);
+}
+
+.a6-mon-place {
+  font: 400 10.5px/1.2 var(--ab-sans);
+  color: var(--ab-brass);
+}
+
+.a6-mon-txt {
+  margin: 0;
+  font: 400 11.8px/1.36 var(--ab-sans);
+  color: var(--ab-body);
+}
+
+.a6-roots {
+  padding-top: 10px;
+  border-top: var(--ab-hair) solid var(--ab-rule);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.a6-roots p {
+  margin: 0;
+  font: 400 clamp(11.8px, 0.86vw, 12.6px)/1.44 var(--ab-sans);
+  color: var(--ab-body);
+}
+
+.a6-letter-center {
+  margin: auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.a6-letter-sal {
+  margin: 0;
+  font: italic 400 clamp(20px, 1.6vw, 24px)/1.2 var(--ab-serif);
+  color: var(--ab-brass);
+}
+
+.a6-letter-body {
+  margin: 0;
+  font: italic 400 clamp(18px, 1.48vw, 22px)/1.46 var(--ab-serif);
+  color: var(--ab-ivory);
+}
+
+.a6-letter-sig {
+  margin-top: 4px;
+  font: italic 400 21px/1.1 var(--ab-serif);
+  color: #e6d5ba;
+}
+
+.a6-bay-foot {
+  padding-top: 12px;
+  border-top: var(--ab-hair) solid var(--ab-rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+/* =========================================================================
+   CONCEPT a7 — Nocturnal Curatorial Desk (Three Tactile Dark-Room Cards)
+   Smoked walnut table (#14110e) + 3 physical cards with lay-down stagger
+   ========================================================================= */
+.a7-desk {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  background-color: #14110e;
+  background-image:
+    radial-gradient(ellipse 78% 68% at 50% 46%, #1f1914 0%, #14100d 62%, #0a0807 100%),
+    repeating-linear-gradient(92deg, rgba(255, 236, 208, 0.008) 0px, rgba(255, 236, 208, 0.008) 2px, transparent 2px, transparent 9px);
+}
+
+#aboutStage.is-open[data-about="a7"] .a7-desk {
+  animation: abFadeIn 0.42s ease both;
+}
+
+.a7-bar {
+  position: relative;
+  z-index: 8;
+  height: 50px;
+  flex-shrink: 0;
+  padding: 0 clamp(22px, 3vw, 44px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.a7-table {
+  position: relative;
+  z-index: 8;
+  flex: 1;
+  max-width: 1360px;
+  width: 100%;
+  margin: 0 auto;
+  padding: clamp(8px, 1.4vh, 18px) clamp(24px, 3vw, 44px) clamp(22px, 3vh, 34px);
+  display: grid;
+  grid-template-columns: 0.78fr 1.36fr 0.88fr;
+  gap: clamp(18px, 2.1vw, 30px);
+  align-items: center;
+}
+
+.a7-card {
+  position: relative;
+  border-radius: 2px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.62), 0 16px 34px rgba(0, 0, 0, 0.56), 0 32px 60px rgba(0, 0, 0, 0.38);
+  will-change: transform, opacity, box-shadow;
+}
+
+/* Object 1: Mounted Archival Portrait Print */
+.a7-card--print {
+  padding: 16px 16px 18px;
+  background: #181512;
+  border: var(--ab-hair) solid rgba(236, 216, 182, 0.24);
+  transform: rotate(-1.2deg);
+}
+
+#aboutStage.is-open[data-about="a7"] .a7-card--print {
+  animation: abCardLayLeft 0.58s var(--ab-ease-settle) 0s both;
+}
+
+.a7-photo-mount {
+  position: relative;
+  padding: 8px;
+  background: #100e0c;
+}
+
+.a7-corner {
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  border-color: rgba(226, 198, 152, 0.55);
+  border-style: solid;
+  pointer-events: none;
+}
+.a7-corner--tl { top: 3px; left: 3px; border-width: 1px 0 0 1px; }
+.a7-corner--tr { top: 3px; right: 3px; border-width: 1px 1px 0 0; }
+.a7-corner--bl { bottom: 3px; left: 3px; border-width: 0 0 1px 1px; }
+.a7-corner--br { bottom: 3px; right: 3px; border-width: 0 1px 1px 0; }
+
+.a7-print-meta {
+  margin-top: 12px;
+  padding-top: 9px;
+  border-top: var(--ab-hair) solid var(--ab-rule);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.a7-print-name {
+  font: 400 18px/1.1 var(--ab-serif);
+  color: var(--ab-ivory);
+}
+
+/* Object 2: Dark Cotton Dossier Sheet */
+.a7-card--dossier {
+  padding: clamp(20px, 2.5vh, 28px) clamp(22px, 2.4vw, 32px);
+  background: linear-gradient(180deg, #1d1815 0%, #191512 100%);
+  border: var(--ab-hair) solid rgba(236, 216, 182, 0.26);
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+#aboutStage.is-open[data-about="a7"] .a7-card--dossier {
+  animation: abCardLayCenter 0.58s var(--ab-ease-settle) 0.08s both;
+}
+
+.a7-dossier-hdr {
+  padding-bottom: 9px;
+  border-bottom: var(--ab-hair) solid var(--ab-rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.a7-statement {
+  margin: 0;
+  font: 300 clamp(27px, 2.5vw, 38px)/0.97 var(--ab-serif);
+  letter-spacing: -0.028em;
+  color: var(--ab-ivory);
+}
+
+.a7-door {
+  margin: 0;
+  font: 400 clamp(14.5px, 1.1vw, 16px)/1.38 var(--ab-serif);
+  color: #ebe2d3;
+}
+
+.a7-dossier-cols {
+  padding-top: 10px;
+  border-top: var(--ab-hair) solid var(--ab-rule-soft);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.a7-dossier-cols p {
+  margin: 0;
+  font: 400 12.4px/1.48 var(--ab-sans);
+  color: var(--ab-body);
+}
+
+.a7-dossier-stood {
+  padding-top: 10px;
+  border-top: var(--ab-hair) solid var(--ab-rule);
+}
+
+.a7-dossier-stood .ab-stood-item {
+  padding: 6px 8px;
+  margin: 0 -8px;
+}
+
+.a7-dossier-stood .ab-stood-text {
+  font-size: 12px;
+  line-height: 1.38;
+}
+
+/* Object 3: Signed Artist Note Card */
+.a7-card--note {
+  padding: clamp(22px, 2.8vh, 30px) clamp(22px, 2.2vw, 28px);
+  background: linear-gradient(165deg, #251f19 0%, #1e1814 100%);
+  border: var(--ab-hair) solid rgba(236, 216, 182, 0.34);
+  outline: var(--ab-hair) solid rgba(236, 216, 182, 0.16);
+  outline-offset: -7px;
+  transform: rotate(1.4deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+#aboutStage.is-open[data-about="a7"] .a7-card--note {
+  animation: abCardLayRight 0.58s var(--ab-ease-settle) 0.16s both;
+}
+
+.a7-note-sal {
+  margin: 10px 0 6px;
+  font: italic 400 18px/1.2 var(--ab-serif);
+  color: var(--ab-brass);
+}
+
+.a7-note-body {
+  margin: 0;
+  font: italic 400 clamp(15.5px, 1.24vw, 18px)/1.46 var(--ab-serif);
+  color: var(--ab-ivory);
+}
+
+.a7-note-sig {
+  margin-top: 14px;
+  font: italic 400 22px/1.1 var(--ab-serif);
+  color: #e9d9be;
+}
+
+.a7-note-foot {
+  padding-top: 12px;
+  border-top: var(--ab-hair) solid var(--ab-rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+/* =========================================================================
+   CONCEPT a8 — Night-Komorebi Same-Room Plinth (Day-to-Night Leaf Dapples)
+   Zero opaque backdrop; live C1 nocturnal komorebi + Right 64vw airy plinth
+   ========================================================================= */
+.a8-bay {
+  width: 36vw;
+}
+
+.a8-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(16, 13, 11, 0) 0%, rgba(16, 13, 11, 0.12) 32%, rgba(16, 13, 11, 0.52) 48%, rgba(16, 13, 11, 0.72) 100%);
+}
+
+.a8-plinth {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 64vw;
+  z-index: 4;
+  pointer-events: auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: clamp(20px, 2.6vh, 32px) clamp(28px, 3.8vw, 54px) clamp(24px, 3vh, 34px) clamp(20px, 2.4vw, 34px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(14px, 1.8vh, 22px);
+}
+
+.a8-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.a8-quote-wrap {
+  padding-bottom: clamp(14px, 1.8vh, 20px);
+  border-bottom: var(--ab-hair) solid var(--ab-rule-strong);
+}
+
+.a8-statement {
+  margin: 0;
+  font: 300 clamp(34px, 3.65vw, 54px)/0.97 var(--ab-serif);
+  letter-spacing: -0.03em;
+  color: #f6efe4;
+  text-shadow: 0 2px 24px rgba(8, 6, 5, 0.62);
+}
+
+.a8-cols {
+  display: grid;
+  grid-template-columns: 0.90fr 1.10fr;
+  gap: clamp(24px, 2.8vw, 40px);
+  align-items: start;
+}
+
+.a8-left {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.a8-portrait-row {
+  display: grid;
+  grid-template-columns: clamp(148px, 12vw, 178px) 1fr;
+  gap: 18px;
+  align-items: center;
+}
+
+.a8-portrait-frame {
+  margin: 0;
+  padding: 6px;
+  background: rgba(20, 16, 13, 0.72);
+  border: var(--ab-hair) solid rgba(236, 216, 182, 0.30);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.48);
+}
+
+.a8-door {
+  margin: 0;
+  font: 400 clamp(14.5px, 1.12vw, 16.5px)/1.4 var(--ab-serif);
+  color: #efe6d7;
+}
+
+.a8-prose {
+  margin: 0;
+  font: 400 clamp(12.8px, 0.94vw, 13.8px)/1.52 var(--ab-sans);
+  color: var(--ab-body);
+}
+
+.a8-right {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.a8-letter {
+  padding: 12px 15px;
+  background: rgba(18, 14, 11, 0.56);
+  border-top: var(--ab-hair) solid var(--ab-rule-strong);
+  border-left: 1px solid rgba(220, 192, 148, 0.44);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.a8-letter__body {
+  margin: 5px 0 0;
+  font: italic 400 clamp(14px, 1.04vw, 15.5px)/1.42 var(--ab-serif);
+  color: var(--ab-ivory);
+}
+
+.a8-foot {
+  padding-top: 10px;
+  border-top: var(--ab-hair) solid var(--ab-rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+#aboutStage.is-open[data-about="a8"] .a8-top,
+#aboutStage.is-open[data-about="a8"] .a8-quote-wrap {
+  animation: abRiseUp 0.58s var(--ab-ease-out) 0.04s both;
+}
+
+#aboutStage.is-open[data-about="a8"] .a8-left {
+  animation: abRiseUp 0.58s var(--ab-ease-out) 0.12s both;
+}
+
+#aboutStage.is-open[data-about="a8"] .a8-right {
+  animation: abRiseUp 0.58s var(--ab-ease-out) 0.18s both;
+}
+
+/* =========================================================================
+   RESPONSIVE ADAPTATION (< 980px / < 860px) & REDUCED MOTION
+   ========================================================================= */
+@media (max-width: 980px) {
+  .a6-booth { overflow-y: auto; }
+  .a6-bays { grid-template-columns: 1fr; }
+  .a6-bay { border-right: 0; border-bottom: var(--ab-hair) solid var(--ab-rule); }
+  .a7-table { grid-template-columns: 1fr; max-width: 640px; }
+  .a7-card--print, .a7-card--note { transform: none; }
+  .a5-catalogue { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 860px) {
+  .a1-bay, .a2-bay, .a4-bay, .a8-bay, .a2-3d-caption { display: none; }
+  .a1-salon, .a2-float, .a4-alcove, .a8-plinth {
+    width: 100vw;
+    background: rgba(15, 12, 10, 0.96);
+    border-left: 0;
+  }
+  .a2-mobile-portrait { display: block; }
+  .a1-hero, .a1-spread, .a2-grid, .a4-header, .a4-cols, .a5-focal, .a8-cols, .a8-portrait-row, .a7-dossier-cols {
+    grid-template-columns: 1fr;
+  }
+  .a3-mast, .a3-cols { grid-template-columns: 1fr; }
+  .a3-mast__role { display: none; }
+  .a3-monograph { overflow-y: auto; }
+  .a3-rail, .a3-plate { border-right: 0; border-bottom: var(--ab-hair) solid var(--ab-rule); }
+  .a3-body { overflow-y: visible; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #aboutStage,
+  #aboutStage *,
+  #aboutStage *::before,
+  #aboutStage *::after {
+    animation-duration: 0.01s !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.01s !important;
+  }
+}

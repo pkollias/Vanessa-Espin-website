@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/Vanessa-Espin-website/favicon.ico">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vanessa Espín — Event Planning</title>
+<meta name="description" content="Vanessa Espín, event planning and creative direction. New York.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://api.fontshare.com">
+<link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=gambetta@300,400,401,600,700&f[]=zodiak@300,400,401&f[]=switzer@400,500,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link id="about-concepts-css" rel="stylesheet" href="about-concepts.css">
+<link id="intro-concepts-css" rel="stylesheet" href="intro-concepts.css">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js"
+  }
+}
+</script>
+<style>.bench { display: none !important; }</style>
+</head>
+<body data-concept="c1" data-tone="light" data-copy="l1">
+
+<!-- Live 3D Event Mount (Untouched exhibition films load here on graphical entry) -->
+<div class="film-stage" id="filmStage" aria-hidden="true"></div>
+<div class="film-nav" id="filmNav" role="navigation" aria-label="Event navigation">
+  <button class="film-return" id="filmReturn" type="button" aria-label="Return to Event Planning">← Event Planning</button>
+  <button class="film-media" id="filmMedia" type="button" aria-label="Open the event's media" aria-haspopup="dialog" hidden>Media</button>
+  <button class="film-next" id="filmNext" type="button" aria-label="Experience next event">Next: Herencia Viva →</button>
+</div>
+
+<!-- Main Landing Shell -->
+<div class="landing-shell" id="landingShell">
+  <canvas id="backdrop" aria-hidden="true"></canvas>
+
+  <!-- C3 Monumental Split Display Words -->
+  <div class="split-stage" id="splitStage" aria-hidden="true">
+    <p class="split-word split-word--top" id="splitTop">IYUANA</p>
+    <p class="split-word split-word--bot" id="splitBot">SUEÑOS</p>
+  </div>
+
+  <!-- WebGL Creased & Lit Posters (6-Slot Endless Ring + 7th Portrait Sheet for A2) -->
+  <canvas id="gl" aria-label="Events — click center poster to experience the event, drag sideways on center poster to read her note"></canvas>
+
+  <!-- Corner Masking Tape Layer (Suppressed during drag/flip for note!) -->
+  <svg class="pins-svg" id="pinsSvg" aria-hidden="true"></svg>
+
+  <!-- Balanced 3-Point Top Masthead: Left Name · Center Event Planning Dropdown · Right About -->
+  <header class="masthead">
+    <a class="masthead__brand" href="#top" id="brandHome">
+      <span class="masthead__name">Vanessa Espín</span>
+    </a>
+
+    <div class="masthead__center index-wrap">
+      <button class="nav-btn nav-btn--center nav-btn--current" id="indexBtn" type="button" aria-expanded="false" aria-controls="indexPop">
+        <span>Event Planning</span>
+        <span class="nav-caret" aria-hidden="true">▾</span>
+      </button>
+      <div class="index-pop index-pop--center" id="indexPop" hidden>
+        <div class="index-pop__hdr">Events · New York</div>
+        <div id="indexList"></div>
+      </div>
+    </div>
+
+    <nav class="masthead__nav" aria-label="About">
+      <button class="nav-btn nav-btn--bio" id="aboutBtn" type="button">About</button>
+    </nav>
+  </header>
+
+  <!-- Uniform Left Curatorial Placard (L1..L4) -->
+  <section class="placard" id="placard" aria-live="polite">
+    <h1 class="placard__title" id="plTitle">Iyuana</h1>
+    <p class="placard__sub" id="plSub">Film &amp; photography exhibition · Long Island City, Queens</p>
+    <div class="placard__actions">
+      <button class="enter-btn" id="enterBtn" type="button">
+        <span>Experience the Event</span>
+        <span aria-hidden="true">→</span>
+      </button>
+      <button class="flip-btn" id="flipBtn" type="button" title="Turn center poster over to read Vanessa’s note">Her note ↻</button>
+    </div>
+  </section>
+
+  <!-- C4 Salon Triptych Labels -->
+  <div class="triptych-bar" id="triptychBar"></div>
+
+  <!-- C7 Event Broadsheet & Voice Rail -->
+  <section class="broadsheet-rail" id="broadsheetRail">
+    <div class="bs-list" id="bsList"></div>
+    <div class="bs-voice">
+      <span class="bs-voice__eyebrow" id="bsEyebrow">Behind the Poster · Vanessa’s Note</span>
+      <blockquote class="bs-voice__text" id="bsQuote"></blockquote>
+    </div>
+    <div class="bs-foot">
+      <div class="bs-foot__venue" id="bsVenue"></div>
+      <button class="enter-btn" id="bsEnterBtn" type="button">
+        <span>Experience the Event</span> <span aria-hidden="true">→</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Subtle Bottom Bar (01/03 removed; crystal-clear center-poster instruction) -->
+  <footer class="corner-bar">
+    <div class="corner-bar__left" id="cornerLeft">Click center poster to experience the event · Drag sideways on center poster to read her note</div>
+    <div class="corner-bar__right">
+      <span id="cornerHint">Scroll or ← →</span>
+    </div>
+  </footer>
+
+  <div class="grain" aria-hidden="true"></div>
+</div>
+
+<!-- Portal Transition Overlay Canvas -->
+<canvas id="portal-fx" aria-hidden="true"></canvas>
+
+<!-- Collapsible Workbench Switcher (Press H or ?clean=1 to hide) -->
+<aside class="bench is-min" id="bench" aria-label="Landing v3 Workbench">
+  <div class="bench__hdr">
+    <span class="bench__title">Landing v3 Lab</span>
+    <div class="bench__hdr-btns">
+      <button type="button" id="benchMinBtn" title="Expand / collapse switcher">▾</button>
+    </div>
+  </div>
+  <div class="bench__body">
+    <div>
+      <span class="bench__grp-lbl">Dark-Gallery About (A1–A8 · Click to preview)</span>
+      <div class="bench__pills" id="bioPills"></div>
+    </div>
+    <div>
+      <span class="bench__grp-lbl">Loading Overture (O1–O6 · Click to replay)</span>
+      <div class="bench__pills" id="introPills"></div>
+    </div>
+    <div>
+      <span class="bench__grp-lbl">Left Placard Copy (L1–L4)</span>
+      <div class="bench__pills" id="copyPills"></div>
+    </div>
+    <div>
+      <span class="bench__grp-lbl">Stage Concept (C1–C8) &amp; Portal (P1–P4)</span>
+      <div class="bench__pills" id="conceptPills"></div>
+      <div class="bench__pills" id="portalPills" style="margin-top:4px;"></div>
+    </div>
+  </div>
+</aside>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

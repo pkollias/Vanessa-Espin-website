@@ -1,0 +1,98 @@
+{
+  "painting_id": "086",
+  "title": "Jumping Fish Over Wheat \u2014 Fins, Wheat & Dress Hems",
+  "source_file": "reference/vision-board/board/concepts/herencia/assets/086.jpg",
+  "dimensions_wh": [
+    2069,
+    2200
+  ],
+  "curated_hang": {
+    "wall": "L",
+    "s": 2.08,
+    "y": 1.6,
+    "w_m": 1.809
+  },
+  "mm_per_source_px": 0.8743,
+  "loop_frames": 24,
+  "fps": 12,
+  "loop_seconds": 2.0,
+  "strip_grid": {
+    "cols": 6,
+    "rows": 4,
+    "frames": 24
+  },
+  "mask_file": "086/mask.png",
+  "faces_hands_mask_file": "086/faces_hands_mask.png",
+  "mask_bbox_xywh": [
+    0,
+    668,
+    2069,
+    1419
+  ],
+  "web_scale": 0.42,
+  "web_dimensions_wh": [
+    869,
+    924
+  ],
+  "web_mask_bbox_xywh": [
+    0,
+    280,
+    869,
+    597
+  ],
+  "masked_pixels": 1157517,
+  "masked_share_pct": 25.4299,
+  "faces_hands_protected_pixels": 2081731,
+  "outside_mask_max_abs_diff": 0,
+  "faces_hands_max_diff": 0,
+  "preview_3strengths_mp4": "086/preview_3strengths.mp4",
+  "sheet_4x_file": "086/4x_frames_sheet.jpg",
+  "layers": [
+    "fish_caudal_fin: smooth Catmull-Rom forked rose tail whipping with carangiform S-wave follow-through over furrow-repaired wheat (0 stair-steps)",
+    "fish_pectoral_fin & fish_jaw: sculling silver pectoral fan + gentle jaw breath (round eye locked)",
+    "wheat_grass_fg: diagonal wind-wave across foreground emerald/gold stalks",
+    "dress_hem_left & dress_hem_right: subtle travelling pleat ripple along lower indigo/cobalt dress hems (upper bodies, heads, braids & all 4 bubbles 100% locked per directive #62)"
+  ],
+  "occlusion_plate_provenance": "Local furrow-aligned exemplar synthesis + 1:1 2000px canvas-weave transfer strictly inside revealed crescent behind fish fins, upper grass tips, and outer dress hems (all 4 bubbles, women's upper bodies/heads/braids & village 100% untouched, 0 diff).",
+  "strengths": {
+    "s1": {
+      "label": "1 \u00b7 Doubt (subtle stir)",
+      "strip_file": "086/s1_strip.png",
+      "web_strip_file": "086/s1_strip_web.jpg",
+      "preview_mp4": "086/preview_s1.mp4",
+      "peak_displacement_px": 5.13,
+      "peak_displacement_hung_mm": 4.49,
+      "changed_pixels_union": 908286,
+      "changed_share_pct": 19.9544,
+      "max_rgb_diff": 255,
+      "outside_mask_max_abs_diff": 0,
+      "faces_hands_max_diff": 0
+    },
+    "s2": {
+      "label": "2 \u00b7 Alive (fins, wheat & hems)",
+      "strip_file": "086/s2_strip.png",
+      "web_strip_file": "086/s2_strip_web.jpg",
+      "preview_mp4": "086/preview_s2.mp4",
+      "peak_displacement_px": 22.74,
+      "peak_displacement_hung_mm": 19.88,
+      "changed_pixels_union": 1056645,
+      "changed_share_pct": 23.2138,
+      "max_rgb_diff": 255,
+      "outside_mask_max_abs_diff": 0,
+      "faces_hands_max_diff": 0
+    },
+    "s3": {
+      "label": "3 \u00b7 Windy (emphatic gust & swim)",
+      "strip_file": "086/s3_strip.png",
+      "web_strip_file": "086/s3_strip_web.jpg",
+      "preview_mp4": "086/preview_s3.mp4",
+      "peak_displacement_px": 48.89,
+      "peak_displacement_hung_mm": 42.75,
+      "changed_pixels_union": 1129187,
+      "changed_share_pct": 24.8075,
+      "max_rgb_diff": 255,
+      "outside_mask_max_abs_diff": 0,
+      "faces_hands_max_diff": 0
+    }
+  }
+}

@@ -1,0 +1,217 @@
+{
+  "generator": "Blender 4.1.1 Cycles Path-Traced GI + OpenImageDenoise (Standard View Transform, Exposure=0, Gamma=1)",
+  "total_webp_bytes": 566920,
+  "total_webp_mb": 0.541,
+  "budget_max_mb": 2.2,
+  "threejs_loader_notes": {
+    "flipY": true,
+    "colorSpace_gi_and_albedo": "THREE.SRGBColorSpace",
+    "colorSpace_rough_norm": "THREE.NoColorSpace (linear raw RGB)",
+    "reference_midhall_plaster_srgb": [
+      0.8065,
+      0.761,
+      0.6996
+    ],
+    "reference_midhall_floor_gi_srgb": [
+      0.6711,
+      0.6515,
+      0.6299
+    ],
+    "glsl_5_line_binding": [
+      "// Corridor physical point P = vec3(x, y, s) from film-v2 ROOM_FRAG:",
+      "vec3 giWallL = texture2D(uLeftWallGI,  vec2((P.z + 6.0) / 23.30, P.y / 3.89)).rgb;",
+      "vec3 giWallR = texture2D(uRightWallGI, vec2((P.z + 6.0) / 23.30, P.y / 3.89)).rgb;",
+      "vec3 giCeil  = texture2D(uCeilGI,      vec2((P.z + 6.0) / 26.72, (P.x + 1.42) / 2.84)).rgb;",
+      "vec3 giFloor = texture2D(uFloorGI,     vec2((P.x + 1.42) / 2.84, (P.z + 6.0) / 26.72)).rgb;"
+    ],
+    "how_to_multiply_with_watercolour_and_sun": "Normalize GI irradiance via `vec3 E_baked = srgbToLin(giSample) / srgbToLin(vec3(0.806, 0.761, 0.700));` (for walls/ceiling/vestibule) or `/ srgbToLin(vec3(0.671, 0.651, 0.630))` (for floor_gi), then multiply directly with your surface + GRIS watercolour albedo before adding live Komorebi direct sun (`E_sun`)!"
+  },
+  "maps": {
+    "left_wall_gi.webp": {
+      "size": [
+        2048,
+        512
+      ],
+      "bytes": 17746,
+      "surface": "Corridor Left Wall (x = -1.42 m, normal +X, plus recessed doors @ s=4.90 & 14.80m)",
+      "domain": {
+        "s0": -6.0,
+        "s1": 17.3,
+        "y0": 0.0,
+        "y1": 3.89
+      },
+      "uv_gl_flipY_true": {
+        "u": "(s + 6.00) / 23.30",
+        "v": "y / 3.89"
+      },
+      "includes": "3D doorway casing & recessed 6-panel relief, 28cm baseboard, cornice shadow, honey-oak bounce, and 9 Hang A2 3.8cm frame contact shadows"
+    },
+    "right_wall_gi.webp": {
+      "size": [
+        2048,
+        512
+      ],
+      "bytes": 19594,
+      "surface": "Corridor Right Wall (x = +1.42 m, normal -X, plus recessed doors @ s=4.90 & 14.80m)",
+      "domain": {
+        "s0": -6.0,
+        "s1": 17.3,
+        "y0": 0.0,
+        "y1": 3.89
+      },
+      "uv_gl_flipY_true": {
+        "u": "(s + 6.00) / 23.30",
+        "v": "y / 3.89"
+      },
+      "includes": "Un-mirrored along +s to match left_wall_gi! Includes 3D doorway relief, baseboard, cornice, oak bounce, and 16 Hang A2 3.8cm frame contact shadows"
+    },
+    "ceiling_coffered_gi.webp": {
+      "size": [
+        2048,
+        512
+      ],
+      "bytes": 105284,
+      "surface": "Corridor + Arch Soffit + Vestibule Coffered Pressed-Tin Ceiling (y = 3.89 m / 3.80 m)",
+      "domain": {
+        "s0": -6.0,
+        "s1": 20.72,
+        "x0": -1.42,
+        "x1": 1.42
+      },
+      "uv_gl_flipY_true": {
+        "u": "(s + 6.00) / 26.72",
+        "v": "(x + 1.42) / 2.84"
+      },
+      "includes": "Real path-traced 3D 30x30cm stepped pressed-tin coffers + embossed Victorian medallion relief + warm honey-oak floor bounce"
+    },
+    "vestibule_gi.webp": {
+      "size": [
+        1024,
+        512
+      ],
+      "bytes": 13952,
+      "surface": "4-Region Padded Vestibule Sky-Portal GI Atlas (VLw, VRw, Arch Spandrel, Window Wall)",
+      "regions_gl_flipY_true": {
+        "VLw": {
+          "domain": {
+            "s0": 17.3,
+            "s1": 20.72,
+            "y0": 0.0,
+            "y1": 3.8
+          },
+          "uv_rect": [
+            0.003906,
+            0.328125,
+            0.007812,
+            0.992188
+          ],
+          "u_formula": "mix(0.003906, 0.328125, (s - 17.30) / 3.42)",
+          "v_formula": "mix(0.007813, 0.992188, y / 3.80)",
+          "frames_baked": [
+            "003",
+            "010"
+          ]
+        },
+        "VRw": {
+          "domain": {
+            "s0": 17.3,
+            "s1": 20.72,
+            "y0": 0.0,
+            "y1": 3.8
+          },
+          "uv_rect": [
+            0.337891,
+            0.662109,
+            0.007812,
+            0.992188
+          ],
+          "u_formula": "mix(0.337891, 0.662109, (s - 17.30) / 3.42)",
+          "v_formula": "mix(0.007813, 0.992188, y / 3.80)",
+          "frames_baked": [
+            "012",
+            "015",
+            "014"
+          ]
+        },
+        "arch_spandrel": {
+          "domain": {
+            "x0": -1.42,
+            "x1": 1.42,
+            "y0": 0.0,
+            "y1": 3.89
+          },
+          "uv_rect": [
+            0.671875,
+            0.996094,
+            0.507812,
+            0.992188
+          ],
+          "u_formula": "mix(0.671875, 0.996094, (x + 1.42) / 2.84)",
+          "v_formula": "mix(0.507813, 0.992188, y / 3.89)"
+        },
+        "window_wall": {
+          "domain": {
+            "x0": -0.87,
+            "x1": 0.87,
+            "y0": 0.0,
+            "y1": 3.8
+          },
+          "uv_rect": [
+            0.671875,
+            0.996094,
+            0.007812,
+            0.492188
+          ],
+          "u_formula": "mix(0.671875, 0.996094, (x + 0.87) / 1.74)",
+          "v_formula": "mix(0.007813, 0.492188, y / 3.80)"
+        }
+      }
+    },
+    "floor_gi.webp": {
+      "size": [
+        512,
+        2048
+      ],
+      "bytes": 11876,
+      "surface": "Corridor + Vestibule Floor Pure GI & Baseboard Skirting Contact-Shadow Map (z=0)",
+      "domain": {
+        "x0": -1.42,
+        "x1": 1.42,
+        "s0": -6.0,
+        "s1": 20.72
+      },
+      "uv_gl_flipY_true": {
+        "u": "(x + 1.42) / 2.84",
+        "v": "(s + 6.00) / 26.72"
+      }
+    },
+    "oak_floor_pbr.webp": {
+      "size": [
+        1024,
+        2048
+      ],
+      "bytes": 253128,
+      "surface": "Seamless Quarter-Sawn Honey-Oak Plank Diffuse Albedo (1 tile = 2.84 m wide x 5.68 m long = 360.6 px/m)",
+      "uv_tiling": {
+        "u": "(x + 1.42) / 2.84",
+        "v": "fract(s / 5.68)",
+        "wrap": "THREE.RepeatWrapping"
+      }
+    },
+    "oak_floor_rough_norm.webp": {
+      "size": [
+        1024,
+        2048
+      ],
+      "bytes": 145340,
+      "surface": "Packed Tangent-Space Normal + Satin Roughness Map locked 1:1 to oak_floor_pbr.webp",
+      "channels": {
+        "R": "Normal.X * 0.5 + 0.5 (+X across corridor)",
+        "G": "Normal.Y * 0.5 + 0.5 (+Y along corridor +s)",
+        "B": "Roughness (0.34..0.77 satin waxed oak with board-to-board sheen & matte seams)"
+      },
+      "glsl_unpack": "vec3 rn = texture2D(uOakRoughNorm, uvOak).rgb; vec2 nXY = rn.rg * 2.0 - 1.0; vec3 Nfloor = normalize(vec3(nXY.x * 0.35, 1.0, nXY.y * 0.35)); float rough = rn.b;"
+    }
+  },
+  "baked_hang_a2_frames_count": 30
+}
