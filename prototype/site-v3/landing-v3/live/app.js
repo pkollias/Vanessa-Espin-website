@@ -1,7 +1,8 @@
 import * as THREE from 'three';
-import { SITE, EXHIBITIONS, BIO, CONCEPTS, PORTALS, ABOUT_CONCEPTS, INTRO_CONCEPTS, COPY_MODES } from './data.js';
+import { SITE, EXHIBITIONS, BIO, CONCEPTS, PORTALS, ABOUT_CONCEPTS, INTRO_CONCEPTS, COPY_MODES, SCROLL_CUES } from './data.js';
 import { createAboutController } from './about-concepts.js';
 import { createIntroController } from './intro-concepts.js';
+import { createScrollCueController } from './scroll-cues.js';
 
 const N = EXHIBITIONS.length;
 const RING = N * 2; // 6-slot endless ring (2×3 sharing the 3 GPU textures) so scrolling wraps full-circle with 0 teleport!
@@ -67,6 +68,7 @@ const rawPortal = params.get('portal') === 'dolly' ? 'threshold' : params.get('p
 const rawAbout = params.get('about') || params.get('bio');
 const rawIntro = params.get('intro');
 const rawCopy = params.get('copy');
+const rawCue = params.get('cue');
 
 const state = {
   concept: initConcept,
@@ -74,6 +76,7 @@ const state = {
   aboutStyle: ABOUT_CONCEPTS.some((a) => a.id === rawAbout) ? rawAbout : (cDef.defaultAbout || 'a1'),
   introStyle: (rawIntro === 'none' || INTRO_CONCEPTS.some((o) => o.id === rawIntro)) ? rawIntro : 'o1',
   copyMode: COPY_MODES.some((m) => m.id === rawCopy) ? rawCopy : 'l1',
+  cueStyle: (rawCue === 'none' || SCROLL_CUES.some((s) => s.id === rawCue)) ? rawCue : 's2',
   active: initIdx,
   target: initIdx,
   p: initIdx,
@@ -88,12 +91,8 @@ const state = {
 
 let aboutCtrl = null;
 let introCtrl = null;
+let scrollCueCtrl = null;
 let portraitSheet = null;
-
-function isSheetTurned(s) {
-  if (!s) return false;
-  return Math.abs(Math.cos(s.spin) - 1) > 0.025 || Math.abs(Math.cos(s.spinTgt) - 1) > 0.025 || Math.abs(s.spinVel) > 0.02;
-}
 
 document.body.classList.add('clean-hud');   // the public site is always the visitor's view
 
@@ -131,8 +130,149 @@ function resize() {
   fxCanvasEl.width = Math.round(VW * DPR);
   fxCanvasEl.height = Math.round(VH * DPR);
   updateLedgeGeometry();
+  updateCenteredAnchors();
 }
 addEventListener('resize', resize);
+
+const _envVec = new THREE.Vector3();
+const _envEuler = new THREE.Euler();
+const _layoutCam = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
+_layoutCam.position.set(0, 0, 10);
+_layoutCam.lookAt(0, 0, 0);
+_layoutCam.updateMatrixWorld(true);
+
+const _measureRange = document.createRange();
+function renderedTextWidth(el) {
+  if (!el || getComputedStyle(el).display === 'none') return 0;
+  let maxW = 0;
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  let node;
+  while ((node = walker.nextNode())) {
+    if (!node.nodeValue || !node.nodeValue.trim()) continue;
+    _measureRange.selectNodeContents(node);
+    const w = _measureRange.getBoundingClientRect().width;
+    if (w > maxW) maxW = w;
+  }
+  return maxW;
+}
+
+function getStagePosterPose(mob = VW < 820) {
+  if (!mob) {
+    const placardAllowance = 128;
+    const gapAbove = Math.round(clamp(VH * 0.028, 22, 28));
+    const gapBelow = Math.round(clamp(VH * 0.03, 24, 30));
+    const cueAllowance = 26;
+    const topSafe = 64;
+    const botSafe = 18;
+    const availForEnv = Math.max(180, VH - topSafe - placardAllowance - gapAbove - gapBelow - cueAllowance - botSafe);
+    const posterFrac = clamp((availForEnv / 1.095) / Math.max(1, VH), 0.28, 0.44);
+    const posterH = Hv * posterFrac;
+    const envApprox = VH * posterFrac * 1.095;
+    const clusterH = placardAllowance + gapAbove + envApprox + gapBelow + cueAllowance;
+    const clusterTopPx = Math.max(topSafe, 56 + ((VH - 66) - clusterH) * 0.46);
+    const posterCenterPx = clusterTopPx + placardAllowance + gapAbove + envApprox * 0.5;
+    const posterCy = Hv * (0.5 - posterCenterPx / Math.max(1, VH));
+    return { posterH, posterCy, gapAbove, gapBelow };
+  }
+  const placardAllowance = 124;
+  const gapBelowPoster = Math.round(clamp(VH * 0.028, 20, 26));
+  const gapBelowPlacard = Math.round(clamp(VH * 0.026, 20, 26));
+  const cueAllowance = 24;
+  const topSafe = 62;
+  const botSafe = 14;
+  const availForEnv = Math.max(150, VH - topSafe - gapBelowPoster - placardAllowance - gapBelowPlacard - cueAllowance - botSafe);
+  const maxFracByWidth = ((VW - 64) / 0.80) / Math.max(1, VH);
+  const posterFrac = clamp(Math.min((availForEnv / 1.095) / Math.max(1, VH), maxFracByWidth), 0.24, 0.40);
+  const posterH = Hv * posterFrac;
+  const envApprox = VH * posterFrac * 1.095;
+  const clusterH = envApprox + gapBelowPoster + placardAllowance + gapBelowPlacard + cueAllowance;
+  const clusterTopPx = Math.max(topSafe, 56 + ((VH - 70) - clusterH) * 0.42);
+  const posterCenterPx = clusterTopPx + envApprox * 0.5;
+  const posterCy = Hv * (0.5 - posterCenterPx / Math.max(1, VH));
+  return { posterH, posterCy, gapBelowPoster, gapBelowPlacard, placardAllowance };
+}
+
+function computePosterEnvelopePx(posterH, posterCy, aspect) {
+  _layoutCam.aspect = Math.max(0.1, VW / Math.max(1, VH));
+  _layoutCam.updateProjectionMatrix();
+  const hw = (posterH * aspect) * 0.5;
+  const hh = posterH * 0.5;
+  _envVec.set(-hw, posterCy, 0).project(_layoutCam);
+  const leftPx = (_envVec.x + 1) * 0.5 * VW;
+  _envVec.set(hw, posterCy, 0).project(_layoutCam);
+  const rightPx = (_envVec.x + 1) * 0.5 * VW;
+
+  // Include both flat+tape overhang (13px) and resting 3D tilted poses (rx=-0.15, ry=-0.26, rz)
+  _envVec.set(0, posterCy + hh, 0).project(_layoutCam);
+  let minTopPx = (1 - _envVec.y) * 0.5 * VH - 13;
+  _envVec.set(0, posterCy - hh, 0).project(_layoutCam);
+  let maxBotPx = (1 - _envVec.y) * 0.5 * VH + 13;
+
+  for (const rz of [-0.04, 0.015]) {
+    _envEuler.set(-0.15, -0.26, rz, 'XYZ');
+    for (const [cx, cy] of [[-hw, hh], [hw, hh], [hw, -hh], [-hw, -hh]]) {
+      _envVec.set(cx, cy, 0.04).applyEuler(_envEuler);
+      _envVec.y += posterCy;
+      _envVec.project(_layoutCam);
+      const py = (1 - _envVec.y) * 0.5 * VH;
+      if (py < minTopPx) minTopPx = py;
+      if (py > maxBotPx) maxBotPx = py;
+    }
+  }
+  return { leftPx, rightPx, widthPx: Math.max(160, rightPx - leftPx), minTopPx, maxBotPx };
+}
+
+function updateCenteredAnchors() {
+  const root = document.documentElement;
+  const mob = VW < 820;
+  const ex = EXHIBITIONS[state.active] || EXHIBITIONS[0];
+  const aspect = sheets[state.active]?.aspect || ex.aspect || 0.80;
+  const pose = getStagePosterPose(mob);
+  const env = computePosterEnvelopePx(pose.posterH, pose.posterCy, aspect);
+
+  root.style.setProperty('--poster-left', `${Math.round(env.leftPx)}px`);
+  root.style.setProperty('--poster-width', `${Math.round(env.widthPx)}px`);
+
+  // Regularized figure-caption measure: W_max = min(VW - 36, clamp(13.5rem, 0.93 * posterWidth, W_ceil))
+  const wMax = Math.min(Math.max(176, VW - 36), clamp(env.widthPx * 0.93, 216, mob ? 320 : 336));
+  root.style.setProperty('--placard-max-w', `${Math.round(wMax)}px`);
+  root.style.setProperty('--placard-tight-w', 'max-content');
+
+  // Post-wrap tight bounding-box shrink-wrap (eliminates CSS post-wrap trailing slack after text-wrap: balance)
+  const titleEl = document.getElementById('plTitle');
+  const subEl = document.getElementById('plSub');
+  const btnEl = document.getElementById('enterBtn');
+  const btnW = (btnEl && getComputedStyle(btnEl.parentElement).display !== 'none') ? btnEl.offsetWidth : 0;
+  const contentW = Math.max(renderedTextWidth(titleEl), renderedTextWidth(subEl), btnW);
+  if (contentW > 40) {
+    const tightW = Math.min(Math.round(wMax), Math.ceil(contentW + 1));
+    root.style.setProperty('--placard-tight-w', `${tightW}px`);
+  }
+
+  const nonClusterConcept = state.concept === 'c3' || state.concept === 'c4' || state.concept === 'c7';
+  if (!mob) {
+    root.style.setProperty('--placard-above-bottom', `${Math.round(VH - (env.minTopPx - pose.gapAbove))}px`);
+    if (nonClusterConcept) {
+      root.style.setProperty('--cue-below-top', 'auto');
+      root.style.setProperty('--cue-dock-bottom', 'clamp(16px, 2.8vh, 30px)');
+    } else {
+      root.style.setProperty('--cue-below-top', `${Math.round(env.maxBotPx + pose.gapBelow)}px`);
+      root.style.setProperty('--cue-dock-bottom', 'auto');
+    }
+  } else {
+    const placardTop = Math.round(env.maxBotPx + pose.gapBelowPoster);
+    root.style.setProperty('--placard-below-top', `${placardTop}px`);
+    if (nonClusterConcept) {
+      root.style.setProperty('--cue-below-top', 'auto');
+      root.style.setProperty('--cue-dock-bottom', 'clamp(12px, 2.2vh, 22px)');
+    } else {
+      const pEl = document.getElementById('placard');
+      const pH = (pEl && pEl.offsetHeight > 20) ? pEl.offsetHeight : pose.placardAllowance;
+      root.style.setProperty('--cue-below-top', `${Math.round(placardTop + pH + pose.gapBelowPlacard)}px`);
+      root.style.setProperty('--cue-dock-bottom', 'auto');
+    }
+  }
+}
 
 const NFOLD = 20;
 const FOLDS_GLSL = /* glsl */ `
@@ -567,7 +707,7 @@ function applySheetTargets(nowSec) {
       s.tgt.s = H * (isFocus ? 1.035 : 0.96);
       s.tgt.o = 1;
       s.tgt.exp = isFocus ? 1.02 : 0.88;
-      s.flatTgt = (!drag && !isSheetTurned(s) && isFocus) ? 1 : 0;
+      s.flatTgt = (!drag && isFocus) ? 1 : 0;
       s.creaseTgt = isFocus ? 0.04 : 0.42;
       s.rate = 8.5;
     });
@@ -590,7 +730,7 @@ function applySheetTargets(nowSec) {
       s.tgt.s = H * mix(1, 0.68, clamp01(ad));
       s.tgt.o = ad > 1.35 ? 0 : 1;
       s.tgt.exp = 1;
-      s.flatTgt = (!drag && !isSheetTurned(s) && state.hoveredSlot === slot && ad < 0.08) ? 1 : 0;
+      s.flatTgt = (!drag && state.hoveredSlot === slot && ad < 0.08) ? 1 : 0;
       s.creaseTgt = mix(0.06, 0.75, clamp01(ad));
       s.rate = clamp(11 - 1.2 * ad, 6.5, 14);
     });
@@ -600,7 +740,7 @@ function applySheetTargets(nowSec) {
 
   // C7: Event Broadsheet & Voice Rail — poster hangs on the right plate
   if (c === 'c7') {
-    const H = mob ? Hv * 0.40 : Hv * 0.58;
+    const H = mob ? Hv * 0.40 : Hv * 0.56;
     const cx = mob ? 0 : Wv * 0.21;
     sheets.forEach((s, slot) => {
       const d = slot - state.p;
@@ -614,7 +754,7 @@ function applySheetTargets(nowSec) {
       s.tgt.s = H;
       s.tgt.o = d < -0.12 ? clamp01(1 + (d + 0.12) * 3.2) : (ad > 1.15 ? clamp01(1 - (ad - 1.15) * 2.2) : 1);
       s.tgt.exp = 1;
-      s.flatTgt = (!drag && !isSheetTurned(s) && state.hoveredSlot === slot && ad < 0.08) ? 1 : 0;
+      s.flatTgt = (!drag && state.hoveredSlot === slot && ad < 0.08) ? 1 : 0;
       s.creaseTgt = mix(0.06, 0.85, clamp01(ad));
       s.rate = clamp(11 - 1.2 * ad, 6.5, 14);
     });
@@ -622,16 +762,16 @@ function applySheetTargets(nowSec) {
     return;
   }
 
-  // C6: 3D Gallery Ledge Maquette — symmetric poster spacing on wooden picture rail
+  // C6: 3D Gallery Ledge Maquette — centered poster spacing on wooden picture rail
   if (c === 'c6') {
-    const H = mob ? Hv * 0.44 : Hv * 0.54;
-    const cx = mob ? 0 : Wv * 0.02;
+    const H = mob ? Hv * 0.41 : Hv * 0.50;
+    const cx = 0;
     const sx = mob ? Wv * 0.56 : Wv * 0.315;
     sheets.forEach((s, slot) => {
       const d = slot - state.p;
       const ad = Math.abs(d);
       s.tgt.x = cx + d * sx;
-      s.tgt.y = -Hv * 0.035;
+      s.tgt.y = mob ? Hv * 0.11 : -Hv * 0.025;
       s.tgt.z = 0.04 - ad * 0.55;
       s.tgt.rx = -0.095;
       s.tgt.ry = d * -0.10;
@@ -639,7 +779,7 @@ function applySheetTargets(nowSec) {
       s.tgt.s = H;
       s.tgt.o = ad > 1.35 ? clamp01(1 - (ad - 1.35) * 2.4) : 1;
       s.tgt.exp = mix(1.03, 0.84, clamp01(ad));
-      s.flatTgt = (!drag && !isSheetTurned(s) && state.hoveredSlot === slot && ad < 0.08) ? 1 : 0;
+      s.flatTgt = (!drag && state.hoveredSlot === slot && ad < 0.08) ? 1 : 0;
       s.creaseTgt = mix(0.03, 0.38, clamp01(ad));
       s.rate = clamp(10.5 - 1.1 * ad, 6.5, 13);
     });
@@ -648,12 +788,13 @@ function applySheetTargets(nowSec) {
   }
 
   // C1 (Komorebi+Wash), C2 (Chiaroscuro Spot), C5 (Living Aura), C8 (Evolved Baseline)
-  // Linear 3-poster stage (0..2) with symmetric left & right closeness!
-  const H = mob ? Hv * 0.42 : Hv * 0.55;
-  const cx = mob ? 0 : Wv * 0.025;
-  const cy = mob ? Hv * 0.08 : -Hv * 0.035;
+  // Poster + placard + dots form a unified vertical cluster!
+  const pose = getStagePosterPose(mob);
+  const H = pose.posterH;
+  const cx = 0;
+  const cy = pose.posterCy;
   const sx = mob ? Wv * 0.56 : Wv * 0.315;
-  const sy = mob ? Hv * 0.04 : Hv * 0.085;
+  const sy = mob ? Hv * 0.035 : Hv * 0.068;
   const sz = mob ? 0.95 : 1.18;
 
   sheets.forEach((s, slot) => {
@@ -663,12 +804,12 @@ function applySheetTargets(nowSec) {
     s.tgt.y = cy + d * sy;
     s.tgt.z = -ad * sz;
     s.tgt.rx = -0.15;
-    s.tgt.ry = -0.28 + d * -0.06;
-    s.tgt.rz = -0.035 + d * 0.04;
+    s.tgt.ry = -0.26 + d * -0.06;
+    s.tgt.rz = -0.03 + d * 0.04;
     s.tgt.s = H;
     s.tgt.o = ad > 1.35 ? clamp01(1 - (ad - 1.35) * 1.8) : 1;
     s.tgt.exp = c === 'c2' ? mix(1.05, 0.30, smooth(0.08, 0.85, ad)) : 1.0;
-    s.flatTgt = (!drag && !isSheetTurned(s) && state.hoveredSlot === slot && ad < 0.08) ? 1 : 0;
+    s.flatTgt = (!drag && state.hoveredSlot === slot && ad < 0.08) ? 1 : 0;
     s.creaseTgt = mix(0.07, 0.92, smooth(0.08, 0.9, ad));
     s.rate = clamp(11 - 1.15 * ad, 6.5, 14);
   });
@@ -681,10 +822,9 @@ function applyAboutAndIntroModifiers() {
   const im = introCtrl ? introCtrl.getSheetIntroFactor() : null;
   const cSlot = getCentredSlot();
 
-  // Never flatten with tape while dragging or showing reverse note!
-  sheets.forEach((s) => {
-    if (drag || isSheetTurned(s)) s.flatTgt = 0;
-  });
+  if (drag) {
+    sheets.forEach((s) => { s.flatTgt = 0; });
+  }
 
   if (rm && (rm.dimWall > 0.002 || Math.abs(rm.posterShiftX || 0) > 0.001 || (rm.sideFade || 0) > 0.002)) {
     sheets.forEach((s, slot) => {
@@ -763,9 +903,8 @@ function updateTapeOverlay() {
     ? (state.hoveredSlot >= 0 ? (state.hoveredSlot % N) : state.active)
     : (state.hoveredSlot === cSlot ? cSlot : -1);
   const s = sheets[slot];
-  // Suppress corner masking tape whenever dragging sideways, turning, flipped to her note, or inside About!
   const aboutMix = aboutCtrl ? aboutCtrl.getMix() : 0;
-  const show = !drag && aboutMix < 0.05 && s && !isSheetTurned(s) && s.flat > 0.65 && (state.concept === 'c4' || state.concept === 'c1' || state.concept === 'c8');
+  const show = !drag && aboutMix < 0.05 && s && s.flat > 0.65 && (state.concept === 'c4' || state.concept === 'c1' || state.concept === 'c8');
   if (!show) {
     tapeEls.forEach((el) => { el.style.opacity = '0'; });
     return;
@@ -1188,25 +1327,34 @@ function syncExhibitionDOM(instant = false) {
   document.querySelectorAll('[data-trip]').forEach((b) => b.classList.toggle('is-active', +b.dataset.trip === i));
   document.querySelectorAll('[data-bs]').forEach((b) => b.classList.toggle('is-active', +b.dataset.bs === i));
 
-  $('#bsQuote').textContent = `“${ex.note}”`;
-  $('#bsVenue').textContent = `${ex.kind} · ${ex.venue} · ${ex.date}`;
+  $('#bsQuote').textContent = ex.stoodShort || '';
+  $('#bsVenue').textContent = `${ex.kind} · ${ex.venue}`;
+  if (scrollCueCtrl) scrollCueCtrl.sync(i, state.p);
 
   document.body.dataset.copy = state.copyMode;
+  const renderTwoLineSub = (raw) => {
+    const esc = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const idx = String(raw || '').indexOf(' · ');
+    if (idx < 0) return `<span class="placard__desc">${esc(raw)}</span>`;
+    return `<span class="placard__desc">${esc(raw.slice(0, idx))}</span><span class="placard__loc">${esc(raw.slice(idx + 3))}</span>`;
+  };
   const writePlacard = () => {
     if (state.copyMode === 'l2') {
       $('#plTitle').textContent = ex.typeHeadline;
-      $('#plSub').textContent = ex.typeSub;
+      $('#plSub').innerHTML = renderTwoLineSub(ex.typeSub);
     } else if (state.copyMode === 'l3') {
       $('#plTitle').textContent = ex.name;
       $('#plSub').textContent = ex.stoodShort;
     } else {
-      // L1 (default) & L4 (hidden via CSS): Uniform short name + uniform plain-English What · Where
+      // L1 (default) & L4 (hidden via CSS): Short name + Description on line 1, Location on line 2 (no dot)
       $('#plTitle').textContent = ex.name;
-      $('#plSub').textContent = ex.uniformSub;
+      $('#plSub').innerHTML = renderTwoLineSub(ex.uniformSub);
     }
     placardEl.classList.remove('is-swapping');
+    updateCenteredAnchors();
   };
 
+  updateCenteredAnchors();
   clearTimeout(placardSwapTimer);
   if (instant) {
     writePlacard();
@@ -1228,9 +1376,7 @@ function goToExhibition(nextIdx, now = performance.now()) {
   state.target = clamped;
   state.tw = reduced ? null : { from: state.p, to: clamped, t0: now, dur: 0.51 };
   if (reduced) state.p = clamped;
-  sheets.forEach((s, slot) => {
-    if (slot !== clamped) s.spinTgt = Math.round(s.spinTgt / (Math.PI * 2)) * Math.PI * 2;
-  });
+  if (scrollCueCtrl) scrollCueCtrl.markScrolled();
   syncExhibitionDOM(false);
   syncUrl();
   return true;
@@ -1621,13 +1767,19 @@ function syncUrl() {
   u.searchParams.set('portal', state.portal);
   u.searchParams.set('about', state.aboutStyle);
   u.searchParams.set('copy', state.copyMode);
+  if (state.cueStyle && state.cueStyle !== 's2') u.searchParams.set('cue', state.cueStyle);
+  else u.searchParams.delete('cue');
   if (state.introStyle && state.introStyle !== 'o1') u.searchParams.set('intro', state.introStyle);
   else u.searchParams.delete('intro');
   u.searchParams.delete('bio');
-  history.replaceState(null, '', u);
+  history.replaceState(history.state, '', u);
 }
 
 function buildWorkbench() {
+  const sp = $('#cuePills');
+  if (sp) sp.innerHTML = SCROLL_CUES.map((s) => `
+    <button type="button" class="bench__pill" data-cue="${s.id}" title="${s.desc}" aria-pressed="${state.cueStyle === s.id}">${s.label}</button>
+  `).join('');
   const cp = $('#conceptPills');
   if (cp) cp.innerHTML = CONCEPTS.map((c) => `
     <button type="button" class="bench__pill" data-c="${c.id}" aria-pressed="${state.concept === c.id}">${c.short}</button>
@@ -1681,8 +1833,17 @@ function setCopyMode(mid) {
   syncExhibitionDOM(true);
   syncUrl();
 }
+function setCueStyle(sid) {
+  if (!SCROLL_CUES.some((s) => s.id === sid)) return;
+  state.cueStyle = sid;
+  if (scrollCueCtrl) scrollCueCtrl.setCue(sid);
+  buildWorkbench();
+  syncUrl();
+}
 
 $('#bench').addEventListener('click', (e) => {
+  const bsc = e.target.closest('[data-cue]');
+  if (bsc) setCueStyle(bsc.dataset.cue);
   const bc = e.target.closest('[data-c]');
   if (bc) setConcept(bc.dataset.c);
   const bp = e.target.closest('[data-p]');
@@ -1704,7 +1865,7 @@ $('#bench').addEventListener('click', (e) => {
 });
 
 /* =========================================================================
-   Pointer, Wheel, Drag-to-Flip & Keyboard Input
+   Pointer, Wheel, Direct Drag-Over-Poster & Keyboard Input
    ========================================================================= */
 const raycaster = new THREE.Raycaster();
 const ndc = new THREE.Vector2();
@@ -1731,11 +1892,9 @@ glCanvas.addEventListener('pointerdown', (e) => {
   if (state.inFilm || state.drawerOpen || state.portalAnim) return;
   glCanvas.setPointerCapture(e.pointerId);
   const hitSlot = hitTestSheets(e.clientX, e.clientY);
-  const onCentred = hitSlot >= 0 && (state.concept === 'c4' || hitSlot === getCentredSlot());
   drag = {
     id: e.pointerId, x0: e.clientX, y0: e.clientY, moved: false,
-    hitSlot, spinMode: onCentred && state.concept !== 'c4',
-    spin0: hitSlot >= 0 ? sheets[hitSlot].spinTgt : 0,
+    hitSlot,
     p0: state.p,
   };
   glCanvas.classList.add('is-dragging');
@@ -1761,12 +1920,11 @@ glCanvas.addEventListener('pointermove', (e) => {
   if (Math.hypot(dx, dy) > 6) drag.moved = true;
   if (!drag.moved) return;
 
-  if (drag.spinMode && sheets[drag.hitSlot]) {
-    sheets[drag.hitSlot].spinTgt = drag.spin0 + dx * 0.0115;
-  } else if (state.concept !== 'c4') {
+  if (state.concept !== 'c4') {
     state.tw = null;
     state.target = clamp(drag.p0 - dx / (VW * 0.32), -0.18, N - 0.82);
     state.p = state.target;
+    if (scrollCueCtrl) scrollCueCtrl.markScrolled();
     const liveEx = clamp(Math.round(state.p), 0, N - 1);
     if (liveEx !== state.active) {
       const prev = state.active;
@@ -1794,10 +1952,7 @@ function finishDrag() {
     }
     return;
   }
-  if (d.spinMode && sheets[d.hitSlot]) {
-    const s = sheets[d.hitSlot];
-    s.spinTgt = Math.round(s.spinTgt / Math.PI) * Math.PI;
-  } else if (state.concept !== 'c4') {
+  if (state.concept !== 'c4') {
     goToExhibition(clamp(Math.round(state.target), 0, N - 1));
   }
 }
@@ -1805,10 +1960,10 @@ glCanvas.addEventListener('pointerup', finishDrag);
 glCanvas.addEventListener('pointercancel', finishDrag);
 glCanvas.addEventListener('pointerleave', () => { ptr.inside = false; state.hoveredSlot = -1; glCanvas.classList.remove('is-over'); });
 
-// Wheel: Full-circle endless scroll! One notch = one poster (0.51s glide)
+// Wheel: Linear 3-poster scroll (works right over the poster too!); one notch = one poster (0.51s glide)
 let wheelAcc = 0, lastWheel = -1e9, wheelLockedUntil = 0;
 addEventListener('wheel', (e) => {
-  if (state.inFilm || state.drawerOpen || state.portalAnim || (introCtrl && introCtrl.isActive()) || e.target.closest('.bench, .index-pop, #aboutStage')) return;
+  if (state.inFilm || state.drawerOpen || state.portalAnim || (introCtrl && introCtrl.isActive()) || e.target.closest('.bench, .menu-pop, #aboutStage')) return;
   e.preventDefault();
   const now = performance.now();
   if (now - lastWheel > 160) wheelAcc = 0;
@@ -1823,39 +1978,43 @@ addEventListener('wheel', (e) => {
   }
 }, { passive: false });
 
-// UI Buttons & Keyboard
+// UI Buttons, Top-Right Burger Menu & Keyboard
+const menuBtn = $('#menuBtn'), menuPop = $('#menuPop');
+function closeMenuPop() {
+  if (!menuPop) return;
+  menuPop.hidden = true;
+  menuBtn?.setAttribute('aria-expanded', 'false');
+}
+
 $('#aboutBtn').addEventListener('click', () => {
+  closeMenuPop();
   if (state.drawerOpen) closeAbout();
   else openAbout(state.aboutStyle);
 });
-$('#enterBtn').addEventListener('click', () => enterFilm(state.active, getCentredSlot()));
-$('#bsEnterBtn').addEventListener('click', () => enterFilm(state.active, getCentredSlot()));
-$('#flipBtn').addEventListener('click', () => {
-  const s = sheets[getCentredSlot()];
-  if (s) s.spinTgt = Math.round(s.spinTgt / Math.PI + 1) * Math.PI;
-});
+$('#enterBtn')?.addEventListener('click', () => enterFilm(state.active, getCentredSlot()));
+$('#enterBtnMobile')?.addEventListener('click', () => enterFilm(state.active, getCentredSlot()));
+$('#bsEnterBtn')?.addEventListener('click', () => enterFilm(state.active, getCentredSlot()));
 $('#filmReturn').addEventListener('click', () => returnFromFilm());
 $('#filmNext').addEventListener('click', goToNextEventFromFilm);
-$('#cornerNext')?.addEventListener('click', () => stepBy(1));
 $('#brandHome').addEventListener('click', (e) => {
   e.preventDefault();
+  closeMenuPop();
   if (state.drawerOpen) closeAbout();
   if (state.inFilm) returnFromFilm();
   goToExhibition(0);
 });
 
-const indexBtn = $('#indexBtn'), indexPop = $('#indexPop');
-indexBtn.addEventListener('click', (e) => {
+menuBtn?.addEventListener('click', (e) => {
   e.stopPropagation();
-  if (state.drawerOpen) closeAbout();
-  const open = indexPop.hidden;
-  indexPop.hidden = !open;
-  indexBtn.setAttribute('aria-expanded', String(open));
+  const open = menuPop.hidden;
+  if (open && state.drawerOpen) closeAbout();
+  menuPop.hidden = !open;
+  menuBtn.setAttribute('aria-expanded', String(open));
 });
 document.addEventListener('click', (e) => {
-  if (!e.target.closest('.index-wrap')) { indexPop.hidden = true; indexBtn.setAttribute('aria-expanded', 'false'); }
+  if (!e.target.closest('.menu-wrap')) closeMenuPop();
   const gt = e.target.closest('[data-goto]');
-  if (gt) { indexPop.hidden = true; indexBtn.setAttribute('aria-expanded', 'false'); goToExhibition(+gt.dataset.goto); }
+  if (gt) { closeMenuPop(); goToExhibition(+gt.dataset.goto); }
   const tr = e.target.closest('[data-trip]');
   if (tr) {
     const idx = +tr.dataset.trip;
@@ -1870,7 +2029,7 @@ addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     if (state.drawerOpen) closeAbout();
     else if (state.inFilm || state.portalAnim) returnFromFilm();
-    else if (!indexPop.hidden) { indexPop.hidden = true; indexBtn.setAttribute('aria-expanded', 'false'); }
+    else if (menuPop && !menuPop.hidden) closeMenuPop();
     return;
   }
   if (false) {
@@ -1906,6 +2065,11 @@ function tick(now) {
     if (u >= 1) state.tw = null;
   } else {
     state.p += (state.target - state.p) * (reduced ? 1 : 1 - Math.exp(-dt * 8));
+  }
+
+  if (scrollCueCtrl) {
+    scrollCueCtrl.sync(state.active, state.p);
+    if (scrollCueCtrl.tick) scrollCueCtrl.tick(now, dt);
   }
 
   applySheetTargets(nowSec);
@@ -1954,6 +2118,15 @@ const loadImg = (src) => new Promise((res, rej) => {
 async function boot() {
   resize();
   buildStaticConceptDOM();
+
+  scrollCueCtrl = createScrollCueController({
+    EXHIBITIONS,
+    SCROLL_CUES,
+    getState: () => state,
+    goToExhibition: (exIdx) => goToExhibition(exIdx),
+    stepBy: (delta) => stepBy(delta),
+  });
+  scrollCueCtrl.setCue(state.cueStyle);
 
   aboutCtrl = createAboutController({
     SITE, EXHIBITIONS, BIO, ABOUT_CONCEPTS,
@@ -2010,15 +2183,13 @@ async function boot() {
     front.anisotropy = maxAniso;
     front.minFilter = THREE.LinearMipmapLinearFilter;
     front.needsUpdate = true;
-
-    const back = buildBackTexture(ex, img, aspect);
-    return { front, back, aspect };
+    return { front, aspect };
   });
 
   // 3-poster linear stage (circularity lives inside events via Next: Iyuana → only!)
   sheets = EXHIBITIONS.map((ex, i) => {
-    const { front, back, aspect } = texPairs[i];
-    return new PosterSheet(front, back, aspect, i, i);
+    const { front, aspect } = texPairs[i];
+    return new PosterSheet(front, front, aspect, i, i);
   });
 
   // 7th 3D WebGL Portrait Print for About Concept A2
@@ -2035,11 +2206,7 @@ async function boot() {
   applySheetTargets(0);
   sheets.forEach((s) => s.snap());
   if (portraitSheet) portraitSheet.snap();
-
-  if (params.get('flip') === '1' && sheets[getCentredSlot()]) {
-    const cs = sheets[getCentredSlot()];
-    cs.spin = cs.spinTgt = Math.PI;
-  }
+  updateCenteredAnchors();
 
   introCtrl.notifyReady();
 

@@ -307,7 +307,7 @@ export function addPavlosSeatRoseEasterEgg(scene, initialSpotLevel = 0.0) {
 
   function setSpotlightLevel(level01) {
     const lv = Math.max(0, Math.min(1, level01));
-    rosePinSpot.visible = lv > 0.002;
+    rosePinSpot.visible = true;   // always counted, at zero strength until the end: a light switching on makes every lit surface rebuild its shader, which froze the film here
     rosePinSpot.intensity = MAX_CD * lv;
     roseBeamMesh.visible = lv > 0.002;
     beamMat.uniforms.uLevel.value = lv;

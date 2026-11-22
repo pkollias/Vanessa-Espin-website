@@ -315,6 +315,8 @@ body.hud-hidden #hudMin {
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+import { skipUnlitLights } from '/Vanessa-Espin-website/shared/film-lights.js';
+skipUnlitLights(THREE);   // a light's maths is skipped wherever the light does not reach: same picture, less work (see the file)
 
 (async () => {
   'use strict';
@@ -946,7 +948,7 @@ import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
   renderer.setSize(window.innerWidth, window.innerHeight);
   // Keep the film smooth: when frames run late, draw at a lower resolution (shared helper; ?pace=off on the address disables it)
-  import('/Vanessa-Espin-website/shared/film-pace.js').then(({ keepPace }) => keepPace({ renderer, min: 1 })).catch(() => {});
+  import('/Vanessa-Espin-website/shared/film-pace.js').then(({ keepPace }) => keepPace({ renderer, min: 0.85 })).catch(() => {});
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.NoToneMapping;
   viewportEl.appendChild(renderer.domElement);
@@ -4467,6 +4469,7 @@ import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
     }
   }
 
+  const WARM_UP = { visiting: false };   // true while the warm-up visits a moment: the scene is set up for it but not drawn
   function evaluateAndRenderScene(animClockSec, livingClock = animClockSec) {
     const t = STATE.t;
     const c = phoneFraming(evalMovieCam(t), t);
@@ -4544,7 +4547,7 @@ import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
     }
 
     updateBirdsAtMovieTime(t);
-    renderer.render(scene, camera);
+    if (!WARM_UP.visiting) renderer.render(scene, camera);
 
     return { cam: c, sun };
   }
@@ -4844,7 +4847,24 @@ import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
       SPLASH_MEDIUM_SPECS[STATE.splashKey] ? loadSplashMediumKey(STATE.splashKey) : Promise.resolve(),
     ]),
     new Promise(r => setTimeout(r, 1100)),
-  ]).then(() => {
+  ]).then(async () => {
+    // Before the film starts: build every shader and send every picture to the graphics card, for every moment of the
+    // film, while the opening frame is held. Otherwise that work lands mid-film as a freeze (over a second, as the poster arrived).
+    if (!freezeLoop) {
+      const t0 = STATE.t, times = [];
+      for (let t = 0; t <= TOTAL_SEC; t += 1.0) times.push(t);
+      times.push(T_EASEL_SHOW + 0.05, T_EYES_START + 0.6, T_BLINK_START + 0.05, T_RELEASE + 0.15, T_LANDING - 2.4, T_LANDING - 1.0, T_LANDING, TOTAL_SEC);
+      const visit = (t) => {
+        STATE.t = t; STATE.monotonicFrontS = targetPaintFrontForMovieTime(t);
+        WARM_UP.visiting = true;
+        try { evaluateAndRenderScene(t, 0); } finally { WARM_UP.visiting = false; }
+      };
+      try {
+        const { warmFilm } = await import('/Vanessa-Espin-website/shared/film-warm.js');
+        await warmFilm({ renderer, scene, camera, times, visit, first: t0 });
+      } catch {}
+      STATE.t = t0; STATE.monotonicFrontS = targetPaintFrontForMovieTime(t0);
+    }
     startupReady = true;
     markFreezeDirty(5);
     lastNow = performance.now();

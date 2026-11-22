@@ -5,8 +5,8 @@
 <link rel="icon" href="/Vanessa-Espin-website/favicon.ico">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Vanessa Espín — Event Planning</title>
-<meta name="description" content="Vanessa Espín, event planning and creative direction. New York.">
+<title>Vanessa Espín — Brand Curation</title>
+<meta name="description" content="Vanessa Espín, brand curation and creative direction. New York.">
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://api.fontshare.com">
 <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="style.css">
 <link id="about-concepts-css" rel="stylesheet" href="about-concepts.css">
 <link id="intro-concepts-css" rel="stylesheet" href="intro-concepts.css">
+<link id="scroll-cues-css" rel="stylesheet" href="scroll-cues.css">
 <script type="importmap">
 {
   "imports": {
@@ -28,7 +29,7 @@
 <!-- Live 3D Event Mount (Untouched exhibition films load here on graphical entry) -->
 <div class="film-stage" id="filmStage" aria-hidden="true"></div>
 <div class="film-nav" id="filmNav" role="navigation" aria-label="Event navigation">
-  <button class="film-return" id="filmReturn" type="button" aria-label="Return to Event Planning">← Event Planning</button>
+  <button class="film-return" id="filmReturn" type="button" aria-label="Return to Brand Curation">← Brand Curation</button>
   <button class="film-media" id="filmMedia" type="button" aria-label="Open the event's media" aria-haspopup="dialog" hidden>Media</button>
   <button class="film-next" id="filmNext" type="button" aria-label="Experience next event">Next: Herencia Viva →</button>
 </div>
@@ -43,44 +44,53 @@
     <p class="split-word split-word--bot" id="splitBot">SUEÑOS</p>
   </div>
 
-  <!-- WebGL Creased & Lit Posters (6-Slot Endless Ring + 7th Portrait Sheet for A2) -->
-  <canvas id="gl" aria-label="Events — click center poster to experience the event, drag sideways on center poster to read her note"></canvas>
+  <!-- WebGL Creased & Lit Posters (Scroll or drag anywhere — including over posters — to browse) -->
+  <canvas id="gl" aria-label="Brand Curation — click center poster to experience the event, scroll or drag left and right to browse posters"></canvas>
 
-  <!-- Corner Masking Tape Layer (Suppressed during drag/flip for note!) -->
+  <!-- Corner Masking Tape Layer -->
   <svg class="pins-svg" id="pinsSvg" aria-hidden="true"></svg>
 
-  <!-- Balanced 3-Point Top Masthead: Left Name · Center Event Planning Dropdown · Right About -->
+  <!-- Top Masthead: Left Name · Top-Right Burger Menu (Brand Curation + About) -->
   <header class="masthead">
     <a class="masthead__brand" href="#top" id="brandHome">
       <span class="masthead__name">Vanessa Espín</span>
     </a>
 
-    <div class="masthead__center index-wrap">
-      <button class="nav-btn nav-btn--center nav-btn--current" id="indexBtn" type="button" aria-expanded="false" aria-controls="indexPop">
-        <span>Event Planning</span>
-        <span class="nav-caret" aria-hidden="true">▾</span>
+    <nav class="masthead__nav menu-wrap" id="menuWrap" aria-label="Primary menu">
+      <button class="burger-btn" id="menuBtn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="menuPop">
+        <span class="burger-lines" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </span>
       </button>
-      <div class="index-pop index-pop--center" id="indexPop" hidden>
-        <div class="index-pop__hdr">Events · New York</div>
-        <div id="indexList"></div>
-      </div>
-    </div>
 
-    <nav class="masthead__nav" aria-label="About">
-      <button class="nav-btn nav-btn--bio" id="aboutBtn" type="button">About</button>
+      <div class="menu-pop" id="menuPop" hidden>
+        <div class="menu-pop__sec">
+          <div class="menu-pop__hdr">Brand Curation</div>
+          <div id="indexList"></div>
+        </div>
+        <div class="menu-pop__div" role="separator"></div>
+        <button class="menu-about-btn" id="aboutBtn" type="button">
+          <span>About</span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </div>
     </nav>
   </header>
 
-  <!-- Uniform Left Curatorial Placard (L1..L4) -->
+  <!-- Centered Container · Left-Aligned Event Placard (Bounded by clamp(13.5rem, 0.93 * posterWidth, 21rem) + tight-wrap) -->
   <section class="placard" id="placard" aria-live="polite">
     <h1 class="placard__title" id="plTitle">Iyuana</h1>
-    <p class="placard__sub" id="plSub">Film &amp; photography exhibition · Long Island City, Queens</p>
+    <p class="placard__sub" id="plSub">
+      <span class="placard__desc">Film &amp; photography exhibition</span>
+      <span class="placard__loc">Queens, Brooklyn, NYC</span>
+    </p>
     <div class="placard__actions">
       <button class="enter-btn" id="enterBtn" type="button">
         <span>Experience the Event</span>
         <span aria-hidden="true">→</span>
       </button>
-      <button class="flip-btn" id="flipBtn" type="button" title="Turn center poster over to read Vanessa’s note">Her note ↻</button>
     </div>
   </section>
 
@@ -91,7 +101,7 @@
   <section class="broadsheet-rail" id="broadsheetRail">
     <div class="bs-list" id="bsList"></div>
     <div class="bs-voice">
-      <span class="bs-voice__eyebrow" id="bsEyebrow">Behind the Poster · Vanessa’s Note</span>
+      <span class="bs-voice__eyebrow" id="bsEyebrow">Brand Curation · NYC</span>
       <blockquote class="bs-voice__text" id="bsQuote"></blockquote>
     </div>
     <div class="bs-foot">
@@ -101,14 +111,6 @@
       </button>
     </div>
   </section>
-
-  <!-- Subtle Bottom Bar (01/03 removed; crystal-clear center-poster instruction) -->
-  <footer class="corner-bar">
-    <div class="corner-bar__left" id="cornerLeft">Click center poster to experience the event · Drag sideways on center poster to read her note</div>
-    <div class="corner-bar__right">
-      <span id="cornerHint">Scroll or ← →</span>
-    </div>
-  </footer>
 
   <div class="grain" aria-hidden="true"></div>
 </div>
@@ -126,6 +128,10 @@
   </div>
   <div class="bench__body">
     <div>
+      <span class="bench__grp-lbl">Scroll Cue Mocks (S1–S6 · Click to test)</span>
+      <div class="bench__pills" id="cuePills"></div>
+    </div>
+    <div>
       <span class="bench__grp-lbl">Dark-Gallery About (A1–A8 · Click to preview)</span>
       <div class="bench__pills" id="bioPills"></div>
     </div>
@@ -134,13 +140,9 @@
       <div class="bench__pills" id="introPills"></div>
     </div>
     <div>
-      <span class="bench__grp-lbl">Left Placard Copy (L1–L4)</span>
+      <span class="bench__grp-lbl">Title Copy (L1–L4) &amp; Stage (C1–C8)</span>
       <div class="bench__pills" id="copyPills"></div>
-    </div>
-    <div>
-      <span class="bench__grp-lbl">Stage Concept (C1–C8) &amp; Portal (P1–P4)</span>
-      <div class="bench__pills" id="conceptPills"></div>
-      <div class="bench__pills" id="portalPills" style="margin-top:4px;"></div>
+      <div class="bench__pills" id="conceptPills" style="margin-top:4px;"></div>
     </div>
   </div>
 </aside>

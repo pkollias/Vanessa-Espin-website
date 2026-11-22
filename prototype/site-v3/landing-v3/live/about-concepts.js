@@ -18,25 +18,25 @@ const POSTER_BAY_STYLES = new Set(['a1', 'a4', 'a8']);
 
 const DEFAULT_BIO = {
   statement: 'I wanted to tell the stories of us.',
-  eyebrow: 'Event Planning & Creative Direction · New York',
+  eyebrow: 'Brand Curation & Creative Direction · New York',
   door: 'I help bring cultural and artistic events to life. I create the visual identity and the marketing material, and I curate the experience itself.',
   stood: [
     {
       exIdx: 2,
       name: 'Ayazamana',
-      place: 'Flushing Town Hall',
+      place: 'Queens, NYC',
       text: 'At Ayazamana I was in the tech room above the stage, handling the visuals that came up after every dance.',
     },
     {
       exIdx: 0,
       name: 'Iyuana',
-      place: 'Long Island City',
+      place: 'Queens, Brooklyn, NYC',
       text: 'At Iyuana I made sure Yanda, a member of the Sápara Nation, told his story himself.',
     },
     {
       exIdx: 1,
       name: 'Herencia Viva',
-      place: 'Flushing Town Hall',
+      place: 'Manhattan, Queens, NYC',
       text: 'At Herencia Viva, if I could go back for five minutes, I’d stand in front of the Ecuadorian Mona Lisa.',
     },
   ],

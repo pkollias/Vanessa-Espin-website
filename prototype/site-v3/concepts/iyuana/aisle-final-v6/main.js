@@ -29,6 +29,8 @@
 // the dark stays dark. ?fire=a|b|c picks the variant; ?fire=0 is v1's white flood.
 import * as THREE from 'three';
 import { TRAJECTORIES, TRAJECTORY_LIST } from '../trajectories/paths.js';
+import { skipUnlitLights } from '/Vanessa-Espin-website/shared/film-lights.js';
+skipUnlitLights(THREE);   // a lamp's maths is skipped wherever its cone does not reach: same picture, far less work (see the file)
 
 const A = '../assets/';
 const qs = new URLSearchParams(location.search);
@@ -1086,8 +1088,10 @@ async function loadFilm() {
   if (v.requestVideoFrameCallback) v.requestVideoFrameCallback(onFrame);
   drawFilm();
 }
-const avgC = document.createElement('canvas'); avgC.width = avgC.height = 4; const avgX = avgC.getContext('2d', { willReadFrequently: true });
-let avgTick = 0;
+// The projected film's average colour by video time, one value every 0.1 s (red, green, blue, 0-255). The page used to read it
+// back from the picture every few frames; that read waits for the graphics card to finish and held up the whole film.
+// Recorded once from the same picture instead (site-check/results/stalls/rec-avg.mjs).
+const FILM_AVG = { dt: 0.1, c: [20,20,32,22,22,36,24,24,38,26,26,39,24,24,38,23,22,35,23,21,34,23,22,35,23,22,35,23,21,35,23,21,35,22,21,34,23,20,33,24,21,33,25,22,33,25,21,32,27,23,33,27,23,34,29,24,34,29,24,33,29,24,33,29,24,33,29,24,34,30,24,35,30,24,35,30,24,35,30,24,35,30,24,35,30,24,34,30,24,34,30,24,34,30,24,34,29,24,34,29,24,34,29,24,33,29,23,33,29,23,33,29,23,34,28,23,34,28,23,33,28,23,33,28,23,33,27,22,33,27,21,32,28,22,32,28,22,32,29,22,33,29,22,33,29,22,33,28,22,33,29,22,33,29,22,33,29,22,33,28,22,32,28,21,32,28,22,33,28,22,33,29,23,34,33,28,40,38,36,51,42,43,59,57,65,89,68,79,109,78,93,128,84,104,141,88,108,146,96,119,157,94,118,157,93,118,157,91,115,155,88,112,154,79,101,143,77,97,139,75,94,135,71,90,131,62,80,119,60,75,115,55,69,108,51,65,106,48,62,106,45,58,103,45,58,103,47,60,107,50,63,113,50,65,114,51,66,115,50,66,115,50,65,115,50,66,116,51,66,117,50,66,118,49,64,117,49,64,116,49,64,116,49,64,116,49,63,115,49,63,114,49,63,113,46,60,110,48,60,109,49,61,108,50,61,107,53,62,106,56,63,104,58,63,103,62,64,101,65,64,98,68,65,96,72,65,93,75,66,88,77,66,87,80,67,84,83,67,81,86,67,78,88,68,77,90,68,74,92,68,71,95,69,67,97,69,63,98,70,62,100,69,58,101,69,57,101,69,56,101,69,55,101,69,55,102,69,55,101,69,55,102,69,55,102,69,55,103,69,55,102,69,55,102,69,55,102,69,55,102,69,55,102,69,54,102,69,54,102,69,54,102,69,55,102,69,55,102,69,55,102,69,55,102,69,55,102,69,54,102,69,55,102,68,54,101,69,54,100,69,54,100,69,54,100,69,54,100,69,54,100,69,54,100,69,54,100,69,54,100,69,54,100,68,54,101,69,54,100,69,54,101,69,54,101,69,55,101,70,55,101,70,55,101,70,55,101,69,55,102,70,55,101,69,54,101,69,54,101,69,54,102,70,55,102,70,55,103,71,55,103,71,55,103,71,55,103,70,55,102,70,55,103,70,55,103,71,55,103,71,55,103,70,55,103,70,55,102,70,54,102,70,54,102,70,54,102,70,54,101,69,54,102,69,54,102,70,55,102,70,55,102,70,56,99,70,58,99,71,59,100,71,59,99,70,59,99,70,58,100,71,59,99,70,58,99,70,58,99,70,58,100,70,58,100,71,59,100,71,59,100,71,59,100,71,58,100,70,58,100,70,58,100,70,58,100,71,58,100,71,59,100,71,58,100,71,58,100,71,58,100,71,58,100,71,58,100,71,58,100,71,58,100,71,58,100,71,58,100,71,58,99,70,58,99,70,58] };
 const ringGrad = (() => {
   const g = fctx.createRadialGradient(256, 256, 0, 256, 256, 256);
   g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(0.83, 'rgba(0,0,0,0)'); g.addColorStop(0.9, 'rgba(0,0,0,0.92)'); g.addColorStop(0.95, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,1)');
@@ -1104,12 +1108,8 @@ function drawFilm() {
   fctx.save(); fctx.translate(256, 256); fctx.scale(1, squash); fctx.translate(-256, -256);
   fctx.fillStyle = ringGrad; fctx.fillRect(-10, -60, 532, 632); fctx.restore();
   filmTex.needsUpdate = true;
-  if ((avgTick++ % 4) === 0) {
-    avgX.drawImage(film.canvas, 96, 96, 320, 320, 0, 0, 4, 4);
-    const d = avgX.getImageData(0, 0, 4, 4).data; let r = 0, g = 0, b = 0;
-    for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; }
-    film.avg.setRGB(r / 16 / 255, g / 16 / 255, b / 16 / 255, THREE.SRGBColorSpace);
-  }
+  const ac = FILM_AVG.c, an = ac.length / 3 - 1, af = clamp(v.currentTime / FILM_AVG.dt, 0, an), a0 = Math.floor(af), a1 = Math.min(an, a0 + 1), ak = af - a0;
+  film.avg.setRGB(lerp(ac[a0 * 3], ac[a1 * 3], ak) / 255, lerp(ac[a0 * 3 + 1], ac[a1 * 3 + 1], ak) / 255, lerp(ac[a0 * 3 + 2], ac[a1 * 3 + 2], ak) / 255, THREE.SRGBColorSpace);
 }
 
 // ---------------------------------------------------------------- type over the picture
@@ -1593,6 +1593,14 @@ window.__aisle = { TOTAL, TL, BACK, END, PACE, FIRE, HANG: HANG.id, NB, pxAtS, g
   window.__aisle.gobos = gobos;
   await filmP;
   renderer.compile(scene, camera);
+  // Before the film starts: send every picture to the graphics card and build the fire lens's shader, so that neither
+  // lands mid-film as a hitch (photographs used to be sent the first time their board came into view).
+  try { const { sendPictures } = await import('/Vanessa-Espin-website/shared/film-warm.js'); sendPictures(renderer, scene); } catch {}
+  if (new URLSearchParams(location.search).get('warm') !== 'off') {
+    downMat.uniforms.uPre.value = 0; downMat.uniforms.tSrc.value = halfRT.texture; pass(downMat, qRT);
+    fireMat.uniforms.tSrc.value = qRT.texture; pass(fireMat, fireRT);
+    renderer.setRenderTarget(null);
+  }
   overtureT0 = performance.now(); prev = overtureT0;
   if (MANUAL) { manual.now = overtureT0 + 4000; prev = manual.now - 33; window.__aisle.ready = true; }
   else {

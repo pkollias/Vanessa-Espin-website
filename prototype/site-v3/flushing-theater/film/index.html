@@ -318,6 +318,8 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { TRAJECTORIES, DEFAULT_FILM_DURATION } from '../trajectories/paths.js';
 import { addPavlosSeatRoseEasterEgg } from '../trajectories/rose.js';
 import { createTactileMaterialRig } from '../trajectories/tactile.js';
+import { skipUnlitLights } from '/Vanessa-Espin-website/shared/film-lights.js';
+skipUnlitLights(THREE);   // a light's maths is skipped wherever its cone does not reach: same picture, far less work (see the file)
 
 const qs = new URLSearchParams(location.search);
 if (qs.get('clean') === '1') document.body.classList.add('clean');
@@ -389,7 +391,7 @@ function frameForTallScreen(u, fov, pos, look) {
 }
 window.addEventListener('resize', resize);
 // Keep the film smooth: when frames run late, draw at a lower resolution (shared helper; ?pace=off on the address disables it)
-import('/Vanessa-Espin-website/shared/film-pace.js').then(({ keepPace }) => keepPace({ renderer, min: 1, apply: resize })).catch(() => {});
+import('/Vanessa-Espin-website/shared/film-pace.js').then(({ keepPace }) => keepPace({ renderer, min: 0.85, apply: resize })).catch(() => {});
 resize();
 
 // ---- DARK BLENDER CHIAROSCURO LIGHT RIG (+15% WHISPER OF SHADOW SEPARATION OVER ORIGINAL) ----
@@ -838,9 +840,16 @@ loader.load('../assets/flushing-theater.glb', gltf => {
   tactileRig.prepareChairDisorder(root, roseEasterEgg.root);
   batchRepeatedMeshesIntoInstanced(root);
   syncFormatButtons();
-  sceneReady = true;
+  // Before the film starts: build every shader and send every picture to the graphics card, for every moment of the film,
+  // while the opening frame is held. Otherwise that work lands mid-film as a freeze (it did, when the rose's light came on).
+  const startFilm = () => { sceneReady = true; needsRender = true; clock.getDelta(); };
+  const warmTimes = []; for (let t = 0; t <= FILM_DURATION; t += 1.0) warmTimes.push(t);
+  warmTimes.push(FILM_DURATION * 0.70, FILM_DURATION * 0.80, FILM_DURATION);
   needsRender = true;
-  clock.getDelta();
+  import('/Vanessa-Espin-website/shared/film-warm.js')
+    .then(({ warmFilm }) => warmFilm({ renderer, scene, camera, times: warmTimes, visit: applyMovieTime, first: filmTime }))
+    .catch(() => {})
+    .then(startFilm);
 });
 
 // ---- SILKY-SMOOTH 26.0s REAL-TIME CINEMA MOVIE (SINGLE LOCKED T2 TRAJECTORY + UNHURRIED 5-PHOTO STAGE HOLD + END SEAT SPOTLIGHT!) ----

@@ -220,7 +220,7 @@ export function createIntroController(ctx = {}) {
     <div class="intro-scene intro-scene--o1">
       <div class="intro-o1__lockup">
         <p class="intro-o1__name">Vanessa Espín</p>
-        <p class="intro-o1__meta">Event Planning · New York</p>
+        <p class="intro-o1__meta">Brand Curation · New York</p>
         <div class="intro-o1__thread-track">
           <div class="intro-o1__thread"></div>
         </div>
@@ -232,14 +232,14 @@ export function createIntroController(ctx = {}) {
       <div class="intro-o2__ground"></div>
       <div class="intro-o2__masthead">
         <span class="intro-o2__brand">Vanessa Espín</span>
-        <span class="intro-o2__role">Event Planning · New York</span>
+        <span class="intro-o2__role">Brand Curation · New York</span>
       </div>
       <div class="intro-o2__deck">
         <div class="intro-o2__card" data-slot="0"><img class="intro-o2__img" alt="" decoding="async"></div>
         <div class="intro-o2__card" data-slot="1"><img class="intro-o2__img" alt="" decoding="async"></div>
         <div class="intro-o2__card" data-slot="2"><img class="intro-o2__img" alt="" decoding="async"></div>
       </div>
-      <div class="intro-o2__foot">Event Planning · New York</div>
+      <div class="intro-o2__foot">Brand Curation · New York</div>
     </div>
 
     <!-- o3: Watercolour Wet-Edge Bloom -->
@@ -247,7 +247,7 @@ export function createIntroController(ctx = {}) {
       <div class="intro-o3__lockup">
         <p class="intro-o3__name">Vanessa Espín</p>
         <div class="intro-o3__reg"><div class="intro-o3__reg-line"></div></div>
-        <p class="intro-o3__role">Event Planning</p>
+        <p class="intro-o3__role">Brand Curation</p>
         <p class="intro-o3__city">New York</p>
       </div>
     </div>
@@ -259,7 +259,7 @@ export function createIntroController(ctx = {}) {
           <div class="intro-o4__line">
             <span class="intro-o4__name">Vanessa Espín</span>
             <span class="intro-o4__sep" aria-hidden="true">·</span>
-            <span class="intro-o4__role">Event Planning</span>
+            <span class="intro-o4__role">Brand Curation</span>
           </div>
           <div class="intro-o4__rule-wrap"><div class="intro-o4__rule"></div></div>
           <p class="intro-o4__city">New York</p>
@@ -272,7 +272,7 @@ export function createIntroController(ctx = {}) {
     <div class="intro-scene intro-scene--o5">
       <div class="intro-o5__lockup">
         <p class="intro-o5__name">Vanessa Espín</p>
-        <p class="intro-o5__meta">Event Planning · New York</p>
+        <p class="intro-o5__meta">Brand Curation · New York</p>
       </div>
     </div>
 
@@ -285,7 +285,7 @@ export function createIntroController(ctx = {}) {
           <p class="intro-o6__quote">“I wanted to tell the stories of us.”</p>
         </div>
         <div class="intro-o6__rule"></div>
-        <p class="intro-o6__colophon">Vanessa Espín · Event Planning</p>
+        <p class="intro-o6__colophon">Vanessa Espín · Brand Curation</p>
       </div>
     </div>
 

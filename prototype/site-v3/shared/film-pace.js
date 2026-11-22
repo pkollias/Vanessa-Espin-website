@@ -8,8 +8,10 @@
 // min       the lowest resolution scale this film may fall to (1 = one drawn pixel per CSS pixel)
 // apply     called after the scale changes, to let the film resize what depends on it; by default the window's resize event is sent
 // ?pace=off on the film's address turns this off; ?pace=1.25 pins a scale.
+// state.hint(ms) sets the starting scale from a measured frame time (called by the warm-up, before the film starts).
 const STEPS = [2, 1.75, 1.5, 1.25, 1, 0.85, 0.75];
-const SLOW = 30;      // below this many frames a second, motion visibly stutters: step down
+const SLOW = 40;      // below this many frames a second for a while, step down (was 30 until Nov 22: he asked for smooth first)
+const AIM = 50;       // the pace a film should start at; the warm-up measures a frame and the starting resolution is set from it
 const ROOM = 57;      // at or above this for a good while, try one step up
 
 export function keepPace({ renderer, min = 1, apply = null, name = location.pathname } = {}) {
@@ -33,6 +35,17 @@ export function keepPace({ renderer, min = 1, apply = null, name = location.path
     idx = k; state.scale = steps[k]; state.changes++; setScale(steps[k]);
     try { sessionStorage.setItem(KEY, String(steps[k])); } catch {}
     quietUntil = now + 1300; sum = n = slowFor = roomFor = 0;
+  };
+  // The warm-up (film-warm.js) measures how long the film's heavier frames take to draw and tells us before the film starts,
+  // so the right resolution is in place from the first frame instead of being found over the first ten seconds.
+  // The guess assumes about three quarters of a frame's cost follows the number of pixels.
+  state.hint = (frameMs) => {
+    if (!(frameMs > 0)) return state.scale;
+    let k = idx, est = frameMs;
+    while (est > 1000 / AIM && k < steps.length - 1) { est *= 0.25 + 0.75 * (steps[k + 1] / steps[k]) ** 2; k++; }
+    state.hinted = { frameMs: +frameMs.toFixed(1), from: steps[idx], to: steps[k] };
+    if (k !== idx) change(k, performance.now());
+    return state.scale;
   };
   (function beat(now) {
     raf(beat);
