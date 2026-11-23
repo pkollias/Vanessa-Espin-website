@@ -546,7 +546,7 @@
 </main>
 
 <script type="module">
-  import { FOLD_EVENTS, CONCEPTS } from './data.js?v=20261123g';
+  import { FOLD_EVENTS, CONCEPTS } from './data.js?v=20261123i';
   import { mountFoldCarousel } from './fold-carousel-engine.js?v=20261123g';
 
   const qs = new URLSearchParams(location.search);
@@ -674,9 +674,9 @@
       const g = ctx.createLinearGradient(W * x0 + breeze, H * y0, W * x1 + breeze, H * y1);
       const a = a0 * strength * (isDarkWall ? 0.11 : 1.0);
       if (isDarkWall) {
-        g.addColorStop(0, `rgba(255, 212, 176, ${a.toFixed(3)})`);
-        g.addColorStop(0.55, `rgba(248, 192, 148, ${(a * 0.44).toFixed(3)})`);
-        g.addColorStop(1, 'rgba(248, 184, 138, 0)');
+        g.addColorStop(0, `rgba(255, 234, 184, ${a.toFixed(3)})`);
+        g.addColorStop(0.55, `rgba(248, 222, 162, ${(a * 0.44).toFixed(3)})`);
+        g.addColorStop(1, 'rgba(248, 216, 150, 0)');
       } else {
         g.addColorStop(0, `rgba(255, 244, 214, ${a.toFixed(3)})`);
         g.addColorStop(0.55, `rgba(255, 238, 198, ${(a * 0.48).toFixed(3)})`);

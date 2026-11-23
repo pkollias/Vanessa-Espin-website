@@ -22,9 +22,9 @@ export const EXHIBITIONS = [
     lang: 'es',
     poster: '../img/iyuana.jpg',
     aspect: 420 / 525,
-    filmUrl: '/Vanessa-Espin-website/event-wall-lab/fold/stage.html?event=iyuana&hosted=1&v=20261123g',
-    filmRuntimeSec: 31.5,
-    filmDurationLabel: '0:32',
+    filmUrl: '/Vanessa-Espin-website/event-wall-lab/fold/stage.html?event=iyuana&hosted=1&v=20261123i',
+    filmRuntimeSec: 33.0,
+    filmDurationLabel: '0:33',
     filmOpenBg: '#070605',
     filmOpenTone: 'dark',
     splitTop: 'IYUANA',
@@ -36,7 +36,7 @@ export const EXHIBITIONS = [
     shortDate: 'Aug 2026',
     whoLabel: 'Artists',
     who: 'Yanda Montahuano · Li Can Vega · Armando Vega · Israel Vargas “Panchis”',
-    wash: { base: '#100e0d', mid: '#c84718', deep: '#7a250b', ink: '#f4ede2', muted: 'rgba(244,237,226,0.66)', dark: true },
+    wash: { base: '#0f0d09', mid: '#634a0e', deep: '#3d2d07', ink: '#f4ede2', muted: 'rgba(244,237,226,0.66)', dark: true },
     spot: { room: '#070605', cone: 'rgba(248, 178, 92, 0.30)', rim: '#f0a84b', ink: '#ece4d7' },
     franco: { ground: '#17221b', ink: '#f6ad49', subInk: '#dce3dc', accent: '#5ecb78' },
     evolved: { ground: '#14110e', ink: '#f5b052', subInk: '#e8dfd1' },
@@ -289,8 +289,8 @@ export const COLOR_MODES = [
 
 export const POSTER_SWATCHES = {
   iyuana: [
-    { id: 'iy1', label: 'Sunset Ember ★', chip: '#c84718', base: '#14100d', mid: '#c84718', deep: '#7a250b', ink: '#f4ede2', muted: 'rgba(244,237,226,0.66)', dark: true },
-    { id: 'iy2', label: 'Roasted Terracotta', chip: '#a43818', base: '#17110e', mid: '#a43818', deep: '#5e1d0b', ink: '#f4ede2', muted: 'rgba(244,237,226,0.66)', dark: true },
+    { id: 'iy1', label: 'Dark Mustard Sky ★', chip: '#8a6814', base: '#0f0d09', mid: '#634a0e', deep: '#3d2d07', ink: '#f4ede2', muted: 'rgba(244,237,226,0.66)', dark: true },
+    { id: 'iy2', label: 'Deep Ochre Gold', chip: '#755610', base: '#100e09', mid: '#57400c', deep: '#362706', ink: '#f4ede2', muted: 'rgba(244,237,226,0.66)', dark: true },
     { id: 'iy3', label: 'Jungle Hearth', chip: '#b86824', base: '#111410', mid: '#b86824', deep: '#243828', ink: '#f4ede2', muted: 'rgba(244,237,226,0.66)', dark: true },
   ],
   'herencia-viva': [

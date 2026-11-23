@@ -20,9 +20,9 @@ export const FOLD_EVENTS = [
     durationLabel: '0:33',
     roomBg: '#070605',
     roomTone: 'dark',
-    // Clean nocturnal obsidian + subtle sunset-tangerine ember (zero muddy brown!)
-    wash: { base: '#100e0e', mid: '#3a150b', deep: '#7a2b12', ink: '#f4ede2', muted: 'rgba(244,237,226,0.68)', dark: true },
-    duskWash: { base: '#100e0e', mid: '#3a150b', deep: '#7a2b12', ink: '#f4ede2', muted: 'rgba(244,237,226,0.68)', dark: true },
+    // Nocturnal dark mustard-gold sky wash (matching Iyuana's landing-page dark mustard tone — zero muddy brown!)
+    wash: { base: '#0f0d09', mid: '#57410c', deep: '#382906', ink: '#f4ede2', muted: 'rgba(244,237,226,0.68)', dark: true },
+    duskWash: { base: '#0f0d09', mid: '#57410c', deep: '#382906', ink: '#f4ede2', muted: 'rgba(244,237,226,0.68)', dark: true },
     foldedSecondItem: {
       id: 'iyuana-outside-gallery',
       type: 'image',
