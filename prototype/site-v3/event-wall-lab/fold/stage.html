@@ -546,7 +546,7 @@
 </main>
 
 <script type="module">
-  import { FOLD_EVENTS, CONCEPTS } from './data.js?v=20261123i';
+  import { FOLD_EVENTS, CONCEPTS } from './data.js?v=20261123j';
   import { mountFoldCarousel } from './fold-carousel-engine.js?v=20261123g';
 
   const qs = new URLSearchParams(location.search);
@@ -674,9 +674,9 @@
       const g = ctx.createLinearGradient(W * x0 + breeze, H * y0, W * x1 + breeze, H * y1);
       const a = a0 * strength * (isDarkWall ? 0.11 : 1.0);
       if (isDarkWall) {
-        g.addColorStop(0, `rgba(255, 234, 184, ${a.toFixed(3)})`);
-        g.addColorStop(0.55, `rgba(248, 222, 162, ${(a * 0.44).toFixed(3)})`);
-        g.addColorStop(1, 'rgba(248, 216, 150, 0)');
+        g.addColorStop(0, `rgba(255, 218, 152, ${a.toFixed(3)})`);
+        g.addColorStop(0.55, `rgba(248, 200, 134, ${(a * 0.44).toFixed(3)})`);
+        g.addColorStop(1, 'rgba(248, 192, 124, 0)');
       } else {
         g.addColorStop(0, `rgba(255, 244, 214, ${a.toFixed(3)})`);
         g.addColorStop(0.55, `rgba(255, 238, 198, ${(a * 0.48).toFixed(3)})`);
@@ -708,7 +708,7 @@
       } else {
         ctx.globalCompositeOperation = 'multiply';
         const dg = ctx.createRadialGradient(0, 0, rx * 0.08, 0, 0, rx);
-        const da = (isDarkWall ? 0.13 : 0.082) * lf.wt * strength;
+        const da = (isDarkWall ? 0.065 : 0.082) * lf.wt * strength;
         dg.addColorStop(0, `rgba(38, 28, 20, ${da.toFixed(3)})`);
         dg.addColorStop(0.6, `rgba(38, 28, 20, ${(da * 0.48).toFixed(3)})`);
         dg.addColorStop(1, 'rgba(38, 28, 20, 0)');

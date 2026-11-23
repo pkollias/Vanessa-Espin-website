@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { SITE, EXHIBITIONS, BIO, CONCEPTS, PORTALS, ABOUT_CONCEPTS, INTRO_CONCEPTS, COPY_MODES, SCROLL_CUES, COLOR_MODES, POSTER_SWATCHES, CARD_MOODS } from './data.js?v=20261123i';
+import { SITE, EXHIBITIONS, BIO, CONCEPTS, PORTALS, ABOUT_CONCEPTS, INTRO_CONCEPTS, COPY_MODES, SCROLL_CUES, COLOR_MODES, POSTER_SWATCHES, CARD_MOODS } from './data.js?v=20261123j';
 import { createAboutController } from './about-concepts.js?v=20261123h';
 import { createIntroController } from './intro-concepts.js?v=20261123d';
 import { createScrollCueController } from './scroll-cues.js?v=20261123d';
@@ -120,9 +120,9 @@ function resolveLandingWash(exIdx = state.active) {
       blobScale: 0.28,
     };
   }
-  // Default 'p5': Nocturnal Charcoal ★ + dark mustard sky / botanical green / burgundy-bordeaux triad
+  // Default 'p5': Nocturnal Charcoal ★ + high-chroma dark golden mustard / botanical green / burgundy-bordeaux triad
   const nightBloom = ex.slug === 'iyuana'
-    ? { base: '#0f0d09', mid: '#634a0e', deep: '#3d2d07', vignetteGlow: 'rgba(196, 148, 32, 0.036)', blobScale: 0.64 }
+    ? { base: '#0e0a04', mid: '#d4960e', deep: '#915f05', vignetteGlow: 'rgba(248, 186, 28, 0.068)', blobScale: 0.66 }
     : (ex.slug === 'herencia-viva'
       ? { base: '#100e0d', mid: '#2d5238', deep: '#193021', vignetteGlow: 'rgba(84, 142, 96, 0.036)', blobScale: 0.68 }
       : { base: '#100e0d', mid: '#5c1927', deep: '#703a16', vignetteGlow: 'rgba(186, 76, 58, 0.038)', blobScale: 0.68 });
@@ -1054,9 +1054,9 @@ function drawKomorebiLight(ctx, W, H, nowSec, strength = 1, isDarkWall = false) 
     const g = ctx.createLinearGradient(W * x0 + breeze, H * y0, W * x1 + breeze, H * y1);
     const a = a0 * strength * (isDarkWall ? 0.11 : 1.0);
     if (isDarkWall) {
-      g.addColorStop(0, `rgba(255, 234, 184, ${a.toFixed(3)})`);
-      g.addColorStop(0.55, `rgba(248, 222, 162, ${(a * 0.44).toFixed(3)})`);
-      g.addColorStop(1, 'rgba(248, 216, 150, 0)');
+      g.addColorStop(0, `rgba(255, 218, 152, ${a.toFixed(3)})`);
+      g.addColorStop(0.55, `rgba(248, 200, 134, ${(a * 0.44).toFixed(3)})`);
+      g.addColorStop(1, 'rgba(248, 192, 124, 0)');
     } else {
       g.addColorStop(0, `rgba(255, 244, 214, ${a.toFixed(3)})`);
       g.addColorStop(0.55, `rgba(255, 238, 198, ${(a * 0.48).toFixed(3)})`);
@@ -1089,7 +1089,7 @@ function drawKomorebiLight(ctx, W, H, nowSec, strength = 1, isDarkWall = false) 
     } else {
       ctx.globalCompositeOperation = 'multiply';
       const dg = ctx.createRadialGradient(0, 0, rx * 0.08, 0, 0, rx);
-      const da = (isDarkWall ? 0.16 : 0.082) * lf.wt * strength;
+      const da = (isDarkWall ? 0.065 : 0.082) * lf.wt * strength;
       const shCol = isDarkWall ? '10, 8, 8' : '38, 28, 20';
       dg.addColorStop(0, `rgba(${shCol}, ${da.toFixed(3)})`);
       dg.addColorStop(0.6, `rgba(${shCol}, ${(da * 0.48).toFixed(3)})`);

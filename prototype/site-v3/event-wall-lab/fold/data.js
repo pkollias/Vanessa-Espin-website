@@ -20,9 +20,9 @@ export const FOLD_EVENTS = [
     durationLabel: '0:33',
     roomBg: '#070605',
     roomTone: 'dark',
-    // Nocturnal dark mustard-gold sky wash (matching Iyuana's landing-page dark mustard tone — zero muddy brown!)
-    wash: { base: '#0f0d09', mid: '#57410c', deep: '#382906', ink: '#f4ede2', muted: 'rgba(244,237,226,0.68)', dark: true },
-    duskWash: { base: '#0f0d09', mid: '#57410c', deep: '#382906', ink: '#f4ede2', muted: 'rgba(244,237,226,0.68)', dark: true },
+    // Nocturnal high-chroma golden mustard wash (clean dark gold, zero olive/khaki!)
+    wash: { base: '#0e0a04', mid: '#b07a0a', deep: '#754c04', ink: '#f4ede2', muted: 'rgba(244,237,226,0.68)', dark: true },
+    duskWash: { base: '#0e0a04', mid: '#b07a0a', deep: '#754c04', ink: '#f4ede2', muted: 'rgba(244,237,226,0.68)', dark: true },
     foldedSecondItem: {
       id: 'iyuana-outside-gallery',
       type: 'image',
