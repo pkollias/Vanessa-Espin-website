@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://api.fontshare.com">
 <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
 <link href="https://api.fontshare.com/v2/css?f[]=gambetta@300,400,401,600,700&f[]=zodiak@300,400,401&f[]=switzer@400,500,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=20261123h">
+<link rel="stylesheet" href="style.css?v=20261123k">
 <link id="about-concepts-css" rel="stylesheet" href="about-concepts.css?v=20261123h">
 <link id="intro-concepts-css" rel="stylesheet" href="intro-concepts.css?v=20261123d">
 <link id="scroll-cues-css" rel="stylesheet" href="scroll-cues.css?v=20261123d">
@@ -110,6 +110,16 @@
     </div>
   </div>
   <div class="bench__body">
+    <div id="wallPickerGroup">
+      <span class="bench__grp-lbl">Poster Wall Colors (Click Poster · Pick Color · Depth)</span>
+      <div class="wall-picker" id="wallPicker"></div>
+      <div class="wall-actions">
+        <button type="button" class="bench__pill wall-act-save" id="wallSaveBtn">Save Colors</button>
+        <button type="button" class="bench__pill" id="wallCopyBtn">Copy Hexes</button>
+        <button type="button" class="bench__pill" id="wallResetBtn">Reset</button>
+        <span class="wall-status" id="wallStatus"></span>
+      </div>
+    </div>
     <div>
       <span class="bench__grp-lbl">Dark Wall Mode</span>
       <div class="bench__pills" id="palPills"></div>
@@ -142,6 +152,6 @@
   </div>
 </aside>
 
-<script type="module" src="app.js?v=20261123j"></script>
+<script type="module" src="app.js?v=20261123m"></script>
 </body>
 </html>

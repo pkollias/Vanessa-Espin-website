@@ -20,9 +20,9 @@ export const FOLD_EVENTS = [
     durationLabel: '0:33',
     roomBg: '#070605',
     roomTone: 'dark',
-    // Nocturnal high-chroma golden mustard wash (clean dark gold, zero olive/khaki!)
-    wash: { base: '#0e0a04', mid: '#b07a0a', deep: '#754c04', ink: '#f4ede2', muted: 'rgba(244,237,226,0.68)', dark: true },
-    duskWash: { base: '#0e0a04', mid: '#b07a0a', deep: '#754c04', ink: '#f4ede2', muted: 'rgba(244,237,226,0.68)', dark: true },
+    // Matched to Pavlos's locked Landing wall color (#745744)
+    wash: { base: '#0f0d0b', mid: '#5e4637', deep: '#3d2b1f', ink: '#f4ede2', muted: 'rgba(244,237,226,0.68)', dark: true },
+    duskWash: { base: '#0f0d0b', mid: '#5e4637', deep: '#3d2b1f', ink: '#f4ede2', muted: 'rgba(244,237,226,0.68)', dark: true },
     foldedSecondItem: {
       id: 'iyuana-outside-gallery',
       type: 'image',
@@ -66,7 +66,7 @@ export const FOLD_EVENTS = [
     roomTone: 'light',
     // Preserves Herencia Viva's bright crisp white hallway experience with subtle warm gallery-plaster off-tones
     wash: { base: '#fcfcfa', mid: '#f5f3ed', deep: '#ebe7de', ink: '#181512', muted: 'rgba(24,21,18,0.60)', dark: false },
-    duskWash: { base: '#131b15', mid: '#253b2a', deep: '#39593f', ink: '#edf3ec', muted: 'rgba(237,243,236,0.68)', dark: true },
+    duskWash: { base: '#0e0d0b', mid: '#3f4c33', deep: '#292e1d', ink: '#edf3ec', muted: 'rgba(237,243,236,0.68)', dark: true },
     p1: 'The Ecuadorian Magic Realism of acclaimed artist Luis Medina came to New York City through a series of exhibitions celebrating memory, identity, tradition, and cultural continuity.',
     p2: 'The exhibition brought work that featured surrealistic elements, vibrant colors, and evocative storytelling that weaved together ancestral memory and the enduring spirit of the people of the Andeans of Ecuador.',
     p3: 'In this experience I invited the community into Medina’s world, where heritage remains a living presence, carried forward through landscape and collective memory.',
@@ -92,9 +92,9 @@ export const FOLD_EVENTS = [
     durationLabel: '0:31',
     roomBg: '#040303',
     roomTone: 'dark',
-    // Preserves Ayazamana's darkened Flushing theater experience with subtle velvet-crimson & warm stage-amber bloom
-    wash: { base: '#15100e', mid: '#3b1720', deep: '#543819', ink: '#f4ece0', muted: 'rgba(244,236,224,0.66)', dark: true },
-    duskWash: { base: '#15100e', mid: '#3b1720', deep: '#543819', ink: '#f4ece0', muted: 'rgba(244,236,224,0.66)', dark: true },
+    // Matched to Pavlos's locked Landing wall color (#592744)
+    wash: { base: '#0e0b0b', mid: '#471f37', deep: '#2e121f', ink: '#f4ece0', muted: 'rgba(244,236,224,0.66)', dark: true },
+    duskWash: { base: '#0e0b0b', mid: '#471f37', deep: '#2e121f', ink: '#f4ece0', muted: 'rgba(244,236,224,0.66)', dark: true },
     prependPosterItem: {
       id: 'ayazamana-poster',
       type: 'image',

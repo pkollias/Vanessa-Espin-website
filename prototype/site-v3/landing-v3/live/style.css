@@ -508,6 +508,65 @@ body.clean-hud .bench, body.in-film .bench { opacity: 0; pointer-events: none; t
   box-shadow: 0 0 0 1px rgba(18, 15, 13, 0.55);
 }
 
+/* Live 3-Poster Wall Color Picker inside Landing v3 Lab */
+.wall-picker { display: grid; gap: 6px; }
+.wall-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto 70px;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 7px;
+  border-radius: 6px;
+  background: rgba(244, 237, 226, 0.05);
+  border: var(--hair) solid rgba(244, 237, 226, 0.14);
+}
+.wall-row.is-active {
+  background: rgba(244, 237, 226, 0.11);
+  border-color: rgba(244, 237, 226, 0.34);
+}
+.wall-name {
+  text-align: left;
+  font: 500 11px/1.1 var(--sans);
+  color: #f4ede2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wall-row.is-active .wall-name { color: #f6dfaf; font-weight: 600; }
+.wall-color {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px; height: 20px;
+  padding: 0; border: 1px solid rgba(244, 237, 226, 0.35);
+  border-radius: 4px; background: transparent; cursor: pointer;
+}
+.wall-color::-webkit-color-swatch-wrapper { padding: 1px; }
+.wall-color::-webkit-color-swatch { border: 0; border-radius: 3px; }
+.wall-hex {
+  font: 500 10.5px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: rgba(244, 237, 226, 0.78);
+  min-width: 52px;
+}
+.wall-slider {
+  width: 70px;
+  accent-color: #f4ede2;
+  cursor: pointer;
+}
+.wall-actions {
+  display: flex; align-items: center; gap: 5px; margin-top: 6px; flex-wrap: wrap;
+}
+.wall-act-save {
+  background: #f4ede2 !important;
+  color: #14110e !important;
+  border-color: #f4ede2 !important;
+  font-weight: 600;
+}
+.wall-status {
+  margin-left: auto;
+  font-size: 10.5px;
+  color: #86efac;
+}
+
 /* Phones: Brand Curation (left), Next (centered), and Sound (right) stay cleanly on one line */
 @media (max-width: 640px) {
   .film-nav { top: 12px; left: 10px; right: 10px; }

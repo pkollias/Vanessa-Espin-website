@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { SITE, EXHIBITIONS, BIO, CONCEPTS, PORTALS, ABOUT_CONCEPTS, INTRO_CONCEPTS, COPY_MODES, SCROLL_CUES, COLOR_MODES, POSTER_SWATCHES, CARD_MOODS } from './data.js?v=20261123j';
+import { SITE, EXHIBITIONS, BIO, CONCEPTS, PORTALS, ABOUT_CONCEPTS, INTRO_CONCEPTS, COPY_MODES, SCROLL_CUES, COLOR_MODES, POSTER_SWATCHES, CARD_MOODS } from './data.js?v=20261123m';
 import { createAboutController } from './about-concepts.js?v=20261123h';
 import { createIntroController } from './intro-concepts.js?v=20261123d';
 import { createScrollCueController } from './scroll-cues.js?v=20261123d';
@@ -86,6 +86,7 @@ const state = {
     'herencia-viva': POSTER_SWATCHES['herencia-viva'].some((s) => s.id === params.get('hv')) ? params.get('hv') : 'hv1',
     ayazamana: POSTER_SWATCHES.ayazamana.some((s) => s.id === params.get('ay')) ? params.get('ay') : 'ay1',
   },
+  customWalls: {}, // { [slug]: { hex: '#rrggbb', intensity: 0.66 } } — edited live via Landing v3 Lab color picker
   active: initIdx,
   target: initIdx,
   p: initIdx,
@@ -98,10 +99,51 @@ const state = {
   hoveredSlot: -1,
 };
 
+const DEFAULT_NIGHT_BLOOMS = {
+  iyuana:          { base: '#0f0d0b', mid: '#745744', deep: '#4a3426', vignetteGlow: 'rgba(153, 118, 94, 0.052)', blobScale: 0.64 },
+  'herencia-viva': { base: '#0e0d0b', mid: '#4e5e40', deep: '#323824', vignetteGlow: 'rgba(110, 126, 90, 0.052)', blobScale: 0.68 },
+  ayazamana:       { base: '#0e0b0b', mid: '#592744', deep: '#391726', vignetteGlow: 'rgba(122, 63, 94, 0.052)', blobScale: 0.68 },
+};
+
+function rgbToHex(r, g, b) {
+  const c = (v) => clamp(Math.round(v), 0, 255).toString(16).padStart(2, '0');
+  return `#${c(r)}${c(g)}${c(b)}`;
+}
+
+function deriveCustomWall(hex, intensity = 0.68) {
+  const [r, g, b] = hexToRgb(hex || '#100e0d');
+  const base = rgbToHex(10 + r * 0.045, 9 + g * 0.045, 8 + b * 0.045);
+  const deep = rgbToHex(r * 0.64, g * 0.60, b * 0.56);
+  const glowR = Math.min(255, Math.round(r * 1.15 + 20));
+  const glowG = Math.min(255, Math.round(g * 1.15 + 18));
+  const glowB = Math.min(255, Math.round(b * 1.15 + 16));
+  return {
+    base,
+    mid: rgbToHex(r, g, b),
+    deep,
+    vignetteGlow: `rgba(${glowR}, ${glowG}, ${glowB}, 0.052)`,
+    ink: '#f4ede2',
+    muted: 'rgba(244,237,226,0.66)',
+    dark: true,
+    blobScale: clamp(Number(intensity) || 0.68, 0.15, 1.35),
+  };
+}
+
+function getEffectiveWallPickerValue(slug) {
+  const cw = state.customWalls[slug];
+  if (cw && cw.hex) return { hex: cw.hex, intensity: cw.intensity ?? 0.68 };
+  const def = DEFAULT_NIGHT_BLOOMS[slug] || DEFAULT_NIGHT_BLOOMS.iyuana;
+  return { hex: def.mid, intensity: def.blobScale };
+}
+
 function resolveLandingWash(exIdx = state.active) {
   const ex = EXHIBITIONS[mod(exIdx, N)] || EXHIBITIONS[0];
   const list = POSTER_SWATCHES[ex.slug] || [];
   const chosen = list.find((s) => s.id === state.swatches[ex.slug]) || list[0] || ex.wash;
+
+  if (state.customWalls[ex.slug]?.hex) {
+    return deriveCustomWall(state.customWalls[ex.slug].hex, state.customWalls[ex.slug].intensity);
+  }
 
   if (state.colorMode === 'p1') {
     return {
@@ -121,11 +163,7 @@ function resolveLandingWash(exIdx = state.active) {
     };
   }
   // Default 'p5': Nocturnal Charcoal ★ + high-chroma dark golden mustard / botanical green / burgundy-bordeaux triad
-  const nightBloom = ex.slug === 'iyuana'
-    ? { base: '#0e0a04', mid: '#d4960e', deep: '#915f05', vignetteGlow: 'rgba(248, 186, 28, 0.068)', blobScale: 0.66 }
-    : (ex.slug === 'herencia-viva'
-      ? { base: '#100e0d', mid: '#2d5238', deep: '#193021', vignetteGlow: 'rgba(84, 142, 96, 0.036)', blobScale: 0.68 }
-      : { base: '#100e0d', mid: '#5c1927', deep: '#703a16', vignetteGlow: 'rgba(186, 76, 58, 0.038)', blobScale: 0.68 });
+  const nightBloom = DEFAULT_NIGHT_BLOOMS[ex.slug] || DEFAULT_NIGHT_BLOOMS.ayazamana;
   return {
     base: nightBloom.base,
     mid: nightBloom.mid,
@@ -1917,6 +1955,34 @@ function syncUrl() {
 
 function buildWorkbench() {
   const ex = EXHIBITIONS[state.active] || EXHIBITIONS[0];
+  const wpEl = $('#wallPicker');
+  if (wpEl) {
+    if (!wpEl.children.length) {
+      wpEl.innerHTML = EXHIBITIONS.map((item, idx) => {
+        const val = getEffectiveWallPickerValue(item.slug);
+        return `
+          <div class="wall-row ${idx === state.active ? 'is-active' : ''}" data-wall-row="${item.slug}">
+            <button type="button" class="wall-name" data-wall-goto="${idx}" title="Jump to ${item.name}">${item.name}</button>
+            <input type="color" class="wall-color" data-wall-color="${item.slug}" value="${val.hex}" aria-label="${item.name} wall color">
+            <span class="wall-hex" data-wall-hex="${item.slug}">${val.hex}</span>
+            <input type="range" class="wall-slider" data-wall-int="${item.slug}" min="0.20" max="1.25" step="0.02" value="${val.intensity.toFixed(2)}" title="Wash intensity (${Math.round(val.intensity * 100)}%)">
+          </div>
+        `;
+      }).join('');
+    } else {
+      EXHIBITIONS.forEach((item, idx) => {
+        const val = getEffectiveWallPickerValue(item.slug);
+        const row = wpEl.querySelector(`[data-wall-row="${item.slug}"]`);
+        if (row) row.classList.toggle('is-active', idx === state.active);
+        const colInp = wpEl.querySelector(`[data-wall-color="${item.slug}"]`);
+        if (colInp && document.activeElement !== colInp) colInp.value = val.hex;
+        const hexEl = wpEl.querySelector(`[data-wall-hex="${item.slug}"]`);
+        if (hexEl) hexEl.textContent = val.hex;
+        const rngInp = wpEl.querySelector(`[data-wall-int="${item.slug}"]`);
+        if (rngInp && document.activeElement !== rngInp) rngInp.value = val.intensity.toFixed(2);
+      });
+    }
+  }
   const palEl = $('#palPills');
   if (palEl) palEl.innerHTML = COLOR_MODES.map((m) => `
     <button type="button" class="bench__pill" data-pal="${m.id}" title="${m.desc}" aria-pressed="${state.colorMode === m.id}">${m.label}</button>
@@ -2044,11 +2110,115 @@ function setCueStyle(sid) {
   syncUrl();
 }
 
-$('#bench').addEventListener('click', (e) => {
+function applyCustomWallLive(slug, hex, intensity) {
+  const idx = EXHIBITIONS.findIndex((e) => e.slug === slug);
+  if (idx < 0) return;
+  const cur = getEffectiveWallPickerValue(slug);
+  const nextHex = hex || cur.hex;
+  const nextInt = Number.isFinite(intensity) ? intensity : cur.intensity;
+  state.customWalls[slug] = { hex: nextHex, intensity: nextInt };
+
+  const hexEl = $(`[data-wall-hex="${slug}"]`);
+  if (hexEl) hexEl.textContent = nextHex;
+
+  if (idx !== state.active) {
+    goToExhibition(idx);
+  }
+  const w = resolveLandingWash(state.active);
+  state.washTrans = { fromIdx: state.active, toIdx: state.active, fromWash: w, toWash: w, t0: -999, dur: 0.01, dir: 1 };
+  backdropKey = '';
+  syncExhibitionDOM(true);
+  renderBackdrop(performance.now());
+  startLoop();
+}
+
+async function loadSavedWallColors() {
+  if (document.body.classList.contains('clean-hud')) return;
+  try {
+    const r = await fetch('/Vanessa-Espin-website/api/landing-wall-colors', { cache: 'no-store' });
+    if (!r.ok) return;
+    const d = await r.json();
+    const saved = d?.walls?.colors;
+    if (saved && typeof saved === 'object') {
+      for (const [slug, cfg] of Object.entries(saved)) {
+        if (cfg && /^#[0-9a-f]{6}$/i.test(cfg.hex)) {
+          state.customWalls[slug] = { hex: cfg.hex.toLowerCase(), intensity: Number(cfg.intensity) || 0.68 };
+        }
+      }
+      const w = resolveLandingWash(state.active);
+      state.washTrans = { fromIdx: state.active, toIdx: state.active, fromWash: w, toWash: w, t0: -999, dur: 0.01, dir: 1 };
+      backdropKey = '';
+      buildWorkbench();
+      syncExhibitionDOM(true);
+      startLoop();
+    }
+  } catch {}
+}
+
+function showWallStatus(msg) {
+  const el = $('#wallStatus');
+  if (!el) return;
+  el.textContent = msg;
+  clearTimeout(showWallStatus._t);
+  showWallStatus._t = setTimeout(() => { el.textContent = ''; }, 2400);
+}
+
+const handleWallInput = (e) => {
+  const col = e.target.closest('[data-wall-color]');
+  if (col) {
+    applyCustomWallLive(col.dataset.wallColor, col.value, undefined);
+    return;
+  }
+  const rngEl = e.target.closest('[data-wall-int]');
+  if (rngEl) {
+    applyCustomWallLive(rngEl.dataset.wallInt, undefined, parseFloat(rngEl.value));
+  }
+};
+$('#bench').addEventListener('input', handleWallInput);
+$('#bench').addEventListener('change', handleWallInput);
+
+$('#bench').addEventListener('click', async (e) => {
+  const wgo = e.target.closest('[data-wall-goto]');
+  if (wgo) { goToExhibition(Number(wgo.dataset.wallGoto)); return; }
+  if (e.target.closest('#wallSaveBtn')) {
+    const colors = {};
+    for (const item of EXHIBITIONS) colors[item.slug] = getEffectiveWallPickerValue(item.slug);
+    try {
+      await fetch('/Vanessa-Espin-website/api/landing-wall-colors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: 'walls', colors, updatedAt: new Date().toISOString() }),
+      });
+      showWallStatus('Saved ✓');
+    } catch {
+      showWallStatus('Save failed');
+    }
+    return;
+  }
+  if (e.target.closest('#wallCopyBtn')) {
+    const summary = EXHIBITIONS.map((item) => {
+      const v = getEffectiveWallPickerValue(item.slug);
+      return `${item.name}: ${v.hex} (depth ${Math.round(v.intensity * 100)}%)`;
+    }).join(' | ');
+    try { await navigator.clipboard.writeText(summary); showWallStatus('Copied ✓'); }
+    catch { showWallStatus(summary); }
+    return;
+  }
+  if (e.target.closest('#wallResetBtn')) {
+    state.customWalls = {};
+    const w = resolveLandingWash(state.active);
+    state.washTrans = { fromIdx: state.active, toIdx: state.active, fromWash: w, toWash: w, t0: -999, dur: 0.01, dir: 1 };
+    backdropKey = '';
+    buildWorkbench();
+    syncExhibitionDOM(true);
+    startLoop();
+    showWallStatus('Reset');
+    return;
+  }
   const bpal = e.target.closest('[data-pal]');
-  if (bpal) setColorMode(bpal.dataset.pal);
+  if (bpal) { delete state.customWalls[EXHIBITIONS[state.active]?.slug]; setColorMode(bpal.dataset.pal); }
   const bsw = e.target.closest('[data-swatch]');
-  if (bsw) setPosterSwatch(bsw.dataset.slug, bsw.dataset.swatch);
+  if (bsw) { delete state.customWalls[bsw.dataset.slug]; setPosterSwatch(bsw.dataset.slug, bsw.dataset.swatch); }
   const bcm = e.target.closest('[data-card-mood]');
   if (bcm) setCardMood(bcm.dataset.cardMood);
   const bsc = e.target.closest('[data-cue]');
@@ -2389,6 +2559,7 @@ async function boot() {
   introCtrl.startInitial(linkedIdx >= 0 ? 'none' : state.introStyle);
 
   buildWorkbench();
+  loadSavedWallColors();
   syncExhibitionDOM(true);
   startLoop();
 
