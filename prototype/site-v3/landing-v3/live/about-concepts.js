@@ -1341,7 +1341,10 @@ export function createAboutController(ctx = {}) {
     ctx?.requestRender?.();
   }
 
+  let closeCleanupTimer = 0;
+
   function open(styleId) {
+    clearTimeout(closeCleanupTimer);
     const nextStyle = VALID_IDS.has(styleId) ? styleId : currentStyle;
     const wasOpen = isOpenBool;
     if (nextStyle !== currentStyle) {
@@ -1376,8 +1379,13 @@ export function createAboutController(ctx = {}) {
     ctx?.requestRender?.();
   }
 
-  function close() {
-    if (!isOpenBool && rawMix <= 0.0001) return;
+  function close({ notify = true } = {}) {
+    if (!isOpenBool && rawMix <= 0.0001) {
+      stageEl.classList.remove('is-open', 'is-closing');
+      stageEl.setAttribute('aria-hidden', 'true');
+      return;
+    }
+    clearTimeout(closeCleanupTimer);
     clearBootSnap();
     isOpenBool = false;
     lastHoveredEx = -99;
@@ -1390,11 +1398,18 @@ export function createAboutController(ctx = {}) {
     } else {
       stageEl.classList.add('is-closing');
       stageEl.setAttribute('aria-hidden', 'true');
+      closeCleanupTimer = setTimeout(() => {
+        if (!isOpenBool) {
+          rawMix = 0;
+          mix = 0;
+          stageEl.classList.remove('is-closing');
+        }
+      }, 480);
     }
     ctx?.requestRender?.();
     // Tell the landing, whichever way About was closed (its own Close button and a click outside end here too).
     // Without this the landing kept behaving as if About were open: the address stayed on #about and the masthead stayed covered.
-    ctx?.onCloseStateChange?.(false);
+    if (notify) ctx?.onCloseStateChange?.(false);
   }
 
   function tick(nowMs = performance.now(), dtArg = 1 / 60) {
@@ -1459,6 +1474,7 @@ export function createAboutController(ctx = {}) {
     setCardMood,
     getCardMood: () => currentCardMood,
     isOpen: () => isOpenBool,
+    isClosing: () => stageEl.classList.contains('is-closing') || rawMix > 0,
     getStyle: () => currentStyle,
     getMix: () => mix,
     getRoomMode: () => computeRoomMode(currentStyle, mix),

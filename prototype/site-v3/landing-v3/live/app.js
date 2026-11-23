@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { SITE, EXHIBITIONS, BIO, CONCEPTS, PORTALS, ABOUT_CONCEPTS, INTRO_CONCEPTS, COPY_MODES, SCROLL_CUES, COLOR_MODES, POSTER_SWATCHES, CARD_MOODS } from './data.js?v=20261123g';
-import { createAboutController } from './about-concepts.js?v=20261123d';
+import { SITE, EXHIBITIONS, BIO, CONCEPTS, PORTALS, ABOUT_CONCEPTS, INTRO_CONCEPTS, COPY_MODES, SCROLL_CUES, COLOR_MODES, POSTER_SWATCHES, CARD_MOODS } from './data.js?v=20261123h';
+import { createAboutController } from './about-concepts.js?v=20261123h';
 import { createIntroController } from './intro-concepts.js?v=20261123d';
 import { createScrollCueController } from './scroll-cues.js?v=20261123d';
 
@@ -1519,17 +1519,18 @@ const siteNav = (() => {
       }
     },
     media(open) { const h = here(); if (slugIdx(h.slug) < 0) return; if (open && h.sub !== 'media') set(h.slug + '/media', true); else if (!open && h.sub === 'media') stepBack(h.slug); },
+    isSteppingBack: () => quiet > 0,
     apply() {                                      // bring the page to what the address says
       at = location.hash.slice(1);
       const { slug, sub } = here(), idx = slugIdx(slug);
       if (idx >= 0) {
-        if (state.drawerOpen) closeAbout();
+        if (state.drawerOpen) closeAbout({ fromHistory: true });
         if (!state.inFilm && !state.portalAnim) { pendingMedia = sub === 'media'; goToExhibition(idx); setTimeout(() => enterFilm(idx, getCentredSlot()), 60); }
         else if (state.inFilm) { try { const m = filmFrame().contentWindow.EventMedia; if (sub === 'media') m.open(); else if (m.isOpen()) m.close(); } catch {} }
       } else if (slug === 'about') {
         if (!state.drawerOpen) openAbout();
       } else {
-        if (state.drawerOpen) closeAbout();
+        if (state.drawerOpen) closeAbout({ fromHistory: true });
         if (state.inFilm || state.portalAnim) returnFromFilm(true);
       }
     },
@@ -1872,11 +1873,12 @@ function openAbout(styleId = state.aboutStyle) {
   startLoop();
 }
 
-function closeAbout() {
+function closeAbout({ fromHistory = false } = {}) {
+  if (!state.drawerOpen && !(aboutCtrl && aboutCtrl.isOpen())) return;
   state.drawerOpen = false;
   document.body.classList.remove('about-open');
-  siteNav.about(false);
-  if (aboutCtrl) aboutCtrl.close();
+  if (!fromHistory) siteNav.about(false);
+  if (aboutCtrl) aboutCtrl.close({ notify: false });
   if (state.inFilm) {
     try { filmFrame()?.contentWindow?.StageHost?.setPausedForOverlay?.(false); } catch {}
   }
@@ -1888,6 +1890,7 @@ function closeAbout() {
    Workbench Switcher & URL Sync
    ========================================================================= */
 function syncUrl() {
+  if (document.body.classList.contains('clean-hud') || siteNav.isSteppingBack()) return;
   const u = new URL(location.href);
   u.searchParams.set('c', state.concept);
   u.searchParams.set('i', String(state.active));
@@ -2253,7 +2256,7 @@ let rafId = 0, lastNow = performance.now();
 function isLandingLoopNeeded() {
   if (document.hidden) return false;
   if (!state.inFilm) return true;
-  return Boolean(state.portalAnim || state.drawerOpen || (aboutCtrl && aboutCtrl.getMix() > 0.001));
+  return Boolean(state.portalAnim || state.drawerOpen || (aboutCtrl && (aboutCtrl.isOpen() || aboutCtrl.isClosing())));
 }
 
 function tick(now) {

@@ -37,6 +37,11 @@
   opacity: 1;
 }
 
+#aboutStage:not(.is-open),
+#aboutStage:not(.is-open) * {
+  pointer-events: none !important;
+}
+
 #aboutStage.is-closing {
   visibility: visible;
   pointer-events: none;
