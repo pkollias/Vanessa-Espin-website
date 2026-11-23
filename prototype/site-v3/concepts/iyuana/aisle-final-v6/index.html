@@ -11,8 +11,9 @@
 <style>
   :root {
     --paper: #ece4d7;
-    --soft: rgba(236, 228, 215, 0.62);
-    --faint: rgba(236, 228, 215, 0.36);
+    --soft: rgba(236, 228, 215, 0.72);
+    --faint: rgba(236, 228, 215, 0.42);
+    --amber: #f6a035;
     --night: #070605;
   }
   * { box-sizing: border-box; }
@@ -23,49 +24,140 @@
     -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
     font-feature-settings: "kern", "liga";
   }
-  #gl { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100lvh; display: block; z-index: 0; }
+  #gl { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100lvh; display: block; z-index: 0; cursor: pointer; }
   .ui { position: fixed; inset: 0; pointer-events: none; z-index: 1; }
   .ui > * { position: absolute; will-change: opacity, transform; }
 
-  /* the threshold: the title stands over the aisle like a title card over a picture */
-  .intro { left: clamp(20px, 6.2vw, 96px); bottom: clamp(40px, 7.5vh, 80px); max-width: 640px; opacity: 0; text-shadow: 0 0 28px rgba(7, 6, 5, 0.55); }
-  .intro .k { margin: 0 0 1.5em; font-size: 11px; font-weight: 500; letter-spacing: 0.24em; text-transform: uppercase; color: var(--soft); }
-  .intro h1 { margin: 0; font-family: Gambetta, Georgia, serif; font-weight: 300; font-size: clamp(64px, 9.4vw, 148px); line-height: 0.86; letter-spacing: -0.028em; }
-  .intro .s { margin: 0.42em 0 0; font-family: Gambetta, Georgia, serif; font-weight: 300; font-size: clamp(20px, 1.9vw, 29px); letter-spacing: 0.004em; }
-  .intro .f { margin: 2.2em 0 0; font-size: 12px; letter-spacing: 0.07em; color: var(--soft); font-variant-numeric: lining-nums; }
+  /* Centered opening lockup extracted 1:1 from Vanessa's Poster 1 */
+  .intro-lockup {
+    left: 50%; top: 50%;
+    width: min(72vw, 540px);
+    transform: translate3d(-50%, -50%, 0);
+    display: flex; flex-direction: column; align-items: center;
+    filter: drop-shadow(0 8px 28px rgba(4, 5, 3, 0.88));
+    opacity: 1;
+  }
+  .intro-lockup::before {
+    content: "";
+    position: absolute;
+    inset: -32% -24%;
+    background: radial-gradient(ellipse 68% 64% at 50% 50%, rgba(7, 8, 6, 0.64) 0%, rgba(7, 8, 6, 0.28) 58%, rgba(7, 8, 6, 0) 100%);
+    opacity: var(--scrim-op, 0);
+    z-index: -1;
+    pointer-events: none;
+  }
+  .intro-lockup img {
+    width: 100%; height: auto; display: block;
+    will-change: opacity, transform, filter;
+    opacity: 0;
+  }
+  .intro-lockup .tl-2 { margin-top: 2.0%; }
+  .intro-lockup .tl-3 { margin-top: 1.4%; }
 
-  /* ?open=photo: the title is printed over the first photograph's pale wall, in ink, until the walk pulls back */
-  .open-photo .intro { color: #1c1916; text-shadow: none; }
-  .open-photo .intro .k, .open-photo .intro .f { color: rgba(28, 25, 22, 0.72); }
-  /* running head */
-  .head { top: 26px; left: clamp(20px, 2.4vw, 34px); display: flex; gap: 12px; align-items: baseline; opacity: 0; }
-  .head .t { font-family: Gambetta, Georgia, serif; font-size: 18px; }
-  .head .s { font-family: Gambetta, Georgia, serif; font-weight: 300; font-size: 15px; color: var(--soft); }
+  /* Running head hidden so top navigation and controls never overlap */
+  .head { display: none !important; }
 
-  /* her one line, beside the film */
-  .line { margin: 0; width: min(25vw, 360px); opacity: 0; }
-  .line p { margin: 0; font-family: Gambetta, Georgia, serif; font-weight: 400; font-size: clamp(19px, 1.62vw, 25px); line-height: 1.32; letter-spacing: -0.002em; text-indent: -0.42em; text-wrap: pretty; }
+  /* Hand-crafted organic sumi-watercolour & mist wash (sumi wash):
+     zero rigid borders, ~74% translucent cold-press textured ink core, ragged feathered edges & soft shadow */
+  .stop-line, .label {
+    opacity: 0;
+    isolation: isolate;
+  }
+  .stop-line::before, .label::before {
+    content: "";
+    position: absolute;
+    inset: -44% -40%;
+    z-index: -2;
+    pointer-events: none;
+    backdrop-filter: blur(10px) brightness(0.64) saturate(0.95);
+    -webkit-backdrop-filter: blur(10px) brightness(0.64) saturate(0.95);
+    -webkit-mask-image: var(--wash-mask);
+    mask-image: var(--wash-mask);
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
+  .stop-line::after, .label::after {
+    content: "";
+    position: absolute;
+    inset: -48% -44%;
+    z-index: -1;
+    pointer-events: none;
+    background-image: var(--wash-ink);
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    filter: drop-shadow(0 14px 32px rgba(4, 3, 2, 0.58));
+  }
 
-  /* the wall label beside the poster */
-  .label { width: min(22vw, 300px); opacity: 0; }
-  .label .t { margin: 0; font-family: Gambetta, Georgia, serif; font-size: 25px; line-height: 1.05; }
-  .label .s { margin: 0.28em 0 0; font-family: Gambetta, Georgia, serif; font-weight: 300; font-size: 16.5px; color: var(--soft); }
-  .label .w { margin: 1.7em 0 0; font-size: 12px; line-height: 1.6; letter-spacing: 0.04em; color: var(--soft); font-variant-numeric: lining-nums; }
-  .label .k { margin: 1.9em 0 0.7em; font-size: 10.5px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--faint); }
-  .label ul { list-style: none; margin: 0; padding: 0; font-size: 13.5px; line-height: 1.72; letter-spacing: 0.01em; }
-  /* when the walk pulls back to show the room, the label leaves the wall for the corner, where the title began */
-  .label.corner { left: clamp(20px, 3.4vw, 56px); bottom: clamp(36px, 7vh, 72px); width: min(20vw, 270px); text-shadow: 0 0 24px rgba(7, 6, 5, 0.6); }
+  /* Panel narrative captions (angled into the 3D plane of each panel on desktop; centered below on mobile) */
+  .stop-line {
+    margin: 0;
+    width: max-content;
+    max-width: min(25vw, 326px);
+    padding: 8px 10px;
+  }
+  .stop-line p {
+    margin: 0;
+    font-family: Gambetta, Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(20.5px, 1.68vw, 26px);
+    line-height: 1.30;
+    letter-spacing: -0.004em;
+    color: #f7f1e6;
+    text-shadow: 0 1px 3px rgba(4, 3, 2, 0.95), 0 5px 18px rgba(5, 4, 3, 0.88), 0 14px 34px rgba(6, 5, 4, 0.72);
+    text-wrap: balance;
+  }
 
-  /* one grain over everything, the type included */
-  .grain { position: fixed; left: -50%; top: -50%; width: 200%; height: 200%; pointer-events: none; z-index: 5; opacity: 0.16; mix-blend-mode: overlay; background-repeat: repeat; }
-  .grain.shade { opacity: 0.05; mix-blend-mode: screen; }
+  /* Main Poster curatorial credits: Vanessa Espín + 4 roles */
+  .label {
+    width: max-content;
+    max-width: min(24vw, 290px);
+    padding: 10px 12px;
+  }
+  .label .t {
+    margin: 0 0 10px;
+    font-family: Gambetta, Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(26px, 2.2vw, 34px);
+    line-height: 1.06;
+    letter-spacing: -0.012em;
+    color: #f7f1e6;
+    text-shadow: 0 1px 3px rgba(4, 3, 2, 0.95), 0 5px 18px rgba(5, 4, 3, 0.88), 0 14px 34px rgba(6, 5, 4, 0.72);
+  }
+  .label .ink-rule {
+    display: block;
+    width: 100%;
+    height: 1px;
+    margin: 0 0 9px;
+    background: linear-gradient(90deg, rgba(246, 160, 53, 0.78) 0%, rgba(236, 228, 215, 0.24) 58%, rgba(236, 228, 215, 0) 100%);
+  }
+  .label ul {
+    list-style: none; margin: 0; padding: 0;
+    font-size: clamp(13px, 1.0vw, 14.5px);
+    line-height: 1.80;
+    letter-spacing: 0.035em;
+    color: rgba(247, 241, 230, 0.90);
+    text-shadow: 0 1px 3px rgba(4, 3, 2, 0.95), 0 4px 14px rgba(5, 4, 3, 0.85);
+  }
+  .label ul li::before {
+    content: "• ";
+    color: var(--amber);
+    opacity: 0.95;
+    margin-right: 3px;
+  }
+
+  /* Subtle room grain */
+  .grain { position: fixed; left: -50%; top: -50%; width: 200%; height: 200%; pointer-events: none; z-index: 5; opacity: 0.055; mix-blend-mode: overlay; background-repeat: repeat; }
+  .grain.shade { opacity: 0.018; mix-blend-mode: screen; }
+  body.embed .cinema-pill, body.embed .prog-bar, body.embed .tap-state, body.in-fold-stage .prog-bar, body.in-fold-stage .tap-state { display: none !important; }
 
   .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .fallback { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; gap: 48px; padding: 24px; }
   .fallback img { width: min(60vw, 420px); height: auto; }
   body.nogl .fallback { display: flex; }
 
-  /* cinema playback pill & scrub bar */
+  /* Cinema playback pill & scrub bar */
   .cinema-pill {
     position: fixed; top: 20px; right: 20px; z-index: 12;
     display: flex; align-items: center; gap: 6px; padding: 5px 8px;
@@ -95,57 +187,123 @@
   .cinema-pill .time-lbl { color: var(--soft); font-variant-numeric: tabular-nums; padding: 0 6px; font-size: 10.5px; letter-spacing: 0.06em; }
   body.clean .cinema-pill { display: none; }
 
-  .prog-bar {
-    position: fixed; left: 0; right: 0; bottom: 0; height: 22px; z-index: 10;
-    cursor: pointer; display: flex; align-items: flex-end;
+  .visitor-sound {
+    position: fixed; bottom: 22px; right: 22px; z-index: 12;
+    appearance: none; border: 1px solid rgba(236, 228, 215, 0.20);
+    background: rgba(12, 10, 9, 0.56); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    color: var(--soft); font: 500 11.5px/1 Switzer, "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: 0.04em; padding: 8px 14px; border-radius: 999px; cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
   }
-  .prog-track { width: 100%; height: 2px; background: rgba(236, 228, 215, 0.14); transition: height 0.18s ease; }
-  .prog-bar:hover .prog-track { height: 5px; }
-  .prog-fill { height: 100%; width: 0%; background: rgba(236, 228, 215, 0.72); }
-  body.clean .prog-bar { display: none; }
+  .visitor-sound:hover { color: var(--paper); border-color: rgba(236, 228, 215, 0.45); }
+  .visitor-sound.active { color: var(--paper); }
+  body.embed .visitor-sound { display: none !important; }
+
+  .prog-bar {
+    position: fixed; left: 0; right: 0; bottom: 0; height: 24px; z-index: 10;
+    cursor: pointer; display: flex; align-items: flex-end; touch-action: none;
+  }
+  .prog-track {
+    position: relative; width: 100%; height: 3px;
+    background: rgba(236, 228, 215, 0.22);
+    transition: height 0.18s ease, background 0.18s ease;
+  }
+  .prog-bar:hover .prog-track { height: 6px; background: rgba(236, 228, 215, 0.30); }
+  .prog-fill {
+    position: relative; height: 100%; width: 0%;
+    background: linear-gradient(90deg, rgba(246, 160, 53, 0.92) 0%, rgba(244, 237, 226, 0.96) 100%);
+  }
+  .prog-fill::after {
+    content: ""; position: absolute; right: -5px; top: 50%;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #f7f1e6; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.65);
+    transform: translateY(-50%) scale(0);
+    transition: transform 0.16s ease;
+  }
+  .prog-bar:hover .prog-fill::after { transform: translateY(-50%) scale(1); }
+  .prog-tip {
+    position: absolute; bottom: 12px; left: 0; transform: translateX(-50%);
+    padding: 3px 8px; border-radius: 999px; pointer-events: none;
+    background: rgba(12, 10, 9, 0.86); border: 1px solid rgba(236, 228, 215, 0.24);
+    color: var(--paper); font-size: 10.5px; font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em; opacity: 0; transition: opacity 0.15s ease;
+  }
+  .prog-bar:hover .prog-tip { opacity: 1; }
+
+  /* Subtle center Pause / Resume pill when clicked or paused via Space in standalone view */
+  .tap-state {
+    position: fixed; left: 50%; top: 50%; z-index: 11;
+    transform: translate(-50%, -50%) scale(0.94);
+    width: 56px; height: 56px; border-radius: 50%;
+    border: 1px solid rgba(236, 228, 215, 0.28);
+    background: rgba(12, 10, 9, 0.62);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    color: var(--paper); display: grid; place-items: center;
+    opacity: 0; pointer-events: none;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.38);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+  .tap-state svg { width: 18px; height: 18px; fill: currentColor; }
+  .tap-state.is-paused { opacity: 0.86; transform: translate(-50%, -50%) scale(1); }
+  .tap-state.is-flash { opacity: 0.82; transform: translate(-50%, -50%) scale(1.05); }
 
   @media (max-aspect-ratio: 1/1) {
     .cinema-pill { top: 14px; right: 14px; }
     .head { top: 18px; left: 16px; }
     .head .s { display: none; }
-    .intro { left: 16px; right: 16px; bottom: 64px; }
-    .intro .f { margin-top: 1.6em; }
-    .line { width: auto; }
-    .line p { font-size: 19px; }
-    .label { width: auto; }
-    .label .t, .label .s { display: none; }
-    .label .w { margin: 0; }
-    .label .k { margin: 1em 0 0.4em; }
-    .label ul { font-size: 13px; line-height: 1.55; }
+    .intro-lockup { width: min(86vw, 345px); }
+    .stop-line {
+      width: max-content;
+      max-width: calc(100vw - 44px);
+      left: 50%; right: auto;
+      bottom: clamp(50px, 9vh, 88px);
+      padding: 6px 10px;
+      text-align: center;
+    }
+    .stop-line p { font-size: clamp(19px, 5.0vw, 22.5px); }
+    .label {
+      width: max-content;
+      max-width: calc(100vw - 40px);
+      left: 50%; right: auto;
+      bottom: clamp(40px, 7vh, 76px);
+      padding: 8px 12px;
+      text-align: center;
+    }
+    .label .t { font-size: clamp(23px, 6vw, 28px); margin-bottom: 7px; }
+    .label .ink-rule {
+      background: linear-gradient(90deg, rgba(236, 228, 215, 0) 0%, rgba(246, 160, 53, 0.72) 50%, rgba(236, 228, 215, 0) 100%);
+      margin-bottom: 8px;
+    }
+    .label ul {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 14px;
+      font-size: 12.5px; line-height: 1.65;
+    }
   }
 </style>
-<style>.cinema-pill, .review-pill, #hud, #hudMin, .prog-bar { visibility: hidden !important; pointer-events: none !important; }</style>
+<style>.cinema-pill, .review-pill, #hud, #hudMin, .text-studio, .cue-lanes { visibility: hidden !important; pointer-events: none !important; }</style>
 </head>
 <body>
 <canvas id="gl" aria-hidden="true"></canvas>
 
 <main class="ui">
-  <section class="intro" id="intro">
-    <p class="k">Film and photography exhibition</p>
-    <h1>Iyuana</h1>
-    <p class="s">El Retorno de los Sueños</p>
-    <p class="f">Long Island City, Queens&ensp;·&ensp;August 18–24, 2026</p>
+  <section class="intro-lockup" id="intro" aria-label="Film & Photography Exhibition: Iyuana, El Retorno de los Sueños">
+    <img class="tl-1" id="tl-1" src="../assets/title/title-1-kicker.png" alt="Film & Photography Exhibition">
+    <img class="tl-2" id="tl-2" src="../assets/title/title-2-iyuana.png" alt="Iyuana">
+    <img class="tl-3" id="tl-3" src="../assets/title/title-3-sub.png" alt="El Retorno de los Sueños">
   </section>
 
   <div class="head" id="head"><span class="t">Iyuana</span><span class="s">El Retorno de los Sueños</span></div>
 
-  <blockquote class="line" id="line"><p>“I curated the exhibition so that the images and the film could tell most of the story.”</p></blockquote>
+  <div class="stop-line" id="stop-line"><p id="stop-line-p"></p></div>
 
   <section class="label" id="label">
-    <p class="t">Iyuana</p>
-    <p class="s">El Retorno de los Sueños</p>
-    <p class="w">August 18–24, 2026<br>Long Island City, Queens</p>
-    <p class="k">Artists</p>
+    <p class="t">Vanessa Espín</p>
+    <span class="ink-rule" aria-hidden="true"></span>
     <ul>
-      <li>Yanda Montahuano</li>
-      <li>Li Can Vega</li>
-      <li>Armando Vega</li>
-      <li>Israel Vargas “Panchis”</li>
+      <li>Creative Direction</li>
+      <li>Event Planning</li>
+      <li>Art Curation</li>
+      <li>Production</li>
     </ul>
   </section>
   <p class="vh" aria-live="polite" id="live"></p>
@@ -155,26 +313,29 @@
 <div class="grain" aria-hidden="true"></div>
 
 <div class="fallback">
-  <img src="../assets/212.jpg" alt="Iyuana, El Retorno de los Sueños: the exhibition poster">
+  <img src="../assets/poster-1.png" alt="Iyuana, El Retorno de los Sueños: the exhibition poster">
 </div>
 
 <div class="cinema-pill" id="cinema-pill">
   <button id="btn-play" class="active" title="Play / Pause (Space)">Pause</button>
   <button id="btn-replay" title="Replay from beginning (R)">&#8634; Replay</button>
   <span class="sep"></span>
-  <select id="traj-sel" title="Camera Trajectory"></select>
-  <a href="../trajectories/" title="Open White 3D Trajectory Plot Lab">3D Lab</a>
+  <button id="btn-sound" class="active" title="Toggle Ambient Soundscape (M)">&#9834; Sound</button>
+  <select id="sound-sel" title="Ambient Soundscape"></select>
   <span class="sep"></span>
-  <span class="time-lbl" id="time-lbl">0.0s / 24.0s</span>
+  <select id="traj-sel" title="Camera Trajectory"></select>
+  <a href="../trajectories/" title="Open White 3D Trajectory & Timing Lab">3D &amp; Timing Lab</a>
+  <span class="sep"></span>
+  <span class="time-lbl" id="time-lbl">0.0s / 31.5s</span>
 </div>
-<div class="prog-bar" id="prog-bar" title="Click or drag to scrub movie"><div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div></div>
+<button class="visitor-sound" id="visitor-sound" type="button" hidden title="Toggle Exhibition Soundscape (M)">&#9834; Sound</button>
+<div class="tap-state" id="tap-state" aria-hidden="true"><svg id="tap-icon" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg></div>
+<div class="prog-bar" id="prog-bar" title="Click or drag to navigate video"><span class="prog-tip" id="prog-tip">0:00</span><div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div></div>
 
 <script type="importmap">
 { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js" } }
 </script>
-<!-- Event media: the "Media" link, the strip and the pop-up (shared module in /event-media/).
-     It loads before the film's own script so it can pause the film's video while the viewer is open. -->
-<script type="module">import { mountEventMedia } from '/Vanessa-Espin-website/event-media/event-media.js?v=6'; mountEventMedia({ manifest: '/Vanessa-Espin-website/event-media/manifests/iyuana.json' });</script>
-<script type="module" src="./main.js"></script>
+<script type="module">import { mountEventMedia } from '/Vanessa-Espin-website/event-media/event-media.js?v=7'; mountEventMedia({ manifest: '/Vanessa-Espin-website/event-media/manifests/iyuana.json', button: false });</script>
+<script type="module" src="./main.js?v=20261122g"></script>
 </body>
 </html>

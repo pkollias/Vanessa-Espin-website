@@ -48,6 +48,54 @@
  },
  "mocks": [
   {
+   "id": "panels-4",
+   "axis": "chosen panels",
+   "name": "Vanessa’s 4 Exhibition Panels",
+   "line": "The 4 actual exhibition panels Vanessa chose, opening zoomed-in on Panel 1’s top-left forest photograph.",
+   "flag": "",
+   "spacing": 3.3,
+   "sources": [],
+   "boards": [
+    {
+     "kind": "panel",
+     "src": "panels/panel-1.jpg",
+     "W": 1.92,
+     "H": 1.066,
+     "cy": 1.48,
+     "rects": [
+      {
+       "x": -0.6017,
+       "y": 0.1928,
+       "w": 0.5652,
+       "h": 0.3541,
+       "subOnly": true
+      }
+     ]
+    },
+    {
+     "kind": "panel",
+     "src": "panels/panel-2.jpg",
+     "W": 1.92,
+     "H": 1.066,
+     "cy": 1.48
+    },
+    {
+     "kind": "panel",
+     "src": "panels/panel-3.jpg",
+     "W": 1.92,
+     "H": 1.066,
+     "cy": 1.48
+    },
+    {
+     "kind": "panel",
+     "src": "panels/panel-4.jpg",
+     "W": 1.92,
+     "H": 1.645,
+     "cy": 1.52
+    }
+   ]
+  },
+  {
    "id": "final",
    "axis": "tall board option",
    "name": "Warm silhouettes over the candles",

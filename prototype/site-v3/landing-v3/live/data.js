@@ -3,7 +3,7 @@
 
 export const SITE = {
   name: 'Vanessa Espín',
-  headline: 'Brand Curation & Creative Direction',
+  headline: 'Brand Curator of Events & Experiences',
   city: 'New York',
   linkedin: 'https://www.linkedin.com/in/vanessaespin',
   threeWords: 'Colorful · Stylish · Crafty',
@@ -22,9 +22,9 @@ export const EXHIBITIONS = [
     lang: 'es',
     poster: '../img/iyuana.jpg',
     aspect: 420 / 525,
-    filmUrl: '/Vanessa-Espin-website/concepts/iyuana/aisle-final-v6/',
-    filmRuntimeSec: 24.0,
-    filmDurationLabel: '0:24',
+    filmUrl: '/Vanessa-Espin-website/event-wall-lab/fold/stage.html?event=iyuana&hosted=1&v=20261123d',
+    filmRuntimeSec: 31.5,
+    filmDurationLabel: '0:32',
     filmOpenBg: '#070605',
     filmOpenTone: 'dark',
     splitTop: 'IYUANA',
@@ -36,7 +36,7 @@ export const EXHIBITIONS = [
     shortDate: 'Aug 2026',
     whoLabel: 'Artists',
     who: 'Yanda Montahuano · Li Can Vega · Armando Vega · Israel Vargas “Panchis”',
-    wash: { base: '#15120f', mid: '#0b0908', deep: '#3b2816', ink: '#f4ede2', muted: 'rgba(244,237,226,0.68)', dark: true },
+    wash: { base: '#100e0d', mid: '#c84718', deep: '#7a250b', ink: '#f4ede2', muted: 'rgba(244,237,226,0.66)', dark: true },
     spot: { room: '#070605', cone: 'rgba(248, 178, 92, 0.30)', rim: '#f0a84b', ink: '#ece4d7' },
     franco: { ground: '#17221b', ink: '#f6ad49', subInk: '#dce3dc', accent: '#5ecb78' },
     evolved: { ground: '#14110e', ink: '#f5b052', subInk: '#e8dfd1' },
@@ -53,26 +53,26 @@ export const EXHIBITIONS = [
     typeSub: 'Solo exhibition of Luis Medina · Manhattan, Queens, NYC',
     stoodShort: '“At Herencia Viva, if I could go back for five minutes, I’d stand in front of the Ecuadorian Mona Lisa.”',
     lang: 'es',
-    poster: '../img/herencia-viva.jpg',
+    poster: '../img/herencia-viva-ayllu.png',
     aspect: 420 / 525,
-    filmUrl: '/Vanessa-Espin-website/herencia-hallway/film-v2/',
+    filmUrl: '/Vanessa-Espin-website/event-wall-lab/fold/stage.html?event=herencia-viva&hosted=1&v=20261123d',
     filmRuntimeSec: 38.0,
     filmDurationLabel: '0:38',
-    filmOpenBg: '#f3efe6',
+    filmOpenBg: '#f6f4ef',
     filmOpenTone: 'light',
     splitTop: 'HERENCIA',
     splitBot: 'VIVA',
     kind: 'Painting exhibition',
     role: 'Curator & creative director',
     venue: 'Manhattan, Queens, NYC',
-    date: 'May 29–31, 2026',
+    date: 'May 16–31, 2026',
     shortDate: 'May 2026',
     whoLabel: 'Painter',
     who: 'Luis Medina · with Ayllu Gallery',
-    wash: { base: '#e3b5ba', mid: '#c6606b', deep: '#a94856', ink: '#1c1213', muted: 'rgba(28,18,19,0.62)', dark: false },
-    spot: { room: '#0e0c0a', cone: 'rgba(244, 214, 172, 0.28)', rim: '#e0918d', ink: '#ece4d7' },
-    franco: { ground: '#274fa6', ink: '#f6f2ea', subInk: '#fbd065', accent: '#e3888d' },
-    evolved: { ground: '#c47b80', ink: '#191413', subInk: '#332524' },
+    wash: { base: '#100e0d', mid: '#2d5238', deep: '#193021', ink: '#f4ede2', muted: 'rgba(244,237,226,0.66)', dark: true },
+    spot: { room: '#0b0f0c', cone: 'rgba(222, 234, 194, 0.27)', rim: '#9db883', ink: '#edf2e9' },
+    franco: { ground: '#213828', ink: '#f3efe4', subInk: '#dcd184', accent: '#8ab07a' },
+    evolved: { ground: '#121b14', ink: '#edf2e9', subInk: '#c5d4c2' },
     aura: 'herencia',
     place: 'Manhattan, Queens, NYC · May 2026',
   },
@@ -86,36 +86,54 @@ export const EXHIBITIONS = [
     typeSub: 'Ayazamana Dance Group · Queens, NYC',
     stoodShort: '“At Ayazamana I was in the tech room above the stage, handling the visuals that came up after every dance.”',
     lang: 'es',
-    poster: '../img/ayazamana.png',
-    aspect: 408 / 525,
-    filmUrl: '/Vanessa-Espin-website/flushing-theater/film/',
-    filmRuntimeSec: 26.0,
-    filmDurationLabel: '0:26',
+    poster: '../img/ayazamana.png?v=20261123a',
+    aspect: 1252 / 1826,
+    filmUrl: '/Vanessa-Espin-website/event-wall-lab/fold/stage.html?event=ayazamana&hosted=1&v=20261123f',
+    filmRuntimeSec: 30.5,
+    filmDurationLabel: '0:31',
     filmOpenBg: '#040303',
     filmOpenTone: 'dark',
     splitTop: 'AYAZA',
     splitBot: 'MANA',
     kind: 'Live music & traditional dance',
-    role: 'Identity, poster & visual curation',
+    role: 'Creative & event coordination',
     venue: 'Queens, NYC',
     date: 'July 11, 2026',
     shortDate: 'Jul 2026',
     whoLabel: 'Performers',
     who: 'Ayazamana Dance Group',
-    wash: { base: '#f2e8c2', mid: '#e2cc72', deep: '#cfb354', ink: '#4e1624', muted: 'rgba(78,22,36,0.64)', dark: false },
+    wash: { base: '#100e0d', mid: '#5c1927', deep: '#703a16', ink: '#f4ede2', muted: 'rgba(244,237,226,0.66)', dark: true },
     spot: { room: '#080607', cone: 'rgba(218, 92, 112, 0.27)', rim: '#f0d765', ink: '#ece4d7' },
     franco: { ground: '#4d1624', ink: '#f3dd67', subInk: '#f4ebe4', accent: '#d95b72' },
-    evolved: { ground: '#f1dc6b', ink: '#531826', subInk: '#6a2837' },
+    evolved: { ground: '#180d12', ink: '#f3dd67', subInk: '#ece2d8' },
     aura: 'ayazamana',
     place: 'Queens, NYC · July 2026',
   },
 ];
 
-// Exact verbatim "Purpose first" (asm-c, marked LOVE) assembly from /about-lenses/, with the widened letter ("Dear artist, dear client,")
+// Verbatim About Me & Client Message from Vanessa Espín (Nov 22, 2026).
+// Zero email address or phone number in code or DOM; inquiries route via opaque privacy relay endpoint or LinkedIn.
 export const BIO = {
-  statement: 'I wanted to tell the stories of us.',
-  eyebrow: 'Brand Curation & Creative Direction · New York',
-  door: 'I help bring cultural and artistic events to life. I create the visual identity and the marketing material, and I curate the experience itself.',
+  quote: '“A well told and organized visual story can transform vision into impact.”',
+  roleTitle: 'Brand Curator of Events & Experiences',
+  statement: 'A well told and organized visual story can transform vision into impact.',
+  eyebrow: 'Brand Curator of Events & Experiences · New York',
+  door: 'I’m a New York-based Brand Curator of Events & Experiences, driven by the belief that the way we bring people, stories, and ideas together can move us toward meaningful change.',
+  aboutParagraphs: [
+    'I’m a New York-based Brand Curator of Events & Experiences, driven by the belief that the way we bring people, stories, and ideas together can move us toward meaningful change.',
+    'My work lives at the intersection of culture, creativity, and community. I approach every project with a curiosity for people and the stories that shape them, bringing together the right voices, creative perspectives, and environments to create experiences that resonate beyond the moment.',
+    'Rooted in New York’s Latin American arts community, I’ve collaborated with cultural organizations, independent artists, and creative teams to bring ideas to life through exhibitions, live performances, and community-driven gatherings. From producing cultural programs and coordinating artist collaborations to shaping visual identities, developing partnerships, and hosting events, I enjoy working across the many layers that turn a vision into a shared experience.',
+    'My creative foundation comes from five years of agency experience in art direction, brand storytelling, and visual strategy. Over time, I’ve found myself drawn beyond the screen and into the spaces where brands, culture, and people meet. Today, I bring that visual sensibility and strategic perspective into the curation and production of experiences, with an appreciation for the details that make a gathering feel intentional and meaningful.',
+    'At the heart of it all is a simple belief: A well told and organized visual story can transform vision into impact.',
+    'I’m interested in working with people and organizations who share that ambition, particularly those using creativity as a tool for cultural connection, positive impact, and a more thoughtful world.',
+  ],
+  clientKicker: 'For Clients & Collaborators',
+  clientHeading: 'Working With Vanessa',
+  clientParagraphs: [
+    'Vanessa is a creative dedicated to organizing, clarifying, and positioning personal and experiential brands with purpose. She specializes in person-centered creative services that transform ideas, stories, and initiatives into cohesive visual identities with a strong voice and presence.',
+    'What sets her apart is her ability to distill complex stories into experiences that are clear, engaging, and authentic to the people behind them. Every creative decision is rooted in your original intention, ensuring your brand not only resonates with your audience but also remains true to its purpose.',
+    'She synthesizes your vision into thoughtful visual systems that communicate who you are, what you stand for, and why your work matters. Whether you’re an individual, artist, founder, or cultural initiative, Vanessa helps your story become something people can understand, remember, and connect with.',
+  ],
   stood: [
     {
       exIdx: 2,
@@ -139,16 +157,13 @@ export const BIO = {
       text: 'At Herencia Viva, if I could go back for five minutes, I’d stand in front of the Ecuadorian Mona Lisa.',
     },
   ],
-  home: 'Where I come from shows up in my warmth, my passion and my communal spirit. I make sure people don’t only experience the art; they feel seen, listened to and celebrated. The food, the spaces and the way people meet at my events resemble how we connect back home.',
-  turn: 'At some point I realised I wanted more of me in the work. Being a graphic designer and art director wasn’t enough; I wanted to be part of the entire creative experience. I was also looking for purpose. This time I followed my heart and joined the Ecuadorian community.',
-  letterHeading: 'How I work',
-  letterSalutation: 'Dear artist, dear client,',
-  letterBody: 'Your work will tell most of the story. I will choose what to show, how it sits together and where people see it. I will give it a visual identity and make the material that carries it. What is written about your work, you will read first. I will ask before anything of yours goes out. And when people arrive, you tell your own story.',
-  doors: [
-    ['Institutions & venues', 'I bring the identity, the poster and the promotion, and I curate and hang the show.'],
-    ['Brands & sponsors', 'I have built an Ecuadorian community in New York around these events, and I came to them from brand design.'],
-    ['Press', 'Posters, photographs and a short biography, on request.'],
-  ],
+  home: 'Rooted in New York’s Latin American arts community, I’ve collaborated with cultural organizations, independent artists, and creative teams to bring ideas to life through exhibitions, live performances, and community-driven gatherings.',
+  turn: 'My creative foundation comes from five years of agency experience in art direction, brand storytelling, and visual strategy. Over time, I’ve found myself drawn beyond the screen and into the spaces where brands, culture, and people meet.',
+  letterHeading: 'For Clients & Collaborators',
+  letterSalutation: 'Working With Vanessa',
+  letterBody: 'Vanessa is a creative dedicated to organizing, clarifying, and positioning personal and experiential brands with purpose. Whether you’re an individual, artist, founder, or cultural initiative, Vanessa helps your story become something people can understand, remember, and connect with.',
+  // Paste an opaque Formspree / Web3Forms relay endpoint (e.g. 'https://formspree.io/f/xxxxxxxx') before launch — zero email exposed in code!
+  contactRelayUrl: '',
   linkedin: 'https://www.linkedin.com/in/vanessaespin',
 };
 
@@ -159,8 +174,8 @@ export const CONCEPTS = [
     name: 'Komorebi & Watercolour Wall',
     pick: true,
     defaultPortal: 'threshold',
-    defaultAbout: 'a1',
-    summary: 'Washed C8 colour bases grazed by swaying Perfect Days window-light, centered poster framing, and uniform borough/NYC captions.',
+    defaultAbout: 'a9',
+    summary: 'Washed C8 colour bases grazed by swaying window-light, centered poster framing, and uniform borough/NYC captions.',
   },
   {
     id: 'c2',
@@ -230,7 +245,8 @@ export const PORTALS = [
 ];
 
 export const ABOUT_CONCEPTS = [
-  { id: 'a1', label: 'A1 · Asymmetric Salon ★', desc: 'Lights-go-off dusk + 3D poster re-hangs in left spotlight + wide 2-col dark salon' },
+  { id: 'a9', label: 'A9 · Landing Komorebi + Wash ★', desc: 'Unified Landing C1 Komorebi + Wash styling + live poster shift (zero legacy dark override)' },
+  { id: 'a1', label: 'A1 · Asymmetric Salon', desc: 'Lights-go-off dusk + 3D poster re-hangs in left spotlight + wide 2-col dark salon' },
   { id: 'a2', label: 'A2 · 3D Portrait Print ★', desc: 'Portrait is a real 7th 3D WebGL creased print lit beside unboxed ivory prose' },
   { id: 'a3', label: 'A3 · Monograph', desc: 'Full-canvas matte obsidian 3-col monograph + sticky rail + curtain drop' },
   { id: 'a4', label: 'A4 · Dark Alcove + Push', desc: 'Refined 54vw dark lime-wash alcove coordinated with left 3D room push' },
@@ -263,6 +279,36 @@ export const SCROLL_CUES = [
   { id: 's4', label: 'S4 · Edge Arrows + Titles ★', desc: 'Breathing left/right margin show cues + minimal center dots' },
   { id: 's5', label: 'S5 · Mini Poster Strip', desc: 'Three miniature uncropped poster thumbnails + flanking chevrons' },
   { id: 's6', label: 'S6 · Vernier Tick Scale', desc: 'Architectural tick-ruler with live continuous gliding indicator' },
+];
+
+export const COLOR_MODES = [
+  { id: 'p5', label: 'Nocturnal Charcoal ★', desc: 'Constant nocturnal charcoal (#100e0d) + subtle sunset-orange / sage / ruby aura' },
+  { id: 'p1', label: 'Deep Poster Nocturnes', desc: 'Dark gallery grounds keyed to each poster: Ember Umber · Forest Night · Velvet Ruby' },
+  { id: 'p2', label: 'Pure Obsidian', desc: 'Deepest cinema-black (#090807) gallery wall with restrained poster halo' },
+];
+
+export const POSTER_SWATCHES = {
+  iyuana: [
+    { id: 'iy1', label: 'Sunset Ember ★', chip: '#c84718', base: '#14100d', mid: '#c84718', deep: '#7a250b', ink: '#f4ede2', muted: 'rgba(244,237,226,0.66)', dark: true },
+    { id: 'iy2', label: 'Roasted Terracotta', chip: '#a43818', base: '#17110e', mid: '#a43818', deep: '#5e1d0b', ink: '#f4ede2', muted: 'rgba(244,237,226,0.66)', dark: true },
+    { id: 'iy3', label: 'Jungle Hearth', chip: '#b86824', base: '#111410', mid: '#b86824', deep: '#243828', ink: '#f4ede2', muted: 'rgba(244,237,226,0.66)', dark: true },
+  ],
+  'herencia-viva': [
+    { id: 'hv1', label: 'Botanical Night ★', chip: '#3d6e4c', base: '#0f1511', mid: '#2d5238', deep: '#193021', ink: '#f4ede2', muted: 'rgba(244,237,226,0.66)', dark: true },
+    { id: 'hv2', label: 'Deep Olive Umber', chip: '#6b7a40', base: '#13150f', mid: '#4b572c', deep: '#293018', ink: '#f4ede2', muted: 'rgba(244,237,226,0.66)', dark: true },
+    { id: 'hv3', label: 'Andean Emerald', chip: '#2f6b53', base: '#0d1513', mid: '#245240', deep: '#143026', ink: '#f4ede2', muted: 'rgba(244,237,226,0.66)', dark: true },
+  ],
+  ayazamana: [
+    { id: 'ay1', label: 'Velvet Ruby & Gold ★', chip: '#8c283e', base: '#150e11', mid: '#631b2b', deep: '#703a16', ink: '#f4ede2', muted: 'rgba(244,237,226,0.66)', dark: true },
+    { id: 'ay2', label: 'Stage Crimson', chip: '#9c2840', base: '#160c0f', mid: '#781e30', deep: '#42101a', ink: '#f4ede2', muted: 'rgba(244,237,226,0.66)', dark: true },
+    { id: 'ay3', label: 'Gilded Nocturne', chip: '#b88632', base: '#14110c', mid: '#6e4e1c', deep: '#451923', ink: '#f4ede2', muted: 'rgba(244,237,226,0.66)', dark: true },
+  ],
+};
+
+export const CARD_MOODS = [
+  { id: 'f1', label: 'F1 · Iyuana Dusk Nebula ★', desc: 'Fuzzy nocturnal cosmos: blurred sunset amber, smoky rose-plum & tactile 35mm grain' },
+  { id: 'f2', label: 'F2 · Smoked Umber & Gold', desc: 'Blurred warm bronze-ochre clouds & heavy charcoal rag grain' },
+  { id: 'f3', label: 'F3 · Forest Ember Mist', desc: 'Blurred Amazonian moss-jade, warm ember mist & stippled grain' },
 ];
 
 export const BIOS = ABOUT_CONCEPTS;

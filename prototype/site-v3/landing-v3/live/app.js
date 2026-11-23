@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { SITE, EXHIBITIONS, BIO, CONCEPTS, PORTALS, ABOUT_CONCEPTS, INTRO_CONCEPTS, COPY_MODES, SCROLL_CUES } from './data.js';
-import { createAboutController } from './about-concepts.js';
-import { createIntroController } from './intro-concepts.js';
-import { createScrollCueController } from './scroll-cues.js';
+import { SITE, EXHIBITIONS, BIO, CONCEPTS, PORTALS, ABOUT_CONCEPTS, INTRO_CONCEPTS, COPY_MODES, SCROLL_CUES, COLOR_MODES, POSTER_SWATCHES, CARD_MOODS } from './data.js?v=20261123f';
+import { createAboutController } from './about-concepts.js?v=20261123d';
+import { createIntroController } from './intro-concepts.js?v=20261123d';
+import { createScrollCueController } from './scroll-cues.js?v=20261123d';
 
 const N = EXHIBITIONS.length;
 const RING = N * 2; // 6-slot endless ring (2×3 sharing the 3 GPU textures) so scrolling wraps full-circle with 0 teleport!
@@ -69,14 +69,23 @@ const rawAbout = params.get('about') || params.get('bio');
 const rawIntro = params.get('intro');
 const rawCopy = params.get('copy');
 const rawCue = params.get('cue');
+const rawPal = params.get('pal');
+const rawCard = params.get('card');
 
 const state = {
   concept: initConcept,
   portal: PORTALS.some((p) => p.id === rawPortal) ? rawPortal : cDef.defaultPortal,
-  aboutStyle: ABOUT_CONCEPTS.some((a) => a.id === rawAbout) ? rawAbout : (cDef.defaultAbout || 'a1'),
+  aboutStyle: ABOUT_CONCEPTS.some((a) => a.id === rawAbout) ? rawAbout : (cDef.defaultAbout || 'a9'),
   introStyle: (rawIntro === 'none' || INTRO_CONCEPTS.some((o) => o.id === rawIntro)) ? rawIntro : 'o1',
   copyMode: COPY_MODES.some((m) => m.id === rawCopy) ? rawCopy : 'l1',
   cueStyle: (rawCue === 'none' || SCROLL_CUES.some((s) => s.id === rawCue)) ? rawCue : 's2',
+  colorMode: COLOR_MODES.some((m) => m.id === rawPal) ? rawPal : 'p5',
+  cardMood: CARD_MOODS.some((m) => m.id === rawCard) ? rawCard : 'f1',
+  swatches: {
+    iyuana: POSTER_SWATCHES.iyuana.some((s) => s.id === params.get('iy')) ? params.get('iy') : 'iy1',
+    'herencia-viva': POSTER_SWATCHES['herencia-viva'].some((s) => s.id === params.get('hv')) ? params.get('hv') : 'hv1',
+    ayazamana: POSTER_SWATCHES.ayazamana.some((s) => s.id === params.get('ay')) ? params.get('ay') : 'ay1',
+  },
   active: initIdx,
   target: initIdx,
   p: initIdx,
@@ -85,9 +94,49 @@ const state = {
   drawerOpen: false,
   inFilm: false,
   portalAnim: null, // { kind, t0, dur, idx, slotIdx, cx, cy }
-  washTrans: { fromIdx: initIdx, toIdx: initIdx, t0: -999, dur: 0.78, dir: 1 },
+  washTrans: { fromIdx: initIdx, toIdx: initIdx, fromWash: null, toWash: null, t0: -999, dur: 0.78, dir: 1 },
   hoveredSlot: -1,
 };
+
+function resolveLandingWash(exIdx = state.active) {
+  const ex = EXHIBITIONS[mod(exIdx, N)] || EXHIBITIONS[0];
+  const list = POSTER_SWATCHES[ex.slug] || [];
+  const chosen = list.find((s) => s.id === state.swatches[ex.slug]) || list[0] || ex.wash;
+
+  if (state.colorMode === 'p1') {
+    return {
+      ...chosen,
+      dark: true,
+      vignetteGlow: 'rgba(244, 224, 198, 0.034)',
+      blobScale: 0.88,
+    };
+  }
+  if (state.colorMode === 'p2') {
+    return {
+      ...chosen,
+      base: '#090807',
+      dark: true,
+      vignetteGlow: 'rgba(244, 230, 210, 0.022)',
+      blobScale: 0.28,
+    };
+  }
+  // Default 'p5': Nocturnal Charcoal ★ (#100e0d) + subtle sunset-orange / sage / ruby aura
+  const nightBloom = ex.slug === 'iyuana'
+    ? { mid: '#c84718', deep: '#7a250b', vignetteGlow: 'rgba(236, 94, 32, 0.042)', blobScale: 0.44 }
+    : (ex.slug === 'herencia-viva'
+      ? { mid: '#2d5238', deep: '#193021', vignetteGlow: 'rgba(84, 142, 96, 0.036)', blobScale: 0.68 }
+      : { mid: '#5c1927', deep: '#703a16', vignetteGlow: 'rgba(186, 76, 58, 0.038)', blobScale: 0.68 });
+  return {
+    base: '#100e0d',
+    mid: nightBloom.mid,
+    deep: nightBloom.deep,
+    vignetteGlow: nightBloom.vignetteGlow,
+    ink: '#f4ede2',
+    muted: 'rgba(244,237,226,0.66)',
+    dark: true,
+    blobScale: nightBloom.blobScale,
+  };
+}
 
 let aboutCtrl = null;
 let introCtrl = null;
@@ -115,6 +164,18 @@ const fxCanvasEl = $('#portal-fx');
 const fxCtx = fxCanvasEl.getContext('2d');
 
 let VW = innerWidth, VH = innerHeight, Hv = 1, Wv = 1, DPR = 1;
+// The backdrop of the washed-colour look is nothing but soft gradients, so it is painted on a small canvas and stretched
+// by the browser: the same picture for a fraction of the pixels. (It was painted at full Retina size 60 times a second.)
+// The looks with crisp edges keep a full-size canvas. ?back=full paints it full size, to compare.
+const BACK_FULL = params.get('back') === 'full';
+const BACK_SOFT_SCALE = +params.get('back') > 0 ? +params.get('back') : 0.5;
+function backdropScale() { return (!BACK_FULL && state.concept === 'c1') ? Math.min(DPR, BACK_SOFT_SCALE) : DPR; }
+function sizeBackdrop() {
+  const k = backdropScale(), w = Math.round(VW * k), h = Math.round(VH * k);
+  if (backCanvasEl.width !== w || backCanvasEl.height !== h) { backCanvasEl.width = w; backCanvasEl.height = h; }
+  backdropKey = '';
+}
+let backdropKey = '', backdropTurn = 0;
 function resize() {
   VW = innerWidth; VH = innerHeight;
   DPR = Math.min(devicePixelRatio || 1, 1.5);
@@ -125,8 +186,7 @@ function resize() {
   Hv = 2 * 10 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
   Wv = Hv * camera.aspect;
 
-  backCanvasEl.width = Math.round(VW * DPR);
-  backCanvasEl.height = Math.round(VH * DPR);
+  sizeBackdrop();
   fxCanvasEl.width = Math.round(VW * DPR);
   fxCanvasEl.height = Math.round(VH * DPR);
   updateLedgeGeometry();
@@ -573,15 +633,15 @@ const ledgeGroup = new THREE.Group();
 ledgeGroup.visible = false;
 scene.add(ledgeGroup);
 
-const roomKeyLight = new THREE.DirectionalLight(0xfff4e2, 1.55);
+const roomKeyLight = new THREE.DirectionalLight(0xfff0d8, 1.35);
 roomKeyLight.position.set(-3.2, 4.4, 5.5);
-const roomFillLight = new THREE.HemisphereLight(0xf6efe4, 0x8a6d4b, 0.95);
+const roomFillLight = new THREE.HemisphereLight(0xcabca6, 0x241911, 0.48);
 ledgeGroup.add(roomKeyLight, roomFillLight);
 
-const ledgeWoodMat = new THREE.MeshStandardMaterial({ color: 0x6b4c32, roughness: 0.52, metalness: 0.04 });
-const ledgeLipMat = new THREE.MeshStandardMaterial({ color: 0x563b25, roughness: 0.46, metalness: 0.05 });
-const wainscotMat = new THREE.MeshStandardMaterial({ color: 0xdad3c6, roughness: 0.88, metalness: 0.0 });
-const floor3DMat = new THREE.MeshStandardMaterial({ color: 0x9b7449, roughness: 0.42, metalness: 0.04 });
+const ledgeWoodMat = new THREE.MeshStandardMaterial({ color: 0x4b3320, roughness: 0.50, metalness: 0.05 });
+const ledgeLipMat = new THREE.MeshStandardMaterial({ color: 0x3b2718, roughness: 0.46, metalness: 0.06 });
+const wainscotMat = new THREE.MeshStandardMaterial({ color: 0x1e1a16, roughness: 0.88, metalness: 0.0 });
+const floor3DMat = new THREE.MeshStandardMaterial({ color: 0x3a2819, roughness: 0.44, metalness: 0.05 });
 
 const ledgeShelf = new THREE.Mesh(new THREE.BoxGeometry(16, 0.09, 0.48), ledgeWoodMat);
 const ledgeLip = new THREE.Mesh(new THREE.BoxGeometry(16, 0.13, 0.06), ledgeLipMat);
@@ -826,13 +886,15 @@ function applyAboutAndIntroModifiers() {
     sheets.forEach((s) => { s.flatTgt = 0; });
   }
 
-  if (rm && (rm.dimWall > 0.002 || Math.abs(rm.posterShiftX || 0) > 0.001 || (rm.sideFade || 0) > 0.002)) {
+  if (rm && (rm.dimWall > 0.002 || Math.abs(rm.posterShiftX || 0) > 0.001 || (rm.sideFade || 0) > 0.002 || (rm.centerFade || 0) > 0.002)) {
     sheets.forEach((s, slot) => {
       if (slot === cSlot) {
         s.tgt.x += (rm.posterShiftX || 0) * Wv;
         s.tgt.s *= (rm.posterScale ?? 1);
         s.tgt.exp = mix(s.tgt.exp, 1.04, rm.dimWall || 0);
-        if ((rm.show3DPortrait || 0) > 0.02) {
+        if ((rm.centerFade || 0) > 0.002) {
+          s.tgt.o *= clamp01(1 - rm.centerFade);
+        } else if ((rm.show3DPortrait || 0) > 0.02) {
           s.tgt.o *= clamp01(1 - rm.show3DPortrait * 0.92);
         }
       } else {
@@ -958,7 +1020,7 @@ function drawWetWashBlob(ctx, cx, cy, maxR, prog, midHex, deepHex, alphaScale = 
   ctx.restore();
 }
 
-// Deterministic organic leaf clusters for Perfect Days Komorebi (zero crossed X bars!)
+// Deterministic organic leaf clusters for Komorebi (zero crossed X bars!)
 const KOMOREBI_LEAVES = (() => {
   const R = rng(4021);
   const arr = [];
@@ -990,15 +1052,21 @@ function drawKomorebiLight(ctx, W, H, nowSec, strength = 1, isDarkWall = false) 
   ];
   for (const [x0, y0, x1, y1, a0] of beamAngles) {
     const g = ctx.createLinearGradient(W * x0 + breeze, H * y0, W * x1 + breeze, H * y1);
-    const a = a0 * strength * (isDarkWall ? 0.20 : 1.0);
-    g.addColorStop(0, `rgba(255, 244, 214, ${a.toFixed(3)})`);
-    g.addColorStop(0.55, `rgba(255, 238, 198, ${(a * 0.48).toFixed(3)})`);
-    g.addColorStop(1, 'rgba(255, 236, 190, 0)');
+    const a = a0 * strength * (isDarkWall ? 0.11 : 1.0);
+    if (isDarkWall) {
+      g.addColorStop(0, `rgba(255, 212, 176, ${a.toFixed(3)})`);
+      g.addColorStop(0.55, `rgba(248, 192, 148, ${(a * 0.44).toFixed(3)})`);
+      g.addColorStop(1, 'rgba(248, 184, 138, 0)');
+    } else {
+      g.addColorStop(0, `rgba(255, 244, 214, ${a.toFixed(3)})`);
+      g.addColorStop(0.55, `rgba(255, 238, 198, ${(a * 0.48).toFixed(3)})`);
+      g.addColorStop(1, 'rgba(255, 236, 190, 0)');
+    }
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, W, H);
   }
 
-  // 2. Organic wind-breathing Perfect Days leaf-cluster dapples (soft sunlit pockets + soft foliage penumbra)
+  // 2. Organic wind-breathing leaf-cluster dapples (soft sunlit pockets + soft foliage penumbra)
   for (const lf of KOMOREBI_LEAVES) {
     const dx = reduced ? 0 : Math.sin(nowSec * lf.spd + lf.ph) * W * 0.009 + Math.cos(nowSec * 0.33 + lf.ph) * W * 0.005;
     const dy = reduced ? 0 : Math.cos(nowSec * lf.spd * 0.82 + lf.ph) * H * 0.007;
@@ -1014,17 +1082,18 @@ function drawKomorebiLight(ctx, W, H, nowSec, strength = 1, isDarkWall = false) 
     if (lf.bright) {
       ctx.globalCompositeOperation = isDarkWall ? 'screen' : 'overlay';
       const sg = ctx.createRadialGradient(0, 0, rx * 0.05, 0, 0, rx);
-      const sa = (isDarkWall ? 0.058 : 0.19) * lf.wt * strength;
-      sg.addColorStop(0, `rgba(255, 248, 224, ${sa.toFixed(3)})`);
+      const sa = (isDarkWall ? 0.042 : 0.19) * lf.wt * strength;
+      sg.addColorStop(0, isDarkWall ? `rgba(255, 216, 182, ${sa.toFixed(3)})` : `rgba(255, 248, 224, ${sa.toFixed(3)})`);
       sg.addColorStop(1, 'rgba(255, 248, 224, 0)');
       ctx.fillStyle = sg;
     } else {
       ctx.globalCompositeOperation = 'multiply';
       const dg = ctx.createRadialGradient(0, 0, rx * 0.08, 0, 0, rx);
-      const da = (isDarkWall ? 0.13 : 0.082) * lf.wt * strength;
-      dg.addColorStop(0, `rgba(38, 28, 20, ${da.toFixed(3)})`);
-      dg.addColorStop(0.6, `rgba(38, 28, 20, ${(da * 0.48).toFixed(3)})`);
-      dg.addColorStop(1, 'rgba(38, 28, 20, 0)');
+      const da = (isDarkWall ? 0.16 : 0.082) * lf.wt * strength;
+      const shCol = isDarkWall ? '10, 8, 8' : '38, 28, 20';
+      dg.addColorStop(0, `rgba(${shCol}, ${da.toFixed(3)})`);
+      dg.addColorStop(0.6, `rgba(${shCol}, ${(da * 0.48).toFixed(3)})`);
+      dg.addColorStop(1, `rgba(${shCol}, 0)`);
       ctx.fillStyle = dg;
     }
     ctx.beginPath();
@@ -1051,24 +1120,26 @@ function renderBackdrop(nowMs) {
   const maxDiag = Math.hypot(W, H);
 
   if (c === 'c1') {
-    // C1: Washed C8 colour bases + GRIS wet-edge watercolour bloom + organic Perfect Days Komorebi
-    const baseRgb = mixRgb(hexToRgb(prevEx.wash.base), hexToRgb(ex.wash.base), E_OUT(wt));
+    // C1: Poster-inspired colour bases + GRIS wet-edge watercolour bloom + organic Komorebi
+    const curWash = state.washTrans.toWash || resolveLandingWash(state.active);
+    const prevWash = state.washTrans.fromWash || resolveLandingWash(state.washTrans.fromIdx);
+    const baseRgb = mixRgb(hexToRgb(prevWash.base), hexToRgb(curWash.base), E_OUT(wt));
     ctx.fillStyle = rgbStr(baseRgb);
     ctx.fillRect(0, 0, W, H);
 
-    // Subtle plaster edge warmth so washed C8 bases feel painted onto gallery plaster, never flat hex!
-    const plasterVig = ctx.createRadialGradient(W * 0.5, H * 0.48, H * 0.12, W * 0.5, H * 0.48, maxDiag * 0.62);
-    plasterVig.addColorStop(0, ex.wash.dark ? 'rgba(255,244,225,0.06)' : 'rgba(255,250,242,0.22)');
+    // Subtle plaster / nocturnal ember warmth so washed bases feel atmospheric, never milky brown!
+    const plasterVig = ctx.createRadialGradient(W * 0.5, H * 0.48, H * 0.10, W * 0.5, H * 0.48, maxDiag * 0.58);
+    plasterVig.addColorStop(0, curWash.dark ? (curWash.vignetteGlow || 'rgba(255,224,196,0.03)') : 'rgba(255,250,242,0.22)');
     plasterVig.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = plasterVig;
     ctx.fillRect(0, 0, W, H);
 
-    if (wt < 1 && state.washTrans.fromIdx !== state.washTrans.toIdx) {
-      drawWetWashBlob(ctx, W * 0.52, H * 0.48, maxDiag * 0.62, 1, prevEx.wash.mid, prevEx.wash.deep, 1.15 * (1 - wt));
+    if (wt < 1 && (state.washTrans.fromIdx !== state.washTrans.toIdx || prevWash.base !== curWash.base || prevWash.mid !== curWash.mid)) {
+      drawWetWashBlob(ctx, W * 0.52, H * 0.48, maxDiag * 0.62, 1, prevWash.mid, prevWash.deep, (prevWash.blobScale ?? 1.15) * (1 - wt));
     }
     const originX = W * (state.washTrans.dir >= 0 ? 0.58 : 0.42);
-    drawWetWashBlob(ctx, originX, H * 0.48, maxDiag * 0.66, wt < 1 ? mix(0.32, 1, wt) : 1, ex.wash.mid, ex.wash.deep, 1.22);
-    drawKomorebiLight(ctx, W, H, nowSec, 1.05, !!ex.wash.dark);
+    drawWetWashBlob(ctx, originX, H * 0.48, maxDiag * 0.66, wt < 1 ? mix(0.32, 1, wt) : 1, curWash.mid, curWash.deep, curWash.blobScale ?? 1.22);
+    drawKomorebiLight(ctx, W, H, nowSec, 1.05, !!curWash.dark);
   } else if (c === 'c2') {
     // C2: Chiaroscuro Spotlight Stage (Dark room + honey-oak floor sheen + warm gallery pin-spot)
     const roomRgb = mixRgb(hexToRgb(prevEx.spot.room), hexToRgb(ex.spot.room), E_OUT(wt));
@@ -1141,33 +1212,33 @@ function renderBackdrop(nowMs) {
       ctx.restore();
     }
   } else if (c === 'c4') {
-    // C4 Salon Triptych: Sunlit gallery plaster + subtle picture-rail + soft warm pool behind focused poster
-    ctx.fillStyle = '#e6e1d7';
+    // C4 Salon Triptych: Nocturnal gallery plaster + subtle brass picture-rail + soft warm pool behind focused poster
+    ctx.fillStyle = '#110f0d';
     ctx.fillRect(0, 0, W, H);
     const railY = H * 0.135;
-    ctx.fillStyle = 'rgba(24, 20, 16, 0.11)';
+    ctx.fillStyle = 'rgba(244, 237, 226, 0.11)';
     ctx.fillRect(0, railY, W, Math.max(1, DPR));
     const focusIdx = state.hoveredSlot >= 0 ? (state.hoveredSlot % N) : state.active;
     const fx = W * (0.5 + (focusIdx - 1) * 0.285);
     const fEx = EXHIBITIONS[focusIdx];
-    const halo = ctx.createRadialGradient(fx, H * 0.46, H * 0.04, fx, H * 0.46, H * 0.36);
-    halo.addColorStop(0, rgbStr(hexToRgb(fEx.wash.mid), 0.20));
-    halo.addColorStop(1, 'rgba(230,225,215,0)');
+    const halo = ctx.createRadialGradient(fx, H * 0.46, H * 0.04, fx, H * 0.46, H * 0.38);
+    halo.addColorStop(0, rgbStr(hexToRgb(fEx.wash.mid), 0.28));
+    halo.addColorStop(1, 'rgba(17,15,13,0)');
     ctx.fillStyle = halo;
     ctx.fillRect(0, 0, W, H);
-    drawKomorebiLight(ctx, W, H, nowSec, 0.45);
+    drawKomorebiLight(ctx, W, H, nowSec, 0.72, true);
   } else if (c === 'c5') {
-    // C5 Living-Window Aura: Calm linen ground + animated world aura breathing behind the active poster!
-    ctx.fillStyle = '#e3ded4';
+    // C5 Living-Window Aura: Nocturnal charcoal ground + animated world aura breathing behind the active poster!
+    ctx.fillStyle = '#0f0d0c';
     ctx.fillRect(0, 0, W, H);
     const px = W * (VW < 820 ? 0.5 : 0.575), py = H * 0.485;
     const boost = state.hoveredSlot === getCentredSlot() ? 1.35 : 1.0;
 
     if (ex.aura === 'iyuana') {
-      const g = ctx.createRadialGradient(px, py, H * 0.06, px, py, H * 0.40);
-      g.addColorStop(0, `rgba(245, 164, 66, ${(0.34 * boost).toFixed(2)})`);
+      const g = ctx.createRadialGradient(px, py, H * 0.06, px, py, H * 0.42);
+      g.addColorStop(0, `rgba(218, 96, 36, ${(0.30 * boost).toFixed(2)})`);
       g.addColorStop(0.55, `rgba(42, 62, 44, ${(0.18 * boost).toFixed(2)})`);
-      g.addColorStop(1, 'rgba(227,222,212,0)');
+      g.addColorStop(1, 'rgba(15,13,12,0)');
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
       // Drifting golden Amazonian fire-sparks around the poster rim
       for (let k = 0; k < 18; k++) {
@@ -1179,35 +1250,35 @@ function renderBackdrop(nowMs) {
         ctx.beginPath(); ctx.arc(exX, exY, r, 0, Math.PI * 2); ctx.fill();
       }
     } else if (ex.aura === 'herencia') {
-      drawWetWashBlob(ctx, px, py, H * 0.44, 1, '#d88288', '#2f5fc0', 0.95 * boost);
-      drawKomorebiLight(ctx, W, H, nowSec, 0.72);
+      drawWetWashBlob(ctx, px, py, H * 0.46, 1, '#2d5238', '#193021', 0.85 * boost);
+      drawKomorebiLight(ctx, W, H, nowSec, 0.80, true);
     } else {
-      // Ayazamana stage cyclorama aura (crimson + mint + warm stage gold)
+      // Ayazamana stage cyclorama aura (crimson + warm stage gold)
       const g1 = ctx.createRadialGradient(px - H * 0.08 * Math.sin(nowSec * 0.8), py, H * 0.05, px, py, H * 0.42);
-      g1.addColorStop(0, `rgba(182, 46, 78, ${(0.32 * boost).toFixed(2)})`);
-      g1.addColorStop(0.55, `rgba(232, 188, 74, ${(0.20 * boost).toFixed(2)})`);
-      g1.addColorStop(1, 'rgba(227,222,212,0)');
+      g1.addColorStop(0, `rgba(148, 34, 62, ${(0.34 * boost).toFixed(2)})`);
+      g1.addColorStop(0.55, `rgba(128, 76, 26, ${(0.22 * boost).toFixed(2)})`);
+      g1.addColorStop(1, 'rgba(15,13,12,0)');
       ctx.fillStyle = g1; ctx.fillRect(0, 0, W, H);
     }
   } else if (c === 'c6') {
-    // C6 Gallery Ledge 3D: Warm upper museum wall + subtle raking side-window gradient
+    // C6 Gallery Ledge 3D: Dark museum wall + subtle raking nocturnal window gradient
     const wg = ctx.createLinearGradient(0, 0, W, H);
-    wg.addColorStop(0, '#eee9df');
-    wg.addColorStop(0.65, '#dfd8cb');
-    wg.addColorStop(1, '#cfc6b6');
+    wg.addColorStop(0, '#161311');
+    wg.addColorStop(0.65, '#110f0d');
+    wg.addColorStop(1, '#0b0908');
     ctx.fillStyle = wg;
     ctx.fillRect(0, 0, W, H);
-    drawKomorebiLight(ctx, W, H, nowSec, 0.62);
+    drawKomorebiLight(ctx, W, H, nowSec, 0.72, true);
   } else if (c === 'c7') {
-    // C7 Curatorial Broadsheet: Warm cotton newsprint + ink plate behind right-hand poster
-    ctx.fillStyle = '#ece6da';
+    // C7 Curatorial Broadsheet: Nocturnal charcoal rag + subtle tinted plate behind right-hand poster
+    ctx.fillStyle = '#110f0e';
     ctx.fillRect(0, 0, W, H);
     if (VW >= 820) {
       const splitX = W * 0.46;
-      ctx.fillStyle = 'rgba(21,19,16,0.14)';
+      ctx.fillStyle = 'rgba(244,237,226,0.14)';
       ctx.fillRect(splitX, H * 0.09, Math.max(1, DPR * 0.75), H * 0.82);
       const plateRgb = hexToRgb(ex.wash.mid);
-      ctx.fillStyle = rgbStr(plateRgb, 0.13);
+      ctx.fillStyle = rgbStr(plateRgb, 0.16);
       ctx.fillRect(splitX + W * 0.035, H * 0.12, W * 0.46, H * 0.76);
     }
   }
@@ -1247,13 +1318,15 @@ const triptychBarEl = $('#triptychBar');
 const bsListEl = $('#bsList');
 
 function buildStaticConceptDOM() {
-  // Centered Event Planning dropdown rows (uniform plain-English event type + Queens venue)
-  $('#indexList').innerHTML = EXHIBITIONS.map((ex, i) => `
-    <button class="index-row" type="button" data-goto="${i}">
-      <span class="index-row__top"><span>${ex.name}</span><em>${ex.shortDate}</em></span>
-      <span class="index-row__sub">${ex.uniformSub}</span>
-    </button>
-  `).join('');
+  const indexListEl = $('#indexList');
+  if (indexListEl) {
+    indexListEl.innerHTML = EXHIBITIONS.map((ex, i) => `
+      <button class="index-row" type="button" data-goto="${i}">
+        <span class="index-row__top"><span>${ex.name}</span><em>${ex.shortDate}</em></span>
+        <span class="index-row__sub">${ex.uniformSub}</span>
+      </button>
+    `).join('');
+  }
 
   // C4 Triptych captions
   triptychBarEl.innerHTML = EXHIBITIONS.map((ex, i) => `
@@ -1279,7 +1352,7 @@ function syncThemeColors() {
   const c = state.concept;
   const ex = EXHIBITIONS[state.active];
   const root = document.documentElement;
-  let ink = '#151310', muted = 'rgba(21,19,16,0.58)', rule = 'rgba(21,19,16,0.18)', bg = '#e6e1d7', dark = false;
+  let ink = '#f4ede2', muted = 'rgba(244,237,226,0.66)', rule = 'rgba(244,237,226,0.22)', bg = '#100e0d', dark = true;
 
   if (c === 'c2') {
     bg = ex.spot.room; ink = ex.spot.ink;
@@ -1293,11 +1366,12 @@ function syncThemeColors() {
     bg = ex.evolved.ground; ink = ex.evolved.ink;
     const ir = hexToRgb(ink);
     muted = rgbStr(ir, 0.68); rule = rgbStr(ir, 0.22);
-    dark = (ir[0] + ir[1] + ir[2]) > 420;
+    dark = true;
   } else if (c === 'c1') {
-    bg = ex.wash.base; ink = ex.wash.ink; muted = ex.wash.muted;
-    dark = !!ex.wash.dark;
-    rule = dark ? 'rgba(244,237,226,0.22)' : 'rgba(28,18,19,0.18)';
+    const w = resolveLandingWash(state.active);
+    bg = w.base; ink = w.ink; muted = w.muted;
+    dark = true;
+    rule = 'rgba(244,237,226,0.22)';
   }
 
   root.style.setProperty('--bg', bg);
@@ -1371,12 +1445,15 @@ function goToExhibition(nextIdx, now = performance.now()) {
   const clamped = clamp(nextIdx, 0, N - 1);
   if (clamped === state.active && !state.tw && Math.abs(state.target - clamped) < 1e-4) return false;
   const prev = state.active;
-  state.washTrans = { fromIdx: prev, toIdx: clamped, t0: now, dur: 0.78, dir: clamped >= prev ? 1 : -1 };
+  const fromWash = resolveLandingWash(prev);
   state.active = clamped;
   state.target = clamped;
+  const toWash = resolveLandingWash(clamped);
+  state.washTrans = { fromIdx: prev, toIdx: clamped, fromWash, toWash, t0: now, dur: 0.78, dir: clamped >= prev ? 1 : -1 };
   state.tw = reduced ? null : { from: state.p, to: clamped, t0: now, dur: 0.51 };
   if (reduced) state.p = clamped;
   if (scrollCueCtrl) scrollCueCtrl.markScrolled();
+  buildWorkbench();
   syncExhibitionDOM(false);
   syncUrl();
   return true;
@@ -1407,7 +1484,7 @@ filmMedia.addEventListener('click', () => {
 window.addEventListener('message', (e) => {
   const d = e.data, ifr = filmFrame();
   if (e.origin !== location.origin || !d || d.source !== 'event-media' || !ifr || e.source !== ifr.contentWindow) return;
-  if (d.type === 'ready') { filmMedia.textContent = `Media (${d.count})`; filmMedia.hidden = false; dressFilm(ifr); if (pendingMedia) { pendingMedia = false; try { ifr.contentWindow.EventMedia.open(); ifr.contentWindow.focus(); } catch {} } }
+  if (d.type === 'ready') { filmMedia.hidden = true; dressFilm(ifr); if (pendingMedia) { pendingMedia = false; try { ifr.contentWindow.EventMedia.open(); ifr.contentWindow.focus(); } catch {} } }
   if (d.type === 'open') { document.body.classList.add('media-open'); siteNav.media(true); }
   if (d.type === 'close') { document.body.classList.remove('media-open'); filmMedia.focus({ preventScroll: true }); siteNav.media(false); }
   if (d.type === 'escape') returnFromFilm();     // Escape pressed while the keyboard is inside the film
@@ -1420,6 +1497,7 @@ let pendingMedia = false;
 const siteNav = (() => {
   let quiet = 0;                                   // history moves this code made itself, to be ignored when they report back
   let at = location.hash.slice(1);                 // where the address is, or is about to be (Back takes a moment to land)
+  let aboutReturnSlug = '';
   const slugIdx = (slug) => EXHIBITIONS.findIndex((e) => e.slug === slug);
   const here = () => { const [slug = '', sub = ''] = at.split('/'); return { slug, sub }; };
   const set = (hash, push) => { at = hash; const u = new URL(location.href); u.hash = hash; history[push ? 'pushState' : 'replaceState']({ site: hash }, '', u); };
@@ -1428,8 +1506,18 @@ const siteNav = (() => {
   return {
     entered(slug) { if (here().slug !== slug) set(slug, true); },
     switched(slug) { set(slug, false); },          // Next keeps one entry, so Back from any event returns to the landing
-    left(fromHistory) { if (!fromHistory && slugIdx(here().slug) >= 0) stepBack(''); },
-    about(open) { const on = here().slug === 'about'; if (open && !on) set('about', true); else if (!open && on) stepBack(''); },
+    left(fromHistory) { aboutReturnSlug = ''; if (!fromHistory && slugIdx(here().slug) >= 0) stepBack(''); },
+    about(open) {
+      const on = here().slug === 'about';
+      if (open && !on) {
+        aboutReturnSlug = state.inFilm ? (EXHIBITIONS[state.active]?.slug || '') : '';
+        set('about', true);
+      } else if (!open && on) {
+        const fb = state.inFilm ? (aboutReturnSlug || EXHIBITIONS[state.active]?.slug || '') : '';
+        aboutReturnSlug = '';
+        stepBack(fb);
+      }
+    },
     media(open) { const h = here(); if (slugIdx(h.slug) < 0) return; if (open && h.sub !== 'media') set(h.slug + '/media', true); else if (!open && h.sub === 'media') stepBack(h.slug); },
     apply() {                                      // bring the page to what the address says
       at = location.hash.slice(1);
@@ -1438,9 +1526,11 @@ const siteNav = (() => {
         if (state.drawerOpen) closeAbout();
         if (!state.inFilm && !state.portalAnim) { pendingMedia = sub === 'media'; goToExhibition(idx); setTimeout(() => enterFilm(idx, getCentredSlot()), 60); }
         else if (state.inFilm) { try { const m = filmFrame().contentWindow.EventMedia; if (sub === 'media') m.open(); else if (m.isOpen()) m.close(); } catch {} }
+      } else if (slug === 'about') {
+        if (!state.drawerOpen) openAbout();
       } else {
+        if (state.drawerOpen) closeAbout();
         if (state.inFilm || state.portalAnim) returnFromFilm(true);
-        if (slug === 'about') { if (!state.drawerOpen) openAbout(); } else if (state.drawerOpen) closeAbout();
       }
     },
     onPop() { if (quiet > 0) { quiet--; return; } this.apply(); },
@@ -1448,9 +1538,9 @@ const siteNav = (() => {
 })();
 addEventListener('popstate', () => siteNav.onPop());
 
-/* In the visitor's view (?clean=1, or H) a film's own review controls are hidden too. They stay in the page, because the
-   end of a film is read from its time label. The films themselves are not edited: the rule is added to the film's page here. */
-const FILM_CLEAN_CSS = 'html.site-clean .cinema-pill, html.site-clean .review-pill, html.site-clean #hud, html.site-clean #hudMin, html.site-clean .prog-bar { visibility: hidden !important; pointer-events: none !important; } @media (max-width: 520px) { html.site-clean #head { top: 54px !important; } }';  // on a phone the film's corner title sits below the site's buttons
+/* In the visitor's view (?clean=1, or H) a film's own review controls are hidden too, while its progress bar remains clickable.
+   They stay in the page, because the end of a film is read from its time label. */
+const FILM_CLEAN_CSS = 'html.site-clean .cinema-pill, html.site-clean .review-pill, html.site-clean #hud, html.site-clean #hudMin, html.site-clean #head, html.site-clean .head { visibility: hidden !important; pointer-events: none !important; }';
 function dressFilm(ifr = filmFrame()) {
   try {
     const d = ifr && ifr.contentDocument; if (!d || !d.head) return;
@@ -1461,6 +1551,31 @@ function dressFilm(ifr = filmFrame()) {
 const landingShell = $('#landingShell');
 let filmEndTimer = 0, filmPollTimer = 0, veilFadeTimer = 0;
 const prefetchedUrls = new Set();
+
+function primeEventAudioFromGesture(slug) {
+  if (slug !== 'iyuana' && slug !== 'ayazamana') return;
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtx) return;
+  if (!window.__iyuanaAudioBridge) {
+    window.__iyuanaAudioBridge = { ctx: new AudioCtx(), buffers: new Map() };
+  }
+  window.__ayazamanaAudioBridge = window.__iyuanaAudioBridge;
+  const bridge = window.__iyuanaAudioBridge;
+  if (bridge.ctx.state === 'suspended') {
+    bridge.ctx.resume().catch(() => {});
+  }
+  const key = slug === 'iyuana' ? 'chant' : 'ayazamana:sanjuanito';
+  const url = slug === 'iyuana'
+    ? '/Vanessa-Espin-website/concepts/iyuana/assets/audio/forest-chant.m4a'
+    : '/Vanessa-Espin-website/flushing-theater/assets/audio/sanjuanito-ecuador.m4a';
+  if (!bridge.buffers.has(key)) {
+    const p = fetch(url)
+      .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(`HTTP ${r.status}`))))
+      .then((arr) => bridge.ctx.decodeAudioData(arr));
+    bridge.buffers.set(key, p);
+    p.catch(() => bridge.buffers.delete(key));
+  }
+}
 
 function prefetchEvent(idx) {
   const ex = EXHIBITIONS[mod(idx, N)];
@@ -1507,6 +1622,7 @@ function mountFilmIframe(ex) {
 
   const nextIdx = (state.active + 1) % N;
   const nextEx = EXHIBITIONS[nextIdx];
+  primeEventAudioFromGesture(nextEx.slug);
   prefetchEvent(nextIdx);
   filmNext.textContent = `Next: ${nextEx.name} →`;
   filmNav.classList.remove('is-ended');
@@ -1550,9 +1666,12 @@ function unmountFilmIframe() {
 
 function enterFilm(idx = state.active, slotHint = getCentredSlot()) {
   if (state.inFilm || state.portalAnim) return;
+  try { if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur(); } catch {}
   const exIdx = mod(idx, N);
   if (exIdx !== state.active) goToExhibition(exIdx);
   const ex = EXHIBITIONS[exIdx];
+  // Unlock & pre-decode exhibition WebAudio inside the live click gesture so music starts at 0ms when the stage opens!
+  primeEventAudioFromGesture(ex.slug);
   const slotIdx = (slotHint >= 0 && sheets[slotHint]) ? slotHint : getCentredSlot();
   const s = sheets[slotIdx];
   const corners = s ? projectSheetCorners(s) : [[VW * 0.4, VH * 0.3], [VW * 0.6, VH * 0.3], [VW * 0.6, VH * 0.7], [VW * 0.4, VH * 0.7]];
@@ -1585,6 +1704,7 @@ function goToNextEventFromFilm() {
   // Circular inside events (+1 mod N: Iyuana → Herencia Viva → Ayazamana → Iyuana!)
   const nextIdx = (state.active + 1) % N;
   const nextEx = EXHIBITIONS[nextIdx];
+  primeEventAudioFromGesture(nextEx.slug);
   state.active = nextIdx;
   state.target = nextIdx;
   state.p = nextIdx;
@@ -1700,6 +1820,7 @@ function renderPortalFX(nowMs) {
     fxCtx.fillRect(0, 0, W, H);
     filmStage.classList.remove('is-under');
     filmStage.classList.add('is-active');
+    document.body.classList.remove('is-entering');
     document.body.classList.add('in-film');
     state.inFilm = true;
     state.portalAnim = null;
@@ -1724,7 +1845,7 @@ function buildPortraitPrintTexture(img) {
   g.drawImage(img, pad, pad, img.width, img.height);
   g.fillStyle = 'rgba(28, 24, 20, 0.55)';
   g.font = `500 ${Math.round(W * 0.019)}px Switzer, sans-serif`;
-  g.fillText('VANESSA ESPÍN · BROOKLYN BRIDGE PARK, NY', pad, H - Math.round(botPad * 0.36));
+  g.fillText('VANESSA ESPÍN · HERENCIA VIVA, NYC', pad, H - Math.round(botPad * 0.36));
 
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -1741,6 +1862,9 @@ function openAbout(styleId = state.aboutStyle) {
   if (ABOUT_CONCEPTS.some((a) => a.id === styleId)) state.aboutStyle = styleId;
   state.drawerOpen = true;
   document.body.classList.add('about-open');
+  if (state.inFilm) {
+    try { filmFrame()?.contentWindow?.StageHost?.setPausedForOverlay?.(true); } catch {}
+  }
   siteNav.about(true);
   if (aboutCtrl) aboutCtrl.open(state.aboutStyle);
   buildWorkbench();
@@ -1753,6 +1877,9 @@ function closeAbout() {
   document.body.classList.remove('about-open');
   siteNav.about(false);
   if (aboutCtrl) aboutCtrl.close();
+  if (state.inFilm) {
+    try { filmFrame()?.contentWindow?.StageHost?.setPausedForOverlay?.(false); } catch {}
+  }
   syncUrl();
   startLoop();
 }
@@ -1767,6 +1894,16 @@ function syncUrl() {
   u.searchParams.set('portal', state.portal);
   u.searchParams.set('about', state.aboutStyle);
   u.searchParams.set('copy', state.copyMode);
+  if (state.colorMode && state.colorMode !== 'p5') u.searchParams.set('pal', state.colorMode);
+  else u.searchParams.delete('pal');
+  if (state.swatches.iyuana !== 'iy1') u.searchParams.set('iy', state.swatches.iyuana);
+  else u.searchParams.delete('iy');
+  if (state.swatches['herencia-viva'] !== 'hv1') u.searchParams.set('hv', state.swatches['herencia-viva']);
+  else u.searchParams.delete('hv');
+  if (state.swatches.ayazamana !== 'ay1') u.searchParams.set('ay', state.swatches.ayazamana);
+  else u.searchParams.delete('ay');
+  if (state.cardMood && state.cardMood !== 'f1') u.searchParams.set('card', state.cardMood);
+  else u.searchParams.delete('card');
   if (state.cueStyle && state.cueStyle !== 's2') u.searchParams.set('cue', state.cueStyle);
   else u.searchParams.delete('cue');
   if (state.introStyle && state.introStyle !== 'o1') u.searchParams.set('intro', state.introStyle);
@@ -1776,6 +1913,31 @@ function syncUrl() {
 }
 
 function buildWorkbench() {
+  const ex = EXHIBITIONS[state.active] || EXHIBITIONS[0];
+  const palEl = $('#palPills');
+  if (palEl) palEl.innerHTML = COLOR_MODES.map((m) => `
+    <button type="button" class="bench__pill" data-pal="${m.id}" title="${m.desc}" aria-pressed="${state.colorMode === m.id}">${m.label}</button>
+  `).join('');
+
+  const swGroup = $('#swatchGroup');
+  const swLbl = $('#swatchLbl');
+  const swEl = $('#swatchPills');
+  if (swLbl) swLbl.textContent = `Dark Poster Swatches (${ex.name})`;
+  if (swGroup) swGroup.style.display = (state.colorMode === 'p1') ? '' : 'none';
+  if (swEl) {
+    const swList = POSTER_SWATCHES[ex.slug] || [];
+    swEl.innerHTML = swList.map((sw) => `
+      <button type="button" class="bench__pill" data-swatch="${sw.id}" data-slug="${ex.slug}" aria-pressed="${state.swatches[ex.slug] === sw.id}">
+        <span class="bench__dot" style="background:${sw.chip}"></span>${sw.label}
+      </button>
+    `).join('');
+  }
+
+  const cmEl = $('#cardMoodPills');
+  if (cmEl) cmEl.innerHTML = CARD_MOODS.map((m) => `
+    <button type="button" class="bench__pill" data-card-mood="${m.id}" title="${m.desc}" aria-pressed="${state.cardMood === m.id}">${m.label}</button>
+  `).join('');
+
   const sp = $('#cuePills');
   if (sp) sp.innerHTML = SCROLL_CUES.map((s) => `
     <button type="button" class="bench__pill" data-cue="${s.id}" title="${s.desc}" aria-pressed="${state.cueStyle === s.id}">${s.label}</button>
@@ -1802,14 +1964,52 @@ function buildWorkbench() {
   `).join('');
 }
 
+function setColorMode(pid) {
+  if (!COLOR_MODES.some((m) => m.id === pid)) return;
+  const fromWash = resolveLandingWash(state.active);
+  state.colorMode = pid;
+  const toWash = resolveLandingWash(state.active);
+  state.washTrans = { fromIdx: state.active, toIdx: state.active, fromWash, toWash, t0: performance.now(), dur: 0.55, dir: 1 };
+  buildWorkbench();
+  syncExhibitionDOM(true);
+  syncUrl();
+  startLoop();
+}
+
+function setPosterSwatch(slug, swId) {
+  const list = POSTER_SWATCHES[slug];
+  if (!list || !list.some((s) => s.id === swId)) return;
+  const fromWash = resolveLandingWash(state.active);
+  state.swatches[slug] = swId;
+  if (state.colorMode === 'p2' || state.colorMode === 'p5') state.colorMode = 'p1';
+  const toWash = resolveLandingWash(state.active);
+  state.washTrans = { fromIdx: state.active, toIdx: state.active, fromWash, toWash, t0: performance.now(), dur: 0.55, dir: 1 };
+  buildWorkbench();
+  syncExhibitionDOM(true);
+  syncUrl();
+  startLoop();
+}
+
+function setCardMood(mid) {
+  if (!CARD_MOODS.some((m) => m.id === mid)) return;
+  state.cardMood = mid;
+  if (aboutCtrl) aboutCtrl.setCardMood(mid);
+  if (!state.drawerOpen) openAbout(state.aboutStyle);
+  buildWorkbench();
+  syncUrl();
+}
+
 function setConcept(cid) {
   const found = CONCEPTS.find((c) => c.id === cid);
   if (!found) return;
+  const fromWash = resolveLandingWash(state.active);
   state.concept = cid;
+  sizeBackdrop();
   state.portal = found.defaultPortal;
   state.aboutStyle = found.defaultAbout || state.aboutStyle;
   if (aboutCtrl) aboutCtrl.setStyle(state.aboutStyle);
-  state.washTrans = { fromIdx: state.active, toIdx: state.active, t0: performance.now(), dur: 0.5, dir: 1 };
+  const toWash = resolveLandingWash(state.active);
+  state.washTrans = { fromIdx: state.active, toIdx: state.active, fromWash, toWash, t0: performance.now(), dur: 0.5, dir: 1 };
   buildWorkbench();
   syncExhibitionDOM(true);
   syncUrl();
@@ -1842,6 +2042,12 @@ function setCueStyle(sid) {
 }
 
 $('#bench').addEventListener('click', (e) => {
+  const bpal = e.target.closest('[data-pal]');
+  if (bpal) setColorMode(bpal.dataset.pal);
+  const bsw = e.target.closest('[data-swatch]');
+  if (bsw) setPosterSwatch(bsw.dataset.slug, bsw.dataset.swatch);
+  const bcm = e.target.closest('[data-card-mood]');
+  if (bcm) setCardMood(bcm.dataset.cardMood);
   const bsc = e.target.closest('[data-cue]');
   if (bsc) setCueStyle(bsc.dataset.cue);
   const bc = e.target.closest('[data-c]');
@@ -1928,8 +2134,11 @@ glCanvas.addEventListener('pointermove', (e) => {
     const liveEx = clamp(Math.round(state.p), 0, N - 1);
     if (liveEx !== state.active) {
       const prev = state.active;
+      const fromWash = resolveLandingWash(prev);
       state.active = liveEx;
-      state.washTrans = { fromIdx: prev, toIdx: liveEx, t0: performance.now(), dur: 0.65, dir: dx < 0 ? 1 : -1 };
+      const toWash = resolveLandingWash(liveEx);
+      state.washTrans = { fromIdx: prev, toIdx: liveEx, fromWash, toWash, t0: performance.now(), dur: 0.65, dir: dx < 0 ? 1 : -1 };
+      buildWorkbench();
       syncExhibitionDOM(false);
     }
   }
@@ -1978,43 +2187,29 @@ addEventListener('wheel', (e) => {
   }
 }, { passive: false });
 
-// UI Buttons, Top-Right Burger Menu & Keyboard
-const menuBtn = $('#menuBtn'), menuPop = $('#menuPop');
-function closeMenuPop() {
-  if (!menuPop) return;
-  menuPop.hidden = true;
-  menuBtn?.setAttribute('aria-expanded', 'false');
-}
-
-$('#aboutBtn').addEventListener('click', () => {
-  closeMenuPop();
+// UI Buttons, Top-Right About Me Button & Keyboard
+$('#aboutBtn')?.addEventListener('click', () => {
+  if (state.drawerOpen) closeAbout();
+  else openAbout(state.aboutStyle);
+});
+$('#filmAbout')?.addEventListener('click', () => {
   if (state.drawerOpen) closeAbout();
   else openAbout(state.aboutStyle);
 });
 $('#enterBtn')?.addEventListener('click', () => enterFilm(state.active, getCentredSlot()));
-$('#enterBtnMobile')?.addEventListener('click', () => enterFilm(state.active, getCentredSlot()));
 $('#bsEnterBtn')?.addEventListener('click', () => enterFilm(state.active, getCentredSlot()));
 $('#filmReturn').addEventListener('click', () => returnFromFilm());
-$('#filmNext').addEventListener('click', goToNextEventFromFilm);
+$('#filmNext')?.addEventListener('click', goToNextEventFromFilm);
 $('#brandHome').addEventListener('click', (e) => {
   e.preventDefault();
-  closeMenuPop();
   if (state.drawerOpen) closeAbout();
   if (state.inFilm) returnFromFilm();
   goToExhibition(0);
 });
 
-menuBtn?.addEventListener('click', (e) => {
-  e.stopPropagation();
-  const open = menuPop.hidden;
-  if (open && state.drawerOpen) closeAbout();
-  menuPop.hidden = !open;
-  menuBtn.setAttribute('aria-expanded', String(open));
-});
 document.addEventListener('click', (e) => {
-  if (!e.target.closest('.menu-wrap')) closeMenuPop();
   const gt = e.target.closest('[data-goto]');
-  if (gt) { closeMenuPop(); goToExhibition(+gt.dataset.goto); }
+  if (gt) goToExhibition(+gt.dataset.goto);
   const tr = e.target.closest('[data-trip]');
   if (tr) {
     const idx = +tr.dataset.trip;
@@ -2029,12 +2224,19 @@ addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     if (state.drawerOpen) closeAbout();
     else if (state.inFilm || state.portalAnim) returnFromFilm();
-    else if (menuPop && !menuPop.hidden) closeMenuPop();
     return;
   }
   if (false) {
     document.body.classList.toggle('clean-hud');
     dressFilm();
+    return;
+  }
+  if (state.inFilm && e.code === 'Space' && !e.target?.closest?.('button, a')) {
+    e.preventDefault();
+    try {
+      const cw = filmFrame()?.contentWindow;
+      if (cw) cw.dispatchEvent(new cw.KeyboardEvent('keydown', { key: ' ', code: 'Space', bubbles: true }));
+    } catch {}
     return;
   }
   if (state.inFilm || state.drawerOpen || state.portalAnim) return;
@@ -2048,9 +2250,15 @@ addEventListener('keydown', (e) => {
    ========================================================================= */
 let rafId = 0, lastNow = performance.now();
 
+function isLandingLoopNeeded() {
+  if (document.hidden) return false;
+  if (!state.inFilm) return true;
+  return Boolean(state.portalAnim || state.drawerOpen || (aboutCtrl && aboutCtrl.getMix() > 0.001));
+}
+
 function tick(now) {
   rafId = 0;
-  if (document.hidden || (state.inFilm && !state.portalAnim)) return;
+  if (!isLandingLoopNeeded()) return;
 
   const dt = Math.min(0.05, (now - lastNow) / 1000);
   lastNow = now;
@@ -2088,7 +2296,15 @@ function tick(now) {
     camera.lookAt(0, 0, 0);
   }
 
-  renderBackdrop(now);
+  // The backdrop's own motion is a slow drift of light (well under a pixel a frame), so while nothing else is changing
+  // it is repainted on every other frame. A colour change, the About room dimming or a portal repaint it every frame.
+  {
+    const rm = aboutCtrl ? aboutCtrl.getRoomMode() : null;
+    const key = `${state.concept}|${state.active}|${backCanvasEl.width}x${backCanvasEl.height}|${rm ? (rm.dimWall || 0).toFixed(3) + '/' + (rm.nightKomorebi || 0).toFixed(3) + '/' + (rm.posterShiftX ?? '') : ''}`;
+    const washing = (now - state.washTrans.t0) / 1000 < state.washTrans.dur + 0.1;
+    const busy = washing || !!state.portalAnim || key !== backdropKey || state.concept !== 'c1' || BACK_FULL;
+    if (busy || (backdropTurn++ & 1) === 0) { renderBackdrop(now); backdropKey = key; }
+  }
   renderer.render(scene, camera);
   updateTapeOverlay();
   if (state.portalAnim) renderPortalFX(now);
@@ -2097,7 +2313,7 @@ function tick(now) {
 }
 
 function startLoop() {
-  if (!rafId && !document.hidden && !(state.inFilm && !state.portalAnim)) {
+  if (!rafId && isLandingLoopNeeded()) {
     lastNow = performance.now();
     rafId = requestAnimationFrame(tick);
   }
@@ -2134,13 +2350,28 @@ async function boot() {
     goToExhibition: (exIdx) => goToExhibition(exIdx),
     enterFilmFromAbout: (exIdx) => {
       closeAbout();
-      goToExhibition(exIdx);
-      setTimeout(() => enterFilm(exIdx, getCentredSlot()), 60);
+      if (state.inFilm) {
+        const nextEx = EXHIBITIONS[mod(exIdx, N)];
+        primeEventAudioFromGesture(nextEx.slug);
+        state.active = mod(exIdx, N);
+        state.target = state.active;
+        state.p = state.active;
+        syncExhibitionDOM(true);
+        syncUrl();
+        siteNav.switched(nextEx.slug);
+        mountFilmIframe(nextEx);
+      } else {
+        goToExhibition(exIdx);
+        setTimeout(() => enterFilm(exIdx, getCentredSlot()), 60);
+      }
     },
     onCloseStateChange: (isOpen) => {
       state.drawerOpen = isOpen;
       document.body.classList.toggle('about-open', isOpen);
       siteNav.about(isOpen);
+      if (!isOpen && state.inFilm) {
+        try { filmFrame()?.contentWindow?.StageHost?.setPausedForOverlay?.(false); } catch {}
+      }
       buildWorkbench();
       syncUrl();
       startLoop();
@@ -2170,7 +2401,7 @@ async function boot() {
   ]);
 
   const [portraitImg, ...imgs] = await Promise.all([
-    loadImg('../img/portrait.jpg'),
+    loadImg('../img/about-me.jpg'),
     ...EXHIBITIONS.map((ex) => loadImg(ex.poster)),
   ]);
   const maxAniso = renderer.capabilities.getMaxAnisotropy();

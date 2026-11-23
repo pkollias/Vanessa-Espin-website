@@ -1,5 +1,5 @@
-/* Event media: strip and pop-up. Mechanics are in event-media.js; this file holds every look.
-   Styled to Pavlos's locked S1 + 5B + Full-Center-Wake + Tick-Ruler + Pop-Up Placard configuration.
+/* Event media: narrow sampling strip + continuous diminishing-wing viewer mode.
+   Mechanics are in event-media.js; this file holds every look as custom properties on .evm.
    Unitless numbers are read by the script (fractions of the screen, pixels or milliseconds as noted). */
 .evm {
   --evm-serif: 'Gambetta', Georgia, serif;
@@ -13,36 +13,38 @@
   --evm-pool: rgba(244, 174, 86, 0.13);
   --evm-vignette: rgba(4, 3, 2, 0.72);
 
-  --evm-strip-h: 0.58;        /* strip height, as a fraction of the screen height */
-  --evm-strip-y: 0;           /* vertical nudge of the strip, as a fraction of the screen height */
-  --evm-gap: 16;              /* px between frames */
-  --evm-edge: 0.1;            /* margin at rest: the first frame starts this far in, as a fraction of the screen width */
-  --evm-rest-centre: 0;       /* 1 = the first and last frames rest at the centre of the screen instead */
-  --evm-aperture: 0.38;       /* width / height of every frame at rest: one fixed, narrow window (5B strict slits) */
-  --evm-aperture-open: 0.62;  /* width / height of the selected frame: it widens, its neighbours step aside */
-  --evm-open-ms: 300;         /* ms: how long that widening takes */
-  --evm-pan: 1;               /* 0 to 1: how much of the hidden part of a picture the counter-pan travels */
-  --evm-pan-min: 0.35;        /* every picture is fitted at least this much wider than the widened frame */
-  --evm-whole-in-strip: 0;    /* 0 = 5B Strict Slits (every item uses the fixed panning aperture in the strip, opens 100% whole) */
-  --evm-wheel: 1;             /* wheel and trackpad gain */
-  --evm-glide: 0.13;          /* seconds: how viscous the strip feels */
+  /* Mode 1 · Narrow Sampling Strip (fixed width, zero hover accordion, inner counter-pan) */
+  --evm-strip-h: 0.56;        /* strip height, as a fraction of the screen height */
+  --evm-strip-y: 0;           /* vertical nudge of the strip */
+  --evm-gap: 14;              /* px between slivers in strip mode */
+  --evm-edge: 0.08;           /* resting left/right margin of the strip, as fraction of screen width */
+  --evm-rest-centre: 0;
+  --evm-aperture: 0.27;       /* narrow fixed sliver aspect (width / height) — teases without showing the full picture */
+  --evm-pan: 1;               /* 0 to 1: counter-pan travel across hidden width */
+  --evm-pan-min: 0.65;        /* every picture is at least 65% wider than its narrow sliver so all items visibly counter-pan */
+  --evm-wheel: 1;             /* wheel and trackpad gain in strip mode (wheel is locked in viewer mode) */
+  --evm-glide: 0.13;          /* seconds: viscous strip follow */
   --evm-inertia: 320;         /* ms of throw after a drag is released */
 
-  /* Silver-Gelatin darkroom wash (rich blacks, zero muddy gray fog) */
-  --evm-wash-sat: 0.14;
+  /* Silver-Gelatin sampling wash (stays washed until clicked open; subtle wake under pointer) */
+  --evm-wash-sat: 0.12;
   --evm-wash-contrast: 1.04;
-  --evm-wash-bright: 0.74;
-  --evm-veil: 0.22;
+  --evm-wash-bright: 0.70;
+  --evm-veil: 0.24;
   --evm-veil-color: #12100e;
-  --evm-lift-ms: 300ms;       /* how fast the wash lifts on hover or selection */
+  --evm-lift-ms: 260ms;
 
-  --evm-pop-ms: 520;          /* ms: a frame opening to the whole picture, and folding back */
-  --evm-pop-inset-x: 0.05;    /* room kept clear around the open picture, as fractions of the screen */
-  --evm-pop-inset-y: 0.095;
-  --evm-pop-upscale: 1;       /* the open picture is never shown larger than this many CSS px per file px */
-  --evm-part-dist: 7vw;       /* how far the neighbours part when a frame opens */
-  --evm-part-fade: 0.86;      /* how much they recede (0 = stay, 1 = vanish) */
-  --evm-scrim: 0.88;          /* how far the ground closes over the strip behind an open picture */
+  /* Mode 2 · In-Place Viewer Mode With Diminishing Flanking Wings */
+  --evm-pop-ms: 500;          /* ms: unfolding from strip into viewer mode, and folding back */
+  --evm-step-ms: 430;         /* ms: gliding from one open item to another in viewer mode */
+  --evm-hero-max-w: 0.56;     /* max width of center hero on desktop (leaves side bays for diminishing wings) */
+  --evm-hero-max-h: 0.69;     /* max height of center hero (leaves clean top chrome & bottom placard+index room) */
+  --evm-pop-upscale: 1;       /* never upscale beyond 1 CSS px per file px */
+  --evm-hero-gap: 26;         /* px breathing room between the whole hero and the ±1 wings */
+  --evm-wing-gap: 13;         /* px between outer diminishing wings (±1..±2..±3) */
+  --evm-wing-h1: 0.66;        /* height of ±1 wing as fraction of strip/viewer base height */
+  --evm-wing-decay: 0.72;     /* geometric height step-down per wing step (d=1 -> 0.66, d=2 -> 0.48, d=3 -> 0.34) */
+  --evm-wing-aperture: 0.26;  /* narrow sliver aspect of flanking wings */
   --evm-fade-ms: 320;         /* ms: the viewer arriving and leaving */
 
   position: fixed; inset: 0; z-index: 2147483000; overflow: hidden; contain: layout paint;
@@ -56,7 +58,7 @@
   .evm { --evm-hair: 0.5px; }
 }
 
-/* 1A Per-Event Nocturnal Room Undertones */
+/* Per-Event Nocturnal Room Undertones */
 .evm[data-event='herencia-viva'] {
   --evm-ground: #15100f;
   --evm-accent: #e49a92;
@@ -70,7 +72,7 @@
   --evm-vignette: rgba(3, 2, 3, 0.76);
 }
 
-.evm[hidden], .evm-pop[hidden] { display: none; }
+.evm[hidden] { display: none; }
 .evm.is-open { opacity: 1; }
 html.evm-lock { overflow: hidden; }
 .evm button { font: inherit; letter-spacing: inherit; color: inherit; }
@@ -85,167 +87,173 @@ html.evm-lock { overflow: hidden; }
 }
 .evm__grain {
   position: absolute; inset: -2rem; z-index: 6; pointer-events: none;
-  background-image: url(./noise.png); background-size: 150px 150px;
+  background-image: url(/Vanessa-Espin-website/landing-v3/img/noise.png); background-size: 150px 150px;
   opacity: 0.068; mix-blend-mode: screen;
 }
 
-/* ── the strip ── */
-.evm__viewport { position: absolute; inset: 0; z-index: 2; overflow: hidden; touch-action: none; cursor: grab; }
-.evm.is-dragging .evm__viewport { cursor: grabbing; }
-.evm__track { position: absolute; left: 0; top: 0; height: 100%; will-change: transform; }
-.evm-item { position: absolute; margin: 0; overflow: hidden; transform: translate3d(var(--evm-shift, 0px), 0, 0); }
-.evm-item__frame {
-  position: absolute; inset: 0; display: block; margin: 0; padding: 0; border: 0; background: #070605;
-  overflow: hidden; cursor: inherit;
-  box-shadow: inset 0 0 0 var(--evm-hair) rgba(244, 237, 226, 0.13);
-  transition: box-shadow 0.28s ease;
+/* ── the continuous strip / viewer stage ── */
+.evm__viewport {
+  position: absolute; inset: 0; z-index: 2; overflow: hidden;
+  touch-action: none; cursor: grab;
 }
-.evm-item:hover .evm-item__frame,
-.evm-item.is-selected .evm-item__frame {
-  box-shadow: inset 0 0 0 1px rgba(244, 237, 226, 0.48), 0 18px 44px rgba(0, 0, 0, 0.45);
+.evm[data-wings='arc'] .evm__viewport,
+.evm[data-wings='hinged'] .evm__viewport {
+  perspective: 1250px;
+}
+.evm.is-dragging .evm__viewport { cursor: grabbing; }
+.evm.is-popped .evm__viewport { cursor: default; }
+
+.evm__track {
+  position: absolute; left: 0; top: 0; width: 100%; height: 100%;
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+.evm-item {
+  position: absolute; left: 0; top: 0; margin: 0; overflow: hidden;
+  will-change: transform, width, height, opacity;
+}
+.evm-item__frame {
+  position: absolute; inset: 0; display: block; margin: 0; padding: 0; border: 0;
+  background: #070605; overflow: hidden; cursor: pointer;
+  box-shadow: inset 0 0 0 var(--evm-hair) rgba(244, 237, 226, 0.13);
+  transition: box-shadow 0.25s ease;
+}
+.evm:not(.is-popped) .evm-item:hover .evm-item__frame,
+.evm-item__frame:focus-visible {
+  box-shadow: inset 0 0 0 1px rgba(244, 237, 226, 0.46), 0 14px 36px rgba(0, 0, 0, 0.42);
+}
+.evm.is-popped .evm-item.is-hero .evm-item__frame {
+  cursor: default;
+  border-radius: 1.5px;
+  box-shadow: 0 32px 86px rgba(0, 0, 0, 0.74), inset 0 0 0 var(--evm-hair) rgba(244, 237, 226, 0.24);
+}
+.evm.is-popped .evm-item.is-wing:hover .evm-item__frame {
+  box-shadow: inset 0 0 0 1px rgba(244, 237, 226, 0.44);
 }
 .evm-item__frame:focus-visible { outline-offset: -2px; }
+
 .evm-item__media {
-  position: absolute; left: 0; top: 0; display: block; max-width: none; object-fit: cover; pointer-events: none; will-change: transform;
+  position: absolute; left: 0; top: 0; display: block; max-width: none;
+  object-fit: cover; pointer-events: none; will-change: transform, width, height;
   filter: saturate(var(--evm-wash-sat)) contrast(var(--evm-wash-contrast)) brightness(var(--evm-wash-bright));
   transition: filter var(--evm-lift-ms) ease;
 }
-.evm-item__media--video > * { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
-.evm-item__media--video > [hidden] { display: none; }
 .evm-item__veil {
   position: absolute; inset: 0; pointer-events: none;
   background: var(--evm-veil-color); opacity: var(--evm-veil);
   transition: opacity var(--evm-lift-ms) ease;
 }
 
-/* Whisper video timecode pill inside strip slots (fades gently when actively playing) */
+/* Strip Mode hover: subtle tonal hint under cursor while keeping the narrow sliver crop */
+.evm:not(.is-popped) .evm-item:hover .evm-item__media,
+.evm:not(.is-popped) .evm-item__frame:focus-visible .evm-item__media {
+  filter: saturate(0.72) contrast(1.03) brightness(0.92);
+}
+.evm:not(.is-popped) .evm-item:hover .evm-item__veil,
+.evm:not(.is-popped) .evm-item__frame:focus-visible .evm-item__veil {
+  opacity: 0.06;
+}
+
+/* Viewer Mode: ONLY the opened Center Hero shows 100% full true-to-file colour */
+.evm.is-popped .evm-item.is-hero .evm-item__media {
+  filter: none;
+}
+.evm.is-popped .evm-item.is-hero .evm-item__veil {
+  opacity: 0;
+}
+.evm.is-popped .evm-item.is-wing:hover .evm-item__media {
+  filter: saturate(0.45) contrast(1.03) brightness(0.86);
+}
+.evm.is-popped .evm-item.is-wing:hover .evm-item__veil {
+  opacity: 0.12;
+}
+
+/* Active Hero Video Player (mounted ONLY when opened in Viewer Mode — zero strip video playback!) */
+.evm-item__hero-video {
+  position: absolute; inset: 0; z-index: 4;
+  width: 100%; height: 100%; display: block; object-fit: contain; background: #050404;
+  pointer-events: auto;
+}
+
+/* Whisper video indicator inside narrow strip & wing slivers (hidden when playing as hero) */
 .evm-item__vid-pill {
-  position: absolute; left: 9px; bottom: 9px; z-index: 3; pointer-events: none;
+  position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 3; pointer-events: none;
   display: inline-flex; align-items: center; gap: 4px;
   padding: 3.5px 7.5px; border-radius: 999px;
-  background: rgba(14, 12, 10, 0.72);
+  background: rgba(14, 12, 10, 0.74);
   border: var(--evm-hair) solid rgba(244, 237, 226, 0.24);
   backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-  color: #f4ede2; font: 500 10px/1 var(--evm-sans);
-  letter-spacing: 0.04em; font-variant-numeric: tabular-nums;
-  transition: opacity 0.25s ease;
+  color: #f4ede2; font: 500 9.5px/1 var(--evm-sans);
+  letter-spacing: 0.04em; font-variant-numeric: tabular-nums; white-space: nowrap;
+  transition: opacity 0.22s ease;
 }
-.evm-item.is-playing .evm-item__vid-pill { opacity: 0.25; }
+.evm-item.is-hero .evm-item__vid-pill { opacity: 0; }
 
-/* Silver-Gelatin lift + Full-Colour Center Wake when scrolling with wheel/keys (yields immediately to any hovered frame!) */
-.evm-item:hover .evm-item__media,
-.evm-item.is-selected .evm-item__media,
-.evm-item__frame:focus-visible .evm-item__media,
-.evm-item.is-open .evm-item__media,
-.evm__track:not(:hover) .evm-item.is-current .evm-item__media { filter: none; }
-
-.evm-item:hover .evm-item__veil,
-.evm-item.is-selected .evm-item__veil,
-.evm-item__frame:focus-visible .evm-item__veil,
-.evm-item.is-open .evm-item__veil,
-.evm__track:not(:hover) .evm-item.is-current .evm-item__veil { opacity: 0; }
-
-@media (hover: none) {
-  .evm-item.is-current .evm-item__media { filter: none; }
-  .evm-item.is-current .evm-item__veil { opacity: 0; }
-}
-
-/* Staggered horizontal entrance deal on .evm-item__frame (never touches .evm-item's --evm-shift!) */
+/* Staggered horizontal entrance deal on .evm-item__frame */
 @keyframes evmDealIn {
-  from { opacity: 0; transform: translate3d(44px, 0, 0); }
+  from { opacity: 0; transform: translate3d(42px, 0, 0); }
   to   { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 .evm.is-dealing .evm-item__frame {
   animation: evmDealIn 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
-  animation-delay: calc(var(--evm-dist, 0) * 35ms);
+  animation-delay: calc(var(--evm-dist, 0) * 32ms);
 }
 
-/* a frame is open: its slot empties, the neighbours part and recede (--evm-e runs 0 to 1) */
-.evm-item.is-open { visibility: hidden; }
-.evm-item.is-before { transform: translate3d(calc(var(--evm-shift, 0px) - var(--evm-e, 0) * var(--evm-part-dist)), 0, 0); opacity: calc(1 - var(--evm-e, 0) * var(--evm-part-fade)); }
-.evm-item.is-after { transform: translate3d(calc(var(--evm-shift, 0px) + var(--evm-e, 0) * var(--evm-part-dist)), 0, 0); opacity: calc(1 - var(--evm-e, 0) * var(--evm-part-fade)); }
-
-/* ── the open picture & museum placard ── */
-.evm-pop { position: absolute; inset: 0; z-index: 5; }
-.evm-pop__scrim { position: absolute; inset: 0; background: var(--evm-ground); opacity: calc(var(--evm-e, 0) * var(--evm-scrim)); }
-.evm-pop__box {
-  position: absolute; overflow: hidden; background: #050404; border-radius: 1.5px;
-  box-shadow: 0 32px 86px rgba(0, 0, 0, 0.72), 0 0 0 var(--evm-hair) rgba(244, 237, 226, 0.22);
-}
-.evm-pop__media { position: absolute; display: block; max-width: none; object-fit: cover; }
-
-.evm-pop__edge {
-  position: absolute; top: 0; bottom: 0; width: 11vw; margin: 0; padding: 0 clamp(14px, 2vw, 28px);
-  border: 0; background: none; display: flex; align-items: center;
-  opacity: calc(var(--evm-e, 0) * 0.75); transition: opacity 0.2s ease;
-}
-.evm-pop__edge--prev { left: 0; justify-content: flex-start; cursor: w-resize; }
-.evm-pop__edge--next { right: 0; justify-content: flex-end; cursor: e-resize; }
-.evm-pop__edge--prev::after { content: '←'; }
-.evm-pop__edge--next::after { content: '→'; }
-.evm-pop__edge::after {
-  width: 40px; height: 40px; border-radius: 999px;
-  display: grid; place-items: center;
-  background: rgba(18, 15, 13, 0.68);
-  border: var(--evm-hair) solid rgba(244, 237, 226, 0.28);
+/* ── Viewer Mode Left / Right Stepper Buttons ── */
+.evm__step {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 8;
+  width: 40px; height: 40px; border-radius: 999px; margin: 0; padding: 0; border: 0;
+  display: grid; place-items: center; cursor: pointer;
+  background: rgba(18, 15, 13, 0.68); color: #f4ede2;
+  border: var(--evm-hair) solid rgba(244, 237, 226, 0.26);
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  font: 500 15px/1 var(--evm-sans); color: #f4ede2;
-  transition: transform 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+  font: 500 15px/1 var(--evm-sans);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.22s ease, border-color 0.22s ease, background 0.22s ease;
 }
-.evm-pop__edge:hover, .evm-pop__edge:focus-visible { opacity: 1; }
-.evm-pop__edge:hover::after {
-  border-color: var(--evm-accent);
+.evm__step--prev { left: clamp(14px, 2vw, 28px); }
+.evm__step--next { right: clamp(14px, 2vw, 28px); }
+.evm.is-popped .evm__step { opacity: 0.82; pointer-events: auto; }
+.evm.is-popped .evm__step:hover {
+  opacity: 1; border-color: var(--evm-accent);
   background: rgba(26, 22, 18, 0.94);
-  transform: scale(1.06);
+  transform: translateY(-50%) scale(1.06);
 }
-.evm-pop__edge:disabled { visibility: hidden; }
+.evm.is-popped .evm__step:disabled { opacity: 0; pointer-events: none; }
 
-/* Pop-Up Museum Placard */
-.evm-placard {
-  position: absolute; left: 50%; bottom: clamp(16px, 2.3vh, 24px);
-  transform: translateX(-50%); z-index: 9; pointer-events: none;
-  display: none; align-items: baseline; gap: 10px; max-width: min(70vw, 680px);
-  padding: 7px 15px; border-radius: 999px;
-  background: rgba(16, 13, 11, 0.78);
-  border: var(--evm-hair) solid rgba(244, 237, 226, 0.20);
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  color: #f4ede2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  opacity: var(--evm-e, 0);
-}
-.evm.is-popped .evm-placard { display: inline-flex; }
-.evm-placard__kind {
-  font: 600 9.5px/1 var(--evm-sans); letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--evm-accent); flex-shrink: 0;
-}
-.evm-placard__title {
-  font: 401 14.5px/1.2 var(--evm-serif); overflow: hidden; text-overflow: ellipsis;
-}
-
-/* ── corner chrome (Gambetta + Switzer smoked-glass pills) ── */
+/* ── Corner Chrome (Gambetta + Switzer Smoked-Glass Pills) ── */
 .evm__chrome {
   position: absolute; left: 0; right: 0; top: 0; z-index: 8;
   display: flex; justify-content: space-between; align-items: center; gap: 16px;
   padding: clamp(16px, 2.2vh, 24px) clamp(18px, 2.4vw, 34px); pointer-events: none;
 }
 .evm__chrome > * { pointer-events: auto; }
-.evm__back {
+.evm__back,
+.evm__fold {
   margin: 0; display: inline-flex; align-items: center; gap: 7px;
   padding: 8px 15px; border-radius: 999px; cursor: pointer;
   background: rgba(18, 15, 13, 0.62); color: rgba(244, 237, 226, 0.90);
   border: var(--evm-hair) solid rgba(244, 237, 226, 0.24);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   font: 500 12.5px/1 var(--evm-sans); letter-spacing: 0.02em;
-  transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.25s ease;
+  transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.25s ease, opacity 0.25s ease;
 }
-.evm__back:hover {
+.evm__back:hover,
+.evm__fold:hover {
   background: rgba(28, 24, 20, 0.92);
   border-color: rgba(244, 237, 226, 0.56);
   color: #fff;
-  transform: translateX(-2px);
 }
+.evm__back:hover { transform: translateX(-2px); }
+.evm__right { display: inline-flex; align-items: center; gap: 8px; }
+.evm__fold { display: none; padding: 6px 12px; font-size: 12px; }
+.evm.is-popped .evm__fold { display: inline-flex; }
+
 .evm__title {
   flex: 1 1 auto; min-width: 0; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   font: 300 clamp(19px, 1.65vw, 24px)/1.1 var(--evm-serif); letter-spacing: -0.018em; opacity: 0.92;
+  pointer-events: none;
 }
 .evm__count {
   padding: 6px 12px; border-radius: 999px;
@@ -255,13 +263,34 @@ html.evm-lock { overflow: hidden; }
   font-variant-numeric: tabular-nums; white-space: nowrap; color: rgba(244, 237, 226, 0.82);
 }
 
-/* ── architectural tick-ruler + floating hover loupe ── */
+/* ── Centered Bottom Stack: Museum Placard + Centered Architectural Tick-Ruler ── */
+.evm-placard {
+  position: absolute; left: 50%; bottom: clamp(52px, 6.2vh, 64px);
+  transform: translateX(-50%); z-index: 9; pointer-events: none;
+  display: inline-flex; align-items: baseline; gap: 10px; max-width: min(74vw, 680px);
+  padding: 6px 15px; border-radius: 999px;
+  background: rgba(16, 13, 11, 0.78);
+  border: var(--evm-hair) solid rgba(244, 237, 226, 0.20);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  color: #f4ede2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  opacity: 0; transition: opacity 0.24s ease;
+}
+.evm.is-popped .evm-placard { opacity: 1; }
+.evm-placard__kind {
+  font: 600 9.5px/1 var(--evm-sans); letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--evm-accent); flex-shrink: 0;
+}
+.evm-placard__title {
+  font: 401 14px/1.2 var(--evm-serif); overflow: hidden; text-overflow: ellipsis;
+}
+
 .evm__map {
-  position: absolute; right: clamp(18px, 2.4vw, 34px); bottom: clamp(16px, 2.2vh, 24px); z-index: 8;
-  display: flex; gap: 0; align-items: flex-end; max-width: min(64vw, 760px);
-  padding: 6px 8px; border-radius: 999px;
-  background: rgba(16, 13, 11, 0.48);
-  border: var(--evm-hair) solid rgba(244, 237, 226, 0.12);
+  position: absolute; left: 50%; bottom: clamp(14px, 2vh, 22px);
+  transform: translateX(-50%); z-index: 8;
+  display: flex; gap: 0; align-items: flex-end; max-width: min(86vw, 760px);
+  padding: 6px 10px; border-radius: 999px;
+  background: rgba(16, 13, 11, 0.52);
+  border: var(--evm-hair) solid rgba(244, 237, 226, 0.14);
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
 }
 .evm-map__thumb {
@@ -276,7 +305,7 @@ html.evm-lock { overflow: hidden; }
 }
 .evm-map__thumb[data-kind='video']::after,
 .evm-map__thumb[data-kind='painting']::after { height: 14px; }
-.evm-map__thumb.is-in-view::after { opacity: 0.68; height: 15px; }
+.evm-map__thumb.is-in-view::after { opacity: 0.64; height: 15px; }
 .evm-map__thumb.is-current::after,
 .evm-map__thumb.is-open::after,
 .evm-map__thumb:hover::after {
@@ -326,11 +355,19 @@ html.evm-lock { overflow: hidden; }
   .evm, .evm-item__media, .evm-item__veil, .evm-open { transition: none; }
   .evm.is-dealing .evm-item__frame { animation: none; }
 }
-@media (max-width: 640px) {
-  .evm { --evm-strip-h: 0.5; --evm-gap: 10; }
+@media (max-width: 720px) {
+  .evm {
+    --evm-strip-h: 0.50;
+    --evm-gap: 10;
+    --evm-hero-max-w: 0.80;
+    --evm-hero-max-h: 0.64;
+    --evm-hero-gap: 14;
+    --evm-wing-gap: 8;
+  }
   .evm__chrome { padding: 14px 16px; }
   .evm__title { display: none; }
-  .evm__map { left: 16px; right: 16px; bottom: 14px; max-width: none; justify-content: center; }
-  .evm-placard { bottom: 52px; max-width: calc(100vw - 32px); }
+  .evm__map { max-width: calc(100vw - 28px); bottom: 12px; }
+  .evm-placard { bottom: 48px; max-width: calc(100vw - 28px); font-size: 12.5px; }
+  .evm__step { width: 34px; height: 34px; font-size: 13px; }
   .evm-loupe { display: none !important; }
 }

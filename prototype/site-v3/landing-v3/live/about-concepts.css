@@ -21,7 +21,7 @@
 
   position: fixed;
   inset: 0;
-  z-index: 44;
+  z-index: 72;
   color: var(--ab-parchment);
   font-family: var(--ab-sans);
   font-weight: 400;
@@ -44,8 +44,7 @@
   transition: opacity 0.44s var(--ab-ease-out), visibility 0s linear 0.45s;
 }
 
-body.is-entering #aboutStage,
-body.in-film #aboutStage {
+body.is-entering:not(.in-film):not(.about-open) #aboutStage {
   opacity: 0 !important;
   pointer-events: none !important;
   transition: opacity 0.18s ease !important;
@@ -169,12 +168,12 @@ body.in-film #aboutStage {
   transform: translateY(-1px);
 }
 
-/* Archival Uncropped Natural-Colour Portrait Integrity (773×806, ZERO zoom, ZERO crop) */
+/* Archival Uncropped Natural-Colour Portrait Integrity (1290×1930, ZERO zoom, ZERO crop) */
 .ab-portrait-img {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 773 / 806;
+  aspect-ratio: 1290 / 1930;
   object-fit: contain;
   filter: none;
   transform: none !important;
@@ -417,7 +416,7 @@ body.in-film #aboutStage {
 
 .a1-hero {
   display: grid;
-  grid-template-columns: clamp(178px, 14.4vw, 210px) 1fr;
+  grid-template-columns: clamp(148px, 12.2vw, 178px) 1fr;
   gap: clamp(20px, 2.3vw, 34px);
   align-items: center;
 }
@@ -436,9 +435,10 @@ body.in-film #aboutStage {
 
 .a1-mat__cap {
   margin-top: 6px;
-  font: 400 9.5px/1.2 var(--ab-serif);
-  letter-spacing: 0.16em;
+  font: 400 8.5px/1.2 var(--ab-serif);
+  letter-spacing: 0.105em;
   text-transform: uppercase;
+  white-space: nowrap;
   color: var(--ab-stone);
   text-align: center;
 }
@@ -621,7 +621,7 @@ body.in-film #aboutStage {
 .a2-mobile-portrait {
   display: none;
   margin: 0;
-  max-width: 220px;
+  max-width: 196px;
   padding: 6px;
   background: #15120f;
   border: var(--ab-hair) solid var(--ab-rule);
@@ -859,7 +859,7 @@ body.in-film #aboutStage {
 
 .a3-plate__fig {
   margin: 0;
-  width: min(100%, 340px);
+  width: min(100%, 300px, 36vh);
   padding: 10px;
   background: #14110e;
   border: var(--ab-hair) solid rgba(236, 216, 182, 0.26);
@@ -989,7 +989,7 @@ body.in-film #aboutStage {
 
 .a4-header {
   display: grid;
-  grid-template-columns: clamp(154px, 12vw, 175px) 1fr;
+  grid-template-columns: clamp(126px, 9.8vw, 148px) 1fr;
   gap: 20px;
   align-items: center;
 }
@@ -1131,7 +1131,7 @@ body.in-film #aboutStage {
 
 .a5-focal {
   display: grid;
-  grid-template-columns: clamp(205px, 17.5vw, 252px) 1fr;
+  grid-template-columns: clamp(168px, 13.5vw, 204px) 1fr;
   gap: clamp(28px, 3.8vw, 56px);
   align-items: center;
   padding-left: clamp(8px, 3.2vw, 48px);
@@ -1316,7 +1316,7 @@ body.in-film #aboutStage {
 
 .a6-portrait-box {
   margin: 0 auto;
-  width: min(100%, 34vh);
+  width: min(100%, 24.5vh);
   padding: 7px;
   background: #181411;
   border: var(--ab-hair) solid rgba(236, 216, 182, 0.28);
@@ -1495,6 +1495,9 @@ body.in-film #aboutStage {
 
 /* Object 1: Mounted Archival Portrait Print */
 .a7-card--print {
+  width: 100%;
+  max-width: 286px;
+  justify-self: center;
   padding: 16px 16px 18px;
   background: #181512;
   border: var(--ab-hair) solid rgba(236, 216, 182, 0.24);
@@ -1716,7 +1719,7 @@ body.in-film #aboutStage {
 
 .a8-portrait-row {
   display: grid;
-  grid-template-columns: clamp(148px, 12vw, 178px) 1fr;
+  grid-template-columns: clamp(124px, 9.8vw, 148px) 1fr;
   gap: 18px;
   align-items: center;
 }
@@ -1785,6 +1788,587 @@ body.in-film #aboutStage {
 }
 
 /* =========================================================================
+   CONCEPT a9 — Nocturnal Editorial Monograph Salon ★ (Default About Me)
+   Locked to Vanessa Espín's signature Nocturnal Umber (#13100d / #15120f)
+   regardless of the Landing Page's active poster wash!
+   ========================================================================= */
+#aboutStage[data-about="a9"] {
+  --bg: #13100d;
+  --ink: #f4ede2;
+  --muted: rgba(244, 237, 226, 0.64);
+  --rule: rgba(244, 237, 226, 0.18);
+  --ab-ivory: #f4ede2;
+  --ab-parchment: #ebe1d2;
+  --ab-body: rgba(244, 237, 226, 0.76);
+  --ab-stone: rgba(244, 237, 226, 0.60);
+  --ab-faint: rgba(244, 237, 226, 0.40);
+  --ab-brass: #e5c17d;
+  --ab-rule: rgba(244, 237, 226, 0.18);
+  --ab-rule-strong: rgba(244, 237, 226, 0.30);
+  --ab-rule-soft: rgba(244, 237, 226, 0.12);
+  color: var(--ink);
+}
+
+.a9m-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background:
+    radial-gradient(64% 58% at 22% 28%, rgba(86, 36, 20, 0.20) 0%, rgba(16, 14, 14, 0) 72%),
+    radial-gradient(58% 64% at 78% 72%, rgba(96, 40, 22, 0.16) 0%, rgba(16, 14, 14, 0) 75%),
+    rgba(16, 14, 14, 0.96);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+}
+
+body.in-film #aboutStage[data-about="a9"] .a9m-stage {
+  background:
+    radial-gradient(64% 58% at 22% 28%, rgba(86, 36, 20, 0.20) 0%, rgba(16, 14, 14, 0) 72%),
+    radial-gradient(58% 64% at 78% 72%, rgba(96, 40, 22, 0.16) 0%, rgba(16, 14, 14, 0) 75%),
+    rgba(16, 14, 14, 0.992);
+}
+
+.a9m-stage-grain {
+  position: fixed;
+  inset: -2rem;
+  z-index: 8;
+  pointer-events: none;
+  background-image: url(../img/noise.png);
+  background-size: 150px 150px;
+  opacity: 0.075;
+  mix-blend-mode: screen;
+}
+
+#aboutStage.is-open[data-about="a9"] .a9m-stage {
+  animation: abFadeIn 0.44s var(--ab-ease-out) both;
+}
+
+.a9m-wrap {
+  position: relative;
+  z-index: 1;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(16px, 2.2vh, 26px) var(--gutter, clamp(20px, 3vw, 46px)) clamp(64px, 9vh, 104px);
+}
+
+.a9m-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: clamp(18px, 2.8vh, 30px);
+  border-bottom: var(--ab-hair) solid var(--rule);
+}
+
+.a9m-brand {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  margin: 0;
+  color: var(--ink);
+  font: 400 clamp(20px, 1.65vw, 25px)/1 var(--ab-serif);
+  letter-spacing: -0.02em;
+  cursor: pointer;
+}
+
+.a9m-grid {
+  margin-top: clamp(26px, 4.2vh, 46px);
+  display: grid;
+  grid-template-columns: clamp(248px, 25.5vw, 322px) minmax(0, 1fr);
+  gap: clamp(32px, 5.2vw, 78px);
+  align-items: start;
+}
+
+.a9m-rail {
+  position: sticky;
+  top: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+#aboutStage.is-open[data-about="a9"] .a9m-rail {
+  animation: abRiseUp 0.52s var(--ab-ease-out) 0.05s both;
+}
+
+.a9m-portrait-card {
+  margin: 0;
+  padding: 8px 8px 10px;
+  background: rgba(30, 24, 19, 0.72);
+  border: 1px solid rgba(238, 210, 170, 0.18);
+  border-radius: 4px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 244, 224, 0.08),
+    0 22px 48px rgba(0, 0, 0, 0.52);
+}
+
+.a9m-portrait-cap {
+  margin-top: 7px;
+  font: 400 9.5px/1.2 var(--ab-serif);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ab-stone);
+  text-align: center;
+}
+
+.a9m-rail-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-top: 2px;
+}
+
+.a9m-rail-name {
+  font: 400 20px/1.1 var(--ab-serif);
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+
+.a9m-rail-role {
+  font: 400 12.5px/1.38 var(--ab-sans);
+  color: var(--ab-stone);
+}
+
+.a9m-rail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 2px;
+}
+
+.a9m-btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 17px;
+  border-radius: 999px;
+  font: 500 12.5px/1 var(--ab-sans);
+  letter-spacing: 0.015em;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.24s var(--ab-ease-out), opacity 0.22s ease, background 0.24s ease, color 0.24s ease, border-color 0.24s ease;
+}
+
+.a9m-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.a9m-btn:disabled {
+  opacity: 0.58;
+  cursor: default;
+}
+
+.a9m-btn--solid {
+  background: var(--ink);
+  color: var(--bg);
+  border: var(--ab-hair) solid var(--ink);
+}
+
+.a9m-btn--solid:hover:not(:disabled) {
+  opacity: 0.90;
+}
+
+.a9m-btn--ghost {
+  background: transparent;
+  color: var(--ink);
+  border: var(--ab-hair) solid var(--ab-rule-strong);
+}
+
+.a9m-btn--ghost:hover {
+  background: color-mix(in srgb, var(--ink) 9%, transparent);
+  border-color: var(--ink);
+}
+
+.a9m-main {
+  max-width: 65ch;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(32px, 4.6vh, 48px);
+}
+
+.a9m-epigraph {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(18px, 2.6vh, 26px);
+}
+
+#aboutStage.is-open[data-about="a9"] .a9m-epigraph {
+  animation: abRiseUp 0.52s var(--ab-ease-out) 0.08s both;
+}
+
+.a9m-quote {
+  margin: 0;
+  font: italic 300 clamp(25px, 2.7vw, 38px)/1.18 var(--ab-serif);
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.a9-rule {
+  background: var(--rule);
+}
+
+#aboutStage.is-open[data-about="a9"] .a9-rule {
+  animation: abRuleDraw 0.52s var(--ab-ease-glide) 0.12s both;
+}
+
+.a9m-sec {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+#aboutStage.is-open[data-about="a9"] .a9m-sec {
+  animation: abRiseUp 0.54s var(--ab-ease-out) 0.14s both;
+}
+
+.a9m-sec-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.a9m-sec-title {
+  margin: 0;
+  font: 400 clamp(22px, 1.9vw, 29px)/1.12 var(--ab-serif);
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.a9m-prose-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.a9m-prose {
+  margin: 0;
+  font: 400 clamp(14.6px, 1.02vw, 15.8px)/1.70 var(--ab-sans);
+  color: color-mix(in srgb, var(--ink) 72%, transparent);
+}
+
+.a9m-prose--lead {
+  font-size: clamp(16.2px, 1.15vw, 18px);
+  line-height: 1.58;
+  color: color-mix(in srgb, var(--ink) 80%, transparent);
+}
+
+.a9m-hi {
+  font-weight: 500;
+  color: color-mix(in srgb, var(--ink) 93%, transparent);
+}
+
+.a9m-callout {
+  margin: 4px 0;
+  padding: 18px 0 19px;
+  border-top: 1px solid var(--ab-rule-strong);
+  border-bottom: 1px solid var(--ab-rule-strong);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.a9m-callout__lead {
+  font: 500 11.5px/1.3 var(--ab-sans);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ab-stone);
+}
+
+.a9m-callout__quote {
+  margin: 0;
+  font: italic 400 clamp(19px, 1.48vw, 23.5px)/1.34 var(--ab-serif);
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+/* For Clients & Collaborators — Textured, Fuzzy, Abstract Nocturnal Pigment Cloud
+   Feathered organic aura inspired by the glowing sunset dusk & cosmos of the Iyuana poster */
+@keyframes a9OrbDriftA {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(-16px, 10px, 0) scale(1.07); }
+}
+@keyframes a9OrbDriftB {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(14px, -12px, 0) scale(1.06); }
+}
+
+.a9m-studio-card {
+  position: relative;
+  overflow: visible;
+  isolation: isolate;
+  margin: 10px 0;
+  padding: clamp(30px, 3.6vw, 42px) clamp(28px, 3.8vw, 44px);
+  border-radius: 26px;
+  background: radial-gradient(88% 86% at 50% 50%, rgba(12, 9, 8, 0.86) 0%, rgba(16, 12, 10, 0.54) 68%, rgba(19, 16, 13, 0) 100%);
+  border: 0;
+  box-shadow: none;
+}
+
+.a9m-studio-aura {
+  position: absolute;
+  inset: -28px -32px;
+  z-index: 0;
+  pointer-events: none;
+  filter: blur(42px) saturate(1.18);
+  opacity: 0.96;
+  -webkit-mask-image: radial-gradient(76% 74% at 50% 50%, #000 36%, rgba(0, 0, 0, 0.55) 70%, transparent 100%);
+  mask-image: radial-gradient(76% 74% at 50% 50%, #000 36%, rgba(0, 0, 0, 0.55) 70%, transparent 100%);
+}
+
+.a9m-orb {
+  position: absolute;
+  border-radius: 50%;
+  will-change: transform;
+}
+
+/* Default F1 · Iyuana Dusk Nebula (fuzzy out-of-focus sunset terracotta, smoky rose-plum & golden mist) */
+.a9m-orb--1 {
+  width: 72%;
+  height: 78%;
+  right: -6%;
+  bottom: -10%;
+  background: radial-gradient(circle at 46% 48%, rgba(214, 102, 44, 0.58) 0%, rgba(168, 66, 30, 0.30) 48%, rgba(19, 16, 13, 0) 76%);
+  animation: a9OrbDriftA 19s ease-in-out infinite;
+}
+
+.a9m-orb--2 {
+  width: 74%;
+  height: 76%;
+  left: -8%;
+  top: -12%;
+  background: radial-gradient(circle at 50% 50%, rgba(146, 58, 72, 0.54) 0%, rgba(88, 34, 46, 0.28) 52%, rgba(19, 16, 13, 0) 78%);
+  animation: a9OrbDriftB 23s ease-in-out infinite;
+}
+
+.a9m-orb--3 {
+  width: 58%;
+  height: 62%;
+  left: 22%;
+  top: 18%;
+  background: radial-gradient(circle at 50% 50%, rgba(236, 164, 72, 0.34) 0%, rgba(188, 112, 42, 0.14) 54%, rgba(19, 16, 13, 0) 76%);
+  animation: a9OrbDriftA 25s ease-in-out infinite reverse;
+}
+
+/* F2 · Smoked Umber & Gold Dust */
+#aboutStage[data-card-mood="f2"] .a9m-orb--1 {
+  background: radial-gradient(circle at 46% 48%, rgba(188, 132, 62, 0.54) 0%, rgba(128, 78, 34, 0.26) 48%, rgba(19, 16, 13, 0) 76%);
+}
+#aboutStage[data-card-mood="f2"] .a9m-orb--2 {
+  background: radial-gradient(circle at 50% 50%, rgba(96, 68, 44, 0.52) 0%, rgba(58, 40, 26, 0.26) 52%, rgba(19, 16, 13, 0) 78%);
+}
+#aboutStage[data-card-mood="f2"] .a9m-orb--3 {
+  background: radial-gradient(circle at 50% 50%, rgba(232, 192, 118, 0.28) 0%, rgba(19, 16, 13, 0) 74%);
+}
+
+/* F3 · Forest Ember Mist */
+#aboutStage[data-card-mood="f3"] .a9m-orb--1 {
+  background: radial-gradient(circle at 46% 48%, rgba(62, 108, 74, 0.52) 0%, rgba(36, 68, 46, 0.26) 48%, rgba(19, 16, 13, 0) 76%);
+}
+#aboutStage[data-card-mood="f3"] .a9m-orb--2 {
+  background: radial-gradient(circle at 50% 50%, rgba(186, 102, 46, 0.44) 0%, rgba(112, 56, 28, 0.22) 52%, rgba(19, 16, 13, 0) 78%);
+}
+#aboutStage[data-card-mood="f3"] .a9m-orb--3 {
+  background: radial-gradient(circle at 50% 50%, rgba(142, 174, 118, 0.24) 0%, rgba(19, 16, 13, 0) 74%);
+}
+
+/* Subtle velvety tactile film grain blended softly into the feathered pigment cloud */
+.a9m-studio-grain {
+  position: absolute;
+  inset: -16px -20px;
+  z-index: 1;
+  pointer-events: none;
+  background-image: url(../img/noise.png);
+  background-size: 136px 136px;
+  mix-blend-mode: screen;
+  opacity: 0.085;
+  -webkit-mask-image: radial-gradient(76% 74% at 50% 50%, #000 32%, transparent 96%);
+  mask-image: radial-gradient(76% 74% at 50% 50%, #000 32%, transparent 96%);
+}
+
+.a9m-studio-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+#aboutStage.is-open[data-about="a9"] .a9m-studio-card {
+  animation: abRiseUp 0.54s var(--ab-ease-out) 0.20s both;
+}
+
+.a9m-studio-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(244, 224, 196, 0.16);
+}
+
+.a9m-studio-head .ab-eyebrow {
+  color: rgba(246, 214, 168, 0.78);
+}
+
+.a9m-studio-title {
+  margin: 0;
+  font: 400 clamp(23px, 1.95vw, 30px)/1.08 var(--ab-serif);
+  letter-spacing: -0.02em;
+  color: #f8f1e5;
+}
+
+.a9m-studio-prose {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.a9m-studio-p {
+  margin: 0;
+  font: 400 clamp(14.3px, 0.99vw, 15.4px)/1.66 var(--ab-sans);
+  color: rgba(246, 238, 226, 0.76);
+}
+
+.a9m-studio-p .a9m-hi {
+  color: rgba(255, 250, 242, 0.93);
+}
+
+/* Privacy-First Contact Card (Zero Exposed Email or Phone) */
+.a9m-contact {
+  padding-top: clamp(24px, 3.4vh, 34px);
+  border-top: var(--ab-hair) solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  scroll-margin-top: 24px;
+}
+
+#aboutStage.is-open[data-about="a9"] .a9m-contact {
+  animation: abRiseUp 0.54s var(--ab-ease-out) 0.24s both;
+}
+
+.a9m-contact-sub {
+  margin: 2px 0 0;
+  font: 400 14px/1.52 var(--ab-sans);
+  color: var(--ab-stone);
+  max-width: 54ch;
+}
+
+.a9m-form {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.a9m-honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.a9m-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 13px;
+}
+
+.a9m-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.a9m-field > span {
+  font: 500 11.5px/1.2 var(--ab-sans);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ab-stone);
+}
+
+.a9m-field > span em {
+  font-style: normal;
+  text-transform: none;
+  letter-spacing: 0;
+  opacity: 0.72;
+}
+
+.a9m-field input,
+.a9m-field textarea {
+  width: 100%;
+  appearance: none;
+  padding: 10px 13px;
+  border-radius: 6px;
+  border: 1px solid rgba(244, 232, 212, 0.18);
+  background: rgba(255, 246, 232, 0.04);
+  color: #f4ede2;
+  font: 400 14px/1.45 var(--ab-sans);
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.a9m-field textarea {
+  resize: vertical;
+  min-height: 98px;
+}
+
+.a9m-field input::placeholder,
+.a9m-field textarea::placeholder {
+  color: var(--ab-faint);
+}
+
+.a9m-field input:focus,
+.a9m-field textarea:focus {
+  outline: none;
+  border-color: rgba(244, 224, 190, 0.52);
+  background: rgba(255, 246, 232, 0.07);
+  box-shadow: 0 0 0 1px rgba(235, 194, 132, 0.18);
+}
+
+.a9m-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.a9m-form-status {
+  margin-top: 4px;
+  padding: 10px 13px;
+  border-radius: 6px;
+  border: var(--ab-hair) solid var(--rule);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  font: 400 13px/1.45 var(--ab-sans);
+  color: var(--ink);
+}
+
+.a9m-form-status.is-error {
+  border-color: var(--ab-rule-strong);
+}
+
+.a9-close {
+  background: transparent;
+  border-color: var(--rule);
+  color: var(--ink);
+}
+.a9-close:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+}
+
+/* =========================================================================
    RESPONSIVE ADAPTATION (< 980px / < 860px) & REDUCED MOTION
    ========================================================================= */
 @media (max-width: 980px) {
@@ -1803,7 +2387,27 @@ body.in-film #aboutStage {
     background: rgba(15, 12, 10, 0.96);
     border-left: 0;
   }
+  .a9-salon {
+    width: 100vw;
+    background: color-mix(in srgb, var(--bg) 90%, transparent);
+    border-left: 0;
+  }
+  .a9m-stage {
+    background-color: color-mix(in srgb, var(--bg) 94%, transparent);
+  }
+  .a9m-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .a9m-rail {
+    position: static;
+    max-width: min(260px, 68vw);
+  }
+  .a9m-form-row {
+    grid-template-columns: 1fr;
+  }
   .a2-mobile-portrait { display: block; }
+  .a1-mat, .a4-portrait-card, .a5-portrait-frame, .a8-portrait-frame { max-width: min(216px, 58vw); }
   .a1-hero, .a1-spread, .a2-grid, .a4-header, .a4-cols, .a5-focal, .a8-cols, .a8-portrait-row, .a7-dossier-cols {
     grid-template-columns: 1fr;
   }

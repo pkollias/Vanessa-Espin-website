@@ -11,10 +11,10 @@
 <link rel="preconnect" href="https://api.fontshare.com">
 <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
 <link href="https://api.fontshare.com/v2/css?f[]=gambetta@300,400,401,600,700&f[]=zodiak@300,400,401&f[]=switzer@400,500,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-<link id="about-concepts-css" rel="stylesheet" href="about-concepts.css">
-<link id="intro-concepts-css" rel="stylesheet" href="intro-concepts.css">
-<link id="scroll-cues-css" rel="stylesheet" href="scroll-cues.css">
+<link rel="stylesheet" href="style.css?v=20261123d">
+<link id="about-concepts-css" rel="stylesheet" href="about-concepts.css?v=20261123e">
+<link id="intro-concepts-css" rel="stylesheet" href="intro-concepts.css?v=20261123d">
+<link id="scroll-cues-css" rel="stylesheet" href="scroll-cues.css?v=20261123d">
 <script type="importmap">
 {
   "imports": {
@@ -24,14 +24,15 @@
 </script>
 <style>.bench { display: none !important; }</style>
 </head>
-<body data-concept="c1" data-tone="light" data-copy="l1">
+<body data-concept="c1" data-tone="dark" data-copy="l1">
 
 <!-- Live 3D Event Mount (Untouched exhibition films load here on graphical entry) -->
 <div class="film-stage" id="filmStage" aria-hidden="true"></div>
 <div class="film-nav" id="filmNav" role="navigation" aria-label="Event navigation">
   <button class="film-return" id="filmReturn" type="button" aria-label="Return to Brand Curation">← Brand Curation</button>
-  <button class="film-media" id="filmMedia" type="button" aria-label="Open the event's media" aria-haspopup="dialog" hidden>Media</button>
-  <button class="film-next" id="filmNext" type="button" aria-label="Experience next event">Next: Herencia Viva →</button>
+  <button class="film-media" id="filmMedia" type="button" aria-label="Open the event's media" aria-haspopup="dialog" hidden style="display:none">Media</button>
+  <button class="film-next" id="filmNext" type="button" aria-label="Experience next event" hidden style="display:none">Next</button>
+  <button class="film-about" id="filmAbout" type="button" aria-label="Open About Me">About Me</button>
 </div>
 
 <!-- Main Landing Shell -->
@@ -50,32 +51,14 @@
   <!-- Corner Masking Tape Layer -->
   <svg class="pins-svg" id="pinsSvg" aria-hidden="true"></svg>
 
-  <!-- Top Masthead: Left Name · Top-Right Burger Menu (Brand Curation + About) -->
+  <!-- Top Masthead: Left Name · Top-Right About Me Button (No Burger) -->
   <header class="masthead">
     <a class="masthead__brand" href="#top" id="brandHome">
       <span class="masthead__name">Vanessa Espín</span>
     </a>
 
-    <nav class="masthead__nav menu-wrap" id="menuWrap" aria-label="Primary menu">
-      <button class="burger-btn" id="menuBtn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="menuPop">
-        <span class="burger-lines" aria-hidden="true">
-          <span></span>
-          <span></span>
-          <span></span>
-        </span>
-      </button>
-
-      <div class="menu-pop" id="menuPop" hidden>
-        <div class="menu-pop__sec">
-          <div class="menu-pop__hdr">Brand Curation</div>
-          <div id="indexList"></div>
-        </div>
-        <div class="menu-pop__div" role="separator"></div>
-        <button class="menu-about-btn" id="aboutBtn" type="button">
-          <span>About</span>
-          <span aria-hidden="true">→</span>
-        </button>
-      </div>
+    <nav class="masthead__nav" aria-label="About navigation">
+      <button class="masthead__about" id="aboutBtn" type="button">About Me</button>
     </nav>
   </header>
 
@@ -128,11 +111,23 @@
   </div>
   <div class="bench__body">
     <div>
+      <span class="bench__grp-lbl">Dark Wall Mode</span>
+      <div class="bench__pills" id="palPills"></div>
+    </div>
+    <div id="swatchGroup">
+      <span class="bench__grp-lbl" id="swatchLbl">Poster Swatches (Active Event)</span>
+      <div class="bench__pills" id="swatchPills"></div>
+    </div>
+    <div>
+      <span class="bench__grp-lbl">About Client-Card Texture (F1–F3 · Fuzzy Abstract)</span>
+      <div class="bench__pills" id="cardMoodPills"></div>
+    </div>
+    <div>
       <span class="bench__grp-lbl">Scroll Cue Mocks (S1–S6 · Click to test)</span>
       <div class="bench__pills" id="cuePills"></div>
     </div>
     <div>
-      <span class="bench__grp-lbl">Dark-Gallery About (A1–A8 · Click to preview)</span>
+      <span class="bench__grp-lbl">Dark-Gallery About (A1–A9 · Click to preview)</span>
       <div class="bench__pills" id="bioPills"></div>
     </div>
     <div>
@@ -147,6 +142,6 @@
   </div>
 </aside>
 
-<script type="module" src="app.js"></script>
+<script type="module" src="app.js?v=20261123f"></script>
 </body>
 </html>

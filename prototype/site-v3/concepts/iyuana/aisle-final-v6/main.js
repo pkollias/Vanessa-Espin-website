@@ -28,14 +28,50 @@
 // walk: a hard-edged lens in linear light that weights the bright parts, so the flame spreads into a glow while
 // the dark stays dark. ?fire=a|b|c picks the variant; ?fire=0 is v1's white flood.
 import * as THREE from 'three';
-import { TRAJECTORIES, TRAJECTORY_LIST } from '../trajectories/paths.js';
+import { TRAJECTORIES, TRAJECTORY_LIST } from '../trajectories/paths.js?v=20261122g';
+import { SCHEDULE_PRESETS, SCHEDULE_VERSION, STATION_DEFS, cloneSchedule, compileSchedule, decodeScheduleParam } from '../trajectories/schedule.js?v=20261122g';
+import { IYUANA_TRACKS, createIyuanaAudio } from '../ambient-audio.js?v=20261122g';
 import { skipUnlitLights } from '/Vanessa-Espin-website/shared/film-lights.js';
 skipUnlitLights(THREE);   // a lamp's maths is skipped wherever its cone does not reach: same picture, far less work (see the file)
 
 const A = '../assets/';
 const qs = new URLSearchParams(location.search);
 if (qs.get('clean') === '1') document.body.classList.add('clean');
-const FILM_DURATION = Math.min(60, Math.max(8, Number(qs.get('dur')) || 24.0));
+if (qs.get('embed') === '1') document.body.classList.add('embed');
+try {
+  if (window.parent !== window && window.parent.document.getElementById('progSeam')) {
+    document.body.classList.add('in-fold-stage');
+  }
+} catch {}
+
+// Load any saved v2 custom schedule from `/Vanessa-Espin-website/api/iyuana-trajectories` unless overridden by `?sched=` or `?dur=`
+let initialSched = decodeScheduleParam(qs.get('sched'));
+if (!initialSched && !qs.has('dur')) {
+  try {
+    const r = await fetch('/Vanessa-Espin-website/api/iyuana-trajectories', { cache: 'no-store' });
+    if (r.ok) {
+      const d = await r.json();
+      if (d?.__schedule?.sched?.version === SCHEDULE_VERSION) initialSched = d.__schedule.sched;
+    }
+  } catch {}
+}
+if (!initialSched) {
+  initialSched = cloneSchedule(SCHEDULE_PRESETS.balanced);
+  if (qs.has('dur')) {
+    const targetDur = Math.min(90, Math.max(8, Number(qs.get('dur')) || 31.5));
+    const scale = targetDur / initialSched.totalSec;
+    initialSched.departSec *= scale;
+    for (const def of STATION_DEFS) {
+      initialSched.stops[def.id].arrive *= scale;
+      initialSched.stops[def.id].leave *= scale;
+    }
+    initialSched.roomSec *= scale;
+    initialSched.totalSec = targetDur;
+  }
+}
+let compiledSched = compileSchedule(initialSched);
+let FILM_DURATION = compiledSched.totalSec;
+
 let activeTrajId = (qs.get('traj') || 'T1').toUpperCase();
 if (!TRAJECTORIES[activeTrajId]) activeTrajId = 'T1';
 const AT = qs.has('at') ? +qs.get('at') : null;          // jump to a position (0..1 or legacy px)
@@ -46,10 +82,10 @@ const PACE = 'new';
 const FIRE = ['0', 'a', 'b', 'c'].includes(qs.get('fire')) ? qs.get('fire') : 'b';
 const MANUAL = qs.has('manual');                          // captures: the script drives the clock and the movie time
 const OPEN = qs.get('open') === '0' ? '0' : 'photo';
-document.body.classList.toggle('open-photo', OPEN === 'photo' && activeTrajId === 'T1');
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const HANG_DATA = await (await fetch('./hangs.json', { cache: 'no-store' })).json();
-const HANG = HANG_DATA.mocks.find((m) => m.id === (qs.get('hang') ?? 'tall-d')) ?? HANG_DATA.mocks[0];   // his pick (Nov 17): two candles only
+const HANG = HANG_DATA.mocks.find((m) => m.id === (qs.get('hang') ?? 'panels-4')) ?? HANG_DATA.mocks[0];
+document.body.classList.toggle('open-photo', OPEN === 'photo' && activeTrajId === 'T1' && HANG.id !== 'panels-4');
 const body = document.body;
 
 // ---------------------------------------------------------------- small tools
@@ -117,13 +153,13 @@ const WARM = new THREE.Color().setRGB(1.0, 0.8, 0.6, THREE.LinearSRGBColorSpace)
 const EMBER = new THREE.Color().setRGB(1.0, 0.42, 0.14, THREE.LinearSRGBColorSpace);
 const FLASH = new THREE.Color().setRGB(1.0, 0.9, 0.78, THREE.LinearSRGBColorSpace);
 
-// Her hanging boards face the walker, staggered left and right as in her room; each has its wall label on
-// its outer side, hung on its own cables, so no text ever stands in front of a photograph.
+// Her hanging panels face the walker, staggered left and right as in her room; each has a discreet museum
+// exhibition tag on its outer side, hung on fine wires, so no text ever stands in front of a photograph.
 const LABELS = [
-  { k: '01  Exhibition', t: ['Iyuana', 'El Retorno de los Sueños'] },
-  { k: '02  Dates', t: ['August 18–24, 2026'] },
-  { k: '03  Place', t: ['Long Island City, Queens'] },
-  { k: '04  Artists', t: ['Yanda Montahuano', 'Li Can Vega', 'Armando Vega', 'Israel Vargas “Panchis”'] },
+  { k: '01 · Panel I', t: ['Selva Viva'], sub: 'Sápara Territory, Ecuadorian Amazon', med: 'Archival pigment prints, 2026' },
+  { k: '02 · Panel II', t: ['El Río y la Vida'], sub: 'Pastaza Basin · Daily Life & Craft', med: 'Archival pigment prints, 2026' },
+  { k: '03 · Panel III', t: ['Guardians of the Forest'], sub: 'Portraits from the Sápara Nation', med: 'Archival pigment prints, 2026' },
+  { k: '04 · Panel IV', t: ['El Retorno de los Sueños'], sub: 'Montahuano · Vega · Vargas', med: 'Archival pigment prints, 2026' },
 ];
 const BOARDS = HANG.boards.map((h, i) => {
   const side = i % 2 ? 1 : -1;
@@ -134,9 +170,9 @@ BOARDS.forEach((b, i) => { b.hang = HANG.boards[i]; });
 const ASPECT = HANG_DATA.aspect;
 const ar = (n) => ASPECT[n] ?? 1.5;
 const PHOTO = (n) => `${A}dscf/DSCF${n}.jpg`;
-const LW = 0.56, LH = 0.36, LABEL_Y = 1.3;
+const LW = 0.21, LH = 0.132, LABEL_Y = 1.28;
 
-const POSTER = { n: 212, w: 1.6, h: 2.0, ring: { u: 0.509, v: 0.248, r: 0.41 } };
+const POSTER = { file: 'poster-1.png', w: 1.6, h: 2.0, ring: { u: 0.509, v: 0.248, r: 0.41 } };
 const PB = { w: 1.82, h: 2.38, top: 0.22, z: END_Z + 0.06, cy: 0.55 + 2.38 / 2 };
 
 // ---------------------------------------------------------------- renderer
@@ -145,7 +181,7 @@ let renderer;
 try {
   renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance', alpha: false, stencil: false });
 } catch (e) { body.classList.add('nogl'); throw e; }
-let DPR = Math.min(window.devicePixelRatio || 1, 1.5);   // let: the pace helper below may lower it
+let DPR = Math.min(window.devicePixelRatio || 1, 2.0);   // Full Retina crispness for panels & poster
 renderer.setPixelRatio(DPR);
 renderer.setSize(innerWidth, innerHeight, false);
 renderer.shadowMap.enabled = true;
@@ -267,6 +303,9 @@ function panel(w, h, t = T, bev = BEV) {
 // height and columns of prints stacked to fill it; free / bare: prints placed by hand (bare = no panel, each print
 // on its own wires).
 function layout(d) {
+  if (d.kind === 'panel') {
+    return { W: d.W, H: d.H, panelSrc: d.src, rects: d.rects ?? [] };
+  }
   const m = d.m ?? 0.085, mb = d.mb ?? 0.105, g = d.g ?? 0.05, rects = [];
   if (d.kind === 'rows') {
     const rows = d.rows.map((r, i) => { const h = d.h[i] ?? d.h[0], ws = r.map((n) => h * ar(n)); return { r, h, ws, w: ws.reduce((a, b) => a + b, 0) + g * (r.length - 1) }; });
@@ -325,39 +364,65 @@ function hang(group, cx, cy, cz, yaw) {
   return sw;
 }
 
-// wall labels: set in the site's type, printed onto a small white card the room's light falls on
+// discreet museum exhibition tags: set in the site's type onto a compact archival card beside each panel
 const labelCards = [];
 function labelTexture(L) {
-  const S = 2400, W = S, H = Math.round(S * LH / LW);
+  const S = 1400, W = S, H = Math.round(S * LH / LW);
   const c = document.createElement('canvas'); c.width = W; c.height = H;
   const g = c.getContext('2d');
   g.fillStyle = '#efebe4'; g.fillRect(0, 0, W, H);
   const px = W / LW;                         // canvas pixels per metre
-  const x0 = 0.04 * px;
-  g.fillStyle = '#5d564e'; g.font = `500 ${0.0148 * px}px Switzer, "Helvetica Neue", Arial, sans-serif`;
-  g.letterSpacing = `${0.0036 * px}px`;
+  const x0 = 0.015 * px;
+  g.fillStyle = '#6b635a'; g.font = `500 ${0.0085 * px}px Switzer, "Helvetica Neue", Arial, sans-serif`;
+  g.letterSpacing = `${0.0018 * px}px`;
   g.textBaseline = 'alphabetic';
-  g.fillText(L.k.toUpperCase(), x0, 0.07 * px);
+  g.fillText(L.k.toUpperCase(), x0, 0.028 * px);
   g.letterSpacing = '0px';
-  g.fillStyle = '#1c1916';
-  const big = L.t.length > 2 ? 0.0275 : 0.038;
-  g.font = `400 ${big * px}px Gambetta, Georgia, serif`;
-  let y = 0.07 * px + (L.t.length > 2 ? 0.052 : 0.07) * px;
-  for (const line of L.t) { g.fillText(line, x0, y); y += big * 1.32 * px; }
-  g.fillStyle = '#5d564e'; g.font = `400 ${0.0152 * px}px Switzer, "Helvetica Neue", Arial, sans-serif`;
-  g.fillText('Photographs from the exhibition', x0, LH * px - 0.04 * px);
+  g.fillStyle = '#181512';
+  g.font = `italic 400 ${0.0175 * px}px Gambetta, Georgia, serif`;
+  let y = 0.056 * px;
+  for (const line of L.t) { g.fillText(line, x0, y); y += 0.022 * px; }
+  if (L.sub) {
+    g.fillStyle = '#3d3731'; g.font = `400 ${0.0096 * px}px Switzer, "Helvetica Neue", Arial, sans-serif`;
+    g.fillText(L.sub, x0, 0.084 * px);
+  }
+  g.fillStyle = '#756d63'; g.font = `400 ${0.0082 * px}px Switzer, "Helvetica Neue", Arial, sans-serif`;
+  g.fillText(L.med || 'Archival pigment prints, 2026', x0, LH * px - 0.016 * px);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = maxAniso;
   t.minFilter = THREE.LinearMipmapLinearFilter; t.generateMipmaps = true;
   return t;
 }
 
-const boards = BOARDS.map((def) => {
+function makeArtMaterial(keySuffix, litUniform) {
+  const mat = new THREE.MeshPhysicalMaterial({
+    color: 0xffffff, roughness: 0.56, metalness: 0, clearcoat: 0.14, clearcoatRoughness: 0.36,
+    blending: THREE.NoBlending,
+  });
+  mat.onBeforeCompile = (sh) => {
+    sh.uniforms.uArtLit = litUniform;
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', '#include <common>\nuniform float uArtLit;')
+      .replace('#include <opaque_fragment>', '#include <opaque_fragment>\ngl_FragColor = vec4( mix( outgoingLight * 0.58, diffuseColor.rgb * uArtLit, 0.88 ), 0.20 );');
+  };
+  mat.customProgramCacheKey = () => 'artPanel_' + keySuffix;
+  return mat;
+}
+
+const boards = BOARDS.map((def, bi) => {
   const L = layout(def.hang);
   // a wider board stands further out from the walk; a taller one hangs higher
   def.c = [def.side * (0.55 + (L.W / 2) * Math.cos(def.yaw)), def.hang.cy ?? Math.max(def.c[1], L.H / 2 + 0.38), def.c[2]];
   const g = new THREE.Group();
+  const artLit = { value: 0.94 };
   if (!L.bare) { const pan = new THREE.Mesh(panel(L.W, L.H), [faceMat, edgeMat]); pan.castShadow = true; pan.receiveShadow = true; g.add(pan); }
+  if (L.panelSrc) {
+    const mat = makeArtMaterial(String(bi), artLit);
+    photo(A + L.panelSrc).then((t) => { mat.map = t; mat.needsUpdate = true; });
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(L.W - 0.004, L.H - 0.004), mat);
+    m.position.set(0, 0, FRONT + 0.0005); m.receiveShadow = false; g.add(m);
+  }
   for (const r of L.rects) {
+    if (r.subOnly) continue;
     if (L.bare) {
       // each print on its own mount and its own pair of wires
       const mount = new THREE.Mesh(panel(r.w, r.h, 0.004, 0.0008), [faceMat, edgeMat]);
@@ -365,43 +430,52 @@ const boards = BOARDS.map((def) => {
       const top = r.y + r.h / 2 - 0.02, [, cyy] = def.c;
       for (const sx of [-1, 1]) { const cg = new THREE.Group(); cg.position.z = r.dz; g.add(cg); cables(cg, r.x + sx * (r.w / 2 - 0.03), top, CEIL - (cyy + top)); }
     }
-    const mat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.5, metalness: 0, clearcoat: 0.45, clearcoatRoughness: 0.28 });
+    const mat = makeArtMaterial(`${bi}_${r.n}`, artLit);
     photo(PHOTO(r.n)).then((t) => { mat.map = t; mat.needsUpdate = true; });
     const m = new THREE.Mesh(new THREE.PlaneGeometry(r.w, r.h), mat);
-    m.position.set(r.x, r.y, (r.dz ?? 0) + (L.bare ? 0.002 + 0.0008 : FRONT) + 0.0005); m.receiveShadow = true; g.add(m);
+    m.position.set(r.x, r.y, (r.dz ?? 0) + (L.bare ? 0.002 + 0.0008 : FRONT) + 0.0005); m.receiveShadow = false; g.add(m);
   }
-  const top = L.H / 2 - 0.035, [cx, cy, cz] = def.c;
-  if (!L.bare) for (const s of [-1, 1]) cables(g, s * (L.W / 2 - 0.035), top, CEIL - (cy + top));
-  // the label card, beside the board on its outer side, at museum height (only on boards that carry one)
+  const gromInset = L.panelSrc ? 0.028 : 0.035;
+  const top = L.H / 2 - gromInset, [cx, cy, cz] = def.c;
+  if (!L.bare) for (const s of [-1, 1]) cables(g, s * (L.W / 2 - gromInset), top, CEIL - (cy + top));
+  // compact museum exhibition tag, beside the panel on its outer side
   if (def.label) {
     const lg = new THREE.Group();
-    const lx = def.side * (L.W / 2 + 0.08 + LW / 2), ly = LABEL_Y - cy;
+    const lx = def.side * (L.W / 2 + 0.045 + LW / 2), ly = LABEL_Y - cy;
     lg.position.set(lx, ly, 0); g.add(lg);
-    const card = new THREE.Mesh(panel(LW, LH, 0.003, 0.001), [faceMat, edgeMat]);
+    const card = new THREE.Mesh(panel(LW, LH, 0.0022, 0.0007), [faceMat, edgeMat]);
     card.castShadow = true; card.receiveShadow = true; lg.add(card);
-    const labelMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.82 });
-    const face = new THREE.Mesh(new THREE.PlaneGeometry(LW - 0.004, LH - 0.004), labelMat);
-    face.position.z = 0.0029; face.receiveShadow = true; lg.add(face);
+    const labelMat = makeArtMaterial(`lbl_${bi}`, artLit);
+    const face = new THREE.Mesh(new THREE.PlaneGeometry(LW - 0.003, LH - 0.003), labelMat);
+    face.position.z = 0.0021; face.receiveShadow = false; lg.add(face);
     labelCards.push({ def, labelMat });
-    for (const s of [-1, 1]) cables(lg, s * (LW / 2 - 0.025), LH / 2 - 0.025, CEIL - (LABEL_Y + LH / 2 - 0.025));
+    for (const s of [-1, 1]) {
+      const cabLen = CEIL - (LABEL_Y + LH / 2 - 0.012);
+      const cab = new THREE.Mesh(new THREE.CylinderGeometry(0.0007, 0.0007, cabLen, 5, 1, true), cableMat);
+      cab.position.set(s * (LW / 2 - 0.014), (LH / 2 - 0.012) + cabLen / 2, 0); lg.add(cab);
+    }
   }
   const sw = hang(g, cx, cy, cz, def.yaw);
   const n = new THREE.Vector3(Math.sin(def.yaw), 0, Math.cos(def.yaw));
   const xAxis = new THREE.Vector3(Math.cos(def.yaw), 0, -Math.sin(def.yaw));
-  return { ...def, L, group: g, sw, n, xAxis, center: new THREE.Vector3(cx, cy, cz) };
+  return { ...def, L, group: g, sw, n, xAxis, artLit, center: new THREE.Vector3(cx, cy, cz) };
 });
 
 // the poster board: her poster mounted with a white margin, a hand's width off the end wall
-const posterU = { uReveal: { value: 0 }, uBlank: { value: faceMat.color } };
-const posterMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.86, clearcoat: 0.0001, clearcoatRoughness: 0.32 });
+const posterU = { uReveal: { value: 0 }, uTrueArt: { value: 0 }, uBlank: { value: faceMat.color }, uPosterLit: { value: 0.96 } };
+const posterMat = new THREE.MeshPhysicalMaterial({
+  color: 0xffffff, roughness: 0.86, clearcoat: 0.0001, clearcoatRoughness: 0.32,
+  blending: THREE.NoBlending,
+});
 posterMat.onBeforeCompile = (sh) => {
   Object.assign(sh.uniforms, posterU);
   sh.fragmentShader = sh.fragmentShader
-    .replace('#include <common>', '#include <common>\nuniform float uReveal;\nuniform vec3 uBlank;')
-    .replace('#include <map_fragment>', '#include <map_fragment>\ndiffuseColor.rgb = mix(uBlank, diffuseColor.rgb, uReveal);');
+    .replace('#include <common>', '#include <common>\nuniform float uReveal;\nuniform float uTrueArt;\nuniform vec3 uBlank;\nuniform float uPosterLit;')
+    .replace('#include <map_fragment>', '#include <map_fragment>\nvec3 rawPoster = diffuseColor.rgb;\ndiffuseColor.rgb = mix(uBlank, diffuseColor.rgb, uReveal);')
+    .replace('#include <opaque_fragment>', '#include <opaque_fragment>\nvec3 truePoster = mix(outgoingLight * 0.52, rawPoster * uPosterLit, 0.90);\nfloat kArt = uReveal * uTrueArt;\ngl_FragColor = vec4(mix(outgoingLight, truePoster, kArt), mix(1.0, 0.20, kArt));');
 };
-posterMat.customProgramCacheKey = () => 'poster';
-photo(A + POSTER.n + '.jpg').then((t) => { posterMat.map = t; posterMat.needsUpdate = true; });
+posterMat.customProgramCacheKey = () => 'posterTrue';
+photo(A + POSTER.file).then((t) => { posterMat.map = t; posterMat.needsUpdate = true; });
 const posterBoard = (() => {
   const g = new THREE.Group();
   const pan = new THREE.Mesh(panel(PB.w, PB.h), [faceMat, edgeMat]);
@@ -464,7 +538,7 @@ boards.forEach((b) => {
 });
 const POOL = boards.slice(0, Math.min(4, boards.length)).map((b) => ({ lamp: spot(b.aim.pos, b.aim.target, b.aim.angle, 31, { fill: b.aim.fillAt, noFixture: true }), board: null }));
 // how lit a board is, by its distance ahead of (or behind) the walker along the aisle
-function boardWeight(b, camZ) { const d = camZ - b.center.z; return d >= 0 ? 1 - ss(6.5, 8.5, d) : 1 - ss(0.5, 2.5, -d); }
+function boardWeight(b, camZ) { const d = camZ - b.center.z; return d >= 0 ? 1 - ss(5.2, 7.2, d) : 1 - ss(0.5, 2.5, -d); }
 function assignPool(camZ) {
   for (const b of boards) b.w = boardWeight(b, camZ);
   const want = boards.filter((b) => b.w > 0.001).sort((a, b) => b.w - a.w).slice(0, POOL.length);
@@ -811,28 +885,32 @@ const compMat = sm(`
     vec2 uv = vUv, d = uv - 0.5;
     vec2 q = d * vec2(uRes.x / uRes.y, 1.0);
     float r2 = dot(q, q);
-    vec2 ca = d * 0.0016 * (0.3 + r2);
-    vec3 c = vec3(texture2D(tScene, uv - ca).r, texture2D(tScene, uv).g, texture2D(tScene, uv + ca).b);
+    vec4 sc0 = texture2D(tScene, uv);
+    float isArt = clamp((0.6 - sc0.a) * 2.5, 0.0, 1.0) * (1.0 - clamp(uFire * 4.0, 0.0, 1.0));
+    vec2 ca = d * 0.0014 * (0.3 + r2) * (1.0 - isArt);
+    vec3 c = isArt > 0.5 ? sc0.rgb : vec3(texture2D(tScene, uv - ca).r, sc0.g, texture2D(tScene, uv + ca).b);
     float cc = coc(linZ(texture2D(tDepth, uv).r)) * uDofScale;
     vec4 b = texture2D(tDof, uv);
-    c = mix(c, b.rgb, smoothstep(0.8, 2.2, cc));
+    float dofMix = mix(smoothstep(1.1, 2.6, cc), smoothstep(3.8, 6.8, cc), isArt);
+    c = mix(c, b.rgb, dofMix);
     c = mix(c, texture2D(tFire, uv).rgb, uFire);
-    // the haze: four bilinear taps soften the march's dither
+    // the haze: four bilinear taps soften the march's dither (suppressed over crisp artwork & poster surfaces)
     vec2 ht = 1.0 / uRes;
-    c += (texture2D(tAir, uv + ht * vec2(1.0, 1.0)).rgb + texture2D(tAir, uv + ht * vec2(-1.0, 1.0)).rgb + texture2D(tAir, uv + ht * vec2(1.0, -1.0)).rgb + texture2D(tAir, uv + ht * vec2(-1.0, -1.0)).rgb) * 0.25;
-    c += texture2D(tBloom, uv).rgb * uBloom * vec3(1.0, 0.9, 0.82);
+    float hazeKeep = 1.0 - isArt * 0.88;
+    c += (texture2D(tAir, uv + ht * vec2(1.0, 1.0)).rgb + texture2D(tAir, uv + ht * vec2(-1.0, 1.0)).rgb + texture2D(tAir, uv + ht * vec2(1.0, -1.0)).rgb + texture2D(tAir, uv + ht * vec2(-1.0, -1.0)).rgb) * 0.25 * hazeKeep;
+    c += texture2D(tBloom, uv).rgb * uBloom * vec3(1.0, 0.9, 0.82) * hazeKeep;
     // the film's light: a halo that grows, closes to a point, then floods the room
-    // a rim of light around the disc (R = uHalo.z, width = uHalo.w), a faint wash inside so the film stays legible
     vec2 hp = (uv - uHalo.xy) * uRes; float hd = length(hp), hR = uHalo.z, hw = max(uHalo.w, 1.0);
     float out_ = max(hd - hR, 0.0);
     float rim = hd < hR ? uHaloIn : exp(-out_ * out_ / (2.0 * hw * hw));
     c += uHaloCol * uHaloAmt * (rim + 0.07 * exp(-out_ / (hw * 3.0)));
-    c *= uExposure * (1.0 - 0.36 * smoothstep(0.05, 1.0, r2));
-    c = aces(c / 0.6);
-    vec3 o = vec3(srgb(c.r), srgb(c.g), srgb(c.b));
+    vec3 cRoom = aces((c * uExposure * (1.0 - 0.34 * smoothstep(0.05, 1.0, r2))) / 0.6);
+    vec3 oRoom = vec3(srgb(cRoom.r), srgb(cRoom.g), srgb(cRoom.b));
+    vec3 cArt = clamp(c * uExposure, 0.0, 1.0);
+    vec3 oArt = vec3(srgb(cArt.r), srgb(cArt.g), srgb(cArt.b));
+    vec3 o = mix(oRoom, oArt, isArt);
     float lum = dot(o, vec3(0.299, 0.587, 0.114));
-    o += (hash(gl_FragCoord.xy * 0.71 + fract(uTime * 7.31) * 113.0) - 0.5) * (0.02 * (1.0 - lum) + 0.004);
-    o = o * 0.985 + 0.011;
+    o += (hash(gl_FragCoord.xy * 0.71 + fract(uTime * 7.31) * 113.0) - 0.5) * (0.008 * (1.0 - lum) + 0.002) * (1.0 - isArt * 0.75);
     gl_FragColor = vec4(o * uFade, 1.0);
   }`, { tScene: { value: null }, tDof: { value: null }, tDepth: { value: null }, tBloom: { value: null }, tAir: { value: null },
   uRes: { value: new THREE.Vector2() }, uBloom: { value: 0.24 }, uExposure: { value: 1.0 }, uTime: { value: 0 }, uFade: { value: 0 },
@@ -864,8 +942,9 @@ const fireMat = sm(`
 function resizeTargets() {
   renderer.getDrawingBufferSize(size);
   const w = Math.max(2, size.x), h = Math.max(2, size.y), hw = Math.max(1, Math.round(w / 2)), hh = Math.max(1, Math.round(h / 2));
+  const lw = Math.max(1, Math.round(w * 0.35)), lh = Math.max(1, Math.round(h * 0.35));
   sceneRT.setSize(w, h);
-  reflRT.setSize(hw, hh); airRT.setSize(hw, hh); halfRT.setSize(hw, hh); dofRT.setSize(hw, hh);
+  reflRT.setSize(lw, lh); airRT.setSize(lw, lh); halfRT.setSize(hw, hh); dofRT.setSize(hw, hh);
   fireRT.setSize(hw, hh); qRT.setSize(Math.max(1, Math.round(w / 4)), Math.max(1, Math.round(h / 4)));
   let bw = hw, bh = hh;
   for (let i = 0; i < BLOOM_LEVELS; i++) { down[i].setSize(Math.max(1, bw), Math.max(1, bh)); up[i].setSize(Math.max(1, bw), Math.max(1, bh)); bw = Math.round(bw / 2); bh = Math.round(bh / 2); }
@@ -896,36 +975,43 @@ function updateMirror() {
 // ---------------------------------------------------------------- the route: eye height, square to the boards
 const EYE = 1.6;
 const st = {};
-function boardView(b, turn, dist, shift) {
-  const look = b.center.clone().addScaledVector(b.xAxis, b.side * shift); look.y = b.center.y - 0.04;
+function boardView(b, turn, dist, shift, yDrop = 0.04) {
+  const look = b.center.clone().addScaledVector(b.xAxis, b.side * shift); look.y = b.center.y - yDrop;
   const a = b.yaw + turn, d = new THREE.Vector3(Math.sin(a), 0, Math.cos(a));
   const pos = look.clone().addScaledVector(d, dist); pos.y = EYE;
   return { pos, look };
 }
 function buildStations(portrait) {
-  const k = portrait ? 1.55 : 1;
-  const B = Object.fromEntries(boards.map((b) => [b.id, b]));
+  const yDrop = portrait ? 0.22 : 0.04;
   st.S0 = { pos: new THREE.Vector3(0.25, EYE, 6.2), look: new THREE.Vector3(-0.1, 1.42, -8.0), fov: 40 };
   const fit = (b) => clamp(1.4 * Math.max(b.L.W, b.L.H * 1.5), 1.6, 3.4);   // stand back as far as the board needs
-  // the first and last boards are seen at a gentle three-quarter, the rest square-on
-  boards.forEach((b, i) => { st[`S${i + 1}`] = { ...boardView(b, i === 0 || i === NB - 1 ? -b.side * 0.2 : 0, fit(b) * k, b.label ? 0.16 : 0), fov: 40 }; });
+  const distFor = (b) => portrait ? clamp(fit(b) * 1.88, 5.0, 5.85) : fit(b) * 1.14;
+  // on desktop, shift slightly toward the open aisle so each panel's narrative caption sits cleanly in the open bay beside it
+  boards.forEach((b, idx) => {
+    const turn = portrait ? 0 : -b.side * 0.16;
+    const shift = portrait ? (b.label ? 0.05 : 0) : -0.34;
+    st[`S${idx + 1}`] = { ...boardView(b, turn, distFor(b), shift, yDrop), fov: 40 };
+  });
   if (OPEN === 'photo') {
-    // out of the photograph: straight back, square to the board, far enough to see the room around it, a little
-    // toward the aisle so the gallery opens beside it
-    const b = boards[0], toAisle = -b.side * 0.45;
-    st.S1 = { ...boardView(b, 0, fit(b) * k * 1.3, b.label ? 0.16 : 0), fov: 40 };
-    st.S1.pos.x += toAisle; st.S1.look.x += toAisle * 0.6;
+    const b = boards[0];
+    if (portrait) {
+      const toAisle = -b.side * 0.18;
+      st.S1 = { ...boardView(b, 0, distFor(b) * 1.04, b.label ? 0.05 : 0, yDrop), fov: 40 };
+      st.S1.pos.x += toAisle; st.S1.look.x += toAisle * 0.4;
+    } else {
+      st.S1 = { ...boardView(b, -b.side * 0.14, fit(b) * 1.18, -0.34, yDrop), fov: 40 };
+    }
   }
   st.SF = { pos: new THREE.Vector3(0, EYE, END_Z + 4.25 * (portrait ? 1.3 : 1)), look: new THREE.Vector3(posterBoard.ring.x, 2.0, END_Z), fov: 42 };
-  st.SE = { pos: new THREE.Vector3(0, EYE, END_Z + 4.7 * (portrait ? 1.35 : 1)), look: new THREE.Vector3(0, posterBoard.center.y + 0.03, END_Z), fov: 38 };
-  st.SP = { pos: new THREE.Vector3(0, EYE - 0.05, END_Z + 6.2 * (portrait ? 1.45 : 1)), look: new THREE.Vector3(0, 1.9, END_Z), fov: 51, stop: 0.35 };
+  st.SE = { pos: new THREE.Vector3(0, EYE, END_Z + (portrait ? 5.05 : 4.18)), look: new THREE.Vector3(portrait ? 0 : 0.12, posterBoard.center.y + (portrait ? -0.16 : -0.01), END_Z), fov: 36 };
+  st.SP = { pos: new THREE.Vector3(0, EYE - 0.04, END_Z + (portrait ? 5.75 : 4.75)), look: new THREE.Vector3(0, portrait ? 1.56 : 1.82, END_Z), fov: 44, stop: 0.35 };
   if (portrait) for (const s of Object.values(st)) s.fov = Math.min(64, s.fov * 1.4);
   if (OPEN === 'photo') {
     // the first photograph fills the frame: the lens square to its print, as close as still covers the screen
     const b = boards[0], r = b.L.rects[0];
     const look = b.center.clone().addScaledVector(b.xAxis, r.x); look.y += r.y;
     const fov = st.S1.fov, t = Math.tan((fov * DEG) / 2), asp = innerWidth / innerHeight;
-    const d = Math.min(r.h / (2 * t), r.w / (2 * t * asp)) * 0.96;
+    const d = Math.min(r.h / (2 * t), r.w / (2 * t * asp)) * 0.94;
     st.S0 = { pos: look.clone().addScaledVector(b.n, d + FRONT), look, fov };
   }
   for (const s of Object.values(st)) s.q = new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().lookAt(s.pos, s.look, new THREE.Vector3(0, 1, 0)));
@@ -933,35 +1019,42 @@ function buildStations(portrait) {
 // one gait for every walk: a calm start, a steady middle, a long soft landing; the head turns with the body
 const WALK = { p: cubicBezier(0.45, 0.0, 0.3, 1.0), l: cubicBezier(0.42, 0.0, 0.3, 1.0) };
 // legs between stations: each sways away from the board it leaves and arrives along the aisle
-// ?open=photo: the first leg pulls straight back out of the print and lands drifting toward the aisle, which v3's
-// first walk carries on, so there is no stop and no reversal
-const LEGS = [OPEN === 'photo' ? { from: 'S0', to: 'S1', c1: [0, 0, 0.5], c2: [BOARDS[0].side * 0.3, 0, -0.15] } : { from: 'S0', to: 'S1', c1: [0, 0, -1.6], c2: [0.25, 0, 1.2] }];
+// ?open=photo: uniform 1/3-chord Bezier pull-back along b.n into the aisle — constant smooth zoom-out with zero start hesitation
+const LEGS = [OPEN === 'photo' ? { from: 'S0', to: 'S1', c1: [0.25, -0.02, 0.95], c2: [-0.38, 0.02, -0.82] } : { from: 'S0', to: 'S1', c1: [0, 0, -1.6], c2: [0.25, 0, 1.2] }];
 for (let i = 1; i < NB; i++) { const sf = BOARDS[i - 1].side, sto = BOARDS[i].side; LEGS.push({ from: `S${i}`, to: `S${i + 1}`, c1: [-sf * 0.3, 0, -0.9], c2: [-sto * 0.2, 0, 1.0] }); }
 LEGS.push({ from: `S${NB}`, to: 'SF', c1: [-0.1, 0, -1.3], c2: [0, 0, 1.4] });
-const SAY = ['The entrance', ...BOARDS.map((b, i) => `Board ${i + 1}${b.label ? '. ' + b.label.t.join(', ') : ''}`), 'The film, projected as a circle'];
+const SAY = ['The entrance', ...BOARDS.map((b, i) => `Panel ${i + 1}${b.label ? '. ' + b.label.t.join(', ') : ''}`), 'The film, projected as a circle'];
 let TL;
 if (PACE === 'old') {
   TL = [{ at: 'S0', px: 300, say: SAY[0] }];
-  LEGS.forEach((g, i) => TL.push({ ...g, px: i === 4 ? 1700 : 1350 }, { at: g.to, px: i === 4 ? 900 : 1000, say: SAY[i + 1] }));
+  LEGS.forEach((g, i) => TL.push({ ...g, px: i === NB - 1 ? 1700 : 1350 }, { at: g.to, px: i === NB - 1 ? 900 : 1000, say: SAY[i + 1] }));
   TL.push({ end: true, px: 2500, say: 'The poster' }, { at: 'SE', px: 300 }, { back: true, px: 1300, say: 'The poster, in its room' }, { at: 'SP', px: 200 });
 } else {
-  TL = [{ walk: true, px: 0 }, { end: true, px: 1900, say: 'The poster' }, { back: true, px: 1000, say: 'The poster, in its room' }, { at: 'SP', px: 150 }];
+  TL = [
+    { walk: true, px: 0 },
+    { end: true, px: 1900, say: 'The poster' },
+    { holdSE: true, px: 560, say: 'Vanessa Espín' },
+    { back: true, px: 1080, say: 'The poster, in its room' },
+    { at: 'SP', px: 220 },
+  ];
 }
 
 // v2's walk: one position s along the route (station i at s = i), reached through a scroll map that slows to a
-// drift at each board (a linger: never zero) and carries the walk between them. Each leg is a cubic Hermite
-// whose end speeds match the lingers on either side, so the speed never jumps.
-const PACE_NEW = { lead: 240, walk: [880, ...Array(NB - 1).fill(640), 860], linger: 280, a: 0.05, film: 380, aFilm: 0.035 };
+// drift at each board (a linger: never zero) and carries the walk between them.
+// For OPEN === 'photo', Leg 0 starts smoothly with a gentle non-zero slope m0 = 0.44 (subtle, unhurried zoom-out).
+const PACE_NEW = { lead: 180, walk: [920, ...Array(NB - 1).fill(680), 880], linger: 320, a: 0.05, film: 420, aFilm: 0.035 };
 const PIECES = [];
 if (PACE === 'new') {
-  const P = PACE_NEW, aAt = (j) => (j === NB + 1 ? P.aFilm : P.a);
+  const P = PACE_NEW, aAt = (j) => (j === 0 && OPEN === 'photo' ? 0 : j === NB + 1 ? P.aFilm : P.a);
   const speed = (j) => (j === 0 ? P.a / P.lead : j === NB + 1 ? P.aFilm / P.film : (2 * P.a) / P.linger); // s per px while lingering at j
   let px = 0;
   const add = (o) => { o.start = px; px += o.px; PIECES.push(o); };
-  add({ kind: 'linger', s0: 0, s1: P.a, px: P.lead, j: 0 });
+  if (OPEN !== 'photo') add({ kind: 'linger', s0: 0, s1: P.a, px: P.lead, j: 0 });
   for (let i = 0; i <= NB; i++) {
     const s0 = i + aAt(i), s1 = i + 1 - aAt(i + 1), ds = s1 - s0, n = P.walk[i];
-    add({ kind: 'walk', s0, s1, px: n, m0: (speed(i) * n) / ds, m1: (speed(i + 1) * n) / ds });
+    const m0 = (i === 0 && OPEN === 'photo') ? 0.44 : (speed(i) * n) / ds;
+    const m1 = (i === 0 && OPEN === 'photo') ? (speed(1) * n) / (ds * 1.45) : (speed(i + 1) * n) / ds;
+    add({ kind: 'walk', s0, s1, px: n, m0, m1 });
     if (i < NB) add({ kind: 'linger', s0: s1, s1: i + 1 + P.a, px: P.linger, j: i + 1 });
   }
   add({ kind: 'linger', s0: NB + 1 - P.aFilm, s1: NB + 1, px: P.film, j: NB + 1 });
@@ -981,7 +1074,7 @@ function pxAtS(s) { // inverse, for anchoring type to places on the route
 
 let TOTAL = 0;
 for (const s of TL) { s.start = TOTAL; TOTAL += s.px; }
-const END = TL.find((s) => s.end), BACK = TL.find((s) => s.back);
+const END = TL.find((s) => s.end), HOLD_SE = TL.find((s) => s.holdSE), BACK = TL.find((s) => s.back);
 // where the walk turns toward the film, and where it stands before it (the line and the film's cue hang off these)
 const FILM_APPROACH = { start: pxAtS(NB), px: pxAtS(NB + 1) - pxAtS(NB) };
 const FILM_HOLD = { start: pxAtS(NB + 1 - PACE_NEW.aFilm) };
@@ -1012,28 +1105,39 @@ function routeAt(px) {
   if (s.walk) {
     const sp = sAtPx(px - s.start), i = Math.min(NB, Math.floor(sp)), tt = sp - i;
     route.s = sp;
-    legAt(LEGS[i], tt, clamp(tt * 1.04), tt);
+    // Gentle perspective-balanced zoom-out out of Panel 1's forest photo
+    const tp = (i === 0 && OPEN === 'photo') ? (Math.pow(2.5, tt) - 1) / 1.5 : tt;
+    const tl = (i === 0 && OPEN === 'photo') ? clamp(tp * 1.04) : clamp(tt * 1.04);
+    legAt(LEGS[i], tp, tl, tt);
     return s;
   }
   if (s.end) { endCam(t); return s; }
-  if (s.back) {
-    // the pull-back: straight back along the same line until the poster hangs in its room
-    const tb = PACE === 'old' ? WALK.p(t) : BACK_EASE(t), A0 = st.SE, B0 = st.SP;
+  if (s.holdSE) {
+    // stay on the closer poster view (st.SE) with a barely perceptible 3% living gallery breath
+    const tb = 0.03 * t, A0 = st.SE, B0 = st.SP;
     route.pos.lerpVectors(A0.pos, B0.pos, tb); route.look.lerpVectors(A0.look, B0.look, tb); route.fov = lerp(A0.fov, B0.fov, tb);
     route.q.setFromRotationMatrix(_mq.lookAt(route.pos, route.look, _v.set(0, 1, 0)));
-    route.stop = lerp(1, 0.35, tb);
+    route.stop = 1;
+    return s;
+  }
+  if (s.back) {
+    // the pull-back: straight back along the same line until the poster hangs in its room
+    const tb0 = PACE === 'old' ? WALK.p(t) : BACK_EASE(t), tb = HOLD_SE ? 0.03 + 0.97 * tb0 : tb0, A0 = st.SE, B0 = st.SP;
+    route.pos.lerpVectors(A0.pos, B0.pos, tb); route.look.lerpVectors(A0.look, B0.look, tb); route.fov = lerp(A0.fov, B0.fov, tb);
+    route.q.setFromRotationMatrix(_mq.lookAt(route.pos, route.look, _v.set(0, 1, 0)));
+    route.stop = lerp(1, 0.35, tb0);
     return s;
   }
   const g = LEGS.find((x) => x.from === s.from);
   legAt(g, WALK.p(t), WALK.l(clamp(t * 1.04)), t);
   return s;
 }
-const BACK_EASE = cubicBezier(0.32, 0.0, 0.25, 1.0);
+const BACK_EASE = cubicBezier(0.28, 0.08, 0.28, 1.0);
 
 // ---------------------------------------------------------------- the ending: four ways through the film's light
 // The flame in her poster (212) is its brightest spot: measured at u 0.52, v 0.465, inside the canopy ring the
 // film is projected into. Variants b and c pass through that fire; a keeps v1's point of light but makes it fire.
-const FLAME = { u: 0.52, v: 0.465 };
+const FLAME = { u: 0.52, v: 0.49 };
 const PUSH = cubicBezier(0.55, 0.0, 0.35, 1.0), RISE = cubicBezier(0.5, 0.0, 0.12, 1.0), IO = cubicBezier(0.45, 0, 0.55, 1);
 const flamePt = new THREE.Vector3((FLAME.u - 0.5) * POSTER.w, posterBoard.center.y + POSTER.h / 2 - FLAME.v * POSTER.h, posterBoard.center.z);
 function endCam(e) {
@@ -1114,9 +1218,164 @@ function drawFilm() {
 
 // ---------------------------------------------------------------- type over the picture
 const intro = document.getElementById('intro'), head = document.getElementById('head');
-const line = document.getElementById('line'), label = document.getElementById('label'), live = document.getElementById('live');
+const tl1El = document.getElementById('tl-1'), tl2El = document.getElementById('tl-2'), tl3El = document.getElementById('tl-3');
+const stopLineEl = document.getElementById('stop-line'), stopLineP = document.getElementById('stop-line-p');
+const label = document.getElementById('label'), live = document.getElementById('live');
+for (const el of [tl1El, tl2El, tl3El]) {
+  if (el?.decode) loads.push(el.decode().catch(() => null));
+}
 const _s = new THREE.Vector3();
 function toScreen(p) { _s.copy(p).project(camera); return { x: (_s.x * 0.5 + 0.5) * innerWidth, y: (-_s.y * 0.5 + 0.5) * innerHeight }; }
+
+// Hand-crafted organic domain-warped fBm watercolour & sumi-charcoal wash clouds (sumi wash):
+// unique organic ragged silhouette per stop, ~74% translucent cold-press textured pigment core, zero rigid box edges
+const WASH_PLATES = (() => {
+  const W = 320, H = 200;
+  function hash2(ix, iy, seed) {
+    const h = Math.imul(ix * 374761393 + iy * 668265263 + seed * 1442695041, 1274126177);
+    return ((h ^ (h >>> 13)) >>> 0) / 4294967296;
+  }
+  function vnoise(x, y, seed) {
+    const ix = Math.floor(x), iy = Math.floor(y);
+    const fx = x - ix, fy = y - iy;
+    const ux = fx * fx * (3 - 2 * fx), uy = fy * fy * (3 - 2 * fy);
+    const a = hash2(ix, iy, seed), b = hash2(ix + 1, iy, seed);
+    const c = hash2(ix, iy + 1, seed), d = hash2(ix + 1, iy + 1, seed);
+    return lerp(lerp(a, b, ux), lerp(c, d, ux), uy);
+  }
+  function fbm(x, y, seed, oct = 4) {
+    let sum = 0, amp = 0.5, freq = 1;
+    for (let o = 0; o < oct; o++) {
+      sum += amp * vnoise(x * freq, y * freq, seed + o * 97);
+      freq *= 2.03; amp *= 0.5;
+    }
+    return sum;
+  }
+  function smin(a, b, k = 0.28) {
+    const h = clamp(0.5 + (0.5 * (b - a)) / k, 0, 1);
+    return lerp(b, a, h) - k * h * (1 - h);
+  }
+  function bakeOne(seed) {
+    const R = rng(seed * 7919 + 101);
+    const lobes = [
+      [0, 0, 0.56, 0.50, (R() - 0.5) * 0.28],
+      [-0.22 + (R() - 0.5) * 0.06, -0.10 + (R() - 0.5) * 0.08, 0.42, 0.38, (R() - 0.5) * 0.6],
+      [ 0.23 + (R() - 0.5) * 0.06,  0.09 + (R() - 0.5) * 0.08, 0.44, 0.39, (R() - 0.5) * 0.6],
+      [-0.14 + (R() - 0.5) * 0.08,  0.14 + (R() - 0.5) * 0.06, 0.38, 0.35, (R() - 0.5) * 0.6],
+      [ 0.15 + (R() - 0.5) * 0.08, -0.13 + (R() - 0.5) * 0.06, 0.39, 0.35, (R() - 0.5) * 0.6],
+    ];
+    const cInk = document.createElement('canvas'); cInk.width = W; cInk.height = H;
+    const cMsk = document.createElement('canvas'); cMsk.width = W; cMsk.height = H;
+    const gInk = cInk.getContext('2d'), gMsk = cMsk.getContext('2d');
+    const idInk = gInk.createImageData(W, H), idMsk = gMsk.createImageData(W, H);
+    const dI = idInk.data, dM = idMsk.data;
+
+    for (let py = 0; py < H; py++) {
+      const ny = (py / (H - 1)) * 2 - 1;
+      for (let px = 0; px < W; px++) {
+        const nx = (px / (W - 1)) * 2 - 1;
+        // Strictly fade to 0 before reaching canvas borders so zero straight edge can ever appear
+        const env = 1 - ss(0.74, 0.96, Math.hypot(nx * 1.02, ny * 1.04));
+        const idx = (py * W + px) * 4;
+        if (env <= 0.001) continue;
+
+        let dMin = 9;
+        for (let li = 0; li < lobes.length; li++) {
+          const [lx, ly, rx, ry, rot] = lobes[li];
+          const dx = nx - lx, dy = ny - ly;
+          const ca = Math.cos(rot), sa = Math.sin(rot);
+          const ux = (dx * ca + dy * sa) / rx, uy = (-dx * sa + dy * ca) / ry;
+          dMin = li === 0 ? Math.hypot(ux, uy) : smin(dMin, Math.hypot(ux, uy), 0.34);
+        }
+
+        // Domain-warped watercolour bleed + cold-press paper tooth
+        const qx = fbm(nx * 2.4 + 3.1, ny * 2.4 + 1.7, seed + 11, 3);
+        const qy = fbm(nx * 2.4 + 8.3, ny * 2.4 + 5.9, seed + 37, 3);
+        const bleed = fbm(nx * 3.2 + 1.35 * qx, ny * 3.2 + 1.35 * qy, seed + 73, 4);
+        const fine = fbm(nx * 13.5, ny * 13.5, seed + 131, 3);
+        const grain = hash2(px, py, seed + 211);
+        const dWarp = dMin + (bleed - 0.5) * 0.44 + (fine - 0.5) * 0.14;
+
+        // Soft optical blur mask (::before)
+        const mskA = ss(1.18, 0.46, dWarp) * env;
+        dM[idx] = dM[idx + 1] = dM[idx + 2] = 255;
+        dM[idx + 3] = Math.round(clamp(mskA, 0, 1) * 255);
+
+        // Translucent sumi-charcoal & warm-umber pigment pool with wet tide-glaze & paper tooth (::after)
+        const core = ss(1.26, 0.36, dWarp);
+        const tide = Math.exp(-Math.pow((dWarp - 0.84) / 0.16, 2)) * 0.14;
+        const paperTooth = 0.82 + 0.28 * fine + 0.14 * (grain - 0.5);
+        const inkA = clamp((core * 0.72 + tide) * paperTooth * env, 0, 0.78);
+        const warmGlaze = clamp(tide * 4.5, 0, 1);
+        dI[idx]     = Math.round(13 + 14 * warmGlaze + 7 * (fine - 0.5));
+        dI[idx + 1] = Math.round(11 +  9 * warmGlaze + 5 * (fine - 0.5));
+        dI[idx + 2] = Math.round( 9 +  4 * warmGlaze + 4 * (fine - 0.5));
+        dI[idx + 3] = Math.round(inkA * 255);
+      }
+    }
+    gInk.putImageData(idInk, 0, 0);
+    gMsk.putImageData(idMsk, 0, 0);
+    return { inkUrl: `url(${cInk.toDataURL()})`, maskUrl: `url(${cMsk.toDataURL()})` };
+  }
+  return [1, 2, 3, 4, 5].map(bakeOne);
+})();
+
+if (label) {
+  label.style.setProperty('--wash-ink', WASH_PLATES[4].inkUrl);
+  label.style.setProperty('--wash-mask', WASH_PLATES[4].maskUrl);
+}
+let activeStopWashIdx = -1;
+function applyStopWashAndTightWrap(boardIdx) {
+  if (!stopLineEl || !stopLineP) return;
+  if (boardIdx !== activeStopWashIdx && WASH_PLATES[boardIdx]) {
+    activeStopWashIdx = boardIdx;
+    stopLineEl.style.setProperty('--wash-ink', WASH_PLATES[boardIdx].inkUrl);
+    stopLineEl.style.setProperty('--wash-mask', WASH_PLATES[boardIdx].maskUrl);
+  }
+  // Tight-wrap width around actual balanced lines so short phrases get an intimate watercolour cloud
+  stopLineEl.style.width = 'max-content';
+  const textNode = stopLineP.firstChild;
+  if (textNode) {
+    const rngDom = document.createRange();
+    rngDom.selectNodeContents(stopLineP);
+    const rw = Math.ceil(rngDom.getBoundingClientRect().width);
+    if (rw > 20) stopLineEl.style.width = `${rw + 22}px`;
+  }
+}
+
+function renderIntroLockup(rawFilmTime, staticHold) {
+  if (!intro) return;
+  const p1Arrive = compiledSched?.sched?.stops?.p1?.arrive ?? 3.9;
+  const scTime = Math.min(1, p1Arrive / 3.9);
+  const tAnim = (staticHold && rawFilmTime < 0.08) ? 1.3 * scTime : rawFilmTime;
+  if (tAnim >= 2.92 * scTime) {
+    intro.style.opacity = '0';
+    intro.style.visibility = 'hidden';
+    intro.style.setProperty('--scrim-op', '0');
+    return;
+  }
+  intro.style.visibility = 'visible';
+  intro.style.opacity = '1';
+  const scrimOp = ss(0.04 * scTime, 0.72 * scTime, tAnim) * (1 - ss(2.02 * scTime, 2.86 * scTime, tAnim));
+  intro.style.setProperty('--scrim-op', scrimOp.toFixed(3));
+  const plates = [
+    [tl1El, 0.05, 0.65, 1.95, 2.65],
+    [tl2El, 0.15, 0.80, 2.06, 2.75],
+    [tl3El, 0.26, 0.95, 2.16, 2.86],
+  ];
+  for (const [el, a0, a1, d0, d1] of plates) {
+    if (!el) continue;
+    const appear = ss(a0 * scTime, a1 * scTime, tAnim);
+    const disappear = 1 - ss(d0 * scTime, d1 * scTime, tAnim);
+    const op = appear * disappear;
+    const dy = (1 - appear) * 12 - (1 - disappear) * 14;
+    const sc = 0.975 + 0.025 * appear + 0.03 * (1 - disappear);
+    const bl = (1 - appear) * 5.2 + (1 - disappear) * 4.8;
+    el.style.opacity = op.toFixed(3);
+    el.style.transform = `translate3d(0, ${dy.toFixed(1)}px, 0) scale(${sc.toFixed(4)})`;
+    el.style.filter = bl > 0.08 ? `blur(${bl.toFixed(2)}px)` : 'none';
+  }
+}
 
 (function grain() {
   const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d');
@@ -1138,6 +1397,9 @@ function toScreen(p) { _s.copy(p).project(camera); return { x: (_s.x * 0.5 + 0.5
 // ---------------------------------------------------------------- movie timeline, playback & layout
 const progBarEl = document.getElementById('prog-bar');
 const progFillEl = document.getElementById('prog-fill');
+const progTipEl = document.getElementById('prog-tip');
+const tapStateEl = document.getElementById('tap-state');
+const tapIconEl = document.getElementById('tap-icon');
 const btnPlayEl = document.getElementById('btn-play');
 const btnReplayEl = document.getElementById('btn-replay');
 const timeLblEl = document.getElementById('time-lbl');
@@ -1145,7 +1407,10 @@ const timeLblEl = document.getElementById('time-lbl');
 let filmTime = 0.0;
 let isPlaying = true;
 let isScrubbing = false;
+let wasPlayingBeforeScrub = true;
+let tapFlashTimer = 0;
 const isStaticHold = () => (TIME_Q !== null || AT !== null) && qs.get('play') !== '1';
+const fmtClock = (s) => `${Math.floor(s / 60)}:${String(Math.max(0, Math.round(s)) % 60).padStart(2, '0')}`;
 
 if (TIME_Q !== null) {
   filmTime = clamp(TIME_Q, 0, FILM_DURATION);
@@ -1156,30 +1421,48 @@ if (TIME_Q !== null) {
 }
 
 function pxAtMovieTime(tSec) {
-  const u = clamp(tSec / FILM_DURATION, 0, 1);
-  const hold = OPEN === 'photo' ? 0.055 : 0.0;
-  if (u <= hold) return 0;
-  const v = (u - hold) / (1 - hold);
-  const r = 0.04;
-  const eased = v < r ? (v * v) / (2 * r) : v - r / 2;
-  return clamp(eased / (1 - r / 2), 0, 1) * TOTAL;
+  return compiledSched.uAtTimeSec(tSec) * TOTAL;
 }
 
-function syncPlayUi() {
-  if (!btnPlayEl) return;
-  btnPlayEl.textContent = isPlaying ? 'Pause' : 'Play';
-  btnPlayEl.classList.toggle('active', isPlaying);
+function syncPlayUi(flash = false) {
+  if (btnPlayEl) {
+    btnPlayEl.textContent = isPlaying ? 'Pause' : 'Play';
+    btnPlayEl.classList.toggle('active', isPlaying);
+  }
+  if (tapStateEl && tapIconEl && !isStaticHold() && !MANUAL) {
+    clearTimeout(tapFlashTimer);
+    if (!isPlaying && filmTime < FILM_DURATION - 0.05) {
+      tapIconEl.innerHTML = '<path d="M8 5.5v13l11-6.5z"/>';
+      tapStateEl.classList.remove('is-flash');
+      tapStateEl.classList.add('is-paused');
+    } else if (flash && isPlaying) {
+      tapIconEl.innerHTML = '<path d="M8 5.5v13l11-6.5z"/>';
+      tapStateEl.classList.remove('is-paused');
+      tapStateEl.classList.add('is-flash');
+      tapFlashTimer = setTimeout(() => tapStateEl.classList.remove('is-flash'), 420);
+    } else {
+      tapStateEl.classList.remove('is-paused', 'is-flash');
+    }
+  }
 }
-syncPlayUi();
+syncPlayUi(false);
 
-function togglePlay() {
+function togglePlay(fromUser = false) {
   if (!isPlaying && filmTime >= FILM_DURATION - 0.02) {
     filmTime = 0.0;
     if (film.video) film.seeked = false;
   }
   isPlaying = !isPlaying;
   if (isPlaying && film.video && film.ready) film.video.play().catch(() => {});
-  syncPlayUi();
+  syncPlayUi(fromUser);
+}
+
+function seekToSec(sec, shouldPlay = isPlaying) {
+  filmTime = clamp(Number(sec) || 0, 0, FILM_DURATION);
+  if (filmTime < FILM_DURATION - 0.2 && film.video) film.seeked = pxAtMovieTime(filmTime) > FILM_APPROACH.start + 60;
+  isPlaying = !!shouldPlay && filmTime < FILM_DURATION - 0.02;
+  if (isPlaying && film.video && film.ready) film.video.play().catch(() => {});
+  syncPlayUi(false);
 }
 
 function replayFilm() {
@@ -1207,38 +1490,123 @@ if (trajSelEl) {
   }
   trajSelEl.addEventListener('change', () => {
     activeTrajId = trajSelEl.value;
-    document.body.classList.toggle('open-photo', OPEN === 'photo' && activeTrajId === 'T1');
+    document.body.classList.toggle('open-photo', OPEN === 'photo' && activeTrajId === 'T1' && HANG.id !== 'panels-4');
     replayFilm();
   });
 }
 
+// Ambient Amazonian soundscape (decoupled from film play/end state so it breathes continuously across the page)
+const parentOwnsAudio = (() => {
+  try { return window.parent !== window && !!window.parent.__iyuanaAudioOwned; } catch { return false; }
+})();
+const btnSoundEl = document.getElementById('btn-sound');
+const soundSelEl = document.getElementById('sound-sel');
+const visitorSoundEl = document.getElementById('visitor-sound');
+const ambientAudio = (!MANUAL && qs.get('embed') !== '1' && qs.get('sound') !== '0' && !parentOwnsAudio)
+  ? createIyuanaAudio({ initialTrack: qs.get('sound') || 'chant', initialEnabled: true })
+  : null;
+
+if (ambientAudio) {
+  if (soundSelEl) {
+    for (const t of IYUANA_TRACKS) {
+      const opt = document.createElement('option');
+      opt.value = t.id;
+      opt.textContent = t.label;
+      if (t.id === ambientAudio.getState().trackId) opt.selected = true;
+      soundSelEl.appendChild(opt);
+    }
+    soundSelEl.addEventListener('change', () => ambientAudio.setTrack(soundSelEl.value));
+  }
+  if (visitorSoundEl && document.body.classList.contains('clean')) {
+    visitorSoundEl.hidden = false;
+    visitorSoundEl.addEventListener('click', () => ambientAudio.toggle());
+  }
+  if (btnSoundEl) btnSoundEl.addEventListener('click', () => ambientAudio.toggle());
+  ambientAudio.onStateChange((st) => {
+    const lbl = st.muted ? '♪ Muted' : (st.waitingGesture ? '♪ Sound (Tap)' : '♪ Sound');
+    if (btnSoundEl) {
+      btnSoundEl.textContent = lbl;
+      btnSoundEl.classList.toggle('active', !st.muted);
+    }
+    if (visitorSoundEl) {
+      visitorSoundEl.textContent = lbl;
+      visitorSoundEl.classList.toggle('active', !st.muted);
+    }
+    if (soundSelEl && soundSelEl.value !== st.trackId) soundSelEl.value = st.trackId;
+  });
+} else {
+  if (btnSoundEl) btnSoundEl.style.display = 'none';
+  if (soundSelEl) soundSelEl.style.display = 'none';
+}
+
 window.addEventListener('keydown', (e) => {
+  if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT')) return;
   if (e.code === 'Space') {
     e.preventDefault();
-    togglePlay();
+    togglePlay(true);
   } else if (e.code === 'KeyR') {
     replayFilm();
+  } else if (e.code === 'KeyM' && ambientAudio) {
+    ambientAudio.toggle();
   }
 });
+
+// Click anywhere on the video stage (#gl) to pause or resume playback
+let stageDown = null;
+canvas.addEventListener('pointerdown', (e) => {
+  if (e.button !== undefined && e.button !== 0) return;
+  stageDown = { x: e.clientX, y: e.clientY };
+});
+canvas.addEventListener('pointerup', (e) => {
+  if (!stageDown) return;
+  const moved = Math.hypot(e.clientX - stageDown.x, e.clientY - stageDown.y);
+  stageDown = null;
+  if (moved < 7 && !MANUAL && qs.get('embed') !== '1') {
+    togglePlay(true);
+  }
+});
+
+function updateProgTip(e) {
+  if (!progBarEl || !progTipEl) return;
+  const rect = progBarEl.getBoundingClientRect();
+  const u = clamp((e.clientX - rect.left) / Math.max(1, rect.width), 0, 1);
+  progTipEl.textContent = fmtClock(u * FILM_DURATION);
+  progTipEl.style.left = `${clamp(e.clientX - rect.left, 22, Math.max(22, rect.width - 22)).toFixed(1)}px`;
+  return u;
+}
 
 function scrubFromEvent(e) {
   const rect = progBarEl.getBoundingClientRect();
   const u = clamp((e.clientX - rect.left) / Math.max(1, rect.width), 0, 1);
+  updateProgTip(e);
   filmTime = u * FILM_DURATION;
+  if (filmTime < FILM_DURATION - 0.2 && film.video) film.seeked = pxAtMovieTime(filmTime) > FILM_APPROACH.start + 60;
 }
 
 if (progBarEl) {
   progBarEl.addEventListener('pointerdown', (e) => {
+    wasPlayingBeforeScrub = isPlaying || filmTime >= FILM_DURATION - 0.15;
     isScrubbing = true;
     isPlaying = false;
-    syncPlayUi();
-    progBarEl.setPointerCapture(e.pointerId);
+    syncPlayUi(false);
+    try { progBarEl.setPointerCapture(e.pointerId); } catch {}
     scrubFromEvent(e);
   });
   progBarEl.addEventListener('pointermove', (e) => {
+    updateProgTip(e);
     if (isScrubbing) scrubFromEvent(e);
   });
-  progBarEl.addEventListener('pointerup', () => { isScrubbing = false; });
+  const finishScrub = () => {
+    if (!isScrubbing) return;
+    isScrubbing = false;
+    if (wasPlayingBeforeScrub && filmTime < FILM_DURATION - 0.04) {
+      isPlaying = true;
+      if (film.video && film.ready) film.video.play().catch(() => {});
+    }
+    syncPlayUi(false);
+  };
+  progBarEl.addEventListener('pointerup', finishScrub);
+  progBarEl.addEventListener('pointercancel', finishScrub);
 }
 
 const prog = { x: pxAtMovieTime(filmTime), v: 0 };
@@ -1253,20 +1621,23 @@ function layoutAll() {
 layoutAll();
 let resizeT;
 addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(layoutAll, 80); });
-// Keep the film smooth: when frames run late, draw at a lower resolution (shared helper; ?pace=off on the address disables it)
-import('/Vanessa-Espin-website/shared/film-pace.js').then(({ keepPace }) => keepPace({ renderer, min: 0.85, apply: (s) => { DPR = s; layoutAll(); } })).catch(() => {});
+// Keep the film smooth without sacrificing Retina sharpness (floor >= 1.5 on Retina screens)
+const minSharpDpr = Math.min(window.devicePixelRatio || 1, 1.5);
+import('/Vanessa-Espin-website/shared/film-pace.js').then(({ keepPace }) => keepPace({ renderer, min: minSharpDpr, apply: (s) => { DPR = Math.max(minSharpDpr, s); layoutAll(); } })).catch(() => {});
 
 // ---------------------------------------------------------------- frame by frame
 const walker = { phase: 0, last: new THREE.Vector3(), speed: 0, init: false };
 let overtureT0 = null, prev = performance.now(), lastSay = '', labelCorner = false;
 const T0 = performance.now();
 const _off = new THREE.Vector3(), _eul = new THREE.Euler(0, 0, 0, 'YXZ'), _q2 = new THREE.Quaternion();
-const dof = { focus: 3, aperture: 0 };
+const dof = { focus: st.S0 ? st.S0.pos.distanceTo(st.S0.look) : 3, aperture: 0 };
 
 function lampOn(lamp, now) {
-  if (overtureT0 === null || isStaticHold() || MANUAL || isScrubbing || filmTime > 1.5) return 1;
-  const i = lamps.indexOf(lamp), t = (now - overtureT0) / 1000 - (0.25 + i * 0.14);
-  return t <= 0 ? 0 : clamp(t / 0.45) ** 1.6 * (1 + 0.05 * Math.sin(clamp(t / 0.9) * Math.PI));
+  if (overtureT0 === null || isStaticHold() || MANUAL || isScrubbing || filmTime > 0.9) return 1;
+  const i = lamps.indexOf(lamp);
+  if (i === 0) return lerp(0.92, 1.0, clamp((now - overtureT0) / 220));
+  const t = (now - overtureT0) / 1000 - (0.06 + i * 0.09);
+  return t <= 0 ? 0.35 : lerp(0.35, 1.0, clamp(t / 0.38) ** 1.4);
 }
 
 // What the ending does at e (0..1 through it): which lights are on, how far the poster has come through, how wide
@@ -1312,7 +1683,7 @@ function endFx(e) {
   f.fire = open * (1 - close);
   f.exposure = 1 + 0.12 * f.fire;
   f.halo = { mode: 'rim', grow: f.grow };
-  f.label = ss(0.86, 0.98, e);
+  f.label = ss(0.74, 0.96, e);
   return f;
 }
 
@@ -1335,8 +1706,8 @@ function frame(now) {
   if (timeLblEl) timeLblEl.textContent = `${filmTime.toFixed(1)}s / ${FILM_DURATION.toFixed(1)}s`;
   const s = routeAt(px);
   if (!CAM && activeTrajId !== 'T1') {
-    const uFilm = clamp(filmTime / FILM_DURATION, 0, 1);
-    const { fov } = TRAJECTORIES[activeTrajId].sampleAtTime01(uFilm, _p0, _p1);
+    const uCanon = compiledSched.uAtTimeSec(filmTime);
+    const { fov } = TRAJECTORIES[activeTrajId].sampleAtTime01(uCanon, _p0, _p1);
     route.pos.copy(_p0);
     route.look.copy(_p1);
     route.fov = portrait ? Math.min(64, fov * 1.4) : fov;
@@ -1346,11 +1717,14 @@ function frame(now) {
 
   // ---- the ending, by place in the scroll
   const e = clamp((px - END.start) / END.px);
-  const back = clamp((px - BACK.start) / BACK.px), tb = PACE === 'old' ? WALK.p(back) : BACK_EASE(back);
+  const holdFrac = HOLD_SE ? clamp((px - HOLD_SE.start) / HOLD_SE.px) : 0;
+  const back = clamp((px - BACK.start) / BACK.px);
+  const tb = HOLD_SE && px < BACK.start ? 0.03 * holdFrac : (HOLD_SE ? 0.03 + 0.97 * BACK_EASE(back) : (PACE === 'old' ? WALK.p(back) : BACK_EASE(back)));
   const fx = endFx(e);
   const swapped = fx.reveal > 0.5;
 
   posterU.uReveal.value = fx.reveal;
+  posterU.uTrueArt.value = ss(0.76, 0.96, e);
   posterMat.roughness = swapped ? 0.5 : 0.86; posterMat.clearcoat = swapped ? 0.42 : 0.0001;
   assignPool(route.pos.z);
   for (const p of POOL) p.lamp.scroll = fx.boards;
@@ -1371,7 +1745,11 @@ function frame(now) {
     if (L.fill) { L.fill.intensity = L.fillBase * on; L.fill.color.copy(L.l.color); }
   }
   { const ov = lampOn(POOL[0].lamp, now) * fx.boards;
-    for (const b of boards) b.fixture.lensMat.color.copy(WARM).multiplyScalar(9 * ov * b.w); }
+    for (const b of boards) {
+      b.fixture.lensMat.color.copy(WARM).multiplyScalar(9 * ov * b.w);
+      if (b.artLit) b.artLit.value = clamp(0.06 + 0.88 * ov * Math.pow(clamp(b.w, 0, 1), 0.72), 0.05, 0.96);
+    } }
+  posterU.uPosterLit.value = lerp(0.95, 0.98, tb);
   if (posterWash.fx && tb > 0) {
     const stem = posterWash.fx.g.children[0], head = posterWash.fx.g.children[1];
     posterWash.fx.g.position.copy(posterWash.l.position);
@@ -1409,6 +1787,7 @@ function frame(now) {
   }
 
   // ---- the walker: steps sway a little while moving, breath when standing
+  const snapInit = !walker.init || isStaticHold() || isScrubbing;
   if (!walker.init) { walker.last.copy(route.pos); walker.init = true; }
   const moved = route.pos.distanceTo(walker.last); walker.last.copy(route.pos);
   walker.speed += ((dt > 0 ? moved / dt : 0) - walker.speed) * (1 - Math.exp(-dt * 5));
@@ -1424,38 +1803,103 @@ function frame(now) {
 
   // ---- lens: focus on what we stand before; the stops get a little depth
   const focusTarget = camera.position.distanceTo(route.look);
-  dof.focus += (focusTarget - dof.focus) * (1 - Math.exp(-dt * 6));
+  dof.focus = snapInit ? focusTarget : dof.focus + (focusTarget - dof.focus) * (1 - Math.exp(-dt * 9));
   const apTarget = route.stop * (swapped ? 0.6 : 1) * (reduce ? 0.5 : 1);
-  dof.aperture += (apTarget - dof.aperture) * (1 - Math.exp(-dt * 4));
+  dof.aperture = snapInit ? apTarget : dof.aperture + (apTarget - dof.aperture) * (1 - Math.exp(-dt * 5));
   const resScale = size.y / 900;
   const blurAll = fx.blurAll;
 
-  // ---- type
-  const [i0, i1] = OPEN === 'photo' ? [90, 560] : PACE === 'old' ? [200, 1000] : [120, 700], [h0, h1] = PACE === 'old' ? [800, 1300] : [520, 900];
-  const iO = (isStaticHold() && px > 300) ? 0 : 1 - ss(i0, i1, px);
-  const iIn = (isStaticHold() || isScrubbing || MANUAL) ? 1 : clamp(((now - T0) / 1000 - 0.15) / 0.85);
-  intro.style.opacity = (iO * iIn).toFixed(3);
-  intro.style.transform = `translate3d(0, ${(-ss(i0, i1, px) * 24).toFixed(1)}px, 0)`;
+  // ---- type: centered poster title lockup, 3D panel captions (Panels 1-4), and Main Poster credits
+  renderIntroLockup(filmTime, isStaticHold());
+  const [h0, h1] = PACE === 'old' ? [800, 1300] : [720, 1080];
   head.style.opacity = (ss(h0, h1, px) * (1 - ss(END.start + END.px * 0.2, END.start + END.px * 0.35, px))).toFixed(3);
-  const lineO = ss(FILM_APPROACH.start + FILM_APPROACH.px * 0.72, FILM_HOLD.start + 120, px) * (1 - ss(0.12, 0.26, e));
-  line.style.opacity = lineO.toFixed(3);
-  if (lineO > 0.001) {
-    const c = toScreen(posterBoard.ring), edge = toScreen(_v.set(-PB.w / 2, posterBoard.ring.y, PB.z));
-    if (portrait) { line.style.left = '16px'; line.style.right = '16px'; line.style.top = 'auto'; line.style.bottom = '44px'; line.style.transform = 'none'; }
-    else {
-      const w = line.offsetWidth, x = Math.max(28, Math.min(edge.x - w - 64, innerWidth * 0.08));
-      line.style.left = `${x}px`; line.style.top = `${c.y}px`; line.style.transform = `translate3d(${((1 - lineO) * -10).toFixed(1)}px, -50%, 0)`;
+
+  if (stopLineEl && stopLineP) {
+    let activeQuote = '', qOp = 0, qBoardIdx = -1;
+    for (let bi = 0; bi < Math.min(boards.length, STATION_DEFS.length); bi++) {
+      const def = STATION_DEFS[bi];
+      const stCfg = compiledSched.sched.stops?.[def.id];
+      const txt = stCfg?.quote?.trim();
+      if (!txt) continue;
+      // Fade in while moving into the panel (close to arrival) and stay slightly on while moving out (close to departure)
+      const op = ss(stCfg.arrive - 0.75, stCfg.arrive - 0.05, filmTime) * (1 - ss(stCfg.leave + 0.05, stCfg.leave + 0.80, filmTime));
+      if (op > qOp) { qOp = op; activeQuote = txt; qBoardIdx = bi; }
+    }
+    stopLineEl.style.opacity = qOp.toFixed(3);
+    if (qOp > 0.002 && qBoardIdx >= 0) {
+      if (stopLineP.textContent !== activeQuote || activeStopWashIdx !== qBoardIdx) {
+        stopLineP.textContent = activeQuote;
+        applyStopWashAndTightWrap(qBoardIdx);
+      }
+      const rackBlur = (1 - qOp) * 3.0;
+      stopLineEl.style.filter = rackBlur > 0.08 ? `blur(${rackBlur.toFixed(2)}px)` : 'none';
+      if (portrait) {
+        stopLineEl.style.left = '';
+        stopLineEl.style.right = '';
+        stopLineEl.style.top = '';
+        stopLineEl.style.bottom = '';
+        stopLineEl.style.transform = `translate3d(-50%, ${((1 - qOp) * 10).toFixed(1)}px, 0)`;
+      } else {
+        const b = boards[qBoardIdx];
+        _p0.copy(b.center).addScaledVector(b.xAxis, -b.side * (b.L.W / 2 + 0.52));
+        _p0.y = b.center.y - 0.02;
+        const sc = toScreen(_p0);
+        _p1.copy(b.center).addScaledVector(b.xAxis, -b.side * (b.L.W / 2 + 0.06));
+        _p1.y = b.center.y - 0.02;
+        const edgeSc = toScreen(_p1);
+        const w = stopLineEl.offsetWidth || Math.min(innerWidth * 0.25, 326);
+        const halfW = w * 0.5;
+        const screenMinCx = 36 + halfW;
+        const screenMaxCx = Math.max(screenMinCx, innerWidth - 36 - halfW);
+        let cx = sc.x;
+        if (b.side < 0) {
+          const minCx = Math.min(screenMaxCx, edgeSc.x + 28 + halfW);
+          cx = clamp(cx, minCx, screenMaxCx);
+        } else {
+          const maxCx = Math.max(screenMinCx, edgeSc.x - 28 - halfW);
+          cx = clamp(cx, screenMinCx, maxCx);
+        }
+        const cy = clamp(sc.y, 120, innerHeight - 120);
+        _eul.setFromQuaternion(camera.quaternion, 'YXZ');
+        const relDeg = clamp(((b.yaw - _eul.y) * 180) / Math.PI, -22, 22);
+        stopLineEl.style.left = `${cx.toFixed(1)}px`;
+        stopLineEl.style.top = `${cy.toFixed(1)}px`;
+        stopLineEl.style.right = 'auto';
+        stopLineEl.style.bottom = 'auto';
+        stopLineEl.style.transform = `translate3d(-50%, calc(-50% + ${((1 - qOp) * 10).toFixed(1)}px), 0) perspective(1000px) rotateY(${relDeg.toFixed(1)}deg)`;
+      }
     }
   }
-  // the wall label stands beside the poster while it settles; when the walk pulls back it moves to the corner
-  const corner = !portrait && back > 0.34;
-  if (corner !== labelCorner) { labelCorner = corner; label.classList.toggle('corner', corner); if (corner) label.style.left = label.style.top = label.style.transform = ''; }
-  const labelO = corner ? ss(0.6, 0.96, back) : fx.label * (portrait ? 1 : 1 - ss(0.04, 0.3, back));
+
+  // Main Poster curatorial credits (Vanessa Espín + 4 roles): fades in close to arrival at closer poster view (st.SE) and fades away when zooming out
+  const labelOut = 1 - ss(0.02, 0.44, back);
+  const labelO = fx.label * labelOut;
   label.style.opacity = labelO.toFixed(3);
-  if (labelO > 0.001 && !corner) {
-    const r = toScreen(_v.set(POSTER.w / 2, posterBoard.center.y, PB.z));
-    if (portrait) { label.style.left = '16px'; label.style.right = '16px'; label.style.top = 'auto'; label.style.bottom = '28px'; label.style.transform = 'none'; }
-    else { label.style.left = `${Math.round(r.x + 64)}px`; label.style.top = `${Math.round(r.y)}px`; label.style.transform = `translate3d(${((1 - labelO) * 10).toFixed(1)}px, -50%, 0)`; }
+  if (labelO > 0.001) {
+    const lblBlur = (1 - labelO) * 3.0;
+    label.style.filter = lblBlur > 0.08 ? `blur(${lblBlur.toFixed(2)}px)` : 'none';
+    if (portrait) {
+      label.style.left = '';
+      label.style.right = '';
+      label.style.top = '';
+      label.style.bottom = '';
+      label.style.transform = `translate3d(-50%, ${((1 - labelO) * 10).toFixed(1)}px, 0)`;
+    } else {
+      const anchor = toScreen(_v.set(PB.w / 2 + 0.26, posterBoard.center.y + 0.02, PB.z));
+      const edge = toScreen(_t.set(PB.w / 2 + 0.04, posterBoard.center.y, PB.z));
+      const lw = label.offsetWidth || Math.min(innerWidth * 0.24, 290);
+      const screenMaxX = Math.max(28, innerWidth - lw - 36);
+      const minX = Math.min(screenMaxX, Math.round(edge.x + 26));
+      const lx = clamp(Math.round(anchor.x), minX, screenMaxX);
+      const ly = clamp(Math.round(anchor.y), 120, innerHeight - 140);
+      _eul.setFromQuaternion(camera.quaternion, 'YXZ');
+      const relPosterDeg = clamp((-_eul.y * 180) / Math.PI, -18, 18);
+      label.style.left = `${lx}px`;
+      label.style.top = `${ly}px`;
+      label.style.right = 'auto';
+      label.style.bottom = 'auto';
+      label.style.transform = `translate3d(${((1 - labelO) * 10).toFixed(1)}px, -50%, 0) perspective(1000px) rotateY(${relPosterDeg.toFixed(1)}deg)`;
+    }
   }
   const say = s.walk ? (Math.abs(route.s - Math.round(route.s)) < 0.3 ? SAY[Math.round(route.s)] : '') : s.say;
   if (say && say !== lastSay) { lastSay = say; live.textContent = say; }
@@ -1546,7 +1990,7 @@ function frame(now) {
   cu.tFire.value = fireRT.texture; cu.uFire.value = ss(0, 0.05, fx.fire); cu.uExposure.value = fx.exposure;
   cu.tScene.value = sceneRT.texture; cu.tDof.value = dofRT.texture; cu.tDepth.value = sceneRT.depthTexture; cu.tBloom.value = up[0].texture; cu.tAir.value = airRT.texture;
   cu.uTime.value = time; cu.uDofScale.value = 2.0;
-  cu.uFade.value = (isStaticHold() || MANUAL || isScrubbing) ? 1 : overtureT0 === null ? 0 : clamp((now - overtureT0) / 500);
+  cu.uFade.value = (isStaticHold() || MANUAL || isScrubbing) ? 1 : overtureT0 === null ? 0 : clamp((now - overtureT0) / 380);
   pass(compMat, null);
   if (!MANUAL) requestAnimationFrame(frame);
 }
@@ -1564,7 +2008,31 @@ function measure(step = 10) {
   }
   return { step, TOTAL, END: END.start, BACK: BACK.start, motion: out };
 }
-window.__aisle = { TOTAL, TL, BACK, END, PACE, FIRE, HANG: HANG.id, NB, pxAtS, get px() { return prog.x; }, stations: st, camera, routeAt, measure,
+window.__aisle = { TOTAL, TL, BACK, END, PACE, FIRE, HANG: HANG.id, NB, boards, posterBoard, PB, pxAtS, get px() { return prog.x; }, get filmTime() { return filmTime; }, get duration() { return FILM_DURATION; }, get isPlaying() { return isPlaying; }, stations: st, camera, routeAt, measure, togglePlay: () => togglePlay(true), seekToSec, replayFilm,
+  setSchedule(newSched) {
+    compiledSched = compileSchedule(newSched);
+    FILM_DURATION = compiledSched.totalSec;
+    filmTime = clamp(filmTime, 0, FILM_DURATION);
+  },
+  setState({ tSec, playing, trajId, sched } = {}) {
+    if (sched) {
+      compiledSched = compileSchedule(sched);
+      FILM_DURATION = compiledSched.totalSec;
+    }
+    if (trajId && TRAJECTORIES[trajId] && trajId !== activeTrajId) {
+      activeTrajId = trajId;
+      if (trajSelEl) trajSelEl.value = trajId;
+      document.body.classList.toggle('open-photo', OPEN === 'photo' && activeTrajId === 'T1' && HANG.id !== 'panels-4');
+    }
+    if (typeof playing === 'boolean') {
+      isPlaying = playing;
+      syncPlayUi();
+    }
+    if (typeof tSec === 'number') {
+      isScrubbing = !isPlaying;
+      filmTime = clamp(tSec, 0, FILM_DURATION);
+    }
+  },
   async tick(px, dtMs = 1000 / 30, snap = false) {
     manual.px = px; manual.now += dtMs;
     if (snap) { prog.x = px; prog.v = 0; }
@@ -1579,19 +2047,24 @@ window.__aisle = { TOTAL, TL, BACK, END, PACE, FIRE, HANG: HANG.id, NB, pxAtS, g
     await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
     return { x: prog.x };
   } };
-(function pre(now) { if (overtureT0 !== null) return; if (!isStaticHold()) intro.style.opacity = clamp(((now - T0) / 1000 - 0.15) / 0.85).toFixed(3); requestAnimationFrame(pre); })(performance.now());
+window.addEventListener('message', (ev) => {
+  if (ev.data?.type === 'iyuana-lab-sync' && window.__aisle?.setState) {
+    window.__aisle.setState(ev.data);
+  }
+});
+renderIntroLockup(filmTime, isStaticHold());
 (async () => {
   plantsModelled();
   const gobosP = palmGobos().catch(() => null);
   const filmP = loadFilm().catch((e) => console.warn('film', e));
   const fontsP = Promise.all(['500 40px Switzer', '400 40px Switzer', '400 40px Gambetta'].map((f) => document.fonts.load(f))).catch(() => null);
   await Promise.all(loads.map((p) => p.catch(() => null)));
-  await Promise.race([fontsP, new Promise((r) => setTimeout(r, 2500))]);
+  await Promise.race([fontsP, new Promise((r) => setTimeout(r, 450))]);
   for (const c of labelCards) { c.labelMat.map = labelTexture(c.def.label); c.labelMat.needsUpdate = true; }
   const gobos = await gobosP;
   if (gobos) { boards.forEach((b) => { b.goboTex = gobos[b.gobo % gobos.length]; }); POOL.forEach((p) => { p.lamp.l.map = gobos[0]; }); }
   window.__aisle.gobos = gobos;
-  await filmP;
+  if (MANUAL) await filmP;
   renderer.compile(scene, camera);
   // Before the film starts: send every picture to the graphics card and build the fire lens's shader, so that neither
   // lands mid-film as a hitch (photographs used to be sent the first time their board came into view).

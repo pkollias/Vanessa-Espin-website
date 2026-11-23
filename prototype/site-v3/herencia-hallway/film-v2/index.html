@@ -203,7 +203,7 @@ body.hud-hidden #hudMin {
   display: none !important;
 }
 </style>
-<style>.cinema-pill, .review-pill, #hud, #hudMin, .prog-bar { visibility: hidden !important; pointer-events: none !important; }</style>
+<style>.cinema-pill, .review-pill, #hud, #hudMin, .text-studio, .cue-lanes { visibility: hidden !important; pointer-events: none !important; }</style>
 </head>
 <body>
 <div id="viewport"></div>
@@ -310,7 +310,7 @@ body.hud-hidden #hudMin {
 
 <!-- Event media: the "Media" link, the strip and the pop-up (shared module in /event-media/).
      It loads before the film's own script so it can pause the film's video while the viewer is open. -->
-<script type="module">import { mountEventMedia } from '/Vanessa-Espin-website/event-media/event-media.js?v=6'; mountEventMedia({ manifest: '/Vanessa-Espin-website/event-media/manifests/herencia-viva.json' });</script>
+<script type="module">import { mountEventMedia } from '/Vanessa-Espin-website/event-media/event-media.js?v=7'; mountEventMedia({ manifest: '/Vanessa-Espin-website/event-media/manifests/herencia-viva.json' });</script>
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';

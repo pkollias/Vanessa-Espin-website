@@ -1,0 +1,523 @@
+/* Embedded-to-Fullscreen Event Media Carousel Stylesheet
+   Preserves 100% of the Media Carousel chat's standalone decisions (V4 Rack-Focus, 0.22 Slivers, 0.72 Taper,
+   Fixed-Edge Stepper Arrows, Passive Counter, Placard Segregation, Uniform Tick-Ruler, and Hybrid Fix 1×4 Scrubber Tray)
+   while adapting seamlessly between Inline Right-Column Mode and 100vw × 100vh Full-Screen on Landing C1 Komorebi + Wash. */
+
+.evm {
+  --evm-serif: 'Gambetta', Georgia, serif;
+  --evm-sans: 'Switzer', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  --evm-hair: var(--hair, 1px);
+
+  /* Inherit Propagated Landing Page (C1 Komorebi + Wash) Surface Tokens */
+  --evm-ground: var(--bg, #15120f);
+  --evm-ink: var(--ink, #f4ede2);
+  --evm-muted: var(--muted, rgba(244, 237, 226, 0.68));
+  --evm-rule: var(--rule, rgba(244, 237, 226, 0.22));
+  --evm-accent: var(--ink, #f4ede2);
+  --evm-pill-bg: color-mix(in srgb, var(--evm-ground) 74%, transparent);
+  --evm-pill-hover-bg: var(--evm-ink);
+  --evm-pill-hover-fg: var(--evm-ground);
+
+  /* Locked Standalone Viewer Geometry (V4 + Ultra-Narrow 0.22 + Harmonic 0.72 Taper) */
+  --evm-base-h: 0.56;
+  --evm-hero-max-w: 0.56;
+  --evm-hero-max-h: 0.68;
+  --evm-pop-upscale: 1;
+  --evm-hero-gap: 20;
+  --evm-wing-gap: 9;
+  --evm-wing-h1: 0.66;
+  --evm-wing-decay: 0.72;
+  --evm-wing-aperture: 0.22;
+  --evm-step-ms: 410;
+
+  /* Silver-Gelatin Wing Wash */
+  --evm-wash-sat: 0.14;
+  --evm-wash-contrast: 1.03;
+  --evm-wash-bright: 0.74;
+  --evm-veil: 0.20;
+  --evm-veil-color: #12100e;
+
+  position: relative;
+  width: 100%;
+  height: clamp(400px, 74vh, 660px);
+  overflow: hidden;
+  color: var(--evm-ink);
+  font: 400 12.5px/1.2 var(--evm-sans);
+  letter-spacing: 0.015em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.evm[data-surface-tone="light"] {
+  --evm-wash-bright: 0.86;
+  --evm-veil: 0.10;
+  --evm-veil-color: #2a211d;
+}
+
+/* Full-Screen Standalone Expansion (100vw × 100vh) */
+.evm.is-fullscreen {
+  --evm-hero-max-w: 0.54;
+  --evm-hero-max-h: 0.69;
+  --evm-hero-gap: 24;
+  --evm-wing-gap: 11;
+
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100lvh;
+  z-index: 95;
+  background: var(--evm-ground);
+  animation: evmFsOpen 0.26s cubic-bezier(0.19, 1, 0.22, 1) both;
+}
+
+@keyframes evmFsOpen {
+  from { opacity: 0.92; }
+  to { opacity: 1; }
+}
+
+.evm button { font: inherit; letter-spacing: inherit; color: inherit; }
+.evm :focus-visible { outline: 1.5px solid var(--evm-ink); outline-offset: 2px; }
+
+/* Full-Screen Landing C1 Komorebi + Wash Canvas (Active when Full-Screen) */
+.evm__fs-canvas {
+  display: none;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+.evm.is-fullscreen .evm__fs-canvas {
+  display: block;
+}
+
+/* ── Stage & Continuous 60fps Track ── */
+.evm__viewport {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  touch-action: pan-y;
+  cursor: default;
+}
+.evm.is-fullscreen .evm__viewport {
+  touch-action: none;
+}
+.evm.is-shuttle-dragging .evm__viewport {
+  cursor: grabbing;
+}
+
+.evm__track {
+  position: absolute;
+  left: 0; top: 0; width: 100%; height: 100%;
+  will-change: transform;
+}
+
+.evm-item {
+  position: absolute;
+  left: 0; top: 0; margin: 0; overflow: hidden;
+  will-change: transform, width, height, opacity, filter;
+}
+.evm-item__frame {
+  position: absolute;
+  inset: 0; display: block; margin: 0; padding: 0; border: 0;
+  background: color-mix(in srgb, var(--evm-ink) 8%, var(--evm-ground));
+  overflow: hidden; cursor: pointer;
+  box-shadow: inset 0 0 0 var(--evm-hair) var(--evm-rule);
+  transition: box-shadow 0.24s ease;
+}
+.evm-item.is-hero .evm-item__frame {
+  border-radius: 1.5px;
+  box-shadow: 0 24px 62px rgba(10, 8, 6, 0.28), inset 0 0 0 var(--evm-hair) var(--evm-rule);
+}
+.evm[data-surface-tone="dark"] .evm-item.is-hero .evm-item__frame {
+  box-shadow: 0 30px 78px rgba(0, 0, 0, 0.68), inset 0 0 0 var(--evm-hair) rgba(244, 237, 226, 0.24);
+}
+/* In Inline Mode, clicking the center Hero expands Full-Screen! */
+.evm.is-inline .evm-item.is-hero .evm-item__frame {
+  cursor: zoom-in;
+}
+.evm.is-fullscreen.is-shuttle-enabled .evm-item.is-hero .evm-item__frame {
+  cursor: grab;
+}
+.evm.is-shuttle-dragging .evm-item.is-hero .evm-item__frame {
+  cursor: grabbing !important;
+}
+.evm-item.is-wing:hover .evm-item__frame {
+  box-shadow: inset 0 0 0 1px var(--evm-ink);
+}
+
+.evm-item__media {
+  position: absolute;
+  left: 0; top: 0; display: block; max-width: none;
+  object-fit: cover; pointer-events: none;
+  will-change: transform, width, height;
+  filter: saturate(var(--evm-wash-sat)) contrast(var(--evm-wash-contrast)) brightness(var(--evm-wash-bright));
+  transition: filter 0.24s ease;
+}
+.evm-item__veil {
+  position: absolute; inset: 0; pointer-events: none;
+  background: var(--evm-veil-color); opacity: var(--evm-veil);
+  transition: opacity 0.24s ease;
+}
+
+/* Center Hero: 100% Whole & Uncropped True-to-File Colour */
+.evm-item.is-hero .evm-item__media { filter: none; }
+.evm-item.is-hero .evm-item__veil { opacity: 0; }
+
+.evm-item.is-wing:hover .evm-item__media {
+  filter: saturate(0.34) contrast(1.03) brightness(0.86);
+}
+.evm-item.is-wing:hover .evm-item__veil { opacity: 0.12; }
+
+/* Corner badge hidden — Full screen button now sits centered directly above the central hero image */
+.evm-item__fs-badge {
+  display: none !important;
+}
+
+/* Active Hero Video Player (mounted ONLY on settled center hero) */
+.evm-item__hero-video {
+  position: absolute; inset: 0; z-index: 4;
+  width: 100%; height: 100%; display: block; object-fit: contain; background: #050404;
+  pointer-events: auto;
+}
+
+/* Whisper video indicator inside wing slivers */
+.evm-item__vid-pill {
+  position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); z-index: 3; pointer-events: none;
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 3px 6px; border-radius: 999px;
+  background: rgba(14, 12, 10, 0.76);
+  border: var(--evm-hair) solid rgba(244, 237, 226, 0.24);
+  color: #f4ede2; font: 500 8.5px/1 var(--evm-sans);
+  letter-spacing: 0.03em; font-variant-numeric: tabular-nums; white-space: nowrap;
+  transition: opacity 0.2s ease;
+}
+.evm-item.is-hero .evm-item__vid-pill { opacity: 0; }
+
+/* Staggered Viewer Entrance */
+@keyframes evmFanOut {
+  from { opacity: 0; transform: scale(0.965); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.evm.is-dealing .evm-item__frame {
+  animation: evmFanOut 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--evm-dist, 0) * 32ms);
+}
+
+/* ── Fixed Container-Edge Left / Right Stepper Buttons ── */
+.evm__step {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 8;
+  width: 36px; height: 36px; border-radius: 999px; margin: 0; padding: 0;
+  display: grid; place-items: center; cursor: pointer;
+  background: var(--evm-pill-bg); color: var(--evm-ink);
+  border: var(--evm-hair) solid var(--evm-rule);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  font: 500 14px/1 var(--evm-sans);
+  transition: opacity 0.22s ease, border-color 0.22s ease, background 0.22s ease, color 0.22s ease, transform 0.2s ease;
+}
+.evm.is-fullscreen .evm__step {
+  width: 40px; height: 40px;
+}
+.evm__step--prev { left: clamp(8px, 1.4vw, 22px); }
+.evm__step--next { right: clamp(8px, 1.4vw, 22px); }
+.evm.is-fullscreen .evm__step--prev { left: clamp(16px, 2.2vw, 30px); }
+.evm.is-fullscreen .evm__step--next { right: clamp(16px, 2.2vw, 30px); }
+.evm__step:hover:not(:disabled) {
+  background: var(--evm-pill-hover-bg);
+  color: var(--evm-pill-hover-fg);
+  border-color: var(--evm-ink);
+  transform: translateY(-50%) scale(1.06);
+}
+.evm__step:disabled { opacity: 0; pointer-events: none; }
+
+/* ── Top Corner Chrome (Passive Counter + Full-Screen / Back Controls) ── */
+.evm__chrome {
+  position: absolute; left: 0; right: 0; top: 0; z-index: 8;
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: 6px 4px;
+  pointer-events: none;
+}
+.evm.is-inline .evm__chrome {
+  justify-content: flex-end;
+}
+.evm.is-fullscreen .evm__chrome {
+  padding: clamp(16px, 2.2vh, 24px) clamp(18px, 2.4vw, 34px);
+}
+.evm__chrome > * { pointer-events: auto; }
+
+.evm__back,
+.evm__fs-btn {
+  margin: 0; display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 999px; cursor: pointer;
+  background: var(--evm-pill-bg); color: var(--evm-ink);
+  border: var(--evm-hair) solid var(--evm-rule);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  font: 500 12px/1 var(--evm-sans); letter-spacing: 0.02em;
+  white-space: nowrap;
+  transition: background 0.22s ease, border-color 0.22s ease, color 0.22s ease, transform 0.2s ease;
+}
+.evm.is-inline .evm__fs-btn {
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  transform: translateX(-50%);
+  z-index: 26;
+}
+.evm.is-inline .evm__fs-btn:hover {
+  transform: translateX(-50%) translateY(-1px);
+}
+.evm__back:hover,
+.evm__fs-btn:hover {
+  background: var(--evm-pill-hover-bg);
+  color: var(--evm-pill-hover-fg);
+  border-color: var(--evm-ink);
+}
+.evm.is-inline .evm__back,
+.evm.is-inline .evm__title {
+  display: none;
+}
+.evm.is-fullscreen .evm__fs-btn {
+  display: none;
+}
+
+.evm__title {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  max-width: calc(100% - 260px); text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: 300 clamp(19px, 1.65vw, 24px)/1.1 var(--evm-serif); letter-spacing: -0.018em; opacity: 0.92;
+  pointer-events: none;
+}
+.evm__count {
+  display: none !important;
+}
+
+/* ── Centered Bottom Stack: Museum Placard + Uniform Tick-Ruler ── */
+.evm-placard {
+  position: absolute; left: 50%; bottom: 44px;
+  transform: translateX(-50%); z-index: 9; pointer-events: none;
+  display: inline-flex; align-items: baseline; gap: 9px;
+  max-width: calc(100% - 24px);
+  padding: 5px 14px; border-radius: 999px;
+  background: var(--evm-pill-bg);
+  border: var(--evm-hair) solid var(--evm-rule);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  color: var(--evm-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transition: opacity 0.18s ease;
+}
+.evm.is-fullscreen .evm-placard {
+  bottom: clamp(52px, 6.2vh, 64px);
+  max-width: min(76vw, 700px);
+}
+/* Clean segregation rule from Fix 4: hide placard while scrubber tray is popped up! */
+.evm.is-ribbon-open .evm-placard {
+  opacity: 0;
+}
+.evm-placard__kind {
+  font: 500 9.5px/1 var(--evm-sans); letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--evm-muted); flex-shrink: 0;
+}
+.evm-placard__title {
+  font: 401 13.5px/1.2 var(--evm-serif); overflow: hidden; text-overflow: ellipsis;
+}
+
+.evm__map {
+  position: absolute; left: 50%; bottom: 6px;
+  transform: translateX(-50%); z-index: 12;
+  display: flex; gap: 0; align-items: flex-end;
+  max-width: calc(100% - 20px);
+  padding: 5px 11px; border-radius: 999px;
+  background: var(--evm-pill-bg);
+  border: var(--evm-hair) solid var(--evm-rule);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  touch-action: none;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+.evm.is-fullscreen .evm__map {
+  bottom: clamp(14px, 2vh, 22px);
+  max-width: min(88vw, 780px);
+}
+.evm.has-scrub-ruler .evm__map {
+  cursor: ew-resize;
+}
+.evm.has-scrub-ruler .evm__map:hover,
+.evm.is-ribbon-open .evm__map,
+.evm.is-scrubbing-ruler .evm__map {
+  border-color: var(--evm-ink);
+  box-shadow: 0 8px 24px rgba(10, 8, 6, 0.22);
+}
+.evm-map__thumb {
+  flex: 0 1 7px; width: 7px; min-width: 3.5px; height: 20px;
+  margin: 0; padding: 0; border: 0; background: transparent; cursor: inherit;
+  display: grid; place-items: end center; position: relative;
+}
+.evm-map__thumb::after {
+  content: ''; display: block; width: 1.5px; height: 9px; border-radius: 1px;
+  background: var(--evm-ink); opacity: 0.26;
+  transition: height 0.15s ease, opacity 0.15s ease;
+}
+.evm-map__thumb[data-kind='video']::after,
+.evm-map__thumb[data-kind='painting']::after { height: 12px; }
+.evm-map__thumb.is-in-view::after { opacity: 0.56; height: 13px; }
+.evm-map__thumb.is-scrub-near::after { opacity: 0.78; height: 15px; }
+.evm-map__thumb.is-current::after,
+.evm-map__thumb.is-scrub-target::after {
+  opacity: 1; height: 19px; width: 2px; background: var(--evm-ink);
+}
+
+/* ── Hybrid Fix 1×4 High-Contrast Elevated Scrubber Tray (.evm-ribbon) ── */
+.evm-ribbon {
+  position: absolute;
+  left: 50%;
+  bottom: 46px;
+  z-index: 14;
+  width: min(calc(100% - 16px), 668px);
+  padding: 12px 14px 10px;
+  border-radius: 13px;
+
+  background: linear-gradient(180deg, rgba(46, 40, 36, 0.97) 0%, rgba(28, 24, 21, 0.98) 100%);
+  color: #f7f1e7;
+  border: 1px solid rgba(250, 243, 232, 0.44);
+  backdrop-filter: blur(20px) saturate(1.15);
+  -webkit-backdrop-filter: blur(20px) saturate(1.15);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 252, 246, 0.22),
+    0 14px 36px rgba(0, 0, 0, 0.55),
+    0 28px 68px rgba(0, 0, 0, 0.72);
+
+  transform: translate(-50%, 10px) scale(0.985);
+  opacity: 0; visibility: hidden; pointer-events: none;
+  transition:
+    opacity 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.20s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0.18s;
+}
+.evm.is-fullscreen .evm-ribbon {
+  bottom: calc(clamp(14px, 2vh, 22px) + 48px);
+  padding: 14px 16px 12px;
+}
+.evm-ribbon::after {
+  content: '';
+  position: absolute; left: 0; right: 0; bottom: -22px; height: 24px;
+}
+.evm-ribbon.is-shown {
+  opacity: 1; visibility: visible; pointer-events: auto;
+  transform: translate(-50%, 0) scale(1);
+}
+
+/* S2 Warm Archival Paper Mat Variant */
+.evm[data-pop-style='paper'] .evm-ribbon {
+  background: linear-gradient(180deg, #f5f0e7 0%, #e7dfd1 100%);
+  color: #191512;
+  border: 1px solid rgba(25, 21, 18, 0.24);
+  box-shadow: 0 22px 58px rgba(15, 12, 10, 0.38);
+}
+
+.evm-ribbon__window {
+  position: relative;
+  width: 100%; height: 92px;
+  overflow: hidden; border-radius: 8px;
+  background: rgba(11, 9, 8, 0.90);
+  border: 1px solid rgba(248, 241, 230, 0.14);
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.72);
+  cursor: grab;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%);
+}
+.evm-ribbon__window:active { cursor: grabbing; }
+
+.evm-ribbon__track {
+  position: absolute; left: 0; top: 8px; height: 76px;
+  display: flex; align-items: center; gap: 9px;
+  will-change: transform;
+}
+.evm-ribbon__cell {
+  position: relative;
+  width: 64px; height: 76px; flex: 0 0 64px;
+  margin: 0; padding: 0; border: 0;
+  border-radius: 5px; overflow: hidden; cursor: pointer;
+  background: #181411;
+  box-shadow: inset 0 0 0 1px rgba(248, 241, 230, 0.20), 0 4px 12px rgba(0, 0, 0, 0.45);
+  opacity: 0.68; transform: scale(0.95);
+  transition: opacity 0.14s ease, transform 0.14s ease, box-shadow 0.14s ease;
+}
+.evm-ribbon__cell.is-near { opacity: 0.88; transform: scale(0.98); }
+.evm-ribbon__cell.is-focus {
+  opacity: 1; transform: scale(1.05); z-index: 3;
+  box-shadow: 0 0 0 2px #f4ede2, 0 8px 22px rgba(0, 0, 0, 0.75);
+}
+.evm-ribbon__cell:hover {
+  opacity: 1; transform: translateY(-2px) scale(1.04); z-index: 4;
+  box-shadow: 0 0 0 1.5px #fff, 0 8px 20px rgba(0, 0, 0, 0.75);
+}
+.evm-ribbon__cell img {
+  width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none;
+}
+.evm-ribbon__idx {
+  position: absolute; left: 4px; bottom: 4px;
+  padding: 2px 4.5px; border-radius: 3px; pointer-events: none;
+  background: rgba(10, 8, 7, 0.82); color: rgba(248, 242, 232, 0.92);
+  font: 600 8.5px/1 var(--evm-sans); font-variant-numeric: tabular-nums;
+}
+.evm-ribbon__cell.is-focus .evm-ribbon__idx {
+  background: #f4ede2; color: #14100d;
+}
+.evm-ribbon__vid {
+  position: absolute; right: 4px; top: 4px;
+  padding: 2px 4px; border-radius: 3px; pointer-events: none;
+  background: rgba(10, 8, 7, 0.78); color: #f7f1e7;
+  font: 600 8px/1 var(--evm-sans);
+}
+
+.evm-ribbon__meta {
+  margin-top: 9px;
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  padding: 0 2px;
+}
+.evm-ribbon__left {
+  display: inline-flex; align-items: center; gap: 8px; min-width: 0; flex: 1 1 auto;
+}
+.evm-ribbon__num {
+  padding: 3.5px 8px; border-radius: 999px; flex-shrink: 0;
+  background: rgba(244, 237, 226, 0.14);
+  border: 1px solid rgba(244, 237, 226, 0.34);
+  font: 600 10px/1 var(--evm-sans); letter-spacing: 0.06em; color: #f4ede2;
+  font-variant-numeric: tabular-nums;
+}
+.evm[data-pop-style='paper'] .evm-ribbon__num {
+  background: #191512; color: #f5f0e7; border-color: #191512;
+}
+.evm-ribbon__cap {
+  font: 401 13px/1.2 var(--evm-serif); color: #faf4ea;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+}
+.evm[data-pop-style='paper'] .evm-ribbon__cap { color: #191512; }
+.evm-ribbon__hint {
+  font: 500 9px/1 var(--evm-sans); letter-spacing: 0.07em; text-transform: uppercase;
+  color: rgba(248, 241, 230, 0.56); flex-shrink: 0;
+}
+.evm[data-pop-style='paper'] .evm-ribbon__hint { color: rgba(25, 21, 18, 0.58); }
+
+@media (max-width: 720px) {
+  .evm {
+    height: clamp(360px, 64vh, 520px);
+    --evm-hero-max-w: 0.72;
+    --evm-hero-max-h: 0.64;
+    --evm-hero-gap: 12;
+    --evm-wing-gap: 7;
+  }
+  .evm.is-fullscreen {
+    height: 100vh; height: 100lvh;
+    --evm-hero-max-w: 0.78;
+    --evm-hero-max-h: 0.64;
+  }
+  .evm__title, .evm-ribbon__hint { display: none; }
+  .evm__step { width: 32px; height: 32px; font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .evm, .evm-item__media, .evm-item__veil { transition: none; }
+  .evm.is-dealing .evm-item__frame, .evm.is-fullscreen { animation: none; }
+}

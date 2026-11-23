@@ -58,8 +58,8 @@ const VALID_CUES = new Set([...SCROLL_CUES.map((c) => c.id), 'none']);
 
 const FALLBACK_EXHIBITIONS = [
   { slug: 'iyuana', num: '01', name: 'Iyuana', poster: '../img/iyuana.jpg' },
-  { slug: 'herencia-viva', num: '02', name: 'Herencia Viva', poster: '../img/herencia-viva.jpg' },
-  { slug: 'ayazamana', num: '03', name: 'Ayazamana', poster: '../img/ayazamana.png' },
+  { slug: 'herencia-viva', num: '02', name: 'Herencia Viva', poster: '../img/herencia-viva-ayllu.png' },
+  { slug: 'ayazamana', num: '03', name: 'Ayazamana', poster: '../img/ayazamana.png?v=20261123a' },
 ];
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-export const DEFAULT_FILM_DURATION = 26.0;
+export const DEFAULT_FILM_DURATION = 30.5;
 
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -124,10 +124,11 @@ function compileTrajectory(spec) {
   const cumTime = new Float64Array(M);
   for (let j = 0; j < M; j++) {
     const s = j / (M - 1);
-    const easeIn = 0.24 + 0.76 * sm5(s / 0.11);
+    // Very slow, poised opening camera crawl during the closed-curtain logo & text overture (0..5.7s), then smooth glide to stage:
+    const easeIn = 0.15 + 0.18 * sm5(s / 0.05) + 0.67 * sm5((s - 0.055) / 0.115);
     const easeOut = 0.08 + 0.92 * (1.0 - sm5((s - 0.89) / 0.11));
-    // Gentle C-infinity stage-appreciation linger while inside the auditorium (`Z < 10.5m`) so all 5 photos breathe up close:
-    const stageDwell = 1.0 - 0.58 * (sm5((s - 0.08) / 0.12) * (1.0 - sm5((s - 0.60) / 0.14)));
+    // Gentle C-infinity stage-appreciation linger while inside the auditorium (`Z < 10.5m`) so all 4 dance photos breathe up close:
+    const stageDwell = 1.0 - 0.56 * (sm5((s - 0.11) / 0.12) * (1.0 - sm5((s - 0.62) / 0.14)));
     const bioCurveSlow = Math.pow(1.0 + 2.2 * smoothKappa[j], -0.38);
     speedProfile[j] = Math.max(0.06, easeIn * easeOut * stageDwell * bioCurveSlow);
     if (j > 0) {

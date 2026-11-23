@@ -70,14 +70,14 @@ const FALLBACK_EXHIBITIONS = [
   {
     slug: 'herencia-viva',
     name: 'Herencia Viva',
-    poster: '../img/herencia-viva.jpg',
-    wash: { base: '#e3b5ba', mid: '#c6606b', deep: '#a94856', dark: false },
+    poster: '../img/herencia-viva-ayllu.png',
+    wash: { base: '#100e0d', mid: '#2d5238', deep: '#193021', dark: true },
   },
   {
     slug: 'ayazamana',
     name: 'Ayazamana',
-    poster: '../img/ayazamana.png',
-    wash: { base: '#f2e8c2', mid: '#e2cc72', deep: '#cfb354', dark: false },
+    poster: '../img/ayazamana.png?v=20261123a',
+    wash: { base: '#100e0d', mid: '#5c1927', deep: '#703a16', dark: true },
   },
 ];
 
@@ -526,21 +526,21 @@ export function createIntroController(ctx = {}) {
     const veilAlpha = clamp01(1 - veilEase);
 
     if (veilAlpha > 0.002) {
-      // Subtle warm dawn shift in the umber cardstock right as morning light enters
-      const umber = mixRgb([19, 16, 13], [44, 33, 22], smooth(0.0, 0.65, v));
+      // Nocturnal umber cardstock melting smoothly into the dark gallery wall
+      const umber = mixRgb([16, 14, 13], [26, 20, 15], smooth(0.0, 0.65, v));
       c2d.fillStyle = rgbStr(umber, veilAlpha);
       c2d.fillRect(0, 0, W, H);
 
       const amb = c2d.createRadialGradient(W * 0.48, H * 0.46, H * 0.04, W * 0.48, H * 0.46, Math.hypot(W, H) * 0.55);
-      amb.addColorStop(0, `rgba(235, 192, 124, ${(0.065 * veilAlpha).toFixed(3)})`);
-      amb.addColorStop(1, 'rgba(19, 16, 13, 0)');
+      amb.addColorStop(0, `rgba(235, 192, 124, ${(0.055 * veilAlpha).toFixed(3)})`);
+      amb.addColorStop(1, 'rgba(16, 14, 13, 0)');
       c2d.fillStyle = amb;
       c2d.fillRect(0, 0, W, H);
     }
 
-    // Golden Komorebi morning beams: faint pre-dawn warmth (0.30..0.50), full sunlit wash across reveal (0.50..1.00)
-    const preDawn = smooth(0.28, 0.50, prog) * 0.24;
-    const revealDawn = v > 0 ? Math.sin(Math.pow(v, 0.68) * Math.PI) * 1.12 : 0;
+    // Subtle nocturnal Komorebi gleam: faint warm breath (0.30..0.50), gentle dusk shafts across reveal (0.50..1.00)
+    const preDawn = smooth(0.28, 0.50, prog) * 0.14;
+    const revealDawn = v > 0 ? Math.sin(Math.pow(v, 0.68) * Math.PI) * 0.32 : 0;
     const beamStrength = preDawn + revealDawn;
 
     if (beamStrength > 0.004) {
@@ -704,14 +704,14 @@ export function createIntroController(ctx = {}) {
     c2d.clearRect(0, 0, W, H);
 
     if (endFade > 0.002) {
-      // 1. Warm archival cotton rag paper (#f2ede3) + subtle deckle warmth
-      c2d.fillStyle = `rgba(242, 237, 227, ${endFade.toFixed(3)})`;
+      // 1. Nocturnal charcoal rag paper (#12100e) + subtle obsidian vignette
+      c2d.fillStyle = `rgba(18, 16, 14, ${endFade.toFixed(3)})`;
       c2d.fillRect(0, 0, W, H);
 
       const halfDiag = 0.5 * Math.hypot(W, H);
       const vig = c2d.createRadialGradient(W * 0.5, H * 0.5, halfDiag * 0.2, W * 0.5, H * 0.5, halfDiag * 1.08);
-      vig.addColorStop(0, 'rgba(250, 246, 238, 0)');
-      vig.addColorStop(1, `rgba(214, 203, 184, ${(0.34 * endFade).toFixed(3)})`);
+      vig.addColorStop(0, 'rgba(32, 26, 20, 0)');
+      vig.addColorStop(1, `rgba(6, 5, 4, ${(0.48 * endFade).toFixed(3)})`);
       c2d.fillStyle = vig;
       c2d.fillRect(0, 0, W, H);
 

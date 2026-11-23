@@ -1,0 +1,1404 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/Vanessa-Espin-website/favicon.ico">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Event Experience — Movie + Unified Landing About &amp; Media Salon</title>
+<link rel="preconnect" href="https://api.fontshare.com">
+<link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=gambetta@300,400,401,500,600&f[]=switzer@400,500,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./fold-carousel.css?v=20261123c">
+<style>
+  :root {
+    --serif: 'Gambetta', Georgia, serif;
+    --sans: 'Switzer', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+    --ease-out: cubic-bezier(0.19, 1, 0.22, 1);
+    --ease-glide: cubic-bezier(0.32, 0.72, 0, 1);
+    --hair: 1px;
+
+    /* Propagated Landing Page (C1 · Komorebi + Wash) Tokens */
+    --bg: #15120f;
+    --ink: #f4ede2;
+    --body: rgba(244, 237, 226, 0.86);
+    --muted: rgba(244, 237, 226, 0.68);
+    --rule: rgba(244, 237, 226, 0.22);
+    --rule-strong: rgba(244, 237, 226, 0.36);
+    --plinth-bg: rgba(255, 250, 242, 0.04);
+
+    /* Movie Room Tokens */
+    --room-bg: #070605;
+    --film-ink: #f4ede2;
+    --film-pill-bg: rgba(14, 12, 10, 0.56);
+    --film-pill-bd: rgba(238, 232, 221, 0.24);
+  }
+  @media (min-resolution: 2dppx) {
+    :root { --hair: 0.5px; }
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+  body.fs-open { overflow: hidden; }
+
+  /* Exact Landing Page Unified Paper Grain (multiply on light washes, screen on dark washes) */
+  .grain {
+    position: fixed; inset: -2rem; pointer-events: none; z-index: 120;
+    background-image: url('/Vanessa-Espin-website/landing-v3/img/noise.png');
+    background-size: 150px 150px;
+    opacity: 0.042;
+    mix-blend-mode: multiply;
+  }
+  body[data-tone="dark"] .grain {
+    opacity: 0.08;
+    mix-blend-mode: screen;
+  }
+
+  /* =========================================================================
+     Top Site Navigation (Brand Curation Left · Next Centered · Sound Right)
+     ========================================================================= */
+  .top-nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 55;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 20px;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  body.fs-open .top-nav { opacity: 0; pointer-events: none; }
+  #topAboutExBtn, #topNextBtn { display: none !important; }
+  body.is-hosted .top-nav a[href] { display: none !important; }
+  .top-nav__grp { display: flex; gap: 8px; pointer-events: auto; }
+  .top-nav__grp--right { margin-left: auto; }
+  .pill-btn {
+    appearance: none;
+    border: var(--hair) solid var(--film-pill-bd);
+    background: var(--film-pill-bg);
+    color: var(--film-ink);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    font: 500 12.5px/1 var(--sans); letter-spacing: 0.02em;
+    padding: 8px 15px; border-radius: 999px;
+    cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 7px;
+    transition: background 0.24s ease, color 0.24s ease, border-color 0.24s ease, transform 0.22s var(--ease-out);
+  }
+  .pill-btn:hover {
+    transform: translateY(-1px);
+    border-color: var(--film-ink);
+  }
+  body.below-active .pill-btn {
+    background: color-mix(in srgb, var(--bg) 78%, transparent);
+    color: var(--ink);
+    border-color: var(--rule);
+  }
+  body.below-active .pill-btn:hover {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+
+  /* =========================================================================
+     100vh Movie Stage + 48px Peeking C02 Bottom Bar (Zero Vertical Slider!)
+     ========================================================================= */
+  .movie-runway {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 48px);
+    height: calc(100lvh - 48px);
+    z-index: 2;
+    background: var(--room-bg);
+  }
+  body[data-palette="l4"] .movie-runway { background: transparent; }
+  body[data-palette="l4"] .movie-sticky {
+    position: fixed; top: 0; left: 0; right: 0; height: 100vh; height: 100lvh; z-index: 1;
+  }
+
+  .movie-sticky {
+    position: sticky; top: 0;
+    width: 100%;
+    height: calc(100vh - 48px);
+    height: calc(100lvh - 48px);
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--room-bg);
+  }
+
+  .movie-card {
+    position: relative; width: 100%; height: 100%;
+    background: var(--room-bg); color: var(--film-ink);
+    overflow: hidden;
+    cursor: pointer;
+    will-change: filter;
+  }
+
+  .movie-iframe {
+    position: absolute; inset: 0; width: 100%; height: 100%; border: 0;
+    pointer-events: none; opacity: 0; transition: opacity 0.3s ease;
+  }
+  body.editing-film-cues .movie-iframe { pointer-events: auto; }
+  body.editing-film-cues .play-gate { opacity: 0 !important; pointer-events: none !important; }
+  .movie-iframe.is-loaded { opacity: 1; }
+
+  .still-fallback {
+    position: absolute; inset: 0; display: flex; align-items: flex-end; background: var(--room-bg);
+  }
+  .still-fallback img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.78; }
+  body[data-film-tone="light"] .still-fallback img { opacity: 0.9; }
+  .still-fallback__vig {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(6,5,4,0.28) 0%, transparent 38%, rgba(6,5,4,0.72) 100%);
+  }
+  body[data-film-tone="light"] .still-fallback__vig {
+    background: linear-gradient(180deg, rgba(243,239,230,0.38) 0%, transparent 40%, rgba(243,239,230,0.78) 100%);
+  }
+  .still-fallback__title {
+    position: relative; z-index: 2; padding: 0 clamp(22px, 5.5vw, 80px) clamp(48px, 7vh, 80px);
+    transition: opacity 0.25s ease;
+  }
+  body[data-play="playing"] .still-fallback__title { opacity: 0; }
+  .still-fallback__title span {
+    display: block; font: 400 10.5px/1.2 var(--serif); letter-spacing: 0.22em; text-transform: uppercase;
+    opacity: 0.72; margin-bottom: 8px;
+  }
+  .still-fallback__title h2 {
+    font: 300 clamp(42px, 6.4vw, 96px)/0.90 var(--serif); letter-spacing: -0.026em; margin: 0;
+  }
+  .still-fallback__title em {
+    display: block; font: 300 italic clamp(16px, 1.6vw, 23px)/1.2 var(--serif); opacity: 0.76; margin-top: 6px;
+  }
+
+  /* Centered Play / Replay Button + Subtle 2px Progress Seam */
+  .play-gate {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    z-index: 12; display: flex; flex-direction: column; align-items: center; gap: 10px;
+    transition: opacity 0.26s ease, transform 0.26s ease;
+  }
+  body[data-play="playing"] .play-gate {
+    opacity: 0; pointer-events: none; transform: translate(-50%, -50%) scale(1.06);
+  }
+  .play-circle {
+    appearance: none; width: 64px; height: 64px; border-radius: 50%;
+    border: var(--hair) solid var(--film-pill-bd); background: var(--film-pill-bg);
+    color: var(--film-ink); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    cursor: pointer; display: grid; place-items: center;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.26);
+    transition: transform 0.22s var(--ease-out), border-color 0.2s ease;
+  }
+  .play-circle:hover { transform: scale(1.07); border-color: var(--film-ink); }
+  .play-circle svg { width: 18px; height: 18px; fill: currentColor; }
+  .play-lbl {
+    font: 500 11px/1 var(--sans); letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 6px 13px; border-radius: 999px;
+    border: var(--hair) solid var(--film-pill-bd);
+    background: var(--film-pill-bg); color: var(--film-ink); backdrop-filter: blur(8px);
+  }
+
+  .playing-mini {
+    position: absolute; right: 20px; bottom: 16px; z-index: 16;
+    display: flex; align-items: center; gap: 7px;
+    opacity: 0.88;
+    transition: opacity 0.22s ease;
+  }
+  .movie-card:hover .playing-mini,
+  .playing-mini:focus-within,
+  .playing-mini:hover { opacity: 1; }
+  .playing-mini button {
+    appearance: none; border: var(--hair) solid var(--film-pill-bd); background: var(--film-pill-bg);
+    color: var(--film-ink); padding: 6px 12px; border-radius: 999px; cursor: pointer;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    font: 500 11px/1 var(--sans); letter-spacing: 0.04em;
+    transition: border-color 0.2s ease, transform 0.2s var(--ease-out);
+  }
+  .playing-mini button:hover {
+    border-color: var(--film-ink);
+    transform: translateY(-1px);
+  }
+  .playing-mini span {
+    font: 400 11px/1 var(--sans); font-variant-numeric: tabular-nums; opacity: 0.88;
+    padding: 0 3px;
+  }
+
+  .prog-seam {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 22px; z-index: 15;
+    display: flex; align-items: flex-end; cursor: pointer; touch-action: none;
+  }
+  .prog-seam__track {
+    position: relative; width: 100%; height: 3px;
+    background: rgba(255,255,255,0.22);
+    transition: height 0.16s ease, background 0.16s ease;
+  }
+  body[data-film-tone="light"] .prog-seam__track { background: rgba(20,18,15,0.18); }
+  .prog-seam:hover .prog-seam__track { height: 6px; background: rgba(255,255,255,0.32); }
+  .prog-seam__fill {
+    position: relative; height: 100%; width: 0%;
+    background: linear-gradient(90deg, #f6a035 0%, var(--film-ink) 100%);
+  }
+  body[data-film-tone="light"] .prog-seam__fill {
+    background: linear-gradient(90deg, #567a52 0%, var(--film-ink) 100%);
+  }
+  .prog-seam__fill::after {
+    content: ""; position: absolute; right: -5px; top: 50%;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--film-ink); box-shadow: 0 2px 8px rgba(0,0,0,0.65);
+    transform: translateY(-50%) scale(0);
+    transition: transform 0.16s ease;
+  }
+  .prog-seam:hover .prog-seam__fill::after { transform: translateY(-50%) scale(1); }
+  .prog-seam__tip {
+    position: absolute; bottom: 12px; left: 0; transform: translateX(-50%);
+    padding: 3px 8px; border-radius: 999px; pointer-events: none;
+    background: rgba(12, 10, 9, 0.86); border: var(--hair) solid rgba(244, 237, 226, 0.26);
+    color: #f4ede2; font: 500 10.5px/1 var(--sans); font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em; opacity: 0; transition: opacity 0.15s ease;
+  }
+  .prog-seam:hover .prog-seam__tip { opacity: 1; }
+
+  /* =========================================================================
+     Below-the-Fold Unified Landing C1 Komorebi + Wash Chamber (#foldChamber)
+     ========================================================================= */
+  .fold-chamber {
+    position: relative;
+    z-index: 20;
+    min-height: 100vh;
+    background-color: var(--bg);
+    color: var(--ink);
+    border-top: var(--hair) solid var(--rule);
+    box-shadow: 0 -20px 52px rgba(10, 8, 6, 0.28);
+    overflow: hidden;
+    transition: background-color 0.36s ease, color 0.36s ease;
+  }
+  body[data-tone="dark"] .fold-chamber {
+    border-top-color: rgba(246, 160, 53, 0.42);
+    box-shadow: 0 -14px 36px rgba(246, 160, 53, 0.08), 0 -22px 52px rgba(8, 6, 4, 0.48);
+  }
+  body[data-palette="l4"] .fold-chamber {
+    background-color: color-mix(in srgb, var(--bg) 76%, transparent);
+    backdrop-filter: blur(26px);
+    -webkit-backdrop-filter: blur(26px);
+  }
+
+  .komorebi-canvas {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    z-index: 0; pointer-events: none; display: block;
+  }
+
+  /* =========================================================================
+     Converged Option A Lower-Fold Bar (Warm Amber Hairline + Soft Candle-Rim Pill)
+     Dissolves smoothly on scroll-down so it never overlaps the top navigation!
+     ========================================================================= */
+  @keyframes lipArrowBreathe {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(2.5px); }
+  }
+
+  .fold-lip {
+    position: relative; z-index: 2;
+    height: 48px;
+    padding: 0 clamp(18px, 3.6vw, 52px);
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    border-bottom: var(--hair) solid var(--rule);
+    cursor: pointer; user-select: none; overflow: hidden;
+    font: 500 11px/1 var(--sans); letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted);
+    transition: color 0.25s ease, background 0.25s ease;
+  }
+  body[data-tone="dark"] .fold-lip {
+    background: linear-gradient(180deg, rgba(46, 33, 21, 0.92) 0%, rgba(22, 18, 14, 0.96) 100%);
+    color: rgba(244, 237, 226, 0.80);
+  }
+  body[data-tone="light"] .fold-lip {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 86%, #faf7ef) 0%, var(--bg) 100%);
+    color: color-mix(in srgb, var(--ink) 78%, transparent);
+  }
+  .fold-lip:hover {
+    color: var(--ink);
+    background: color-mix(in srgb, var(--ink) 7%, transparent);
+  }
+  .fold-lip__left {
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .fold-lip__cta {
+    padding: 6px 13px; border-radius: 999px;
+    border: var(--hair) solid rgba(246, 160, 53, 0.44);
+    background: rgba(246, 160, 53, 0.10);
+    color: #f8f1e5; font-weight: 500; letter-spacing: 0.10em;
+    display: inline-flex; align-items: center; gap: 7px; flex-shrink: 0;
+    transition: border-color 0.25s ease, background 0.25s ease, color 0.25s ease;
+  }
+  body[data-tone="light"] .fold-lip__cta {
+    border-color: var(--rule-strong);
+    background: color-mix(in srgb, var(--ink) 7%, transparent);
+    color: var(--ink);
+  }
+  .fold-lip:hover .fold-lip__cta {
+    background: rgba(246, 160, 53, 0.20);
+    border-color: rgba(246, 160, 53, 0.72);
+  }
+  body[data-tone="light"] .fold-lip:hover .fold-lip__cta {
+    background: color-mix(in srgb, var(--ink) 12%, transparent);
+    border-color: var(--ink);
+  }
+  .fold-lip__arr {
+    display: inline-block;
+    animation: lipArrowBreathe 2.8s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fold-lip__arr { animation: none; }
+  }
+
+  /* =========================================================================
+     Converged 2-Column Salon: [Left: About the Exhibition | Right: Standalone Media Carousel]
+     ========================================================================= */
+  .salon-stage {
+    position: relative; z-index: 2;
+    max-width: 1460px; margin: 0 auto;
+    min-height: calc(100vh - 48px);
+    padding: clamp(32px, 4vh, 48px) clamp(20px, 3.4vw, 52px) clamp(28px, 4vh, 48px);
+    display: flex; flex-direction: column; justify-content: center;
+  }
+
+  .converged-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+    gap: clamp(26px, 3.6vw, 54px);
+    align-items: center;
+    width: 100%;
+  }
+  body[data-concept="c00w"] .converged-grid {
+    grid-template-columns: minmax(0, 0.70fr) minmax(0, 1.30fr);
+  }
+  body[data-concept="c03r"] .converged-grid {
+    grid-template-columns: 1fr;
+    gap: clamp(28px, 4.5vh, 48px);
+  }
+  body[data-concept="c03r"] .note-col-text {
+    max-width: 68ch; margin: 0 auto;
+  }
+
+  /* Left Column: Vanessa's Curatorial Note (Exact Landing Typography) */
+  .note-kicker {
+    font: 400 10.5px/1.2 var(--serif);
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 8px; display: block;
+  }
+  .note-title {
+    font: 300 clamp(2.1rem, 3.5vw, 3.25rem)/0.98 var(--serif);
+    letter-spacing: -0.026em; margin: 0; color: var(--ink);
+  }
+  .note-sub {
+    font: 300 italic clamp(1.12rem, 1.65vw, 1.48rem)/1.2 var(--serif);
+    color: var(--muted); margin: 5px 0 0;
+  }
+  .landing-rule {
+    width: 100%; height: var(--hair); margin: 16px 0;
+    background: var(--rule);
+  }
+  .note-org {
+    margin: 0 0 11px;
+    font: 500 13.5px/1.3 var(--sans);
+    letter-spacing: 0.03em;
+    color: var(--ink);
+  }
+  .note-prose {
+    display: grid; gap: 12px;
+    font: 400 clamp(14px, 1.02vw, 15.6px)/1.56 var(--sans);
+    color: var(--body); max-width: 52ch;
+  }
+  .note-prose p { margin: 0; }
+  .note-artists-lbl {
+    font: 400 10.5px/1.2 var(--serif); letter-spacing: 0.20em; text-transform: uppercase;
+    color: var(--muted); margin: 18px 0 8px; display: block;
+  }
+  .artists-list {
+    list-style: none; margin: 0; padding: 0;
+    border-top: var(--hair) solid var(--rule);
+    max-width: 52ch;
+  }
+  .artists-list li {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;
+    padding: 6.5px 0; border-bottom: var(--hair) solid var(--rule);
+    font-size: 13px; line-height: 1.38;
+  }
+  .artists-list b { font-weight: 500; color: var(--ink); }
+  .artists-list span { color: var(--muted); font-size: 12.2px; }
+  .note-signoff {
+    margin: 14px 0 0;
+    font: 400 italic 14.5px/1.35 var(--serif);
+    color: var(--ink);
+    opacity: 0.9;
+  }
+
+  /* Right Column: Inline Standalone Media Carousel Mount */
+  .note-col-carousel {
+    min-width: 0; width: 100%;
+  }
+  body[data-concept="c00b"] .note-col-carousel {
+    padding: 8px;
+    border: var(--hair) solid var(--rule);
+    border-radius: 8px;
+    background: var(--plinth-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  @media (max-width: 880px) {
+    .converged-grid,
+    body[data-concept="c00w"] .converged-grid {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+    .fold-lip {
+      padding: 0 16px; font-size: 10px; letter-spacing: 0.08em;
+    }
+  }
+  @media (max-width: 640px) {
+    .top-nav { padding: 12px 10px; }
+    .pill-btn { padding: 6px 9px; font-size: 11px; gap: 4px; }
+    #topNextBtn { max-width: 42vw; overflow: hidden; text-overflow: ellipsis; }
+  }
+</style>
+<style>.cinema-pill, .review-pill, #hud, #hudMin, .text-studio, .cue-lanes { visibility: hidden !important; pointer-events: none !important; }</style>
+</head>
+<body data-concept="c00" data-palette="l1" data-play="ready" data-film-tone="dark" data-tone="dark">
+
+<div class="grain" aria-hidden="true"></div>
+<div class="cinema-pill" aria-hidden="true" style="position:fixed;top:-9999px;left:-9999px;opacity:0;pointer-events:none"><span id="time-lbl">0.0s / 31.5s</span></div>
+
+<!-- Top Navigation (Brand Curation Left · About Me Right) -->
+<nav class="top-nav" aria-label="Event navigation">
+  <div class="top-nav__grp">
+    <a class="pill-btn" href="/Vanessa-Espin-website/landing-v3/live/" target="_top">← Brand Curation</a>
+  </div>
+  <div class="top-nav__grp top-nav__grp--right">
+    <a class="pill-btn" id="topAboutMeLink" href="/Vanessa-Espin-website/landing-v3/live/#about" target="_top">About Me</a>
+    <button class="pill-btn" type="button" id="topAboutExBtn" hidden style="display:none">About &amp; Media</button>
+  </div>
+</nav>
+
+<!-- 100vh Movie Stage (Minus 44px Peeking Bottom Lip, Zero 3/3 Vertical Slider!) -->
+<section class="movie-runway" id="movieRunway">
+  <div class="movie-sticky" id="movieSticky">
+    <div class="movie-card" id="movieCard">
+      <div class="still-fallback" id="stillFallback">
+        <img id="stillImg" src="/Vanessa-Espin-website/event-media/assets/iyuana/final-02.jpg" alt="">
+        <div class="still-fallback__vig"></div>
+        <div class="still-fallback__title">
+          <span id="stKind">Film &amp; Photography Exhibition</span>
+          <h2 id="stTitle">Iyuana</h2>
+          <em id="stSub">El retorno de los Sueños</em>
+        </div>
+      </div>
+
+      <iframe class="movie-iframe" id="movieIframe" title="3D Event Movie" allow="autoplay; fullscreen"></iframe>
+
+      <!-- Play / Replay Gate -->
+      <div class="play-gate">
+        <button class="play-circle" type="button" id="playBtn" aria-label="Play movie">
+          <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg>
+        </button>
+        <span class="play-lbl" id="playLbl">Play Film · 0:27</span>
+      </div>
+
+      <!-- Bottom Player Controls: Play/Pause · Replay · Sound · Clock -->
+      <div class="playing-mini">
+        <button type="button" id="miniPauseBtn">Pause</button>
+        <button type="button" id="miniReplayBtn" title="Replay from beginning">&#8634; Replay</button>
+        <button type="button" id="bottomSoundBtn" hidden title="Toggle Exhibition Ambient Soundscape">&#9834; Sound</button>
+        <span id="miniTime">0:00 / 0:32</span>
+      </div>
+
+      <!-- Clickable & Scrubbable Video Progress Bar -->
+      <div class="prog-seam" id="progSeam" title="Click or drag to navigate video">
+        <span class="prog-seam__tip" id="progTip">0:00</span>
+        <div class="prog-seam__track"><div class="prog-seam__fill" id="progFill"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Below-the-Fold Unified Landing (C1 Komorebi + Wash) Salon -->
+<main class="fold-chamber" id="foldChamber">
+  <canvas class="komorebi-canvas" id="foldBackdrop" aria-hidden="true"></canvas>
+
+  <!-- Peeking 48px C02 Bottom Bar (No Item Count Number!) -->
+  <div class="fold-lip" id="foldLip" role="button" tabindex="0">
+    <span class="fold-lip__left" id="lipLeftTxt">Iyuana: El retorno de los Sueños — Film &amp; Photography Exhibition</span>
+    <span class="fold-lip__cta"><span>About &amp; Media</span><span class="fold-lip__arr" aria-hidden="true">↓</span></span>
+  </div>
+
+  <div class="salon-stage" id="salonStage">
+    <div class="converged-grid" id="convergedGrid">
+      <!-- Left Column: Vanessa's About the Exhibition Copy -->
+      <div class="note-col-text" id="noteColText"></div>
+
+      <!-- Right Column: Exact Standalone Media Carousel Engine Opened at Item 01 (Click Center Image -> Full-Screen!) -->
+      <div class="note-col-carousel" id="noteColCarousel"></div>
+    </div>
+  </div>
+</main>
+
+<script type="module">
+  import { FOLD_EVENTS, CONCEPTS } from './data.js?v=20261123f';
+  import { mountFoldCarousel } from './fold-carousel-engine.js?v=20261123c';
+
+  const qs = new URLSearchParams(location.search);
+  const useStill = qs.get('still') === '1';
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isHosted = qs.get('hosted') === '1';
+  if (isHosted) document.body.classList.add('is-hosted');
+  const inLabGrid = (() => {
+    try { return !isHosted && window.parent !== window && window.parent.location.pathname.includes('/fold'); } catch { return false; }
+  })();
+
+  const state = {
+    eventSlug: qs.get('event') || 'iyuana',
+    concept: CONCEPTS.some((c) => c.id === qs.get('concept')) ? qs.get('concept') : 'c00',
+    palette: qs.get('palette') || '',
+    popStyle: qs.get('popStyle') || 'pewter',
+    scrubRuler: qs.get('carousel') !== 'her',
+    playState: 'ready',
+    curSec: 0,
+    durSec: 31.5,
+    mediaItems: [],
+    mountedSlug: null,
+    manifestCache: {},
+    carouselApi: null,
+  };
+
+  if (!state.palette) {
+    const c = CONCEPTS.find((x) => x.id === state.concept);
+    state.palette = c ? c.defaultPalette : 'l1';
+  }
+
+  const $ = (id) => document.getElementById(id);
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const mix = (a, b, t) => a + (b - a) * t;
+  const fmtSec = (s) => `${Math.floor(s / 60)}:${String(Math.max(0, Math.round(s)) % 60).padStart(2, '0')}`;
+  const getEx = () => FOLD_EVENTS.find((e) => e.slug === state.eventSlug) || FOLD_EVENTS[0];
+
+  function rng(seed) {
+    let a = seed >>> 0;
+    return () => {
+      a = (a + 0x6d2b79f5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+  function hexToRgb(hex) {
+    const h = hex.replace('#', '');
+    const n = parseInt(h.length === 3 ? h.split('').map((c) => c + c).join('') : h, 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  function rgbStr(rgb, a = 1) {
+    return a >= 0.999
+      ? `rgb(${rgb[0] | 0},${rgb[1] | 0},${rgb[2] | 0})`
+      : `rgba(${rgb[0] | 0},${rgb[1] | 0},${rgb[2] | 0},${a.toFixed(3)})`;
+  }
+  function mixRgb(a, b, t) {
+    return [mix(a[0], b[0], t), mix(a[1], b[1], t), mix(a[2], b[2], t)];
+  }
+
+  /* =========================================================================
+     Exact Landing Page (C1 · Komorebi + Wash) Procedural Canvas Renderer
+     Half-resolution soft canvas + alternate-frame idle cadence
+     ========================================================================= */
+  const KOMOREBI_LEAVES = (() => {
+    const R = rng(4021);
+    const arr = [];
+    for (let i = 0; i < 34; i++) {
+      arr.push({
+        ux: 0.08 + R() * 0.86,
+        uy: -0.04 + R() * 0.96,
+        rx: 0.022 + R() * 0.052,
+        ry: 0.012 + R() * 0.028,
+        rot: -0.55 + R() * 1.1,
+        ph: R() * Math.PI * 2,
+        spd: 0.45 + R() * 0.55,
+        wt: 0.55 + R() * 0.65,
+        bright: i % 3 === 0,
+      });
+    }
+    return arr;
+  })();
+
+  function drawWetWashBlob(ctx, cx, cy, r, midHex, deepHex, alphaScale = 1) {
+    const mid = hexToRgb(midHex), deep = hexToRgb(deepHex);
+    ctx.save();
+    const lobes = [
+      [0, 0, 1.0, 0],
+      [-0.24, -0.15, 0.76, 1.1],
+      [0.26, 0.14, 0.80, 2.3],
+      [-0.14, 0.24, 0.70, 3.7],
+      [0.18, -0.22, 0.72, 4.9],
+    ];
+    for (const [ox, oy, sc, ph] of lobes) {
+      const lx = cx + ox * r * 0.52;
+      const ly = cy + oy * r * 0.42;
+      const lr = Math.max(2, r * sc);
+      ctx.save();
+      ctx.translate(lx, ly);
+      ctx.rotate(ph * 0.7);
+      ctx.scale(1, 0.86);
+      const grd = ctx.createRadialGradient(0, 0, lr * 0.06, 0, 0, lr);
+      grd.addColorStop(0, rgbStr(mid, 0.20 * alphaScale));
+      grd.addColorStop(0.62, rgbStr(mid, 0.16 * alphaScale));
+      grd.addColorStop(0.84, rgbStr(mixRgb(mid, deep, 0.38), 0.21 * alphaScale));
+      grd.addColorStop(1, rgbStr(deep, 0));
+      ctx.fillStyle = grd;
+      ctx.beginPath();
+      ctx.arc(0, 0, lr, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+
+  function drawKomorebiLight(ctx, W, H, nowSec, strength = 1, isDarkWall = false) {
+    ctx.save();
+    const breeze = reducedMotion ? 0 : Math.sin(nowSec * 0.52) * W * 0.012;
+    ctx.globalCompositeOperation = isDarkWall ? 'screen' : 'soft-light';
+    const beamAngles = [
+      [0.06, -0.08, 0.68, 0.95, 0.34],
+      [0.32, -0.10, 0.96, 0.88, 0.24],
+    ];
+    for (const [x0, y0, x1, y1, a0] of beamAngles) {
+      const g = ctx.createLinearGradient(W * x0 + breeze, H * y0, W * x1 + breeze, H * y1);
+      const a = a0 * strength * (isDarkWall ? 0.11 : 1.0);
+      if (isDarkWall) {
+        g.addColorStop(0, `rgba(255, 212, 176, ${a.toFixed(3)})`);
+        g.addColorStop(0.55, `rgba(248, 192, 148, ${(a * 0.44).toFixed(3)})`);
+        g.addColorStop(1, 'rgba(248, 184, 138, 0)');
+      } else {
+        g.addColorStop(0, `rgba(255, 244, 214, ${a.toFixed(3)})`);
+        g.addColorStop(0.55, `rgba(255, 238, 198, ${(a * 0.48).toFixed(3)})`);
+        g.addColorStop(1, 'rgba(255, 236, 190, 0)');
+      }
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    for (const lf of KOMOREBI_LEAVES) {
+      const dx = reducedMotion ? 0 : Math.sin(nowSec * lf.spd + lf.ph) * W * 0.009 + Math.cos(nowSec * 0.33 + lf.ph) * W * 0.005;
+      const dy = reducedMotion ? 0 : Math.cos(nowSec * lf.spd * 0.82 + lf.ph) * H * 0.007;
+      const cx = lf.ux * W + breeze * 0.7 + dx;
+      const cy = lf.uy * H + dy;
+      const rx = lf.rx * W, ry = lf.ry * W;
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(lf.rot + (reducedMotion ? 0 : Math.sin(nowSec * 0.7 + lf.ph) * 0.06));
+      ctx.scale(1, ry / rx);
+
+      if (lf.bright) {
+        ctx.globalCompositeOperation = isDarkWall ? 'screen' : 'overlay';
+        const sg = ctx.createRadialGradient(0, 0, rx * 0.05, 0, 0, rx);
+        const sa = (isDarkWall ? 0.058 : 0.19) * lf.wt * strength;
+        sg.addColorStop(0, `rgba(255, 248, 224, ${sa.toFixed(3)})`);
+        sg.addColorStop(1, 'rgba(255, 248, 224, 0)');
+        ctx.fillStyle = sg;
+      } else {
+        ctx.globalCompositeOperation = 'multiply';
+        const dg = ctx.createRadialGradient(0, 0, rx * 0.08, 0, 0, rx);
+        const da = (isDarkWall ? 0.13 : 0.082) * lf.wt * strength;
+        dg.addColorStop(0, `rgba(38, 28, 20, ${da.toFixed(3)})`);
+        dg.addColorStop(0.6, `rgba(38, 28, 20, ${(da * 0.48).toFixed(3)})`);
+        dg.addColorStop(1, 'rgba(38, 28, 20, 0)');
+        ctx.fillStyle = dg;
+      }
+      ctx.beginPath();
+      ctx.arc(0, 0, rx, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+
+  function resolveActiveSurface() {
+    const ex = getEx();
+    if (state.palette === 'l2') {
+      return {
+        base: '#e6e1d7',
+        mid: ex.wash.mid === '#0b0908' ? '#c89a58' : ex.wash.mid,
+        deep: ex.wash.deep,
+        ink: '#151310',
+        muted: 'rgba(21, 19, 16, 0.58)',
+        rule: 'rgba(21, 19, 16, 0.18)',
+        dark: false,
+        alphaBlob: 0.52,
+        frosted: false,
+      };
+    }
+    if (state.palette === 'l3') {
+      const w = ex.duskWash;
+      return {
+        base: w.base, mid: w.mid, deep: w.deep, ink: w.ink, muted: w.muted,
+        rule: 'rgba(244, 237, 226, 0.22)', dark: true, alphaBlob: 1.18, frosted: false,
+      };
+    }
+    const w = ex.wash;
+    const isCrispWhite = ex.slug === 'herencia-viva' && !w.dark;
+    return {
+      base: w.base,
+      mid: w.mid,
+      deep: w.deep,
+      ink: w.ink,
+      muted: w.muted,
+      rule: w.dark ? 'rgba(244, 237, 226, 0.22)' : 'rgba(24, 21, 18, 0.14)',
+      dark: !!w.dark,
+      alphaBlob: isCrispWhite ? 0.68 : 1.22,
+      komorebiStrength: isCrispWhite ? 0.28 : (w.dark ? 1.05 : 0.92),
+      frosted: state.palette === 'l4',
+    };
+  }
+
+  function paintKomorebiSurface(canvas, nowSec) {
+    if (!canvas) return;
+    const parent = canvas.parentElement;
+    if (!parent) return;
+    const cw = Math.max(1, Math.round(parent.clientWidth * 0.5));
+    const ch = Math.max(1, Math.round(parent.clientHeight * 0.5));
+    if (canvas.width !== cw || canvas.height !== ch) {
+      canvas.width = cw;
+      canvas.height = ch;
+    }
+    const ctx = canvas.getContext('2d');
+    const surf = resolveActiveSurface();
+    const maxDiag = Math.hypot(cw, ch);
+
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, cw, ch);
+
+    if (!surf.frosted) {
+      ctx.fillStyle = surf.base;
+      ctx.fillRect(0, 0, cw, ch);
+    } else {
+      ctx.fillStyle = rgbStr(hexToRgb(surf.base), 0.74);
+      ctx.fillRect(0, 0, cw, ch);
+    }
+
+    const plasterVig = ctx.createRadialGradient(cw * 0.54, ch * 0.48, ch * 0.10, cw * 0.54, ch * 0.48, maxDiag * 0.62);
+    plasterVig.addColorStop(0, surf.dark ? 'rgba(255,244,225,0.06)' : 'rgba(255,250,242,0.22)');
+    plasterVig.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = plasterVig;
+    ctx.fillRect(0, 0, cw, ch);
+
+    drawWetWashBlob(ctx, cw * 0.60, ch * 0.50, maxDiag * 0.64, surf.mid, surf.deep, surf.alphaBlob);
+    drawKomorebiLight(ctx, cw, ch, nowSec, surf.komorebiStrength ?? (surf.dark ? 1.05 : 0.92), surf.dark);
+    ctx.restore();
+  }
+
+  function applyThemeTokens() {
+    const ex = getEx();
+    const surf = resolveActiveSurface();
+    const r = document.documentElement;
+    const tone = surf.dark ? 'dark' : 'light';
+
+    document.body.dataset.concept = state.concept;
+    document.body.dataset.palette = state.palette;
+    document.body.dataset.filmTone = ex.roomTone;
+    document.body.dataset.tone = tone;
+
+    const ir = hexToRgb(surf.ink);
+    r.style.setProperty('--bg', surf.base);
+    r.style.setProperty('--ink', surf.ink);
+    r.style.setProperty('--body', rgbStr(ir, 0.86));
+    r.style.setProperty('--muted', surf.muted);
+    r.style.setProperty('--rule', surf.rule);
+    r.style.setProperty('--rule-strong', rgbStr(ir, 0.34));
+    r.style.setProperty('--plinth-bg', surf.dark ? 'rgba(255,248,236,0.04)' : 'rgba(255,252,246,0.34)');
+
+    r.style.setProperty('--room-bg', ex.roomBg);
+    if (ex.roomTone === 'light') {
+      r.style.setProperty('--film-ink', '#191613');
+      r.style.setProperty('--film-pill-bg', 'rgba(246, 242, 234, 0.84)');
+      r.style.setProperty('--film-pill-bd', 'rgba(25, 22, 19, 0.24)');
+    } else {
+      r.style.setProperty('--film-ink', '#f4ede2');
+      r.style.setProperty('--film-pill-bg', 'rgba(14, 12, 10, 0.58)');
+      r.style.setProperty('--film-pill-bd', 'rgba(244, 237, 226, 0.26)');
+    }
+
+    if (state.carouselApi) {
+      state.carouselApi.setSurfaceTone(tone);
+      state.carouselApi.relayout();
+    }
+
+    const nowSec = performance.now() * 0.001;
+    paintKomorebiSurface($('foldBackdrop'), nowSec);
+    if (state.carouselApi?.isFullscreen()) {
+      paintKomorebiSurface(state.carouselApi.fsCanvas, nowSec);
+    }
+  }
+
+  let komoTurn = 0;
+  function komorebiTick(nowMs) {
+    if (!document.hidden && !reducedMotion && ((komoTurn++ & 1) === 0)) {
+      const nowSec = nowMs * 0.001;
+      if (state.carouselApi?.isFullscreen()) {
+        paintKomorebiSurface(state.carouselApi.fsCanvas, nowSec);
+      } else {
+        paintKomorebiSurface($('foldBackdrop'), nowSec);
+      }
+    }
+    requestAnimationFrame(komorebiTick);
+  }
+  requestAnimationFrame(komorebiTick);
+
+  /* =========================================================================
+     Load Event Media + Fold Outside-Gallery Image into Carousel at Index 1!
+     ========================================================================= */
+  async function loadManifest(slug) {
+    if (state.manifestCache[slug]) return state.manifestCache[slug];
+    const ex = FOLD_EVENTS.find((e) => e.slug === slug) || FOLD_EVENTS[0];
+    let raw = [];
+    try {
+      const r = await fetch(`/Vanessa-Espin-website/event-media/manifests/${slug}.json`);
+      const d = await r.json();
+      raw = Array.isArray(d.items) ? [...d.items] : [];
+    } catch {
+      raw = [];
+    }
+
+    // Keep final-01b-flyers.jpg at index 1 (Image #2) and fold Iyuana's outside-gallery photo (`iyuana-note.jpg`) right after it!
+    if (ex.foldedSecondItem && !raw.some((it) => it.src === ex.foldedSecondItem.src)) {
+      const flyerIdx = raw.findIndex((it) => it.id === 'final-01b' || (it.src && it.src.includes('final-01b-flyers')));
+      const insertAt = flyerIdx >= 0 ? flyerIdx + 1 : Math.min(1, raw.length);
+      raw.splice(insertAt, 0, { ...ex.foldedSecondItem });
+    }
+    // Ensure Herencia Viva & Ayazamana also open cleanly on their Exhibition Poster at Item 01
+    if (ex.prependPosterItem && !raw.some((it) => it.src === ex.prependPosterItem.src)) {
+      raw.unshift({ ...ex.prependPosterItem });
+    }
+
+    state.manifestCache[slug] = raw;
+    return raw;
+  }
+
+  async function mountSalonAndCarousel(startIdx = 0) {
+    const ex = getEx();
+    const surf = resolveActiveSurface();
+
+    $('stillImg').src = ex.stillPlate;
+    $('stKind').textContent = ex.kind;
+    $('stTitle').textContent = ex.title;
+    $('stSub').textContent = ex.sub;
+
+    // Exact C02 bottom lip text — NO item count number!
+    $('lipLeftTxt').textContent = `${ex.title}: ${ex.sub} — ${ex.kind}`;
+
+    const paras = (Array.isArray(ex.paragraphs) && ex.paragraphs.length)
+      ? ex.paragraphs
+      : [ex.p1, ex.p2, ex.p3].filter(Boolean);
+    const proseHTML = paras.map((p) => `<p>${p}</p>`).join('');
+    const orgHTML = ex.orgHeading ? `<p class="note-org">${ex.orgHeading}</p>` : '';
+    const hasArtists = Array.isArray(ex.artists) && ex.artists.length > 0;
+    const artistsHTML = hasArtists
+      ? `${ex.artistsHeading ? `<span class="note-artists-lbl">${ex.artistsHeading}</span>` : ''}<ul class="artists-list">${ex.artists.map(([n, role]) => `<li><b>${n}</b><span>${role}</span></li>`).join('')}</ul>`
+      : '';
+    $('noteColText').innerHTML = `
+      <span class="note-kicker">${ex.kind}</span>
+      <h1 class="note-title">${ex.title}</h1>
+      <p class="note-sub">${ex.sub}</p>
+      <div class="landing-rule" aria-hidden="true"></div>
+      ${orgHTML}
+      <div class="note-prose">
+        ${proseHTML}
+      </div>
+      ${artistsHTML}
+      <p class="note-signoff">${ex.signoff}</p>
+    `;
+
+    if (state.carouselApi) {
+      state.carouselApi.destroy();
+      state.carouselApi = null;
+    }
+
+    state.carouselApi = await mountFoldCarousel({
+      mountTarget: $('noteColCarousel'),
+      event: ex.slug,
+      title: `${ex.title}: ${ex.sub}`,
+      items: state.mediaItems,
+      startAt: startIdx,
+      popStyle: state.popStyle,
+      surfaceTone: surf.dark ? 'dark' : 'light',
+      features: {
+        scrubRuler: state.scrubRuler,
+        dragShuttle: state.scrubRuler,
+      },
+      onFullscreenChange: (isFS, fsCanvas) => {
+        if (isFS) paintKomorebiSurface(fsCanvas, performance.now() * 0.001);
+        if (isHosted) {
+          try { window.parent.postMessage({ source: 'event-media', type: isFS ? 'open' : 'close', event: state.eventSlug }, '*'); } catch {}
+        }
+      },
+    });
+    window.FoldCarousel = state.carouselApi;
+    window.EventMedia = {
+      event: ex.slug,
+      count: state.mediaItems.length,
+      isOpen: () => !!state.carouselApi?.isFullscreen(),
+      open: () => { scrollToBelow(true); state.carouselApi?.enterFullscreen(); },
+      close: () => { state.carouselApi?.exitFullscreen(); },
+      openItem: (idx = 0) => { scrollToBelow(true); state.carouselApi?.stepTo(idx, true); state.carouselApi?.enterFullscreen(); },
+    };
+    if (isHosted) {
+      try { window.parent.postMessage({ source: 'event-media', type: 'ready', event: ex.slug, count: state.mediaItems.length }, '*'); } catch {}
+    }
+  }
+
+  /* =========================================================================
+     Scroll Behavior (Movie -> Below-the-Fold Unified Landing Salon)
+     ========================================================================= */
+  function scrollToBelow(instant = false) {
+    $('foldChamber').scrollIntoView({ behavior: instant ? 'instant' : 'smooth' });
+  }
+
+  $('foldLip').addEventListener('click', () => scrollToBelow(false));
+  $('foldLip').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); scrollToBelow(false); }
+  });
+  $('topAboutExBtn').addEventListener('click', () => scrollToBelow(false));
+
+  function updateScrollState() {
+    const y = window.scrollY || 0;
+    const chamberTop = $('foldChamber').offsetTop || Math.max(480, innerHeight - 48);
+    const p = clamp(y / Math.max(1, chamberTop), 0, 1);
+
+    const card = $('movieCard');
+    if (state.palette !== 'l4') {
+      card.style.filter = `brightness(${mix(1, 0.52, p).toFixed(2)})`;
+    } else {
+      card.style.filter = '';
+    }
+
+    // Dissolve the lower-fold bar smoothly as it rises so it never collides with the fixed top navigation
+    const lip = $('foldLip');
+    if (lip) {
+      const lipOp = clamp(1 - p * 2.2, 0, 1);
+      lip.style.opacity = lipOp.toFixed(3);
+      lip.style.pointerEvents = lipOp < 0.15 ? 'none' : '';
+    }
+
+    document.body.classList.toggle('below-active', p > 0.48);
+    if (p > 0.90 && state.playState === 'playing' && !useStill) togglePlay();
+  }
+  window.addEventListener('scroll', updateScrollState, { passive: true });
+  window.addEventListener('resize', updateScrollState);
+
+  /* =========================================================================
+     Real 3D Movie Mount, Play/Pause (Click + Space), & Scrubbable Progress Bar
+     ========================================================================= */
+  const ifr = $('movieIframe');
+  function dressFilm(frame) {
+    try {
+      const d = frame.contentDocument;
+      if (!d || !d.head || d.getElementById('fold-clean')) return;
+      const st = d.createElement('style');
+      st.id = 'fold-clean';
+      st.textContent = '.cinema-pill,.review-pill,#hud,#hudMin,.prog-bar,.scroll-cue,#head,.head,#visitor-sound,.visitor-sound,.tap-state{visibility:hidden!important;pointer-events:none!important;}';
+      d.head.appendChild(st);
+    } catch {}
+  }
+
+  function mountMovie() {
+    const ex = getEx();
+    state.durSec = ex.durationSec;
+    state.curSec = 0;
+    const autoPlayFilm = !useStill && !inLabGrid && qs.get('paused') !== '1' && (ex.slug === 'iyuana' || ex.slug === 'herencia-viva' || ex.slug === 'ayazamana');
+    state.playState = autoPlayFilm ? 'playing' : 'ready';
+    syncPlayUI();
+
+    if (useStill) {
+      ifr.style.display = 'none';
+      $('stillFallback').style.opacity = '1';
+      return;
+    }
+    if (state.mountedSlug === ex.slug) return;
+    state.mountedSlug = ex.slug;
+    ifr.classList.remove('is-loaded');
+    ifr.style.display = 'block';
+    const baseFilmUrl = ex.filmUrl;
+    if (autoPlayFilm) {
+      ifr.src = baseFilmUrl.includes('?') ? `${baseFilmUrl}&clean=1` : `${baseFilmUrl}?clean=1`;
+    } else if (ex.slug === 'herencia-viva') {
+      ifr.src = baseFilmUrl.includes('?') ? `${baseFilmUrl}&freeze=1&t=0` : `${baseFilmUrl}?hud=0&freeze=1&t=0`;
+    } else {
+      ifr.src = (ex.slug === 'iyuana' && !baseFilmUrl.includes('t=')) ? `${baseFilmUrl}?t=0` : baseFilmUrl;
+    }
+    $('stillFallback').style.opacity = autoPlayFilm ? '0' : '1';
+    ifr.onload = () => {
+      dressFilm(ifr);
+      ifr.classList.add('is-loaded');
+      setTimeout(() => { if (!useStill) $('stillFallback').style.opacity = '0'; }, autoPlayFilm ? 40 : 260);
+    };
+  }
+
+  function syncPlayUI() {
+    const dur = state.durSec || getEx().durationSec;
+    const cur = clamp(state.curSec, 0, dur);
+    const ended = state.playState === 'ended';
+    const pausedMid = state.playState === 'ready' && cur > 0.25 && cur < dur - 0.2;
+    document.body.dataset.play = state.playState;
+    document.body.dataset.nearEnd = (ended || cur >= Math.max(4, dur - 6.5)) ? '1' : '0';
+
+    const hostTl = $('time-lbl');
+    if (hostTl) hostTl.textContent = `${cur.toFixed(1)}s / ${dur.toFixed(1)}s`;
+    $('playIcon').innerHTML = ended
+      ? '<path d="M12 5V2L7 6l5 4V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>'
+      : '<path d="M8 5.5v13l11-6.5z"/>';
+    $('playLbl').textContent = ended
+      ? `Replay Film · ${fmtSec(dur)}`
+      : (pausedMid ? `Resume · ${fmtSec(cur)} / ${fmtSec(dur)}` : `Play Film · ${fmtSec(dur)}`);
+    $('miniPauseBtn').textContent = state.playState === 'playing' ? 'Pause' : 'Play';
+    $('miniTime').textContent = `${fmtSec(cur)} / ${fmtSec(dur)}`;
+    $('progFill').style.width = `${((cur / Math.max(1, dur)) * 100).toFixed(1)}%`;
+    if (!useStill && ifr.classList.contains('is-loaded')) {
+      $('stillFallback').style.opacity = '0';
+    }
+  }
+
+  function togglePlay() {
+    if (useStill) {
+      state.playState = state.playState === 'playing' ? 'ready' : 'playing';
+      if (state.playState === 'playing') state.curSec = 8;
+      syncPlayUI();
+      return;
+    }
+    try {
+      const cw = ifr.contentWindow;
+      const ctrl = cw?.__aisle || cw?.__theater;
+      const d = ifr.contentDocument;
+      if (!d) return;
+      if (state.playState === 'ended') {
+        if (ctrl?.replayFilm) ctrl.replayFilm();
+        else if (cw?.__R?.setT) { cw.__R.setT(0); cw.__R.play(); }
+        else (d.getElementById('btn-replay') || d.getElementById('btnReplay'))?.click();
+        state.playState = 'playing';
+      } else {
+        if (ctrl?.togglePlay) {
+          ctrl.togglePlay();
+          state.playState = ctrl.isPlaying ? 'playing' : 'ready';
+        } else if (cw?.__R?.state) {
+          if (cw.__R.state().playing) cw.__R.pause();
+          else cw.__R.play();
+          state.playState = cw.__R.state().playing ? 'playing' : 'ready';
+        } else {
+          (d.getElementById('btn-play') || d.getElementById('btnPlayPause'))?.click();
+          state.playState = state.playState === 'playing' ? 'ready' : 'playing';
+        }
+      }
+      syncPlayUI();
+    } catch {}
+  }
+  function replayMovie() {
+    if (useStill) {
+      state.curSec = 0;
+      state.playState = 'playing';
+      syncPlayUI();
+      return;
+    }
+    try {
+      const cw = ifr.contentWindow;
+      const ctrl = cw?.__aisle || cw?.__theater;
+      const d = ifr.contentDocument;
+      if (ctrl?.replayFilm) ctrl.replayFilm();
+      else if (cw?.__R?.replay) cw.__R.replay();
+      else if (cw?.__R?.setT) { cw.__R.setT(0); cw.__R.play(); }
+      else (d?.getElementById('btn-replay') || d?.getElementById('btnReplay'))?.click();
+      state.curSec = 0;
+      state.playState = 'playing';
+      syncPlayUI();
+    } catch {}
+  }
+
+  $('playBtn').addEventListener('click', (e) => { e.stopPropagation(); togglePlay(); });
+  $('miniPauseBtn').addEventListener('click', (e) => { e.stopPropagation(); togglePlay(); });
+  $('miniReplayBtn').addEventListener('click', (e) => { e.stopPropagation(); replayMovie(); });
+
+  // Click anywhere on the movie stage to pause or resume playback
+  let cardDown = null;
+  $('movieCard').addEventListener('pointerdown', (e) => {
+    if (e.button !== undefined && e.button !== 0) return;
+    if (e.target.closest('#progSeam, .playing-mini, .play-gate')) return;
+    cardDown = { x: e.clientX, y: e.clientY };
+  });
+  $('movieCard').addEventListener('pointerup', (e) => {
+    if (!cardDown) return;
+    const moved = Math.hypot(e.clientX - cardDown.x, e.clientY - cardDown.y);
+    cardDown = null;
+    if (moved < 7) togglePlay();
+  });
+
+  // Click OR drag anywhere along #progSeam to jump/scrub to specific parts of the video
+  let seamScrubbing = false;
+  let seamWasPlaying = true;
+  function updateSeamTip(e) {
+    const r = $('progSeam').getBoundingClientRect();
+    const ratio = clamp((e.clientX - r.left) / Math.max(1, r.width), 0, 1);
+    const tip = $('progTip');
+    if (tip) {
+      tip.textContent = fmtSec(ratio * state.durSec);
+      tip.style.left = `${clamp(e.clientX - r.left, 24, Math.max(24, r.width - 24)).toFixed(1)}px`;
+    }
+    return ratio;
+  }
+  function applySeamSeek(e, shouldPlay) {
+    const ratio = updateSeamTip(e);
+    const targetSec = ratio * state.durSec;
+    state.curSec = targetSec;
+    if (!useStill) {
+      try {
+        const cw = ifr.contentWindow;
+        const ctrl = cw?.__aisle || cw?.__theater;
+        const d = ifr.contentDocument;
+        if (ctrl?.seekToSec) {
+          ctrl.seekToSec(targetSec, shouldPlay && ratio < 0.992);
+        } else if (cw?.__R?.setT) {
+          cw.__R.setT(targetSec);
+          if (shouldPlay && ratio < 0.992) cw.__R.resumeLive();
+        } else {
+          const sc = d?.getElementById('scrub');
+          const pb = d?.getElementById('prog-bar');
+          if (sc) {
+            sc.value = String(ratio * parseFloat(sc.max || state.durSec));
+            sc.dispatchEvent(new Event('input', { bubbles: true }));
+          } else if (pb) {
+            const pr = pb.getBoundingClientRect();
+            const clientX = pr.left + ratio * Math.max(1, pr.width || innerWidth);
+            pb.dispatchEvent(new PointerEvent('pointerdown', { clientX, bubbles: true, pointerId: 1 }));
+            pb.dispatchEvent(new PointerEvent('pointerup', { clientX, bubbles: true, pointerId: 1 }));
+          }
+        }
+      } catch {}
+    }
+    state.playState = ratio >= 0.992 ? 'ended' : (shouldPlay ? 'playing' : 'ready');
+    syncPlayUI();
+  }
+  $('progSeam').addEventListener('pointerdown', (e) => {
+    e.stopPropagation();
+    seamWasPlaying = state.playState === 'playing' || state.playState === 'ended';
+    seamScrubbing = true;
+    try { $('progSeam').setPointerCapture(e.pointerId); } catch {}
+    applySeamSeek(e, false);
+  });
+  $('progSeam').addEventListener('pointermove', (e) => {
+    updateSeamTip(e);
+    if (seamScrubbing) applySeamSeek(e, false);
+  });
+  const endSeamScrub = (e) => {
+    if (!seamScrubbing) return;
+    seamScrubbing = false;
+    applySeamSeek(e, seamWasPlaying);
+  };
+  $('progSeam').addEventListener('pointerup', endSeamScrub);
+  $('progSeam').addEventListener('pointercancel', () => { seamScrubbing = false; });
+
+  setInterval(() => {
+    if (useStill || seamScrubbing) return;
+    try {
+      const cw = ifr.contentWindow;
+      const d = ifr.contentDocument;
+      if (!d) return;
+      dressFilm(ifr);
+      if (cw?.__aisle && typeof cw.__aisle.filmTime === 'number') {
+        state.curSec = cw.__aisle.filmTime;
+        state.durSec = cw.__aisle.duration || state.durSec;
+        if (state.curSec >= state.durSec - 0.12) state.playState = 'ended';
+        else state.playState = cw.__aisle.isPlaying ? 'playing' : 'ready';
+        syncPlayUI();
+        return;
+      }
+      if (cw?.__R?.state) {
+        const rst = cw.__R.state();
+        state.curSec = rst.t;
+        state.durSec = cw.__R.TOTAL_SEC || state.durSec;
+        if (state.curSec >= state.durSec - 0.12) state.playState = 'ended';
+        else state.playState = rst.playing ? 'playing' : 'ready';
+        syncPlayUI();
+        return;
+      }
+      const tl = d.getElementById('time-lbl');
+      const sc = d.getElementById('scrub');
+      const bp = d.getElementById('btn-play') || d.getElementById('btnPlayPause');
+      if (tl) {
+        const m = tl.textContent.match(/([\d.]+)\s*s?\s*\/\s*([\d.]+)/);
+        if (m) { state.curSec = parseFloat(m[1]); state.durSec = parseFloat(m[2]) || state.durSec; }
+      } else if (sc) {
+        state.curSec = parseFloat(sc.value) || 0;
+        state.durSec = parseFloat(sc.max) || state.durSec;
+      }
+      if (state.curSec >= state.durSec - 0.12) state.playState = 'ended';
+      else if (bp) state.playState = bp.textContent.toLowerCase().includes('pause') ? 'playing' : 'ready';
+      syncPlayUI();
+    } catch {}
+  }, 180);
+
+  // Whole-page ambient soundscapes for Iyuana & Ayazamana + Spacebar Play/Pause
+  let iyuanaPageAudio = null;
+  let ayazamanaPageAudio = null;
+  let iyuanaLoading = false;
+  let ayazamanaLoading = false;
+  let sharedSoundMuted = false;
+  const allowPageAudio = !inLabGrid && !useStill && qs.get('sound') !== '0';
+  if (allowPageAudio) {
+    window.__iyuanaAudioOwned = true;
+    window.__ayazamanaAudioOwned = true;
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT')) return;
+    if (e.key === 'Escape' && isHosted && !state.carouselApi?.isFullscreen()) {
+      try { window.parent.postMessage({ source: 'event-media', type: 'escape', event: state.eventSlug }, '*'); } catch {}
+      return;
+    }
+    if (e.code === 'Space' && !state.carouselApi?.isFullscreen() && (window.scrollY || 0) < innerHeight * 0.55 && !e.target?.closest?.('#foldLip')) {
+      e.preventDefault();
+      togglePlay();
+    } else if (e.code === 'KeyM' && allowPageAudio) {
+      const cur = state.eventSlug === 'iyuana' ? iyuanaPageAudio : (state.eventSlug === 'ayazamana' ? ayazamanaPageAudio : null);
+      if (cur) {
+        sharedSoundMuted = !cur.toggle();
+        if (iyuanaPageAudio) iyuanaPageAudio.setMuted(sharedSoundMuted);
+        if (ayazamanaPageAudio) ayazamanaPageAudio.setMuted(sharedSoundMuted);
+      }
+    }
+  });
+
+  function updateBottomSoundBtn() {
+    const soundBtn = $('bottomSoundBtn');
+    if (!soundBtn) return;
+    const cur = state.eventSlug === 'iyuana' ? iyuanaPageAudio : (state.eventSlug === 'ayazamana' ? ayazamanaPageAudio : null);
+    soundBtn.hidden = !cur;
+    if (cur) {
+      const st = cur.getState();
+      soundBtn.textContent = st.muted ? '♪ Muted' : (st.waitingGesture ? '♪ Sound (Tap)' : '♪ Sound');
+    }
+  }
+
+  const bottomSoundBtnEl = $('bottomSoundBtn');
+  if (bottomSoundBtnEl) {
+    bottomSoundBtnEl.onclick = (e) => {
+      e.stopPropagation();
+      const cur = state.eventSlug === 'iyuana' ? iyuanaPageAudio : (state.eventSlug === 'ayazamana' ? ayazamanaPageAudio : null);
+      if (!cur) return;
+      sharedSoundMuted = !cur.toggle();
+      if (iyuanaPageAudio) iyuanaPageAudio.setMuted(sharedSoundMuted);
+      if (ayazamanaPageAudio) ayazamanaPageAudio.setMuted(sharedSoundMuted);
+      updateBottomSoundBtn();
+    };
+  }
+
+  function syncPageAudioEvent() {
+    if (iyuanaPageAudio) iyuanaPageAudio.setActiveEvent(state.eventSlug);
+    if (ayazamanaPageAudio) ayazamanaPageAudio.setActiveEvent(state.eventSlug);
+    if (allowPageAudio && state.eventSlug === 'iyuana' && !iyuanaPageAudio && !iyuanaLoading) {
+      iyuanaLoading = true;
+      import('/Vanessa-Espin-website/concepts/iyuana/ambient-audio.js?v=20261122g').then(({ createIyuanaAudio }) => {
+        iyuanaPageAudio = createIyuanaAudio({ initialTrack: qs.get('sound') || 'chant', initialEnabled: !sharedSoundMuted });
+        if (!iyuanaPageAudio) return;
+        iyuanaPageAudio.setActiveEvent(state.eventSlug);
+        iyuanaPageAudio.onStateChange(() => updateBottomSoundBtn());
+        updateBottomSoundBtn();
+      }).catch(() => { iyuanaLoading = false; });
+    }
+    if (allowPageAudio && state.eventSlug === 'ayazamana' && !ayazamanaPageAudio && !ayazamanaLoading) {
+      ayazamanaLoading = true;
+      import('/Vanessa-Espin-website/flushing-theater/ambient-audio.js?v=20261123c').then(({ createAyazamanaAudio }) => {
+        ayazamanaPageAudio = createAyazamanaAudio({ initialTrack: qs.get('sound') || 'sanjuanito', initialEnabled: !sharedSoundMuted });
+        if (!ayazamanaPageAudio) return;
+        ayazamanaPageAudio.setActiveEvent(state.eventSlug);
+        ayazamanaPageAudio.onStateChange(() => updateBottomSoundBtn());
+        updateBottomSoundBtn();
+      }).catch(() => { ayazamanaLoading = false; });
+    }
+    updateBottomSoundBtn();
+  }
+  syncPageAudioEvent();
+
+  window.StageHost = {
+    setPausedForOverlay(paused) {
+      if (paused && state.playState === 'playing') togglePlay();
+      const cur = state.eventSlug === 'iyuana' ? iyuanaPageAudio : (state.eventSlug === 'ayazamana' ? ayazamanaPageAudio : null);
+      if (cur && paused) cur.setActiveEvent('overlay-paused');
+      else if (cur && !paused) cur.setActiveEvent(state.eventSlug);
+    },
+  };
+
+  /* =========================================================================
+     Parent Lab Workbench Control API
+     ========================================================================= */
+  function applyViewTarget(view) {
+    const instant = qs.get('instant') === '1' || useStill;
+    if (view === 'film') {
+      state.carouselApi?.exitFullscreen();
+      window.scrollTo({ top: 0, behavior: instant ? 'instant' : 'smooth' });
+    } else if (view === 'note') {
+      state.carouselApi?.exitFullscreen();
+      state.carouselApi?.stepTo(0, instant);
+      scrollToBelow(instant);
+    } else if (view === 'note2') {
+      state.carouselApi?.exitFullscreen();
+      state.carouselApi?.stepTo(1, instant);
+      scrollToBelow(instant);
+    } else if (view === 'media') {
+      scrollToBelow(instant);
+      state.carouselApi?.enterFullscreen();
+    } else if (view === 'ribbon') {
+      state.carouselApi?.exitFullscreen();
+      scrollToBelow(instant);
+      setTimeout(() => state.carouselApi?.previewRibbon(true), 90);
+    }
+    setTimeout(() => { updateScrollState(); state.carouselApi?.relayout(); }, 60);
+  }
+
+  window.addEventListener('message', async (e) => {
+    const d = e.data;
+    if (!d || d.source !== 'fold-lab') return;
+    if (d.type === 'setConfig') {
+      const prevSlug = state.eventSlug;
+      if (d.event) state.eventSlug = d.event;
+      if (d.concept) state.concept = d.concept;
+      if (d.palette) state.palette = d.palette;
+      if (d.popStyle) state.popStyle = d.popStyle;
+      if (typeof d.scrubRuler === 'boolean') state.scrubRuler = d.scrubRuler;
+
+      if (state.eventSlug !== prevSlug) {
+        syncPageAudioEvent();
+        syncPageAudioEvent();
+  state.mediaItems = await loadManifest(state.eventSlug);
+        applyThemeTokens();
+        await mountSalonAndCarousel(typeof d.mediaIdx === 'number' ? d.mediaIdx : 0);
+        mountMovie();
+      } else {
+        applyThemeTokens();
+        state.carouselApi?.setPopStyle(state.popStyle);
+        state.carouselApi?.setFeatures({ scrubRuler: state.scrubRuler, dragShuttle: state.scrubRuler });
+        if (typeof d.mediaIdx === 'number') state.carouselApi?.stepTo(d.mediaIdx, true);
+      }
+      if (d.view) applyViewTarget(d.view);
+    } else if (d.type === 'setView') {
+      applyViewTarget(d.view);
+    }
+  });
+
+  syncPageAudioEvent();
+  state.mediaItems = await loadManifest(state.eventSlug);
+  const startIdx = qs.get('idx') ? clamp(+qs.get('idx') || 0, 0, Math.max(0, state.mediaItems.length - 1)) : 0;
+  applyThemeTokens();
+  await mountSalonAndCarousel(startIdx);
+  mountMovie();
+  if (qs.get('fs') === '1') state.carouselApi?.enterFullscreen();
+  if (qs.get('view')) setTimeout(() => applyViewTarget(qs.get('view')), 80);
+</script>
+</body>
+</html>

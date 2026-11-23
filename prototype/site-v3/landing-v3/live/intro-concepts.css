@@ -60,8 +60,8 @@
 }
 
 #introStage[data-intro="o3"] .intro-grain {
-  opacity: 0.11;
-  mix-blend-mode: multiply;
+  opacity: 0.08;
+  mix-blend-mode: screen;
 }
 
 /* Scene Panels (only active style displays) */
@@ -272,7 +272,7 @@
   font-size: clamp(28px, 3.2vw, 44px);
   line-height: 1.04;
   letter-spacing: -0.025em;
-  color: #1b1714;
+  color: #f3ece0;
 }
 
 .intro-o3__reg {
@@ -288,7 +288,7 @@
 .intro-o3__reg-line {
   width: 100%;
   height: var(--intro-hair);
-  background: rgba(27, 23, 20, 0.28);
+  background: rgba(243, 236, 224, 0.28);
   transform-origin: 50% 50%;
   will-change: transform;
 }
@@ -301,7 +301,7 @@
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  border: var(--intro-hair) solid rgba(27, 23, 20, 0.34);
+  border: var(--intro-hair) solid rgba(243, 236, 224, 0.34);
   transform: translateY(-50%);
 }
 
@@ -320,7 +320,7 @@
   font-weight: 400;
   font-size: clamp(15px, 1.28vw, 19px);
   line-height: 1.15;
-  color: rgba(27, 23, 20, 0.68);
+  color: rgba(243, 236, 224, 0.68);
 }
 
 .intro-o3__city {
@@ -331,7 +331,7 @@
   line-height: 1;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: rgba(27, 23, 20, 0.45);
+  color: rgba(243, 236, 224, 0.48);
 }
 
 /* =========================================================================

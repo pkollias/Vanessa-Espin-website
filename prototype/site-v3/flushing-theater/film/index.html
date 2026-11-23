@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ayazamana — Traditional Dance</title>
 <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
-<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=gambetta@300,400&f[]=switzer@400,500&display=swap">
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=gambetta@300,400&f[]=switzer@400,500,600&display=swap">
 <script type="importmap">
 {
   "imports": {
@@ -19,10 +19,11 @@
 <style>
   :root {
     --paper: #ece4d7;
-    --soft: rgba(236, 228, 215, 0.66);
-    --faint: rgba(236, 228, 215, 0.38);
+    --soft: rgba(236, 228, 215, 0.72);
+    --faint: rgba(236, 228, 215, 0.42);
     --night: #040303;
     --accent: #d6a85a;
+    --gold: #f1dd63;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -47,6 +48,7 @@
     height: 100lvh;
     display: block;
     z-index: 0;
+    cursor: pointer;
   }
 
   .ui {
@@ -60,291 +62,684 @@
     will-change: opacity, transform;
   }
 
-  .intro {
-    left: clamp(22px, 6.2vw, 96px);
-    bottom: clamp(42px, 7.8vh, 84px);
-    max-width: 680px;
-    opacity: 1;
-    text-shadow: 0 2px 32px rgba(4, 3, 3, 0.92);
-  }
-  .intro .k {
-    margin: 0 0 1.4em;
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.24em;
-    text-transform: uppercase;
-    color: var(--soft);
-  }
-  .intro h1 {
-    margin: 0;
-    font-family: Gambetta, Georgia, serif;
-    font-weight: 300;
-    font-size: clamp(58px, 8.8vw, 138px);
-    line-height: 0.88;
-    letter-spacing: -0.028em;
-  }
-  .intro .s {
-    margin: 0.48em 0 0;
-    font-family: Gambetta, Georgia, serif;
-    font-weight: 300;
-    font-size: clamp(19px, 1.85vw, 27px);
-    line-height: 1.25;
-    letter-spacing: 0.004em;
-    color: rgba(236, 228, 215, 0.88);
-    max-width: 34ch;
-  }
-  .intro .f {
-    margin: 2.1em 0 0;
-    font-size: 12px;
-    letter-spacing: 0.07em;
-    color: var(--soft);
-    font-variant-numeric: lining-nums;
-  }
-  .scroll-cue {
-    margin-top: 1.4em;
-    font-size: 10.5px;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--faint);
-  }
+  /* Running head hidden so top navigation and controls never collide (matches Iyuana) */
+  .head { display: none !important; }
 
-  .head {
-    top: 26px;
-    left: clamp(20px, 2.4vw, 36px);
-    display: flex;
-    gap: 12px;
-    align-items: baseline;
-    opacity: 0;
-    text-shadow: 0 1px 18px rgba(4, 3, 3, 0.9);
+  /* Dynamic & Editable Opener Logo + Text Cues Layer */
+  .cue-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
   }
-  .head .t { font-family: Gambetta, Georgia, serif; font-size: 18px; }
-  .head .s { font-family: Gambetta, Georgia, serif; font-weight: 300; font-size: 15px; color: var(--soft); }
+  .cue-item {
+    position: absolute;
+    transform: translate3d(-50%, -50%, 0);
+    will-change: opacity, transform, filter;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .cue-item[data-align="left"] { transform: translate3d(0, -50%, 0); text-align: left; }
+  .cue-item[data-align="right"] { transform: translate3d(-100%, -50%, 0); text-align: right; }
+  .cue-item[data-align="center"] { transform: translate3d(-50%, -50%, 0); text-align: center; }
 
-  .line {
-    left: clamp(22px, 5.2vw, 82px);
-    bottom: clamp(44px, 8vh, 84px);
-    margin: 0;
-    width: min(29vw, 400px);
-    opacity: 0;
-    text-shadow: 0 2px 28px rgba(4, 3, 3, 0.95);
+  /* Subtle feathered theater scrim behind opener cues for effortless legibility */
+  .cue-item::before {
+    content: "";
+    position: absolute;
+    inset: -38% -26%;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(ellipse 68% 64% at 50% 50%, rgba(5, 4, 4, 0.58) 0%, rgba(5, 4, 4, 0.24) 58%, rgba(5, 4, 4, 0) 100%);
   }
-  .line p {
-    margin: 0;
-    font-family: Gambetta, Georgia, serif;
-    font-weight: 300;
-    font-size: clamp(18px, 1.55vw, 24px);
-    line-height: 1.35;
-    letter-spacing: -0.002em;
-    text-indent: -0.38em;
-    text-wrap: pretty;
-  }
-  .line cite {
+  .cue-item.cue-logo img {
     display: block;
-    margin-top: 0.85em;
-    font-style: normal;
-    font-family: Switzer, sans-serif;
-    font-size: 11px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--faint);
+    width: 100%;
+    height: auto;
+    filter:
+      drop-shadow(0 1.5px 2.5px rgba(8, 2, 2, 0.78))
+      drop-shadow(0 6px 16px rgba(5, 2, 2, 0.58))
+      drop-shadow(0 18px 38px rgba(3, 1, 1, 0.80));
+    pointer-events: none;
+  }
+  .cue-item.cue-text p {
+    margin: 0;
+    font-family: Gambetta, Georgia, serif;
+    font-weight: 400;
+    line-height: 1.30;
+    letter-spacing: 0.002em;
+    color: var(--cue-col, #f3ece0);
+    text-shadow: 0 1px 3px rgba(3, 2, 2, 0.95), 0 6px 22px rgba(4, 3, 3, 0.90), 0 14px 36px rgba(4, 3, 3, 0.72);
+    text-wrap: balance;
   }
 
+  /* Interactive Drag Handles when Edit Texts mode is active */
+  body.editing-cues .cue-item {
+    pointer-events: auto;
+    cursor: grab;
+    outline: 1px dashed rgba(241, 221, 99, 0.65);
+    outline-offset: 8px;
+    border-radius: 6px;
+  }
+  body.editing-cues .cue-item.is-selected {
+    outline: 1.5px solid #f1dd63;
+    box-shadow: 0 0 0 4px rgba(241, 221, 99, 0.16);
+  }
+  body.editing-cues .cue-item:active { cursor: grabbing; }
+
+  .snap-guide-x, .snap-guide-y {
+    position: fixed;
+    pointer-events: none;
+    z-index: 4;
+    background: rgba(241, 221, 99, 0.55);
+    opacity: 0;
+    transition: opacity 0.12s ease;
+  }
+  .snap-guide-x { top: 0; bottom: 0; left: 50%; width: 1px; }
+  .snap-guide-y { left: 0; right: 0; top: 50%; height: 1px; }
+  .snap-guide-x.on, .snap-guide-y.on { opacity: 1; }
+
+  /* Closing Poster Credits (Third-person curatorial credits beside the foyer poster) */
   .label {
     left: clamp(22px, 3.8vw, 60px);
-    bottom: clamp(34px, 6.5vh, 68px);
-    width: min(23vw, 310px);
+    bottom: clamp(36px, 6.8vh, 72px);
+    width: min(24vw, 300px);
     opacity: 0;
     text-shadow: 0 2px 26px rgba(4, 3, 3, 0.95);
   }
-  .label .t { margin: 0; font-family: Gambetta, Georgia, serif; font-size: 26px; line-height: 1.05; }
-  .label .s { margin: 0.28em 0 0; font-family: Gambetta, Georgia, serif; font-weight: 300; font-size: 16px; color: var(--soft); }
-  .label .w { margin: 1.5em 0 0; font-size: 12px; line-height: 1.6; letter-spacing: 0.04em; color: var(--soft); font-variant-numeric: lining-nums; }
-  .label .k { margin: 1.5em 0 0.55em; font-size: 10px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--faint); }
-  .label ul { list-style: none; margin: 0; padding: 0; font-size: 13px; line-height: 1.68; letter-spacing: 0.01em; }
-  .label ul span { color: var(--soft); }
+  .label .t {
+    margin: 0 0 8px;
+    font-family: Gambetta, Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(24px, 2.0vw, 31px);
+    line-height: 1.06;
+    color: #f7f1e6;
+  }
+  .label .ink-rule {
+    display: block;
+    width: 100%;
+    height: 1px;
+    margin: 0 0 9px;
+    background: linear-gradient(90deg, rgba(241, 221, 99, 0.78) 0%, rgba(236, 228, 215, 0.24) 58%, rgba(236, 228, 215, 0) 100%);
+  }
+  .label .role {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.55;
+    letter-spacing: 0.02em;
+    color: rgba(247, 241, 230, 0.90);
+  }
 
+  /* Top Playback & Studio Pill */
   .review-pill {
     position: fixed;
     top: 20px;
-    right: 22px;
-    z-index: 10;
+    right: 20px;
+    z-index: 14;
     display: flex;
     gap: 6px;
     align-items: center;
-    background: rgba(12, 10, 9, 0.82);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(236, 228, 215, 0.14);
+    background: rgba(12, 10, 9, 0.72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(236, 228, 215, 0.16);
     border-radius: 999px;
-    padding: 5px 11px;
-    font-size: 11.5px;
+    padding: 5px 10px;
+    font-size: 11px;
+    letter-spacing: 0.05em;
     color: var(--soft);
   }
-  body.clean .review-pill { display: none; }
+  body.clean:not(.editing-cues) .review-pill { display: none; }
   .review-pill button, .review-pill a {
     background: transparent;
     border: 0;
     color: var(--soft);
     font: inherit;
     cursor: pointer;
-    padding: 2px 7px;
+    padding: 4px 9px;
     border-radius: 999px;
     text-decoration: none;
+    transition: background 0.18s ease, color 0.18s ease;
   }
-  .review-pill button:hover, .review-pill a:hover { color: var(--paper); }
+  .review-pill button:hover, .review-pill a:hover { color: var(--paper); background: rgba(236, 228, 215, 0.08); }
   .review-pill button.active {
-    background: rgba(214, 168, 90, 0.22);
+    background: var(--paper);
+    color: var(--night);
+    font-weight: 500;
+  }
+  .review-pill button.edit-btn {
+    border: 1px solid rgba(241, 221, 99, 0.38);
     color: #f6dfaf;
   }
+  .review-pill button.edit-btn.active {
+    background: #f1dd63;
+    color: #14110c;
+    border-color: #f1dd63;
+    font-weight: 600;
+  }
   .review-pill select {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(236, 228, 215, 0.20);
+    background: rgba(20, 18, 16, 0.85);
+    border: 1px solid rgba(236, 228, 215, 0.22);
     color: var(--paper);
     font: inherit;
-    font-size: 11px;
-    padding: 2px 6px;
+    font-size: 10.5px;
+    padding: 3px 8px;
     border-radius: 999px;
     cursor: pointer;
     outline: none;
   }
   .review-pill select option { background: #141110; color: #ece4d7; }
-  .review-pill .sep { opacity: 0.28; }
+  .review-pill .sep { width: 1px; height: 14px; background: rgba(236, 228, 215, 0.16); margin: 0 2px; }
   .review-pill .time {
     font-variant-numeric: tabular-nums;
-    color: var(--faint);
-    padding: 0 3px;
-    min-width: 68px;
+    color: var(--soft);
+    padding: 0 5px;
+    min-width: 72px;
     text-align: center;
   }
 
+  .visitor-sound {
+    position: fixed; bottom: 22px; right: 22px; z-index: 12;
+    appearance: none; border: 1px solid rgba(236, 228, 215, 0.20);
+    background: rgba(12, 10, 9, 0.56); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    color: var(--soft); font: 500 11.5px/1 Switzer, "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: 0.04em; padding: 8px 14px; border-radius: 999px; cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+  .visitor-sound:hover { color: var(--paper); border-color: rgba(236, 228, 215, 0.45); }
+  .visitor-sound.active { color: var(--paper); }
+  body.embed .visitor-sound, body.in-fold-stage .visitor-sound { display: none !important; }
+
+  /* Subtle center Pause / Resume glass indicator (exact Iyuana parity) */
+  .tap-state {
+    position: fixed; left: 50%; top: 50%; z-index: 11;
+    transform: translate(-50%, -50%) scale(0.94);
+    width: 56px; height: 56px; border-radius: 50%;
+    border: 1px solid rgba(236, 228, 215, 0.28);
+    background: rgba(12, 10, 9, 0.62);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    color: var(--paper); display: grid; place-items: center;
+    opacity: 0; pointer-events: none;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.38);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+  .tap-state svg { width: 18px; height: 18px; fill: currentColor; }
+  .tap-state.is-paused { opacity: 0.86; transform: translate(-50%, -50%) scale(1); }
+  .tap-state.is-flash { opacity: 0.82; transform: translate(-50%, -50%) scale(1.05); }
+
+  /* Full Iyuana-Standard Clickable & Scrubbable Progress Bar (Visible in clean visitor view too!) */
   .prog-bar {
-    position: fixed;
-    left: 0;
-    bottom: 0;
-    height: 10px;
-    width: 100%;
-    z-index: 8;
-    cursor: pointer;
-    display: flex;
-    align-items: flex-end;
+    position: fixed; left: 0; right: 0; bottom: 0; height: 24px; z-index: 12;
+    cursor: pointer; display: flex; align-items: flex-end; touch-action: none;
   }
-  body.clean .prog-bar { display: none; }
+  body.embed .review-pill, body.embed .prog-bar, body.embed .tap-state,
+  body.in-fold-stage .prog-bar, body.in-fold-stage .tap-state { display: none !important; }
   .prog-track {
-    width: 100%;
-    height: 2px;
-    background: rgba(236, 228, 215, 0.08);
-    transition: height 0.15s ease;
+    position: relative; width: 100%; height: 3px;
+    background: rgba(236, 228, 215, 0.22);
+    transition: height 0.18s ease, background 0.18s ease;
   }
-  .prog-bar:hover .prog-track { height: 4px; }
+  .prog-bar:hover .prog-track { height: 6px; background: rgba(236, 228, 215, 0.30); }
   .prog-fill {
-    height: 100%;
-    width: 0%;
-    background: rgba(214, 168, 90, 0.78);
+    position: relative; height: 100%; width: 0%;
+    background: linear-gradient(90deg, rgba(214, 168, 90, 0.94) 0%, rgba(244, 237, 226, 0.96) 100%);
+  }
+  .prog-fill::after {
+    content: ""; position: absolute; right: -5px; top: 50%;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #f7f1e6; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.65);
+    transform: translateY(-50%) scale(0);
+    transition: transform 0.16s ease;
+  }
+  .prog-bar:hover .prog-fill::after { transform: translateY(-50%) scale(1); }
+  .prog-tip {
+    position: absolute; bottom: 12px; left: 0; transform: translateX(-50%);
+    padding: 3px 8px; border-radius: 999px; pointer-events: none;
+    background: rgba(12, 10, 9, 0.88); border: 1px solid rgba(236, 228, 215, 0.24);
+    color: var(--paper); font-size: 10.5px; font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em; opacity: 0; transition: opacity 0.15s ease;
+  }
+  .prog-bar:hover .prog-tip { opacity: 1; }
+
+  /* Live Interactive Text & Timing Studio Drawer + Draggable Timeline Lanes */
+  .text-studio {
+    position: fixed;
+    top: 64px;
+    right: 20px;
+    width: 344px;
+    max-height: calc(100vh - 156px);
+    overflow-y: auto;
+    z-index: 20;
+    background: rgba(14, 12, 11, 0.92);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(241, 221, 99, 0.28);
+    border-radius: 12px;
+    padding: 13px 14px 15px;
+    color: var(--paper);
+    font-size: 12px;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.65);
+    display: none;
+  }
+  body.editing-cues .text-studio { display: block; }
+  .ts-head {
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    padding-bottom: 9px; margin-bottom: 10px; border-bottom: 1px solid rgba(236, 228, 215, 0.14);
+  }
+  .ts-head strong { font-size: 12.5px; color: #f6dfaf; letter-spacing: 0.02em; }
+  .ts-hint { font-size: 11px; color: var(--soft); line-height: 1.45; margin: 0 0 10px; }
+  .ts-tabs { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 11px; }
+  .ts-tab {
+    appearance: none; border: 1px solid rgba(236, 228, 215, 0.20); background: rgba(255,255,255,0.04);
+    color: var(--soft); font: 500 11px/1 Switzer, sans-serif; padding: 6px 10px; border-radius: 999px; cursor: pointer;
+  }
+  .ts-tab.active { background: #f1dd63; color: #14110c; border-color: #f1dd63; font-weight: 600; }
+  .ts-field { margin-bottom: 9px; }
+  .ts-field label {
+    display: flex; justify-content: space-between; font-size: 10.5px; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--soft); margin-bottom: 4px;
+  }
+  .ts-field textarea, .ts-field select, .ts-field input[type="number"] {
+    width: 100%; background: rgba(255,255,255,0.07); border: 1px solid rgba(236, 228, 215, 0.20);
+    border-radius: 6px; color: var(--paper); font: inherit; font-size: 12px; padding: 6px 8px;
+  }
+  .ts-field textarea { min-height: 52px; resize: vertical; line-height: 1.38; }
+  .ts-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .ts-row4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .ts-field input[type="range"] { width: 100%; accent-color: #f1dd63; }
+  .ts-actions {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; padding-top: 10px;
+    border-top: 1px solid rgba(236, 228, 215, 0.14); align-items: center;
+  }
+  .ts-btn {
+    appearance: none; border: 1px solid rgba(236, 228, 215, 0.24); background: rgba(255,255,255,0.06);
+    color: var(--paper); font: 500 11px/1 Switzer, sans-serif; padding: 7px 11px; border-radius: 999px; cursor: pointer;
+  }
+  .ts-btn.primary { background: #f1dd63; color: #14110c; border-color: #f1dd63; font-weight: 600; }
+  .ts-btn.danger { color: #fca5a5; border-color: rgba(252, 165, 165, 0.3); }
+  .ts-saved { font-size: 11px; color: #86efac; margin-left: auto; opacity: 0; transition: opacity 0.2s ease; }
+  .ts-saved.on { opacity: 1; }
+
+  /* Visual Draggable Timeline Lanes above Progress Bar when Edit Mode is open */
+  .cue-timeline {
+    position: fixed; left: 20px; right: 20px; bottom: 26px; z-index: 19;
+    background: rgba(12, 10, 9, 0.88); backdrop-filter: blur(10px);
+    border: 1px solid rgba(236, 228, 215, 0.18); border-radius: 9px;
+    padding: 8px 12px 10px; display: none;
+  }
+  body.editing-cues .cue-timeline { display: block; }
+  .ctl-head { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--soft); margin-bottom: 6px; }
+  .ctl-lanes { position: relative; display: flex; flex-direction: column; gap: 5px; }
+  .ctl-lane {
+    position: relative; height: 22px; background: rgba(255,255,255,0.05);
+    border-radius: 5px; overflow: hidden; cursor: pointer;
+  }
+  .ctl-bar {
+    position: absolute; top: 2px; bottom: 2px;
+    background: rgba(241, 221, 99, 0.28); border: 1px solid rgba(241, 221, 99, 0.78);
+    border-radius: 4px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 6px; font-size: 10.5px; color: #f7f1e6; white-space: nowrap; overflow: hidden;
+    cursor: grab; user-select: none;
+  }
+  .ctl-bar.active { background: rgba(241, 221, 99, 0.46); border-color: #fff; }
+  .ctl-hdl {
+    position: absolute; top: 0; bottom: 0; width: 7px; cursor: ew-resize;
+    background: rgba(241, 221, 99, 0.65);
+  }
+  .ctl-hdl.l { left: 0; }
+  .ctl-hdl.r { right: 0; }
+  .ctl-playhead {
+    position: absolute; top: 0; bottom: 0; width: 1.5px; background: #fff;
+    pointer-events: none; z-index: 3;
   }
 
   @media (max-aspect-ratio: 1/1) {
-    .head { top: 18px; left: 16px; }
-    .head .s { display: none; }
-    .intro { left: 18px; right: 18px; bottom: 56px; }
-    .line { left: 18px; right: 18px; width: auto; bottom: 52px; }
-    .label { left: 18px; right: 18px; width: auto; bottom: 28px; }
-    .label .t, .label .s { display: none; }
+    .review-pill { top: 14px; right: 14px; }
+    .label { left: 18px; right: 18px; width: auto; bottom: 38px; text-align: center; }
+    .label .ink-rule {
+      background: linear-gradient(90deg, rgba(236,228,215,0) 0%, rgba(241,221,99,0.72) 50%, rgba(236,228,215,0) 100%);
+    }
+    .text-studio { left: 12px; right: 12px; width: auto; top: 56px; max-height: 48vh; }
   }
 </style>
-<style>.cinema-pill, .review-pill, #hud, #hudMin, .prog-bar { visibility: hidden !important; pointer-events: none !important; }</style>
+<style>.cinema-pill, .review-pill, #hud, #hudMin, .text-studio, .cue-lanes { visibility: hidden !important; pointer-events: none !important; }</style>
 </head>
 <body>
 
 <canvas id="gl" aria-hidden="true"></canvas>
 
-<main class="ui">
-  <section class="intro" id="intro">
-    <p class="k">Traditional Dance &amp; Live Music</p>
-    <h1>Ayazamana</h1>
-    <p class="s">Ecuadorian traditional dance from all regions, brought to New York City.</p>
-    <p class="f">Ecuadorian American Cultural Center&ensp;&middot;&ensp;Flushing Town Hall</p>
-  </section>
+<div class="snap-guide-x" id="snap-x" aria-hidden="true"></div>
+<div class="snap-guide-y" id="snap-y" aria-hidden="true"></div>
+<div class="cue-layer" id="cue-layer" aria-label="Ayazamana opening title and text cues"></div>
 
+<main class="ui">
   <div class="head" id="head">
     <span class="t">Ayazamana</span>
     <span class="s">Traditional Dance</span>
   </div>
 
-  <blockquote class="line" id="line-pride">
-    <p>&ldquo;Our goal was to make sure the audience felt pride in where they come from, in an artful, lively manner.&rdquo;</p>
-    <cite>Vanessa Esp&iacute;n &middot; Identity, Poster &amp; Curation</cite>
-  </blockquote>
-
-  <blockquote class="line" id="line-booth">
-    <p>&ldquo;I was in the tech room above, handling the visuals after every dance. My job was to make sure everything went smoothly so the audience could enjoy every performance.&rdquo;</p>
-    <cite>Backstage w/ Crew &middot; Flushing Town Hall</cite>
-  </blockquote>
-
   <section class="label" id="label">
-    <p class="t">Ayazamana</p>
-    <p class="s">Traditional Dance</p>
-    <p class="w">Ecuadorian American Cultural Center<br>Flushing Town Hall, Queens</p>
-    <p class="k">Credits</p>
-    <ul>
-      <li><span>Identity, Poster &amp; Curation</span> &mdash; Vanessa Esp&iacute;n</li>
-      <li><span>Dance</span> &mdash; Ayazamana Dance Group</li>
-      <li><span>Live Music</span> &mdash; Amawta Roots</li>
-    </ul>
+    <p class="t">Vanessa Esp&iacute;n</p>
+    <span class="ink-rule" aria-hidden="true"></span>
+    <p class="role">Creative and Event Coordination</p>
   </section>
 </main>
 
 <div class="review-pill" id="review-pill">
-  <button id="btn-play" class="active" title="Play / Pause (Space)">Pause</button>
-  <button id="btn-replay" title="Replay from beginning">&#8634; Replay</button>
+  <button id="btn-play" class="active" title="Start / Pause (Space or click stage)">Pause</button>
+  <button id="btn-replay" title="Replay from beginning (R)">&#8634; Replay</button>
   <span class="time" id="time-lbl">0.0s / 26.0s</span>
-  <span class="sep">|</span>
+  <span class="sep"></span>
+  <button id="btn-edit-cues" class="edit-btn" title="Drag &amp; time where the Logo and Texts appear (E)">&#9998; Edit Texts</button>
+  <span class="sep"></span>
+  <button id="btn-sound" class="active" title="Toggle Ambient Soundscape (M)">&#9834; Sound</button>
+  <select id="sound-sel" title="Switch Ayazamana Soundscape"></select>
+  <a href="/Vanessa-Espin-website/flushing-theater/audio/" style="color:#f6dfaf;font-weight:500" title="Compare &amp; mark all 5 Ayazamana audio options">Audition &nearr;</a>
+  <a href="/Vanessa-Espin-website/flushing-theater/logo-lab/" style="color:#f7d43b;font-weight:500" title="Compare 8 poster-palette colorful AYAZAMANA logos">Logo Lab &nearr;</a>
+  <span class="sep"></span>
   <a href="/Vanessa-Espin-website/flushing-theater/trajectories/" style="color:#93c5fd;font-weight:500">3D Plot &nearr;</a>
-  <span class="sep">|</span>
+  <span class="sep"></span>
   <button class="active" data-fmt="01">01 Wash</button>
   <button data-fmt="02">02 Banners</button>
-  <span class="sep">|</span>
-  <button class="active" id="btn-tex" title="Toggle zero-VRAM tactile shaders & contact shadows (or press T)">Tex: ON</button>
-  <span class="sep">|</span>
-  <a href="/Vanessa-Espin-website/flushing-theater/">&larr; Lab</a>
+  <span class="sep"></span>
+  <button class="active" id="btn-tex" title="Toggle zero-VRAM tactile shaders &amp; contact shadows (or press T)">Tex: ON</button>
 </div>
 
-<div class="prog-bar" id="prog-bar" title="Click or drag to scrub movie"><div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div></div>
+<!-- Live Text & Logo Placement / Timing Editor -->
+<aside class="text-studio" id="text-studio" aria-label="Edit Text Placement and Timing">
+  <div class="ts-head">
+    <strong>&#9998; Logo &amp; Text Placement Studio</strong>
+    <button class="ts-btn" id="ts-close" type="button">Done</button>
+  </div>
+  <p class="ts-hint">Drag the <strong>Logo</strong> or <strong>Text</strong> directly on the video to place it anywhere, and drag its yellow bar on the timeline below to set when it appears &amp; fades.</p>
+  <div class="ts-tabs" id="ts-tabs"></div>
+  <div id="ts-form"></div>
+  <div class="ts-actions">
+    <button class="ts-btn primary" id="ts-save" type="button">&#9733; Save Layout</button>
+    <button class="ts-btn" id="ts-add" type="button">+ Add Text</button>
+    <button class="ts-btn" id="ts-reset" type="button">Reset Default</button>
+    <span class="ts-saved" id="ts-saved">Saved &#10003;</span>
+  </div>
+</aside>
 
-<!-- Event media: the "Media" link, the strip and the pop-up (shared module in /event-media/).
-     It loads before the film's own script so it can pause the film's video while the viewer is open. -->
-<script type="module">import { mountEventMedia } from '/Vanessa-Espin-website/event-media/event-media.js?v=6'; mountEventMedia({ manifest: '/Vanessa-Espin-website/event-media/manifests/ayazamana.json' });</script>
+<div class="cue-timeline" id="cue-timeline">
+  <div class="ctl-head">
+    <span>Timeline Cues (Drag bar to move in time · drag edges to trim · click lane to seek)</span>
+    <span id="ctl-time">0.0s / 30.5s</span>
+  </div>
+  <div class="ctl-lanes" id="ctl-lanes">
+    <div class="ctl-playhead" id="ctl-playhead"></div>
+  </div>
+</div>
+
+<button class="visitor-sound" id="visitor-sound" type="button" hidden title="Toggle Exhibition Soundscape (M)">&#9834; Sound</button>
+<div class="tap-state" id="tap-state" aria-hidden="true"><svg id="tap-icon" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg></div>
+<div class="prog-bar" id="prog-bar" title="Click or drag to jump to any part of the video"><span class="prog-tip" id="prog-tip">0:00</span><div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div></div>
+
+<script type="module">import { mountEventMedia } from '/Vanessa-Espin-website/event-media/event-media.js?v=7'; mountEventMedia({ manifest: '/Vanessa-Espin-website/event-media/manifests/ayazamana.json', button: false });</script>
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { TRAJECTORIES, DEFAULT_FILM_DURATION } from '../trajectories/paths.js';
+import { TRAJECTORIES, DEFAULT_FILM_DURATION } from '../trajectories/paths.js?v=20261123c';
 import { addPavlosSeatRoseEasterEgg } from '../trajectories/rose.js';
 import { createTactileMaterialRig } from '../trajectories/tactile.js';
+import { AYAZAMANA_TRACKS, createAyazamanaAudio } from '../ambient-audio.js?v=20261123c';
 import { skipUnlitLights } from '/Vanessa-Espin-website/shared/film-lights.js';
-skipUnlitLights(THREE);   // a light's maths is skipped wherever its cone does not reach: same picture, far less work (see the file)
+skipUnlitLights(THREE);
 
 const qs = new URLSearchParams(location.search);
 if (qs.get('clean') === '1') document.body.classList.add('clean');
+if (qs.get('embed') === '1') document.body.classList.add('embed');
+try {
+  if (window.parent !== window && window.parent.location.pathname.includes('/fold/')) {
+    document.body.classList.add('in-fold-stage');
+  }
+} catch {}
+
 const tactileRig = createTactileMaterialRig(qs.get('tex') !== '0');
 
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 const lerp = (a, b, t) => a + (b - a) * t;
-const ss = (a, b, x) => { const t = clamp((x - a) / (b - a)); return t * t * (3 - 2 * t); };
+const ss = (a, b, x) => { const t = clamp((x - a) / Math.max(1e-5, b - a)); return t * t * (3 - 2 * t); };
+const fmtClock = (s) => {
+  const sec = Math.max(0, Math.round(s));
+  return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
+};
 
 const canvas = document.getElementById('gl');
-const introEl = document.getElementById('intro');
-const headEl = document.getElementById('head');
-const lineBoothEl = document.getElementById('line-booth');
-const linePrideEl = document.getElementById('line-pride');
+const cueLayerEl = document.getElementById('cue-layer');
 const labelEl = document.getElementById('label');
 const progFillEl = document.getElementById('prog-fill');
+const progTipEl = document.getElementById('prog-tip');
+const tapStateEl = document.getElementById('tap-state');
+const tapIconEl = document.getElementById('tap-icon');
 
-// Fast, high-contrast renderer: NO RoomEnvironment studio IBL, capped DPR<=1.5, hardware PCFSoftShadowMap, 15% subtle lift (0.98 exposure)!
+// ---- EDITABLE OPENER LOGO & SUBTITLE CUES (Starts with Big Extracted Poster Logo, then adds Second Text while Logo still exists!) ----
+const CUES_API = '/Vanessa-Espin-website/api/ayazamana-texts';
+const LOGO_SRCS = {
+  ivory:              '../assets/title/ayazamana-logo-ivory.png?v=20261123f',
+  white:              '../assets/title/ayazamana-logo-white.png?v=20261123f',
+  gold:               '../assets/title/ayazamana-logo-gold.png?v=20261123f',
+  'headband-letters': '../assets/title/ayazamana-logo-headband-letters.png?v=20261123c',
+  'mask-letters':     '../assets/title/ayazamana-logo-mask-letters.png?v=20261123c',
+  'headband-stripes': '../assets/title/ayazamana-logo-headband-stripes.png?v=20261123c',
+  'hatband-diagonal': '../assets/title/ayazamana-logo-hatband-diagonal.png?v=20261123c',
+  'ivory-accents':    '../assets/title/ayazamana-logo-ivory-accents.png?v=20261123c',
+  'warm-weave':       '../assets/title/ayazamana-logo-warm-weave.png?v=20261123c',
+  'mask-stripes':     '../assets/title/ayazamana-logo-mask-stripes.png?v=20261123c',
+  'silk-gradient':    '../assets/title/ayazamana-logo-silk-gradient.png?v=20261123c',
+};
+const LOGO_TONE_LABELS = [
+  ['gold',             'Poster Gold ★'],
+  ['ivory',            'Theater Ivory'],
+  ['white',            'Pure White'],
+  ['headband-letters', 'C01 · Headband Letters'],
+  ['mask-letters',     'C02 · Aya Huma Mask Letters'],
+  ['headband-stripes', 'C03 · Hatband Stripes'],
+  ['hatband-diagonal', 'C04 · Tilted Hatband (−12°)'],
+  ['ivory-accents',    'C05 · Ivory A + Jewels'],
+  ['warm-weave',       'C06 · Warm Hat & Crimson'],
+  ['mask-stripes',     'C07 · Knitted Mask Stripes'],
+  ['silk-gradient',    'C08 · Silk Faja Gradient'],
+];
+const TEXT_COLORS = {
+  ivory: '#ece4d7',
+  white: '#ffffff',
+  gold:  '#f1dd63',
+};
+const urlLogoTone = qs.get('logoTone');
+
+function defaultCues() {
+  return [
+    {
+      id: 'logo',
+      kind: 'logo',
+      label: '1 · Big Ayazamana Logo',
+      enabled: true,
+      xPct: 50.0,
+      yPct: 45.0,
+      widthVw: 56.0,
+      maxWidthPx: 760,
+      align: 'center',
+      tone: 'gold',
+      in0: 0.20,
+      in1: 1.05,
+      out0: 4.65,
+      out1: 5.55,
+    },
+    {
+      id: 'sub',
+      kind: 'text',
+      label: '2 · Ecuadorian Dance Text',
+      enabled: true,
+      text: 'Ecuadorian traditional dance from all regions, brought to New York City.',
+      xPct: 50.0,
+      yPct: 58.0,
+      fontPx: 23,
+      maxWidthCh: 36,
+      align: 'center',
+      tone: 'ivory',
+      in0: 1.60,
+      in1: 2.45,
+      out0: 4.75,
+      out1: 5.65,
+    },
+  ];
+}
+
+let textCues = defaultCues();
+let selectedCueId = 'logo';
+let editingCues = qs.get('edit') === '1';
+const cueDomMap = new Map();
+
+function rebuildCueDom() {
+  cueLayerEl.innerHTML = '';
+  cueDomMap.clear();
+  const isPortrait = innerWidth < innerHeight;
+  for (const cue of textCues) {
+    const wrap = document.createElement('div');
+    wrap.className = `cue-item ${cue.kind === 'logo' ? 'cue-logo' : 'cue-text'}`;
+    wrap.dataset.id = cue.id;
+    wrap.dataset.align = cue.align || 'center';
+    if (editingCues && cue.id === selectedCueId) wrap.classList.add('is-selected');
+
+    if (cue.kind === 'logo') {
+      const img = document.createElement('img');
+      const effTone = (urlLogoTone && LOGO_SRCS[urlLogoTone]) ? urlLogoTone : cue.tone;
+      img.src = LOGO_SRCS[effTone] || LOGO_SRCS.ivory;
+      img.alt = 'Ayazamana';
+      const wVw = isPortrait ? Math.min(88, (cue.widthVw || 56) * 1.42) : (cue.widthVw || 56);
+      wrap.style.width = `min(${wVw.toFixed(1)}vw, ${cue.maxWidthPx || 760}px)`;
+      wrap.appendChild(img);
+    } else {
+      const p = document.createElement('p');
+      p.textContent = cue.text || '';
+      const basePx = cue.fontPx || 23;
+      const fPx = isPortrait ? Math.max(15, basePx * 0.78) : clamp(basePx * Math.min(1, innerWidth / 1220), 13.5, basePx);
+      p.style.fontSize = `${fPx.toFixed(1)}px`;
+      p.style.maxWidth = `${cue.maxWidthCh || 36}ch`;
+      wrap.style.setProperty('--cue-col', TEXT_COLORS[cue.tone] || TEXT_COLORS.ivory);
+      wrap.appendChild(p);
+    }
+
+    // Drag-to-position on stage when Edit Texts mode is active
+    wrap.addEventListener('pointerdown', (e) => {
+      if (!editingCues) return;
+      e.stopPropagation();
+      e.preventDefault();
+      selectedCueId = cue.id;
+      syncEditorSelection();
+      wrap.setPointerCapture(e.pointerId);
+      const startX = e.clientX, startY = e.clientY;
+      const origX = cue.xPct, origY = cue.yPct;
+      const snapX = document.getElementById('snap-x');
+      const snapY = document.getElementById('snap-y');
+
+      const onMove = (ev) => {
+        let nx = clamp(origX + ((ev.clientX - startX) / Math.max(1, innerWidth)) * 100, 4, 96);
+        let ny = clamp(origY + ((ev.clientY - startY) / Math.max(1, innerHeight)) * 100, 6, 94);
+        const nearMidX = Math.abs(nx - 50) < 1.2;
+        const nearMidY = Math.abs(ny - 50) < 1.2;
+        if (nearMidX) nx = 50;
+        if (nearMidY) ny = 50;
+        snapX.classList.toggle('on', nearMidX);
+        snapY.classList.toggle('on', nearMidY);
+        cue.xPct = +nx.toFixed(1);
+        cue.yPct = +ny.toFixed(1);
+        applyCuesAtTime(filmTime);
+        refreshFormValuesInPlace();
+      };
+      const onUp = () => {
+        snapX.classList.remove('on');
+        snapY.classList.remove('on');
+        wrap.removeEventListener('pointermove', onMove);
+        wrap.removeEventListener('pointerup', onUp);
+        wrap.removeEventListener('pointercancel', onUp);
+      };
+      wrap.addEventListener('pointermove', onMove);
+      wrap.addEventListener('pointerup', onUp);
+      wrap.addEventListener('pointercancel', onUp);
+    });
+
+    cueLayerEl.appendChild(wrap);
+    cueDomMap.set(cue.id, wrap);
+  }
+}
+
+function applyCuesAtTime(tSec) {
+  const alignShift = (al) => (al === 'left' ? '0%' : al === 'right' ? '-100%' : '-50%');
+  for (const cue of textCues) {
+    const el = cueDomMap.get(cue.id);
+    if (!el) continue;
+    if (!cue.enabled) {
+      el.style.opacity = '0';
+      el.style.visibility = 'hidden';
+      continue;
+    }
+    const appear = ss(cue.in0, Math.max(cue.in0 + 0.05, cue.in1), tSec);
+    const disappear = 1.0 - ss(cue.out0, Math.max(cue.out0 + 0.05, cue.out1), tSec);
+    let op = appear * disappear;
+    // When actively editing & paused/selected, show selected cue faintly if outside its time range so user can still drag it
+    const ghostEdit = editingCues && cue.id === selectedCueId && op < 0.22;
+    if (ghostEdit) op = 0.32;
+
+    if (op <= 0.002) {
+      el.style.opacity = '0';
+      el.style.visibility = 'hidden';
+      continue;
+    }
+    el.style.visibility = 'visible';
+    el.style.left = `${cue.xPct}%`;
+    el.style.top = `${cue.yPct}%`;
+    const dy = ghostEdit ? 0 : ((1 - appear) * 12 - (1 - disappear) * 12);
+    const bl = ghostEdit ? 0 : ((1 - appear) * 4.2 + (1 - disappear) * 3.8);
+    el.style.opacity = op.toFixed(3);
+    el.style.transform = `translate3d(${alignShift(cue.align)}, calc(-50% + ${dy.toFixed(1)}px), 0)`;
+    el.style.filter = bl > 0.08 ? `blur(${bl.toFixed(2)}px)` : 'none';
+  }
+}
+
+async function loadSavedCues() {
+  try {
+    const r = await fetch(CUES_API);
+    if (!r.ok) return;
+    const d = await r.json();
+    if (Array.isArray(d?.layout?.cues) && d.layout.cues.length > 0) {
+      textCues = d.layout.cues;
+      selectedCueId = textCues[0].id;
+    }
+  } catch {}
+  rebuildCueDom();
+  applyCuesAtTime(filmTime);
+  if (editingCues) renderTextStudio();
+}
+
+async function persistCues() {
+  try {
+    await fetch(CUES_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: 'layout', cues: textCues, updatedAt: new Date().toISOString() }),
+    });
+    const st = document.getElementById('ts-saved');
+    if (st) {
+      st.classList.add('on');
+      setTimeout(() => st.classList.remove('on'), 1500);
+    }
+  } catch (err) {
+    console.error('Failed saving Ayazamana text layout:', err);
+  }
+}
+
+// Fast, high-contrast renderer
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance', stencil: false });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.98;
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFShadowMap;   // this three.js version has folded the soft variant into this one; naming it directly avoids a console warning
+renderer.shadowMap.type = THREE.PCFShadowMap;
 const maxAniso = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
 
 const scene = new THREE.Scene();
@@ -359,30 +754,26 @@ function resize() {
   renderer.setSize(innerWidth, innerHeight, false);
   camera.aspect = innerWidth / Math.max(1, innerHeight);
   camera.updateProjectionMatrix();
+  rebuildCueDom();
+  applyCuesAtTime(filmTime);
   needsRender = true;
 }
 
 // ---- TALL SCREENS (PHONES) ----
-// The film is composed for a wide screen. Held upright, a phone keeps the height and loses the sides: the stage
-// picture ran off the right edge and the closing poster off the left. On a tall screen the camera turns to put
-// the subject in the middle (the stage, then the poster by the doors), and the lens opens just enough to hold
-// the whole stage picture. A wide screen (width >= height) is untouched.
 const TALL = { stageX: 0.0, stageHalfW: 3.675, stageZ: -5.95, posterX: 2.19, posterZ: 12.76 };
 function frameForTallScreen(u, fov, pos, look) {
   const aspect = camera.aspect;
   if (aspect >= 1.0) return fov;
   const p = 1.0 - sm5((aspect - 0.80) / 0.20);
-  const bearing = (x, z) => Math.atan2(x - pos.x, -(z - pos.z)); // angle of a point, seen from above, from straight ahead
+  const bearing = (x, z) => Math.atan2(x - pos.x, -(z - pos.z));
   const b0 = bearing(look.x, look.z);
   const bL = bearing(TALL.stageX - TALL.stageHalfW, TALL.stageZ);
   const bR = bearing(TALL.stageX + TALL.stageHalfW, TALL.stageZ);
   const wStage = 1.0 - ss(0.66, 0.78, u);
-  const wPoster = ss(13.4, 15.6, pos.z);                           // only once the camera has backed out past the doors
+  const wPoster = ss(13.4, 15.6, pos.z);
   const turn = (((bL + bR) * 0.5 - b0) * wStage + (bearing(TALL.posterX, TALL.posterZ) - b0) * wPoster) * p;
   const r = Math.hypot(look.x - pos.x, look.z - pos.z), b1 = b0 + turn;
   look.set(pos.x + r * Math.sin(b1), look.y, pos.z - r * Math.cos(b1));
-  // Lens: the stage fills about three quarters of the width from the booth and the whole width up close,
-  // then eases back to the film's own lens as the camera leaves.
   const tan0 = Math.tan(fov * Math.PI / 360);
   const tanFit = Math.tan((bR - bL) * 0.5) * 1.06 / aspect * lerp(1.30, 1.0, ss(0.0, 0.34, u));
   const wFit = (1.0 - ss(0.50, 0.70, u)) * p;
@@ -390,11 +781,9 @@ function frameForTallScreen(u, fov, pos, look) {
   return Math.atan(tanV) * 360 / Math.PI;
 }
 window.addEventListener('resize', resize);
-// Keep the film smooth: when frames run late, draw at a lower resolution (shared helper; ?pace=off on the address disables it)
 import('/Vanessa-Espin-website/shared/film-pace.js').then(({ keepPace }) => keepPace({ renderer, min: 0.85, apply: resize })).catch(() => {});
-resize();
 
-// ---- DARK BLENDER CHIAROSCURO LIGHT RIG (+15% WHISPER OF SHADOW SEPARATION OVER ORIGINAL) ----
+// ---- DARK BLENDER CHIAROSCURO LIGHT RIG ----
 const hemiSky = new THREE.Color().setRGB(0.023, 0.014, 0.024, THREE.LinearSRGBColorSpace);
 const hemiGnd = new THREE.Color().setRGB(0.006, 0.004, 0.004, THREE.LinearSRGBColorSpace);
 const hemiLight = new THREE.HemisphereLight(hemiSky, hemiGnd, 0.19);
@@ -428,20 +817,17 @@ function addBlenderPoint(x, y, z, r, g, b, watts) {
   return pt;
 }
 
-// 1. Left Arch Grazes (`110W`) & Right Terracotta Aisle Pools (`177W`) + Single Seat Rim Fill (`45W` — exact 15% step above original):
 for (const zArch of [2.5, 6.5, 10.2]) {
   addBlenderSpot(-5.9, 5.1, zArch, -7.3, 1.5, zArch, 1.0, 0.70, 0.40, 110.0, 52.0, 0.72, false);
   addBlenderSpot(4.3, 5.3, zArch, 4.4, 0.0, zArch, 1.0, 0.78, 0.50, 177.0, 46.0, 0.68, false);
 }
 addBlenderPoint(-0.8, 4.8, 6.0, 1.0, 0.72, 0.46, 45.0);
 
-// 2. Twin FOH Warm Curtain Spotlights (`620W` + `540W`) + Theatrical Plum Rim (`340W`):
 const fohWarm = addBlenderSpot(-2.2, 5.2, 2.6, 0.30, 2.30, -0.25, 1.0, 0.80, 0.56, 620.0, 50.0, 0.58, true);
 const fohWarmR = addBlenderSpot(3.6, 4.9, 3.4, 2.70, 2.25, -0.24, 1.0, 0.79, 0.54, 540.0, 48.0, 0.62, false);
 const fohViolet = addBlenderSpot(2.6, 5.2, 2.4, -0.50, 2.40, -0.40, 0.95, 0.35, 0.72, 340.0, 52.0, 0.62, false);
 const stageMintBack = addBlenderSpot(0.0, 4.9, -4.2, 0.0, 1.0, -1.2, 0.45, 0.96, 0.85, 420.0, 66.0, 0.65, false);
 
-// 3. Intimate Foyer Sconces (`27W`) + Brass Picture-Light Halo (`260W`) + Pavlos's Seat Rose (dark until end spotlight!):
 addBlenderPoint(-2.5, 2.4, 14.8, 1.0, 0.74, 0.44, 27.0);
 addBlenderPoint(5.8, 2.4, 14.8, 1.0, 0.74, 0.44, 27.0);
 const pierPictureSpot = addBlenderSpot(2.19, 2.58, 14.55, 2.19, 1.62, 12.79, 1.0, 0.87, 0.66, 260.0, 62.0, 0.82, false);
@@ -453,6 +839,12 @@ const iyuanaOakStripsTex = texLoader.load('../assets/textures/iyuana_oak_strips.
 iyuanaOakStripsTex.wrapS = THREE.ClampToEdgeWrapping;
 iyuanaOakStripsTex.wrapT = THREE.RepeatWrapping;
 iyuanaOakStripsTex.anisotropy = maxAniso;
+
+// Full uncropped 1252×1826 Ayazamana poster texture for the foyer framed poster!
+const uncroppedPosterTex = texLoader.load('../assets/textures/ayazamana-public-poster.png?v=20261123a', () => { needsRender = true; });
+uncroppedPosterTex.flipY = false;
+uncroppedPosterTex.colorSpace = THREE.SRGBColorSpace;
+uncroppedPosterTex.anisotropy = maxAniso;
 
 function applyIyuanaOakStripShader(mat, stripWidth = 0.064) {
   const patched = mat.clone();
@@ -515,7 +907,6 @@ function applyIyuanaOakStripShader(mat, stripWidth = 0.064) {
           float lumW = dot(wood, vec3(0.3, 0.59, 0.11));
           gOakRough = mix(0.24, 0.46, fh2(vec2(si + 9.0, sj))) - 0.06 * (lumW - 0.45) + (1.0 - gOakJoint) * 0.55;
 
-          // Analytic 16mm carpet-edge drop-shadow along runner_salmon borders (X = 3.38 & 5.12) + baseboard contact AO:
           float carpAO = 1.0;
           if (uTex > 0.001 && fp.y > 0.34 && fp.y < 20.82) {
             float dCarp = min(abs(fp.x - 3.38), abs(fp.x - 5.12));
@@ -530,13 +921,12 @@ function applyIyuanaOakStripShader(mat, stripWidth = 0.064) {
   return patched;
 }
 
-// ---- RIGHTS-CLEAN STAGE SEQUENCE (SYNCED PHOTOGRAPH + WOOD-STAGE REFLECTION + STAGE SPOTLIGHT PALETTE!) ----
+// ---- 4-PHOTO DANCE STAGE SEQUENCE (Last photo w/ Vanessa removed; remaining 4 spread evenly w/ silky-long fades!) ----
 const STAGE_MOMENTS = [
   { key: 'p03_s1',       url: '../assets/event-moments/outputs/pav_p03_mint_silhouettes_chiaroscuro.jpg', aspect: 1376 / 768, lightRGB: [0.42, 0.95, 0.82] },
   { key: 'p08_tungsten', url: '../assets/event-moments/outputs/pav_p08_varA_tungsten_emerald.jpg',       aspect: 1376 / 768, lightRGB: [1.00, 0.72, 0.38] },
   { key: 'p07_s1',       url: '../assets/event-moments/outputs/pav_p07_violet_mint_chiaroscuro.jpg',     aspect: 1376 / 768, lightRGB: [0.92, 0.66, 0.88] },
   { key: 'p06_s1',       url: '../assets/event-moments/outputs/pav_p06_white_ruffles_chiaroscuro.jpg',   aspect: 1376 / 768, lightRGB: [0.98, 0.82, 0.72] },
-  { key: 'p09_platinum', url: '../assets/event-moments/outputs/p09_lr_bw_warm_platinum.jpg',             aspect: 1280 / 1263, lightRGB: [0.94, 0.88, 0.79] },
 ];
 
 for (const m of STAGE_MOMENTS) {
@@ -590,8 +980,6 @@ const cycShaderMat = new THREE.ShaderMaterial({
       } else {
         sUv.y = (uv0.y - 0.5) * ratio + 0.5;
       }
-      // Note: tex.colorSpace = THREE.SRGBColorSpace (SRGB8_ALPHA8) ALREADY hardware-decodes sRGB -> linear!
-      // Never apply pow(c, 2.2) or tonemapping_fragment here — preserves 100% true-to-file color, skin tones & contrast!
       vec3 c = texture2D(tex, clamp(sUv, 0.002, 0.998)).rgb;
       return vec4(c, inside);
     }
@@ -600,7 +988,11 @@ const cycShaderMat = new THREE.ShaderMaterial({
       vec2 uv0 = vec2(vUv.x, 1.0 - vUv.y);
       vec4 a = sampleMoment(tArtA, uAspectA, uv0);
       vec4 b = sampleMoment(tArtB, uAspectB, uv0);
-      vec3 col = mix(a.rgb * a.a, b.rgb * b.a, uMix);
+      // Smooth equal-luminance-preserved dissolve so mid-crossfade (uMix ~ 0.5) feels buttery and never dips dark
+      float wA = 1.0 - uMix;
+      float wB = uMix;
+      float midLift = 1.0 + 0.08 * (4.0 * wA * wB);
+      vec3 col = (a.rgb * a.a * wA + b.rgb * b.a * wB) * midLift;
       float insideMask = mix(a.a, b.a, uMix);
 
       float fx = max(0.004, uFeather);
@@ -616,7 +1008,6 @@ const cycShaderMat = new THREE.ShaderMaterial({
   `,
 });
 
-// Frame-locked dual-texture 5-tap stage-floor reflection (cross-dissolves by exact same uMix & parts/closes with uCurtain — zero time lag or pop!)
 const floorReflMesh = new THREE.Mesh(
   new THREE.PlaneGeometry(7.35, 4.25),
   new THREE.ShaderMaterial({
@@ -672,7 +1063,6 @@ const floorReflMesh = new THREE.Mesh(
 
         float fadeZ = smoothstep(0.04, 0.96, vUv.y);
         float fadeX = smoothstep(0.0, 0.16, vUv.x) * smoothstep(1.0, 0.84, vUv.x);
-        // Physically open & close reflection aperture along with the parting/closing curtains (never snaps!):
         float gapHalf = mix(0.0, 1.18, uCurtain);
         float curtainGate = smoothstep(gapHalf + 0.16, gapHalf - 0.06, abs(vUv.x - 0.5) * 2.0) * smoothstep(0.01, 0.22, uCurtain);
         gl_FragColor = vec4(col * 0.22 * fadeZ * fadeX * curtainGate, 1.0);
@@ -689,7 +1079,7 @@ const BANNER_SPECS = {
   banner_linen_1: { aspect: 1.56 / 2.34, idx: 2 },
   banner_linen_2: { aspect: 1.64 / 2.05, idx: 0 },
   banner_linen_3: { aspect: 1.72 / 2.15, idx: 1 },
-  banner_linen_4: { aspect: 1.68 / 2.10, idx: 4 },
+  banner_linen_4: { aspect: 1.68 / 2.10, idx: 3 },
 };
 
 function makeLinenBannerMaterial(mObj, bannerAspect) {
@@ -728,14 +1118,12 @@ function makeLinenBannerMaterial(mObj, bannerAspect) {
   });
 }
 
-// ---- AUTOMATIC INSTANCEDMESH BATCHER (CUTS DRAW CALLS FROM 220 -> ~24 FOR 60-120 FPS!) ----
 function batchRepeatedMeshesIntoInstanced(root) {
   root.updateMatrixWorld(true);
   const buckets = new Map();
   root.traverse(obj => {
     if (!obj.isMesh || !obj.visible) return;
     if (obj.name.startsWith('curtain_') || obj.name === 'stage_cyclorama' || obj.name.endsWith('_screen') || BANNER_SPECS[obj.name]) return;
-    // Skip objects under hidden or toggleable groups (`stage_banners_group`, `poster_*`, `tv_*`):
     let p = obj.parent;
     let skip = false;
     while (p && p !== root) {
@@ -752,7 +1140,7 @@ function batchRepeatedMeshesIntoInstanced(root) {
     if (list.length < 4) continue;
     const proto = list[0];
     const inst = new THREE.InstancedMesh(proto.geometry, proto.material, list.length);
-    inst.castShadow = false; // chairs/spotlights don't need shadow-map draw calls!
+    inst.castShadow = false;
     inst.receiveShadow = true;
     inst.frustumCulled = false;
     for (let i = 0; i < list.length; i++) {
@@ -765,7 +1153,6 @@ function batchRepeatedMeshesIntoInstanced(root) {
   }
 }
 
-// ---- LOAD `flushing-theater.glb` v3 ----
 let stageCycMesh = null;
 let stageBannersGroup = null;
 let curtainL = null, curtainR = null;
@@ -794,7 +1181,6 @@ loader.load('../assets/flushing-theater.glb', gltf => {
 
   root.traverse(obj => {
     if (obj.isMesh) {
-      // Only large architectural shell & curtains cast shadows (keeps shadow pass sub-millisecond!):
       obj.castShadow = obj.name.startsWith('curtain_') || obj.name === 'woodwork_boxes_and_doors';
       obj.receiveShadow = obj.name !== 'stage_cyclorama' && !obj.name.endsWith('_screen');
 
@@ -805,11 +1191,16 @@ loader.load('../assets/flushing-theater.glb', gltf => {
           if (!floorOakShared.has(m.name)) {
             floorOakShared.set(m.name, applyIyuanaOakStripShader(m, m.name === 'stage_deck' ? 0.068 : 0.062));
           }
-          // Immediately free ~26 MB of unused 2048x2048 & 1024x1024 embedded floor maps from GPU VRAM!
           tactileRig.disposeUnusedMap(m.map);
           tactileRig.disposeUnusedMap(m.normalMap);
           tactileRig.disposeUnusedMap(m.roughnessMap);
           return floorOakShared.get(m.name);
+        }
+        // Swap embedded cropped 408×525 poster texture for the full uncropped 1252×1826 Ayazamana poster!
+        if (m.name === 'poster_front') {
+          tactileRig.disposeUnusedMap(m.map);
+          m.map = uncroppedPosterTex;
+          m.needsUpdate = true;
         }
         for (const tk of ['map', 'normalMap', 'roughnessMap']) {
           if (m[tk]) m[tk].anisotropy = maxAniso;
@@ -818,6 +1209,11 @@ loader.load('../assets/flushing-theater.glb', gltf => {
         return m;
       });
       obj.material = Array.isArray(obj.material) ? newMats : newMats[0];
+    }
+
+    // Match foyer wall poster frame aspect ratio to the uncropped 1252:1826 poster (0.68565 vs old 0.777)
+    if (obj.name === 'poster_wall_E_doors') {
+      obj.scale.x = (1252 / 1826) / (0.700 / 0.901);
     }
 
     if (obj.name === 'stage_cyclorama') {
@@ -840,8 +1236,7 @@ loader.load('../assets/flushing-theater.glb', gltf => {
   tactileRig.prepareChairDisorder(root, roseEasterEgg.root);
   batchRepeatedMeshesIntoInstanced(root);
   syncFormatButtons();
-  // Before the film starts: build every shader and send every picture to the graphics card, for every moment of the film,
-  // while the opening frame is held. Otherwise that work lands mid-film as a freeze (it did, when the rose's light came on).
+
   const startFilm = () => { sceneReady = true; needsRender = true; clock.getDelta(); };
   const warmTimes = []; for (let t = 0; t <= FILM_DURATION; t += 1.0) warmTimes.push(t);
   warmTimes.push(FILM_DURATION * 0.70, FILM_DURATION * 0.80, FILM_DURATION);
@@ -852,7 +1247,7 @@ loader.load('../assets/flushing-theater.glb', gltf => {
     .then(startFilm);
 });
 
-// ---- SILKY-SMOOTH 26.0s REAL-TIME CINEMA MOVIE (SINGLE LOCKED T2 TRAJECTORY + UNHURRIED 5-PHOTO STAGE HOLD + END SEAT SPOTLIGHT!) ----
+// ---- 26.0s REAL-TIME CINEMA MOVIE + FULL IYUANA PLAYBACK / SCRUB / SCROLL PARITY ----
 const FILM_DURATION = clamp(Number(qs.get('dur')) || DEFAULT_FILM_DURATION, 8.0, 60.0);
 const progBarEl = document.getElementById('prog-bar');
 const btnPlayEl = document.getElementById('btn-play');
@@ -863,6 +1258,8 @@ let sceneReady = false;
 let filmTime = 0.0;
 let isPlaying = true;
 let isScrubbing = false;
+let wasPlayingBeforeScrub = true;
+let tapFlashTimer = null;
 
 if (qs.has('t')) {
   filmTime = clamp(Number(qs.get('t')), 0, FILM_DURATION);
@@ -872,12 +1269,31 @@ if (qs.has('t')) {
   if (qs.get('play') !== '1') isPlaying = false;
 }
 
-function syncPlayUi() {
-  if (!btnPlayEl) return;
-  btnPlayEl.textContent = isPlaying ? 'Pause' : 'Play';
-  btnPlayEl.classList.toggle('active', isPlaying);
+resize();
+loadSavedCues();
+
+function syncPlayUi(showTapIndicator = false) {
+  if (btnPlayEl) {
+    btnPlayEl.textContent = isPlaying ? 'Pause' : 'Play';
+    btnPlayEl.classList.toggle('active', isPlaying);
+  }
+  if (tapStateEl && tapIconEl) {
+    clearTimeout(tapFlashTimer);
+    if (!isPlaying && !isScrubbing && filmTime > 0.05 && filmTime < FILM_DURATION - 0.05) {
+      tapIconEl.innerHTML = '<path d="M8 5.5v13l11-6.5z"/>';
+      tapStateEl.classList.remove('is-flash');
+      tapStateEl.classList.add('is-paused');
+    } else if (showTapIndicator && isPlaying) {
+      tapIconEl.innerHTML = '<path d="M7 5h3.5v14H7zm6.5 0H17v14h-3.5z"/>';
+      tapStateEl.classList.remove('is-paused');
+      tapStateEl.classList.add('is-flash');
+      tapFlashTimer = setTimeout(() => tapStateEl.classList.remove('is-flash'), 420);
+    } else {
+      tapStateEl.classList.remove('is-paused', 'is-flash');
+    }
+  }
 }
-syncPlayUi();
+syncPlayUi(false);
 
 const sm5 = x => { const t = clamp(x, 0, 1); return t * t * t * (t * (t * 6 - 15) + 10); };
 
@@ -893,10 +1309,16 @@ function applyMovieTime(tSec) {
   const u = clamp(tSec / FILM_DURATION, 0, 1);
   progFillEl.style.width = `${(u * 100).toFixed(2)}%`;
   if (timeLblEl) timeLblEl.textContent = `${tSec.toFixed(1)}s / ${FILM_DURATION.toFixed(1)}s`;
+  const ctlPlayhead = document.getElementById('ctl-playhead');
+  const ctlTime = document.getElementById('ctl-time');
+  if (ctlPlayhead) ctlPlayhead.style.left = `${(u * 100).toFixed(2)}%`;
+  if (ctlTime) ctlTime.textContent = `${tSec.toFixed(1)}s / ${FILM_DURATION.toFixed(1)}s`;
 
-  // 1. Curtain & Spotlight Choreography (curtains open early at 0.9s..2.5s and stay open until 20.8s..23.1s so all 5 photos shine!):
-  const openIn = sm5((u - 0.035) / 0.060);
-  const closeOut = sm5((u - 0.80) / 0.09);
+  // 1. Curtain & Spotlight Choreography:
+  // Closed crimson curtain holds during the slow camera crawl while AYAZAMANA + Ecuadorian dance text appear & dissolve (0..5.65s),
+  // then curtains part smoothly (5.65s..7.55s) and stay open across all 4 dance photos until 25.2s..27.6s!
+  const openIn = sm5((u - 0.185) / 0.062);
+  const closeOut = sm5((u - 0.825) / 0.080);
   const curtainOpen = openIn * (1.0 - closeOut);
   const sx = lerp(1.0, 0.14, curtainOpen);
   if (curtainL) curtainL.scale.x = sx;
@@ -908,16 +1330,16 @@ function applyMovieTime(tSec) {
   stageMintBack.intensity = MINT_BACK_CD * curtainOpen;
   floorReflMesh.visible = (stageFormat === '01') && (curtainOpen > 0.01);
 
-  // End-of-movie Easter Egg Spotlight: completely OFF (`0.0`) at the start & during the dances (`u < 0.68`),
-  // then smoothly fades up onto Pavlos's Row 6 · Seat 14 + rose (`u = 0.68..0.78`, right as we glide back past the seat & out the doors!):
-  roseEasterEgg.setSpotlightLevel(sm5((u - 0.68) / 0.10));
+  // End-of-movie Easter Egg Spotlight (`u = 0.725..0.815`):
+  roseEasterEgg.setSpotlightLevel(sm5((u - 0.725) / 0.090));
 
-  // 2. Unhurried 5-Photo Stage Sequence (`u = 0.055 .. 0.56` reaches Photo 5 `p09_platinum` w/ Vanessa at `14.5s`
-  // while camera is STILL right up front at `Z ~ 6.2m`, holding Vanessa's portrait on stage for ~7 full seconds!):
-  const mProg = clamp((u - 0.055) / 0.505, 0, 0.9999) * (STAGE_MOMENTS.length - 1);
+  // 2. Spread 4-Photo Stage Sequence (`u = 0.215 .. 0.785` -> starts cleanly as curtains open, ~3.7s silky C1 cross-fades!):
+  const nSeg = STAGE_MOMENTS.length - 1; // 3 transitions across 4 dance photos
+  const mProg = clamp((u - 0.215) / 0.570, 0, 0.9999) * nSeg;
   const idxA = Math.floor(mProg);
-  const idxB = Math.min(STAGE_MOMENTS.length - 1, idxA + 1);
-  const mixAB = sm5((mProg - idxA - 0.58) / 0.40);
+  const idxB = Math.min(nSeg, idxA + 1);
+  // Gentle, lingering C1 Hermite dissolve spanning 64% of each interval (~3.5s fade instead of steep 0.65s snap!)
+  const mixAB = ss(0.36, 1.00, mProg - idxA);
   const momA = STAGE_MOMENTS[idxA];
   const momB = STAGE_MOMENTS[idxB];
 
@@ -927,7 +1349,6 @@ function applyMovieTime(tSec) {
   cycShaderMat.uniforms.uAspectB.value = momB.aspect;
   cycShaderMat.uniforms.uMix.value = mixAB;
 
-  // Sync both the blurred stage-board reflection AND the overhead stage-deck wash light to the exact same `mixAB`!
   const fu = floorReflMesh.material.uniforms;
   fu.tArtA.value = momA.tex;
   fu.tArtB.value = momB.tex;
@@ -943,7 +1364,7 @@ function applyMovieTime(tSec) {
     THREE.LinearSRGBColorSpace
   );
 
-  // 3. Trajectory (`T2 · Pure Bezier Hook` default, or `?traj=T1..T8` from Trajectory Lab):
+  // 3. Trajectory (`T2 · Pure Bezier Hook` default):
   const activeTraj = TRAJECTORIES[(qs.get('traj') || 'T2').toUpperCase()] || TRAJECTORIES.T2;
   const { fov } = activeTraj.sampleAtTime01(u, _pos, _look);
 
@@ -952,41 +1373,59 @@ function applyMovieTime(tSec) {
   camera.updateProjectionMatrix();
   camera.lookAt(_look);
 
-  // 4. Unhurried Editorial Typography Dissolves:
-  const introOp = 1.0 - sm5((u - 0.070) / 0.060);
-  introEl.style.opacity = introOp.toFixed(3);
-  introEl.style.transform = `translate3d(0, ${(-14 * (1 - introOp)).toFixed(1)}px, 0)`;
+  // 4. Editable Opener Logo + Second Text Cues + Closing Credits:
+  applyCuesAtTime(tSec);
 
-  headEl.style.opacity = (ss(0.08, 0.13, u) * (1.0 - ss(0.86, 0.92, u))).toFixed(3);
-
-  const prideOp = ss(0.16, 0.21, u) * (1.0 - ss(0.37, 0.42, u));
-  linePrideEl.style.opacity = prideOp.toFixed(3);
-  linePrideEl.style.transform = `translate3d(0, ${(10 * (1 - prideOp)).toFixed(1)}px, 0)`;
-
-  const boothOp = ss(0.53, 0.58, u) * (1.0 - ss(0.75, 0.80, u));
-  lineBoothEl.style.opacity = boothOp.toFixed(3);
-  lineBoothEl.style.transform = `translate3d(0, ${(10 * (1 - boothOp)).toFixed(1)}px, 0)`;
-
-  const labelOp = sm5((u - 0.88) / 0.08);
+  const labelOp = sm5((u - 0.895) / 0.070);
   labelEl.style.opacity = labelOp.toFixed(3);
   labelEl.style.transform = `translate3d(0, ${(12 * (1 - labelOp)).toFixed(1)}px, 0)`;
 }
 
-function togglePlay() {
-  if (!isPlaying && filmTime >= FILM_DURATION - 0.02) {
+function seekToSec(targetSec, playAfter = isPlaying) {
+  filmTime = clamp(targetSec, 0, FILM_DURATION);
+  isPlaying = Boolean(playAfter) && filmTime < FILM_DURATION - 0.02;
+  needsRender = true;
+  applyMovieTime(filmTime);
+  syncPlayUi(false);
+}
+
+function togglePlay(fromUserTap = false) {
+  if (!isPlaying && filmTime >= FILM_DURATION - 0.04) {
     filmTime = 0.0;
   }
   isPlaying = !isPlaying;
   needsRender = true;
-  syncPlayUi();
+  syncPlayUi(fromUserTap);
 }
 
 function replayFilm() {
   filmTime = 0.0;
   isPlaying = true;
   needsRender = true;
-  syncPlayUi();
+  applyMovieTime(0.0);
+  syncPlayUi(false);
 }
+
+// Expose full __R & __theater API so stage.html (#ayazamana on Landing Page) has 0ms frame-accurate seek, pause, resume & replay!
+window.__R = {
+  TOTAL_SEC: FILM_DURATION,
+  state: () => ({ t: filmTime, playing: isPlaying, dur: FILM_DURATION }),
+  play: () => { if (filmTime >= FILM_DURATION - 0.04) filmTime = 0; isPlaying = true; needsRender = true; syncPlayUi(false); },
+  pause: () => { isPlaying = false; needsRender = true; syncPlayUi(false); },
+  setT: (sec) => { filmTime = clamp(Number(sec) || 0, 0, FILM_DURATION); isPlaying = false; needsRender = true; applyMovieTime(filmTime); syncPlayUi(false); },
+  resumeLive: () => { if (filmTime < FILM_DURATION - 0.04) { isPlaying = true; needsRender = true; syncPlayUi(false); } },
+  replay: replayFilm,
+};
+window.__theater = {
+  get filmTime() { return filmTime; },
+  get duration() { return FILM_DURATION; },
+  get isPlaying() { return isPlaying; },
+  get isEditingCues() { return editingCues; },
+  setEditingCues: (on) => setEditingCues(on),
+  seekToSec,
+  togglePlay: () => togglePlay(true),
+  replayFilm,
+};
 
 const btnTexEl = document.getElementById('btn-tex');
 function syncTexUi() {
@@ -1002,24 +1441,50 @@ function toggleTexMode() {
 }
 syncTexUi();
 
-if (btnPlayEl) btnPlayEl.addEventListener('click', togglePlay);
+if (btnPlayEl) btnPlayEl.addEventListener('click', () => togglePlay(false));
 if (btnReplayEl) btnReplayEl.addEventListener('click', replayFilm);
 if (btnTexEl) btnTexEl.addEventListener('click', toggleTexMode);
 
-window.addEventListener('keydown', e => {
-  if (e.code === 'Space') {
-    e.preventDefault();
-    togglePlay();
-  } else if (e.code === 'KeyR') {
-    replayFilm();
-  } else if (e.code === 'KeyT') {
-    toggleTexMode();
+// Click anywhere on the 3D video stage (#gl) to Start / Stop playback (exact Iyuana parity)
+let stageDown = null;
+canvas.addEventListener('pointerdown', (e) => {
+  if (e.button !== undefined && e.button !== 0) return;
+  stageDown = { x: e.clientX, y: e.clientY };
+});
+canvas.addEventListener('pointerup', (e) => {
+  if (!stageDown) return;
+  const moved = Math.hypot(e.clientX - stageDown.x, e.clientY - stageDown.y);
+  stageDown = null;
+  if (moved < 7 && qs.get('embed') !== '1' && !document.body.classList.contains('in-fold-stage')) {
+    togglePlay(true);
   }
 });
 
-function scrubFromEvent(e) {
+// Wheel / trackpad scrolling on standalone film scrubs smoothly along the movie timeline!
+window.addEventListener('wheel', (e) => {
+  if (document.body.classList.contains('in-fold-stage') || qs.get('embed') === '1') return;
+  if (e.target && e.target.closest('#text-studio')) return;
+  e.preventDefault();
+  const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+  filmTime = clamp(filmTime + delta * 0.0085, 0, FILM_DURATION);
+  if (filmTime >= FILM_DURATION - 0.02) isPlaying = false;
+  needsRender = true;
+  applyMovieTime(filmTime);
+  syncPlayUi(false);
+}, { passive: false });
+
+// Click OR drag anywhere on #prog-bar to jump to specific parts of the video (preserving playback state!)
+function updateProgTip(e) {
+  if (!progBarEl || !progTipEl) return 0;
   const rect = progBarEl.getBoundingClientRect();
   const u = clamp((e.clientX - rect.left) / Math.max(1, rect.width), 0, 1);
+  progTipEl.textContent = fmtClock(u * FILM_DURATION);
+  progTipEl.style.left = `${clamp(e.clientX - rect.left, 22, Math.max(22, rect.width - 22)).toFixed(1)}px`;
+  return u;
+}
+
+function scrubFromEvent(e) {
+  const u = updateProgTip(e);
   filmTime = u * FILM_DURATION;
   needsRender = true;
   applyMovieTime(filmTime);
@@ -1027,19 +1492,385 @@ function scrubFromEvent(e) {
 
 if (progBarEl) {
   progBarEl.addEventListener('pointerdown', e => {
+    wasPlayingBeforeScrub = isPlaying || filmTime >= FILM_DURATION - 0.15;
     isScrubbing = true;
     isPlaying = false;
-    syncPlayUi();
-    progBarEl.setPointerCapture(e.pointerId);
+    syncPlayUi(false);
+    try { progBarEl.setPointerCapture(e.pointerId); } catch {}
     scrubFromEvent(e);
   });
   progBarEl.addEventListener('pointermove', e => {
+    updateProgTip(e);
     if (isScrubbing) scrubFromEvent(e);
   });
-  progBarEl.addEventListener('pointerup', () => { isScrubbing = false; });
+  const finishScrub = () => {
+    if (!isScrubbing) return;
+    isScrubbing = false;
+    if (wasPlayingBeforeScrub && filmTime < FILM_DURATION - 0.04) {
+      isPlaying = true;
+    }
+    syncPlayUi(false);
+  };
+  progBarEl.addEventListener('pointerup', finishScrub);
+  progBarEl.addEventListener('pointercancel', finishScrub);
 }
 
-const clock = { last: performance.now(), getDelta() { const now = performance.now(), d = (now - this.last) / 1000; this.last = now; return d; } };   // THREE.Clock is deprecated; same getDelta()
+// ---- INTERACTIVE TEXT & TIMING STUDIO UI ----
+const btnEditCuesEl = document.getElementById('btn-edit-cues');
+function setEditingCues(on) {
+  editingCues = Boolean(on);
+  document.body.classList.toggle('editing-cues', editingCues);
+  if (btnEditCuesEl) btnEditCuesEl.classList.toggle('active', editingCues);
+  rebuildCueDom();
+  applyCuesAtTime(filmTime);
+  if (editingCues) renderTextStudio();
+}
+if (editingCues) setEditingCues(true);
+if (btnEditCuesEl) btnEditCuesEl.addEventListener('click', () => setEditingCues(!editingCues));
+document.getElementById('ts-close').addEventListener('click', () => {
+  setEditingCues(false);
+  try { window.parent?.postMessage({ source: 'ayazamana-cues', type: 'closed' }, '*'); } catch {}
+});
+
+function syncEditorSelection() {
+  document.querySelectorAll('.cue-item').forEach((el) => {
+    el.classList.toggle('is-selected', editingCues && el.dataset.id === selectedCueId);
+  });
+  if (editingCues) renderTextStudio();
+  applyCuesAtTime(filmTime);
+}
+
+function refreshFormValuesInPlace() {
+  const cue = textCues.find((c) => c.id === selectedCueId);
+  if (!cue) return;
+  const xIn = document.getElementById('ts-x');
+  const yIn = document.getElementById('ts-y');
+  const xLbl = document.getElementById('ts-x-val');
+  const yLbl = document.getElementById('ts-y-val');
+  if (xIn) xIn.value = cue.xPct;
+  if (yIn) yIn.value = cue.yPct;
+  if (xLbl) xLbl.textContent = `${cue.xPct.toFixed(1)}%`;
+  if (yLbl) yLbl.textContent = `${cue.yPct.toFixed(1)}%`;
+}
+
+function renderTimelineLanes() {
+  const lanes = document.getElementById('ctl-lanes');
+  const playhead = document.getElementById('ctl-playhead');
+  lanes.innerHTML = '';
+  lanes.appendChild(playhead);
+  playhead.style.left = `${(clamp(filmTime / FILM_DURATION, 0, 1) * 100).toFixed(2)}%`;
+
+  for (const cue of textCues) {
+    const lane = document.createElement('div');
+    lane.className = 'ctl-lane';
+    const bar = document.createElement('div');
+    bar.className = `ctl-bar ${cue.id === selectedCueId ? 'active' : ''}`;
+    const lPct = clamp((cue.in0 / FILM_DURATION) * 100, 0, 99);
+    const rPct = clamp((cue.out1 / FILM_DURATION) * 100, lPct + 1, 100);
+    bar.style.left = `${lPct.toFixed(2)}%`;
+    bar.style.width = `${(rPct - lPct).toFixed(2)}%`;
+    bar.innerHTML = `<span class="ctl-hdl l" data-mode="l"></span><span>${cue.label} (${cue.in0.toFixed(1)}s–${cue.out1.toFixed(1)}s)</span><span class="ctl-hdl r" data-mode="r"></span>`;
+
+    // Click empty lane area to jump video there
+    lane.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.ctl-bar')) return;
+      const rect = lane.getBoundingClientRect();
+      const t = clamp((e.clientX - rect.left) / Math.max(1, rect.width), 0, 1) * FILM_DURATION;
+      seekToSec(t, false);
+    });
+
+    // Drag bar or handles to re-time cue live!
+    bar.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      selectedCueId = cue.id;
+      const mode = e.target.dataset.mode || 'move';
+      const rect = lane.getBoundingClientRect();
+      const startX = e.clientX;
+      const orig = { in0: cue.in0, in1: cue.in1, out0: cue.out0, out1: cue.out1 };
+      const fadeInDur = Math.max(0.15, orig.in1 - orig.in0);
+      const fadeOutDur = Math.max(0.15, orig.out1 - orig.out0);
+      bar.setPointerCapture(e.pointerId);
+
+      const onMove = (ev) => {
+        const dt = ((ev.clientX - startX) / Math.max(1, rect.width)) * FILM_DURATION;
+        if (mode === 'move') {
+          const span = orig.out1 - orig.in0;
+          const nIn0 = clamp(orig.in0 + dt, 0, FILM_DURATION - span);
+          const shift = nIn0 - orig.in0;
+          cue.in0 = +(orig.in0 + shift).toFixed(2);
+          cue.in1 = +(orig.in1 + shift).toFixed(2);
+          cue.out0 = +(orig.out0 + shift).toFixed(2);
+          cue.out1 = +(orig.out1 + shift).toFixed(2);
+          seekToSec((cue.in1 + cue.out0) * 0.5, false);
+        } else if (mode === 'l') {
+          cue.in0 = +clamp(orig.in0 + dt, 0, orig.out0 - 0.3).toFixed(2);
+          cue.in1 = +Math.min(orig.out0, cue.in0 + fadeInDur).toFixed(2);
+          seekToSec(cue.in1, false);
+        } else if (mode === 'r') {
+          cue.out1 = +clamp(orig.out1 + dt, orig.in1 + 0.3, FILM_DURATION).toFixed(2);
+          cue.out0 = +Math.max(orig.in1, cue.out1 - fadeOutDur).toFixed(2);
+          seekToSec(cue.out0, false);
+        }
+        renderTextStudio();
+      };
+      const onUp = () => {
+        bar.removeEventListener('pointermove', onMove);
+        bar.removeEventListener('pointerup', onUp);
+        bar.removeEventListener('pointercancel', onUp);
+      };
+      bar.addEventListener('pointermove', onMove);
+      bar.addEventListener('pointerup', onUp);
+      bar.addEventListener('pointercancel', onUp);
+    });
+
+    lane.appendChild(bar);
+    lanes.appendChild(lane);
+  }
+}
+
+function renderTextStudio() {
+  const tabsEl = document.getElementById('ts-tabs');
+  const formEl = document.getElementById('ts-form');
+  if (!textCues.some((c) => c.id === selectedCueId) && textCues.length) {
+    selectedCueId = textCues[0].id;
+  }
+  tabsEl.innerHTML = textCues.map((c) =>
+    `<button type="button" class="ts-tab ${c.id === selectedCueId ? 'active' : ''}" data-cid="${c.id}">${c.label}</button>`
+  ).join('');
+  tabsEl.querySelectorAll('.ts-tab').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      selectedCueId = btn.dataset.cid;
+      const c = textCues.find((x) => x.id === selectedCueId);
+      if (c && (filmTime < c.in0 || filmTime > c.out1)) {
+        seekToSec(clamp((c.in1 + c.out0) * 0.5, 0, FILM_DURATION), false);
+      }
+      syncEditorSelection();
+    });
+  });
+
+  const cue = textCues.find((c) => c.id === selectedCueId);
+  if (!cue) { formEl.innerHTML = ''; return; }
+
+  formEl.innerHTML = `
+    <div class="ts-row2">
+      <div class="ts-field">
+        <label><span>Visible</span></label>
+        <select id="ts-enabled">
+          <option value="1" ${cue.enabled ? 'selected' : ''}>Shown</option>
+          <option value="0" ${!cue.enabled ? 'selected' : ''}>Hidden</option>
+        </select>
+      </div>
+      <div class="ts-field">
+        <label><span>Color Tone</span></label>
+        <select id="ts-tone">
+          ${(cue.kind === 'logo' ? LOGO_TONE_LABELS : [['ivory', 'Theater Ivory'], ['white', 'Pure White'], ['gold', 'Poster Gold']])
+            .map(([val, lbl]) => `<option value="${val}" ${cue.tone === val ? 'selected' : ''}>${lbl}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    ${cue.kind === 'text' ? `
+      <div class="ts-field">
+        <label><span>Text Wording</span></label>
+        <textarea id="ts-text">${(cue.text || '').replace(/</g, '&lt;')}</textarea>
+      </div>
+    ` : ''}
+    <div class="ts-row2">
+      <div class="ts-field">
+        <label><span>Horizontal X</span><span id="ts-x-val">${cue.xPct.toFixed(1)}%</span></label>
+        <input type="range" id="ts-x" min="4" max="96" step="0.5" value="${cue.xPct}">
+      </div>
+      <div class="ts-field">
+        <label><span>Vertical Y</span><span id="ts-y-val">${cue.yPct.toFixed(1)}%</span></label>
+        <input type="range" id="ts-y" min="6" max="94" step="0.5" value="${cue.yPct}">
+      </div>
+    </div>
+    <div class="ts-row2">
+      <div class="ts-field">
+        <label><span>${cue.kind === 'logo' ? 'Logo Width (vw)' : 'Font Size (px)'}</span><span id="ts-sz-val">${cue.kind === 'logo' ? `${cue.widthVw}vw` : `${cue.fontPx}px`}</span></label>
+        <input type="range" id="ts-sz" min="${cue.kind === 'logo' ? 22 : 14}" max="${cue.kind === 'logo' ? 86 : 48}" step="1" value="${cue.kind === 'logo' ? cue.widthVw : cue.fontPx}">
+      </div>
+      <div class="ts-field">
+        <label><span>Alignment</span></label>
+        <select id="ts-align">
+          <option value="left" ${cue.align === 'left' ? 'selected' : ''}>Left</option>
+          <option value="center" ${cue.align === 'center' ? 'selected' : ''}>Center</option>
+          <option value="right" ${cue.align === 'right' ? 'selected' : ''}>Right</option>
+        </select>
+      </div>
+    </div>
+    <div class="ts-field">
+      <label><span>Timing (Seconds: Fade-In &rarr; Hold &rarr; Fade-Out)</span></label>
+      <div class="ts-row4">
+        <input type="number" id="ts-in0" step="0.1" min="0" max="${FILM_DURATION}" value="${cue.in0}" title="Fade-in start (s)">
+        <input type="number" id="ts-in1" step="0.1" min="0" max="${FILM_DURATION}" value="${cue.in1}" title="Full opacity (s)">
+        <input type="number" id="ts-out0" step="0.1" min="0" max="${FILM_DURATION}" value="${cue.out0}" title="Fade-out start (s)">
+        <input type="number" id="ts-out1" step="0.1" min="0" max="${FILM_DURATION}" value="${cue.out1}" title="Gone (s)">
+      </div>
+    </div>
+    ${cue.id !== 'logo' && cue.id !== 'sub' ? `<button type="button" class="ts-btn danger" id="ts-del">Delete This Text Cue</button>` : ''}
+  `;
+
+  document.getElementById('ts-enabled').addEventListener('change', (e) => {
+    cue.enabled = e.target.value === '1';
+    applyCuesAtTime(filmTime);
+  });
+  document.getElementById('ts-tone').addEventListener('change', (e) => {
+    cue.tone = e.target.value;
+    rebuildCueDom();
+    applyCuesAtTime(filmTime);
+  });
+  const txtEl = document.getElementById('ts-text');
+  if (txtEl) {
+    txtEl.addEventListener('input', () => {
+      cue.text = txtEl.value;
+      rebuildCueDom();
+      applyCuesAtTime(filmTime);
+    });
+  }
+  document.getElementById('ts-x').addEventListener('input', (e) => {
+    cue.xPct = +Number(e.target.value).toFixed(1);
+    document.getElementById('ts-x-val').textContent = `${cue.xPct.toFixed(1)}%`;
+    applyCuesAtTime(filmTime);
+  });
+  document.getElementById('ts-y').addEventListener('input', (e) => {
+    cue.yPct = +Number(e.target.value).toFixed(1);
+    document.getElementById('ts-y-val').textContent = `${cue.yPct.toFixed(1)}%`;
+    applyCuesAtTime(filmTime);
+  });
+  document.getElementById('ts-sz').addEventListener('input', (e) => {
+    const v = Number(e.target.value);
+    if (cue.kind === 'logo') {
+      cue.widthVw = v;
+      cue.maxWidthPx = Math.round(v * 13.8);
+      document.getElementById('ts-sz-val').textContent = `${v}vw`;
+    } else {
+      cue.fontPx = v;
+      document.getElementById('ts-sz-val').textContent = `${v}px`;
+    }
+    rebuildCueDom();
+    applyCuesAtTime(filmTime);
+  });
+  document.getElementById('ts-align').addEventListener('change', (e) => {
+    cue.align = e.target.value;
+    rebuildCueDom();
+    applyCuesAtTime(filmTime);
+  });
+  for (const k of ['in0', 'in1', 'out0', 'out1']) {
+    document.getElementById(`ts-${k}`).addEventListener('input', (e) => {
+      cue[k] = clamp(Number(e.target.value) || 0, 0, FILM_DURATION);
+      applyCuesAtTime(filmTime);
+      renderTimelineLanes();
+    });
+  }
+  const delBtn = document.getElementById('ts-del');
+  if (delBtn) {
+    delBtn.addEventListener('click', () => {
+      textCues = textCues.filter((x) => x.id !== cue.id);
+      selectedCueId = textCues[0]?.id || 'logo';
+      rebuildCueDom();
+      syncEditorSelection();
+    });
+  }
+
+  renderTimelineLanes();
+}
+
+document.getElementById('ts-save').addEventListener('click', persistCues);
+document.getElementById('ts-add').addEventListener('click', () => {
+  const n = textCues.length + 1;
+  const tStart = clamp(filmTime, 0, FILM_DURATION - 2.5);
+  const newCue = {
+    id: `cue-${Date.now().toString(36)}`,
+    kind: 'text',
+    label: `${n} · Custom Text`,
+    enabled: true,
+    text: 'New caption text',
+    xPct: 50.0,
+    yPct: 78.0,
+    fontPx: 22,
+    maxWidthCh: 36,
+    align: 'center',
+    tone: 'ivory',
+    in0: +tStart.toFixed(1),
+    in1: +(tStart + 0.8).toFixed(1),
+    out0: +Math.min(FILM_DURATION - 0.8, tStart + 3.6).toFixed(1),
+    out1: +Math.min(FILM_DURATION, tStart + 4.5).toFixed(1),
+  };
+  textCues.push(newCue);
+  selectedCueId = newCue.id;
+  rebuildCueDom();
+  syncEditorSelection();
+});
+document.getElementById('ts-reset').addEventListener('click', () => {
+  textCues = defaultCues();
+  selectedCueId = 'logo';
+  rebuildCueDom();
+  syncEditorSelection();
+  persistCues();
+});
+
+// Ambient Andean concert-hall soundscape
+const parentOwnsAudio = (() => {
+  try { return window.parent !== window && !!window.parent.__ayazamanaAudioOwned; } catch { return false; }
+})();
+const btnSoundEl = document.getElementById('btn-sound');
+const soundSelEl = document.getElementById('sound-sel');
+const visitorSoundEl = document.getElementById('visitor-sound');
+const ambientAudio = (qs.get('embed') !== '1' && qs.get('sound') !== '0' && !parentOwnsAudio)
+  ? createAyazamanaAudio({ initialTrack: qs.get('sound') || 'sanjuanito', initialEnabled: true })
+  : null;
+
+if (ambientAudio) {
+  if (soundSelEl) {
+    for (const t of AYAZAMANA_TRACKS) {
+      const opt = document.createElement('option');
+      opt.value = t.id;
+      opt.textContent = t.label;
+      if (t.id === ambientAudio.getState().trackId) opt.selected = true;
+      soundSelEl.appendChild(opt);
+    }
+    soundSelEl.addEventListener('change', () => ambientAudio.setTrack(soundSelEl.value));
+  }
+  if (visitorSoundEl && document.body.classList.contains('clean')) {
+    visitorSoundEl.hidden = false;
+    visitorSoundEl.addEventListener('click', () => ambientAudio.toggle());
+  }
+  if (btnSoundEl) btnSoundEl.addEventListener('click', () => ambientAudio.toggle());
+  ambientAudio.onStateChange((st) => {
+    const lbl = st.muted ? '♪ Muted' : (st.waitingGesture ? '♪ Sound (Tap)' : '♪ Sound');
+    if (btnSoundEl) {
+      btnSoundEl.textContent = lbl;
+      btnSoundEl.classList.toggle('active', !st.muted);
+    }
+    if (visitorSoundEl) {
+      visitorSoundEl.textContent = lbl;
+      visitorSoundEl.classList.toggle('active', !st.muted);
+    }
+    if (soundSelEl && soundSelEl.value !== st.trackId) soundSelEl.value = st.trackId;
+  });
+} else {
+  if (btnSoundEl) btnSoundEl.style.display = 'none';
+  if (soundSelEl) soundSelEl.style.display = 'none';
+}
+
+window.addEventListener('keydown', e => {
+  if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT')) return;
+  if (e.code === 'Space') {
+    e.preventDefault();
+    togglePlay(true);
+  } else if (e.code === 'KeyR') {
+    replayFilm();
+  } else if (e.code === 'KeyT') {
+    toggleTexMode();
+  } else if (e.code === 'KeyE') {
+    setEditingCues(!editingCues);
+  } else if (e.code === 'KeyM' && ambientAudio) {
+    ambientAudio.toggle();
+  }
+});
+
+const clock = { last: performance.now(), getDelta() { const now = performance.now(), d = (now - this.last) / 1000; this.last = now; return d; } };
 let rafId = 0;
 
 function tick() {
@@ -1053,7 +1884,7 @@ function tick() {
     if (filmTime >= FILM_DURATION) {
       filmTime = FILM_DURATION;
       isPlaying = false;
-      syncPlayUi();
+      syncPlayUi(false);
     }
   }
 

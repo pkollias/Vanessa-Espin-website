@@ -7,28 +7,33 @@ const sm5 = x => {
   return t * t * t * (t * (t * 6 - 15) + 10);
 };
 
-// Exact Iyuana gallery geometry constants (metres, matching aisle-final-v6/main.js)
+export const IYUANA_DURATION = 31.5;
+
+// Exact 4-panel Iyuana gallery geometry constants (metres, matching aisle-final-v6/main.js `panels-4`)
 export const IYUANA_GEOM = {
   CEIL: 4.4,
   EYE: 1.6,
-  SPACING: 3.0,
-  END_Z: -22.6,
-  POSTER_Z: -22.54,
+  SPACING: 3.3,
+  END_Z: -17.5,
+  POSTER_Z: -17.44,
   POSTER_Y: 1.74,
   RING_Y: 2.02,
   BOARDS: [
-    { id: 'B1', x: -1.25, y: 1.45, z: -0.9, side: -1, yaw: 0.26, w: 0.85, h: 1.15 },
-    { id: 'B2', x: 1.25, y: 1.45, z: -3.9, side: 1, yaw: -0.26, w: 1.75, h: 1.25 },
-    { id: 'B3', x: -1.25, y: 1.45, z: -6.9, side: -1, yaw: 0.26, w: 1.85, h: 0.95 },
-    { id: 'B4', x: 1.25, y: 1.45, z: -9.9, side: 1, yaw: -0.26, w: 0.95, h: 1.65 },
-    { id: 'B5', x: -1.25, y: 1.45, z: -12.9, side: -1, yaw: 0.26, w: 1.65, h: 1.25 },
-    { id: 'B6', x: 1.25, y: 1.45, z: -15.9, side: 1, yaw: -0.26, w: 0.9, h: 1.2 },
+    {
+      id: 'P1', label: 'Panel 1 (Forest + 5)',
+      x: -1.48, y: 1.48, z: -0.9, side: -1, yaw: 0.26, w: 1.92, h: 1.066,
+      openSubRect: { x: -0.6017, y: 0.1928, w: 0.5652, h: 0.3541 },
+    },
+    { id: 'P2', label: 'Panel 2 (3×2)', x: 1.48, y: 1.48, z: -4.2, side: 1, yaw: -0.26, w: 1.92, h: 1.066 },
+    { id: 'P3', label: 'Panel 3 (3 Portraits)', x: -1.48, y: 1.48, z: -7.5, side: -1, yaw: 0.26, w: 1.92, h: 1.066 },
+    { id: 'P4', label: 'Panel 4 (Tall)', x: 1.48, y: 1.52, z: -10.8, side: 1, yaw: -0.26, w: 1.92, h: 1.645 },
   ],
   PALMS: [
-    { x: -1.95, z: -21.75, h: 2.1 },
-    { x: 2.05, z: -21.9, h: 1.9 },
-    { x: -2.4, z: -4.5, h: 1.8 },
-    { x: 2.4, z: -10.2, h: 1.9 },
+    { x: -3.25, z: -0.95, h: 1.85 },
+    { x: 3.35, z: -4.45, h: 1.95 },
+    { x: -3.45, z: -7.55, h: 1.80 },
+    { x: -1.95, z: -16.65, h: 2.10 },
+    { x: 2.05, z: -16.80, h: 1.90 },
   ],
 };
 
@@ -90,7 +95,7 @@ function evalClampedBSpline(ctrlPts, u, out) {
 }
 
 // Build arc-length + Two-Thirds Power Law biological curvature-coupled timing LUT
-// (`v(s) ~ easeEnds(s) * (1 + alpha * curvature(s))^-0.38` -> zero stop/bounce AND zero lateral whip)
+// Immediate constant zoom-out onset at t = 0 + constant smooth ending pull-back
 function compileTrajectory(spec) {
   const N = 420;
   const evalFn = spec.curveType === 'bezier' ? evalBezier : evalClampedBSpline;
@@ -147,10 +152,11 @@ function compileTrajectory(spec) {
   const cumTime = new Float64Array(M);
   for (let j = 0; j < M; j++) {
     const s = j / (M - 1);
-    const easeIn = 0.14 + 0.86 * sm5(s / 0.12);
-    const easeOut = 0.08 + 0.92 * (1.0 - sm5((s - 0.88) / 0.12));
-    const bioCurveSlow = Math.pow(1.0 + 2.2 * smoothKappa[j], -0.38);
-    speedProfile[j] = Math.max(0.06, easeIn * easeOut * bioCurveSlow);
+    // Gentle, unhurried zoom-out onset + calm smooth ending pull-back (34.0s film)
+    const easeIn = 0.28 + 0.72 * sm5(s / 0.10);
+    const easeOut = 0.14 + 0.86 * (1.0 - sm5((s - 0.89) / 0.11));
+    const bioCurveSlow = Math.pow(1.0 + 2.0 * smoothKappa[j], -0.36);
+    speedProfile[j] = Math.max(0.08, easeIn * easeOut * bioCurveSlow);
     if (j > 0) {
       const avgV = 0.5 * (speedProfile[j - 1] + speedProfile[j]);
       cumTime[j] = cumTime[j - 1] + ds / avgV;
@@ -161,11 +167,11 @@ function compileTrajectory(spec) {
 
   const speedMps = new Float32Array(M);
   for (let j = 0; j < M; j++) {
-    speedMps[j] = (speedProfile[j] * totalVirtualTime) / 24.0;
+    speedMps[j] = (speedProfile[j] * totalVirtualTime) / IYUANA_DURATION;
   }
 
   function sampleAtTime01(uTime, outPos, outLook) {
-    const u = clamp(uTime / 0.96, 0, 1);
+    const u = clamp(uTime / 0.97, 0, 1);
     let lo = 0, hi = M - 1;
     while (lo + 1 < hi) {
       const mid = (lo + hi) >> 1;
@@ -190,61 +196,65 @@ function compileTrajectory(spec) {
   };
 }
 
-// Smooth board-tracking gaze helper: sweeps gaze smoothly across B1..B6, then locks onto the canopy film & poster
-function aisleBoardGaze(sArc, uTime, pos, outLook, swayScale = 1.0, endFov = 51) {
-  // Approach phase (0..0.72) sweeps gaze down the staggered boards; ending phase (0.72..1.0) locks onto poster & ring
-  const kFilm = sm5((uTime - 0.68) / 0.14);
-  const kPull = sm5((uTime - 0.85) / 0.13);
+// Smooth 4-panel tracking gaze helper: starts on Panel 1's top-left forest photo (when fromForest=true),
+// sweeps smoothly across Panels 1..4, then locks onto the canopy film & new poster
+function aisleBoardGaze(sArc, uTime, pos, outLook, swayScale = 1.0, endFov = 43, fromForest = false) {
+  const kOut = fromForest ? sm5(uTime / 0.11) : 1.0;
+  const kFilm = sm5((uTime - 0.62) / 0.14);
+  const kPull = sm5((uTime - 0.82) / 0.16);
 
-  // Smooth sinusoidal look-ahead across the staggered boards as Z advances from -0.9 to -15.9
-  const boardProgress = clamp((-pos.z - 0.5) / 16.5, 0, 1);
-  const staggerX = Math.sin(boardProgress * Math.PI * 5.0 + Math.PI) * 0.85 * swayScale * (1.0 - kFilm);
-  const lookZ = lerp(pos.z - 3.6, IYUANA_GEOM.POSTER_Z, sm5((uTime - 0.58) / 0.22));
-  const lookY = lerp(1.48, lerp(IYUANA_GEOM.RING_Y, 1.88, kPull), kFilm);
+  const boardProgress = clamp((-pos.z - 0.5) / 11.4, 0, 1);
+  const staggerX = Math.sin(boardProgress * Math.PI * 3.0 + Math.PI) * 0.95 * swayScale * (1.0 - kFilm);
+  const aisleLookX = lerp(staggerX, 0.0, kFilm);
+  const aisleLookY = lerp(1.48, lerp(IYUANA_GEOM.RING_Y, 1.82, kPull), kFilm);
+  const aisleLookZ = lerp(pos.z - 3.6, IYUANA_GEOM.POSTER_Z, sm5((uTime - 0.52) / 0.22));
 
-  outLook.set(lerp(staggerX, 0.0, kFilm), lookY, lookZ);
-  return lerp(40.0, lerp(38.0, endFov, kPull), kFilm);
+  // Forest sub-image center on Panel 1: (-2.060, 1.673, -0.745)
+  outLook.set(
+    lerp(-2.060, aisleLookX, kOut),
+    lerp(1.673, aisleLookY, kOut),
+    lerp(-0.745, aisleLookZ, kOut)
+  );
+  return lerp(40.0, lerp(35.0, endFov, kPull), kFilm);
 }
 
 const RAW_SPECS = [
   {
     id: 'T1',
-    name: 'T1 · Converged S-Weave (aisle-final-v6 Baseline)',
-    shortLabel: 'T1 · Converged S-Weave',
+    name: 'T1 · Converged 4-Panel S-Weave (aisle-final-v6 Baseline)',
+    shortLabel: 'T1 · 4-Panel S-Weave ★',
     curveType: 'bspline',
     color: '#1d4ed8',
-    summary: 'Current v5/v6 converged path: opens at Board 1 (4633), weaves gently left-right past each staggered board at 1.60m eye height, arrives at the canopy film, and pulls straight back to frame the poster.',
+    summary: 'Active default: opens zoomed-in on Panel 1’s top-left forest photo, zooms out immediately at constant speed, weaves past Panels 1–4, passes through the fire, and pulls smoothly back to frame Poster 1.',
     ctrl: [
-      [-1.08, 1.56, 0.05],
-      [-0.45, 1.60, -0.6],
-      [0.42, 1.60, -3.5],
-      [-0.42, 1.60, -6.7],
-      [0.42, 1.60, -9.8],
-      [-0.40, 1.60, -12.8],
-      [0.36, 1.60, -15.6],
-      [0.00, 1.60, -18.35],
-      [0.00, 1.58, -17.90],
-      [0.00, 1.55, -16.40],
+      [-1.94, 1.67, -0.30],
+      [-0.36, 1.60, 1.80],
+      [0.44, 1.60, -2.00],
+      [-0.44, 1.60, -5.60],
+      [0.42, 1.60, -9.20],
+      [0.00, 1.60, -13.85],
+      [0.00, 1.58, -13.65],
+      [0.00, 1.56, -12.95],
     ],
-    gaze: (sArc, uTime, pos, outLook) => aisleBoardGaze(sArc, uTime, pos, outLook, 1.0, 51),
+    gaze: (sArc, uTime, pos, outLook) => aisleBoardGaze(sArc, uTime, pos, outLook, 1.0, 43, true),
   },
   {
     id: 'T2',
-    name: 'T2 · Center-Aisle Dolly (Zero Lateral Sway)',
+    name: 'T2 · Forest Zoom-Out → Center-Aisle Dolly',
     shortLabel: 'T2 · Center-Aisle Dolly',
     curveType: 'bspline',
     color: '#0f766e',
-    summary: 'Body glides straight down the center aisle (x ≈ 0.0m) without zig-zagging while the lens smoothly looks left and right toward each board, ending with a straight pull-back.',
+    summary: 'Zooms smoothly out of Panel 1’s top-left forest photo straight into the center aisle (X ≈ 0.0m, zero lateral weave) while the lens pans across Panels 1–4, ending with a constant pull-back.',
     ctrl: [
-      [-0.95, 1.58, 0.1],
-      [-0.12, 1.60, -1.6],
-      [0.02, 1.60, -4.5],
-      [0.00, 1.60, -8.5],
-      [0.00, 1.60, -13.0],
-      [0.00, 1.60, -18.35],
-      [0.00, 1.55, -16.20],
+      [-1.94, 1.67, -0.30],
+      [-0.25, 1.60, 1.65],
+      [0.00, 1.60, -2.20],
+      [0.00, 1.60, -6.40],
+      [0.00, 1.60, -10.20],
+      [0.00, 1.60, -13.85],
+      [0.00, 1.56, -12.95],
     ],
-    gaze: (sArc, uTime, pos, outLook) => aisleBoardGaze(sArc, uTime, pos, outLook, 1.2, 51),
+    gaze: (sArc, uTime, pos, outLook) => aisleBoardGaze(sArc, uTime, pos, outLook, 1.18, 43, true),
   },
   {
     id: 'T3',
@@ -252,33 +262,33 @@ const RAW_SPECS = [
     shortLabel: 'T3 · Degree-5 Bézier Bow',
     curveType: 'bezier',
     color: '#b45309',
-    summary: 'One single C^∞ polynomial Bézier curve entering from the right threshold (+0.65m), bowing smoothly across the center-left aisle, and landing square on the canopy film & poster.',
+    summary: 'One single C^∞ polynomial Bézier curve zooming out from Panel 1’s forest photo, bowing smoothly across the 4-panel gallery, and settling square on Poster 1.',
     ctrl: [
-      [0.65, 1.62, 2.2],
-      [-0.85, 1.60, -2.5],
-      [-0.95, 1.60, -9.5],
-      [0.45, 1.60, -15.5],
-      [0.00, 1.60, -18.5],
-      [0.00, 1.55, -16.3],
+      [-1.94, 1.67, -0.30],
+      [0.75, 1.60, 1.90],
+      [-0.95, 1.60, -4.80],
+      [0.55, 1.60, -10.40],
+      [0.00, 1.60, -13.85],
+      [0.00, 1.56, -12.95],
     ],
-    gaze: (sArc, uTime, pos, outLook) => aisleBoardGaze(sArc, uTime, pos, outLook, 0.85, 51),
+    gaze: (sArc, uTime, pos, outLook) => aisleBoardGaze(sArc, uTime, pos, outLook, 0.88, 43, true),
   },
   {
     id: 'T4',
-    name: 'T4 · Elevated Crane Descent (2.85m → 1.55m)',
+    name: 'T4 · Elevated Crane Descent (2.75m → 1.55m)',
     shortLabel: 'T4 · Elevated Crane Descent',
     curveType: 'bspline',
     color: '#7c3aed',
-    summary: 'Enters high above the gallery (Y = 2.85m) looking down across the hanging boards and palm fronds, descending smoothly like a cinema crane to eye-height for the film and poster.',
+    summary: 'Enters high above the 4-panel gallery (Y = 2.75m) looking down across Vanessa’s four panels and palm shadows, descending smoothly like a crane to eye-height for the fire & poster.',
     ctrl: [
-      [0.35, 2.85, 2.4],
-      [-0.25, 2.65, -2.0],
-      [0.20, 2.35, -7.2],
-      [-0.15, 1.95, -12.6],
-      [0.00, 1.62, -18.35],
-      [0.00, 1.55, -16.25],
+      [0.35, 2.75, 2.40],
+      [-0.25, 2.48, -1.50],
+      [0.20, 2.12, -5.80],
+      [-0.12, 1.78, -9.80],
+      [0.00, 1.60, -13.85],
+      [0.00, 1.56, -12.95],
     ],
-    gaze: (sArc, uTime, pos, outLook) => aisleBoardGaze(sArc, uTime, pos, outLook, 0.75, 52),
+    gaze: (sArc, uTime, pos, outLook) => aisleBoardGaze(sArc, uTime, pos, outLook, 0.78, 44, false),
   },
   {
     id: 'T5',
@@ -286,18 +296,18 @@ const RAW_SPECS = [
     shortLabel: 'T5 · Low-to-Eye Drift',
     curveType: 'bspline',
     color: '#be123c',
-    summary: 'Opens low (1.15m) glancing slightly upward at the suspended boards and warm overhead spots against the dark ceiling, rising gradually to eye-height at the film.',
+    summary: 'Zooms out from Panel 1 low (1.15m) glancing slightly upward at the four suspended panels and warm overhead spots against the dark ceiling, rising gradually to eye-height.',
     ctrl: [
-      [-0.55, 1.15, 1.2],
-      [0.25, 1.24, -3.2],
-      [-0.20, 1.38, -8.5],
-      [0.15, 1.52, -13.8],
-      [0.00, 1.62, -18.35],
-      [0.00, 1.55, -16.40],
+      [-1.94, 1.67, -0.30],
+      [-0.35, 1.18, 1.50],
+      [0.25, 1.28, -3.20],
+      [-0.18, 1.44, -7.80],
+      [0.00, 1.60, -13.85],
+      [0.00, 1.56, -12.95],
     ],
     gaze: (sArc, uTime, pos, outLook) => {
-      const fov = aisleBoardGaze(sArc, uTime, pos, outLook, 0.85, 51);
-      outLook.y += (1.0 - sm5((uTime - 0.55) / 0.25)) * 0.22;
+      const fov = aisleBoardGaze(sArc, uTime, pos, outLook, 0.88, 43, true);
+      outLook.y += sm5(uTime / 0.12) * (1.0 - sm5((uTime - 0.52) / 0.25)) * 0.20;
       return fov;
     },
   },
@@ -307,20 +317,25 @@ const RAW_SPECS = [
     shortLabel: 'T6 · Right-Flank Arc',
     curveType: 'bspline',
     color: '#0369a1',
-    summary: 'Sweeps wider along the right side of the room (x = +1.75m), revealing the left boards (B1, B3, B5) in deep three-quarter perspective before curving back to center.',
+    summary: 'Pulls out from Panel 1’s forest photo across to the right flank (X = +1.70m), revealing Panels 1 & 3 in deep three-quarter perspective before curving center for the poster.',
     ctrl: [
-      [1.35, 1.62, 1.8],
-      [1.75, 1.60, -3.5],
-      [1.65, 1.60, -9.2],
-      [1.10, 1.60, -14.8],
-      [0.00, 1.60, -18.35],
-      [0.00, 1.55, -16.40],
+      [-1.94, 1.67, -0.30],
+      [1.25, 1.60, 1.75],
+      [1.72, 1.60, -3.20],
+      [1.45, 1.60, -8.40],
+      [0.00, 1.60, -13.85],
+      [0.00, 1.56, -12.95],
     ],
     gaze: (sArc, uTime, pos, outLook) => {
-      const kFilm = sm5((uTime - 0.68) / 0.14);
-      const kPull = sm5((uTime - 0.85) / 0.13);
-      outLook.set(lerp(-0.55, 0.0, kFilm), lerp(1.48, lerp(IYUANA_GEOM.RING_Y, 1.88, kPull), kFilm), lerp(pos.z - 4.2, IYUANA_GEOM.POSTER_Z, sm5((uTime - 0.58) / 0.22)));
-      return lerp(42, lerp(38, 51, kPull), kFilm);
+      const kOut = sm5(uTime / 0.11);
+      const kFilm = sm5((uTime - 0.62) / 0.14);
+      const kPull = sm5((uTime - 0.82) / 0.16);
+      outLook.set(
+        lerp(-2.060, lerp(-0.65, 0.0, kFilm), kOut),
+        lerp(1.673, lerp(1.48, lerp(IYUANA_GEOM.RING_Y, 1.82, kPull), kFilm), kOut),
+        lerp(-0.745, lerp(pos.z - 4.0, IYUANA_GEOM.POSTER_Z, sm5((uTime - 0.52) / 0.22)), kOut)
+      );
+      return lerp(40, lerp(35, 43, kPull), kFilm);
     },
   },
   {
@@ -329,38 +344,43 @@ const RAW_SPECS = [
     shortLabel: 'T7 · Left-Flank Arc',
     curveType: 'bspline',
     color: '#4338ca',
-    summary: 'Sweeps wider along the left side of the room (x = -1.75m), framing the right boards (B2, B4, B6) and aisle depth diagonally before centering on the film & poster.',
+    summary: 'Pulls back along the left flank (X = −1.70m), framing Panel 2 and the tall Panel 4 diagonally down the aisle before centering on the canopy film & Poster 1.',
     ctrl: [
-      [-1.35, 1.62, 1.8],
-      [-1.75, 1.60, -3.5],
-      [-1.65, 1.60, -9.2],
-      [-1.10, 1.60, -14.8],
-      [0.00, 1.60, -18.35],
-      [0.00, 1.55, -16.40],
+      [-1.94, 1.67, -0.30],
+      [-1.55, 1.60, 1.55],
+      [-1.72, 1.60, -3.40],
+      [-1.40, 1.60, -8.60],
+      [0.00, 1.60, -13.85],
+      [0.00, 1.56, -12.95],
     ],
     gaze: (sArc, uTime, pos, outLook) => {
-      const kFilm = sm5((uTime - 0.68) / 0.14);
-      const kPull = sm5((uTime - 0.85) / 0.13);
-      outLook.set(lerp(0.55, 0.0, kFilm), lerp(1.48, lerp(IYUANA_GEOM.RING_Y, 1.88, kPull), kFilm), lerp(pos.z - 4.2, IYUANA_GEOM.POSTER_Z, sm5((uTime - 0.58) / 0.22)));
-      return lerp(42, lerp(38, 51, kPull), kFilm);
+      const kOut = sm5(uTime / 0.11);
+      const kFilm = sm5((uTime - 0.62) / 0.14);
+      const kPull = sm5((uTime - 0.82) / 0.16);
+      outLook.set(
+        lerp(-2.060, lerp(0.65, 0.0, kFilm), kOut),
+        lerp(1.673, lerp(1.50, lerp(IYUANA_GEOM.RING_Y, 1.82, kPull), kFilm), kOut),
+        lerp(-0.745, lerp(pos.z - 4.0, IYUANA_GEOM.POSTER_Z, sm5((uTime - 0.52) / 0.22)), kOut)
+      );
+      return lerp(40, lerp(35, 43, kPull), kFilm);
     },
   },
   {
     id: 'T8',
-    name: 'T8 · Direct Glide + Wide Room Reveal',
+    name: 'T8 · Forest Zoom-Out + Wide Room Reveal',
     shortLabel: 'T8 · Direct + Wide Reveal',
     curveType: 'bspline',
     color: '#15803d',
-    summary: 'Clean, unhurried straight-aisle approach from Z = +2.4m to the canopy film, followed by a deeper pull-back (Z = -14.2m, 55° FOV) that reveals both flanking palms and the full dark gallery.',
+    summary: 'Constant smooth zoom-out from Panel 1’s forest photo into a clean aisle glide, followed by a wider constant pull-back (Z = −11.6m, 47° FOV) revealing Poster 1 and both clearing palms.',
     ctrl: [
-      [0.25, 1.62, 2.4],
-      [-0.18, 1.60, -3.0],
-      [0.14, 1.60, -9.0],
-      [-0.08, 1.60, -14.5],
-      [0.00, 1.60, -18.35],
-      [0.00, 1.54, -14.20],
+      [-1.94, 1.67, -0.30],
+      [-0.20, 1.60, 1.70],
+      [0.16, 1.60, -2.80],
+      [-0.12, 1.60, -7.80],
+      [0.00, 1.60, -13.85],
+      [0.00, 1.55, -11.60],
     ],
-    gaze: (sArc, uTime, pos, outLook) => aisleBoardGaze(sArc, uTime, pos, outLook, 0.65, 55),
+    gaze: (sArc, uTime, pos, outLook) => aisleBoardGaze(sArc, uTime, pos, outLook, 0.72, 47, true),
   },
 ];
 

@@ -2,8 +2,9 @@
 // Pure vanilla ES module: zero external dependencies, 100% approved verbatim copy, 60fps choreography.
 
 export const ABOUT_CONCEPTS = [
-  { id: 'a1', short: 'A1 · Asymmetric Salon ★', name: 'Lights-Go-Off Asymmetric Salon', dur: 0.54 },
-  { id: 'a2', short: 'A2 · 3D Portrait Sheet ★', name: '3D WebGL Portrait Sheet & Nocturne Wall', dur: 0.58 },
+  { id: 'a9', short: 'A9 · Landing Komorebi + Wash ★', name: 'Unified Landing C1 Komorebi + Wash Salon', dur: 0.52 },
+  { id: 'a1', short: 'A1 · Asymmetric Salon', name: 'Lights-Go-Off Asymmetric Salon', dur: 0.54 },
+  { id: 'a2', short: 'A2 · 3D Portrait Sheet', name: '3D WebGL Portrait Sheet & Nocturne Wall', dur: 0.58 },
   { id: 'a3', short: 'A3 · Dark Monograph', name: 'Full-Canvas 3-Column Dark Monograph', dur: 0.50 },
   { id: 'a4', short: 'A4 · Gallery Alcove', name: 'Elevated Dark Gallery Alcove & Room Push', dur: 0.50 },
   { id: 'a5', short: 'A5 · Stipple Chiaroscuro', name: 'Velvet Chiaroscuro & Pointillist Halo', dur: 0.56 },
@@ -17,9 +18,26 @@ const OPEN_BAY_STYLES = new Set(['a1', 'a2', 'a4', 'a8']);
 const POSTER_BAY_STYLES = new Set(['a1', 'a4', 'a8']);
 
 const DEFAULT_BIO = {
-  statement: 'I wanted to tell the stories of us.',
-  eyebrow: 'Brand Curation & Creative Direction · New York',
-  door: 'I help bring cultural and artistic events to life. I create the visual identity and the marketing material, and I curate the experience itself.',
+  quote: '“A well told and organized visual story can transform vision into impact.”',
+  roleTitle: 'Brand Curator of Events & Experiences',
+  statement: 'A well told and organized visual story can transform vision into impact.',
+  eyebrow: 'Brand Curator of Events & Experiences · New York',
+  door: 'I’m a New York-based Brand Curator of Events & Experiences, driven by the belief that the way we bring people, stories, and ideas together can move us toward meaningful change.',
+  aboutParagraphs: [
+    'I’m a New York-based Brand Curator of Events & Experiences, driven by the belief that the way we bring people, stories, and ideas together can move us toward meaningful change.',
+    'My work lives at the intersection of culture, creativity, and community. I approach every project with a curiosity for people and the stories that shape them, bringing together the right voices, creative perspectives, and environments to create experiences that resonate beyond the moment.',
+    'Rooted in New York’s Latin American arts community, I’ve collaborated with cultural organizations, independent artists, and creative teams to bring ideas to life through exhibitions, live performances, and community-driven gatherings. From producing cultural programs and coordinating artist collaborations to shaping visual identities, developing partnerships, and hosting events, I enjoy working across the many layers that turn a vision into a shared experience.',
+    'My creative foundation comes from five years of agency experience in art direction, brand storytelling, and visual strategy. Over time, I’ve found myself drawn beyond the screen and into the spaces where brands, culture, and people meet. Today, I bring that visual sensibility and strategic perspective into the curation and production of experiences, with an appreciation for the details that make a gathering feel intentional and meaningful.',
+    'At the heart of it all is a simple belief: A well told and organized visual story can transform vision into impact.',
+    'I’m interested in working with people and organizations who share that ambition, particularly those using creativity as a tool for cultural connection, positive impact, and a more thoughtful world.',
+  ],
+  clientKicker: 'For Clients & Collaborators',
+  clientHeading: 'Working With Vanessa',
+  clientParagraphs: [
+    'Vanessa is a creative dedicated to organizing, clarifying, and positioning personal and experiential brands with purpose. She specializes in person-centered creative services that transform ideas, stories, and initiatives into cohesive visual identities with a strong voice and presence.',
+    'What sets her apart is her ability to distill complex stories into experiences that are clear, engaging, and authentic to the people behind them. Every creative decision is rooted in your original intention, ensuring your brand not only resonates with your audience but also remains true to its purpose.',
+    'She synthesizes your vision into thoughtful visual systems that communicate who you are, what you stand for, and why your work matters. Whether you’re an individual, artist, founder, or cultural initiative, Vanessa helps your story become something people can understand, remember, and connect with.',
+  ],
   stood: [
     {
       exIdx: 2,
@@ -40,18 +58,19 @@ const DEFAULT_BIO = {
       text: 'At Herencia Viva, if I could go back for five minutes, I’d stand in front of the Ecuadorian Mona Lisa.',
     },
   ],
-  home: 'Where I come from shows up in my warmth, my passion and my communal spirit. I make sure people don’t only experience the art; they feel seen, listened to and celebrated. The food, the spaces and the way people meet at my events resemble how we connect back home.',
-  turn: 'At some point I realised I wanted more of me in the work. Being a graphic designer and art director wasn’t enough; I wanted to be part of the entire creative experience. I was also looking for purpose. This time I followed my heart and joined the Ecuadorian community.',
-  letterHeading: 'How I work',
-  letterSalutation: 'Dear artist, dear client,',
-  letterBody: 'Your work will tell most of the story. I will choose what to show, how it sits together and where people see it. I will give it a visual identity and make the material that carries it. What is written about your work, you will read first. I will ask before anything of yours goes out. And when people arrive, you tell your own story.',
+  home: 'Rooted in New York’s Latin American arts community, I’ve collaborated with cultural organizations, independent artists, and creative teams to bring ideas to life through exhibitions, live performances, and community-driven gatherings.',
+  turn: 'My creative foundation comes from five years of agency experience in art direction, brand storytelling, and visual strategy. Over time, I’ve found myself drawn beyond the screen and into the spaces where brands, culture, and people meet.',
+  letterHeading: 'For Clients & Collaborators',
+  letterSalutation: 'Working With Vanessa',
+  letterBody: 'Vanessa is a creative dedicated to organizing, clarifying, and positioning personal and experiential brands with purpose. Whether you’re an individual, artist, founder, or cultural initiative, Vanessa helps your story become something people can understand, remember, and connect with.',
+  contactRelayUrl: '',
   linkedin: 'https://www.linkedin.com/in/vanessaespin',
 };
 
 const FALLBACK_POSTERS = {
   0: '../img/iyuana.jpg',
-  1: '../img/herencia-viva.jpg',
-  2: '../img/ayazamana.png',
+  1: '../img/herencia-viva-ayllu.png',
+  2: '../img/ayazamana.png?v=20261123a',
 };
 
 const ZERO_ROOM_MODE = {
@@ -59,15 +78,17 @@ const ZERO_ROOM_MODE = {
   posterShiftX: 0,
   posterScale: 1,
   sideFade: 0,
+  centerFade: 0,
   show3DPortrait: 0,
   portraitPose: null,
   nightKomorebi: 0,
   cameraZOffset: 0,
 };
 
-const PORTRAIT_POSE_A2 = { x: -0.22, y: 0.01, z: 0.35, ry: 0.16, s: 0.50 };
+const PORTRAIT_POSE_A2 = { x: -0.22, y: 0.02, z: 0.35, ry: 0.16, s: 0.53 };
 
 const ROOM_TARGETS = {
+  a9: { dimWall: 1.0, posterShiftX: 0, posterScale: 0.94, sideFade: 1.0, centerFade: 1.0, show3DPortrait: 0, portraitPose: null, nightKomorebi: 1.0, cameraZOffset: 0.45 },
   a1: { dimWall: 1.0, posterShiftX: -0.29, posterScale: 0.88, sideFade: 0.82, show3DPortrait: 0, portraitPose: null, nightKomorebi: 0, cameraZOffset: 0 },
   a2: { dimWall: 1.0, posterShiftX: -0.55, posterScale: 0.72, sideFade: 1.0, show3DPortrait: 1.0, portraitPose: PORTRAIT_POSE_A2, nightKomorebi: 0, cameraZOffset: 0 },
   a3: { dimWall: 1.0, posterShiftX: 0, posterScale: 1.0, sideFade: 0, show3DPortrait: 0, portraitPose: null, nightKomorebi: 0, cameraZOffset: 1.1 },
@@ -119,6 +140,57 @@ function esc(str) {
     .replace(/"/g, '&quot;');
 }
 
+function highlightPhrases(str, phrases = []) {
+  const src = String(str ?? '');
+  if (!phrases.length) return esc(src);
+  const ranges = [];
+  for (const ph of phrases) {
+    if (!ph) continue;
+    const idx = src.indexOf(ph);
+    if (idx !== -1) {
+      ranges.push([idx, idx + ph.length]);
+    }
+  }
+  if (!ranges.length) return esc(src);
+  ranges.sort((a, b) => a[0] - b[0]);
+  let out = '';
+  let cur = 0;
+  for (const [s, e] of ranges) {
+    if (s < cur) continue;
+    out += esc(src.slice(cur, s));
+    out += `<strong class="a9m-hi">${esc(src.slice(s, e))}</strong>`;
+    cur = e;
+  }
+  out += esc(src.slice(cur));
+  return out;
+}
+
+const ABOUT_HIGHLIGHTS = [
+  ['Brand Curator of Events & Experiences'],
+  ['intersection of culture, creativity, and community', 'experiences that resonate beyond the moment'],
+  [
+    'New York’s Latin American arts community',
+    'exhibitions, live performances, and community-driven gatherings',
+  ],
+  ['art direction, brand storytelling, and visual strategy'],
+  [],
+  ['cultural connection, positive impact'],
+];
+
+const CLIENT_HIGHLIGHTS = [
+  [
+    'personal and experiential brands with purpose',
+    'cohesive visual identities',
+  ],
+  [
+    'clear, engaging, and authentic',
+    'rooted in your original intention',
+  ],
+  [
+    'thoughtful visual systems',
+  ],
+];
+
 function splitStatementTwoLines(statement) {
   const clean = String(statement || DEFAULT_BIO.statement).trim();
   const idx = clean.toLowerCase().indexOf('the stories');
@@ -141,7 +213,7 @@ function ensureStylesheet() {
   const link = document.createElement('link');
   link.id = 'about-concepts-css';
   link.rel = 'stylesheet';
-  link.href = 'about-concepts.css';
+  link.href = 'about-concepts.css?v=20261122q';
   document.head.appendChild(link);
 }
 
@@ -169,16 +241,25 @@ function resolveBio(ctx) {
     poster: ctx?.EXHIBITIONS?.[row.exIdx]?.poster || FALLBACK_POSTERS[row.exIdx] || '../img/iyuana.jpg',
   }));
 
+  const arr = (key) => (Array.isArray(raw[key]) && raw[key].length > 0 ? raw[key] : DEFAULT_BIO[key]);
+
   return {
+    quote: str('quote'),
+    roleTitle: str('roleTitle'),
     statement: str('statement'),
     eyebrow: str('eyebrow'),
     door: str('door'),
+    aboutParagraphs: arr('aboutParagraphs'),
+    clientKicker: str('clientKicker'),
+    clientHeading: str('clientHeading'),
+    clientParagraphs: arr('clientParagraphs'),
     stood: withPosters,
     home: str('home'),
     turn: str('turn'),
     letterHeading: str('letterHeading'),
     letterSalutation: str('letterSalutation'),
     letterBody: str('letterBody'),
+    contactRelayUrl: typeof raw.contactRelayUrl === 'string' ? raw.contactRelayUrl.trim() : '',
     linkedin: str('linkedin'),
   };
 }
@@ -241,8 +322,9 @@ export function createAboutController(ctx = {}) {
   let bootSnapActive = searchParams.get('openbio') === '1';
 
   const paramStyle = searchParams.get('about') || searchParams.get('bio');
-  const initialCandidate = ctx?.initialStyle || paramStyle || 'a1';
-  let currentStyle = VALID_IDS.has(initialCandidate) ? initialCandidate : 'a1';
+  const initialCandidate = ctx?.initialStyle || paramStyle || 'a9';
+  let currentStyle = VALID_IDS.has(initialCandidate) ? initialCandidate : 'a9';
+  let currentCardMood = ['f1', 'f2', 'f3'].includes(searchParams.get('card')) ? searchParams.get('card') : 'f1';
 
   let isOpenBool = bootSnapActive;
   let rawMix = bootSnapActive ? 1 : 0;
@@ -272,6 +354,7 @@ export function createAboutController(ctx = {}) {
   stageEl.setAttribute('aria-label', 'About Vanessa Espín');
   stageEl.setAttribute('aria-hidden', isOpenBool ? 'false' : 'true');
   stageEl.dataset.about = currentStyle;
+  stageEl.dataset.cardMood = currentCardMood;
 
   // Clear instant-boot snap as soon as real user input happens
   const clearBootSnap = () => {
@@ -314,6 +397,130 @@ export function createAboutController(ctx = {}) {
     const bio = resolveBio(ctx);
     const [line1, line2] = splitStatementTwoLines(bio.statement);
 
+    if (styleId === 'a9') {
+      const aboutParasHTML = bio.aboutParagraphs.map((p, idx) => {
+        const beliefPhrase = 'A well told and organized visual story can transform vision into impact.';
+        if (p.includes(beliefPhrase)) {
+          const pos = p.indexOf(beliefPhrase);
+          const intro = p.slice(0, pos).trim();
+          const tail = p.slice(pos + beliefPhrase.length);
+          return `
+            <aside class="a9m-callout" aria-label="Core belief">
+              ${intro ? `<span class="a9m-callout__lead">${esc(intro)}</span>` : ''}
+              <p class="a9m-callout__quote">${esc(beliefPhrase)}${esc(tail)}</p>
+            </aside>
+          `;
+        }
+        const hi = ABOUT_HIGHLIGHTS[idx] || [];
+        return `<p class="a9m-prose ${idx === 0 ? 'a9m-prose--lead' : ''}">${highlightPhrases(p, hi)}</p>`;
+      }).join('');
+
+      const clientParasHTML = bio.clientParagraphs.map((p, idx) => {
+        const hi = CLIENT_HIGHLIGHTS[idx] || [];
+        return `<p class="a9m-studio-p">${highlightPhrases(p, hi)}</p>`;
+      }).join('');
+
+      return `
+        <div class="a9m-stage-grain" aria-hidden="true"></div>
+        <div class="a9m-stage" data-about-scroll>
+          <div class="a9m-wrap">
+            <header class="a9m-topbar">
+              <button type="button" class="a9m-brand" data-about-close>Vanessa Espín</button>
+              <button type="button" class="ab-close a9-close" data-about-close aria-label="Close About Me">← Back to Work</button>
+            </header>
+
+            <div class="a9m-grid">
+              <aside class="a9m-rail" aria-label="Portrait and direct contact">
+                <figure class="a9m-portrait-card">
+                  <img class="ab-portrait-img" src="../img/about-me.jpg" width="1290" height="1930" alt="Vanessa Espín speaking with a visitor at Herencia Viva in Queens, New York">
+                  <figcaption class="a9m-portrait-cap">Herencia Viva · Queens, NYC</figcaption>
+                </figure>
+
+                <div class="a9m-rail-meta">
+                  <span class="a9m-rail-name">Vanessa Espín</span>
+                  <span class="a9m-rail-role">${esc(bio.roleTitle)} · New York</span>
+                </div>
+
+                <div class="a9m-rail-actions">
+                  <button type="button" class="a9m-btn a9m-btn--solid" data-about-chap="abContact">Send a Message ↓</button>
+                  <a class="a9m-btn a9m-btn--ghost" href="${esc(bio.linkedin)}" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+                </div>
+              </aside>
+
+              <main class="a9m-main">
+                <section class="a9m-sec" aria-labelledby="abMeHeading">
+                  <div class="a9m-sec-head">
+                    <span class="ab-eyebrow">About Me</span>
+                    <h2 class="a9m-sec-title" id="abMeHeading">${esc(bio.roleTitle)}</h2>
+                  </div>
+                  <div class="a9m-prose-stack">
+                    ${aboutParasHTML}
+                  </div>
+                </section>
+
+                <section class="a9m-studio-card" aria-labelledby="abStudioHeading">
+                  <div class="a9m-studio-aura" aria-hidden="true">
+                    <span class="a9m-orb a9m-orb--1"></span>
+                    <span class="a9m-orb a9m-orb--2"></span>
+                    <span class="a9m-orb a9m-orb--3"></span>
+                  </div>
+                  <div class="a9m-studio-grain" aria-hidden="true"></div>
+                  <div class="a9m-studio-inner">
+                    <div class="a9m-studio-head">
+                      <span class="ab-eyebrow">${esc(bio.clientKicker)}</span>
+                      <h3 class="a9m-studio-title" id="abStudioHeading">${esc(bio.clientHeading)}</h3>
+                    </div>
+                    <div class="a9m-studio-prose">
+                      ${clientParasHTML}
+                    </div>
+                  </div>
+                </section>
+
+                <section class="a9m-contact" id="abContact" aria-labelledby="abContactHeading">
+                  <div class="a9m-sec-head">
+                    <span class="ab-eyebrow">Get in Touch</span>
+                    <h3 class="a9m-sec-title" id="abContactHeading">Inquiries &amp; Collaborations</h3>
+                    <p class="a9m-contact-sub">Share a few details about your exhibition, brand identity, or collaboration below, or connect directly on LinkedIn.</p>
+                  </div>
+
+                  <form class="a9m-form" data-about-contact-form novalidate>
+                    <input type="text" name="_gotcha" class="a9m-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
+                    <div class="a9m-form-row">
+                      <label class="a9m-field">
+                        <span>Your Name</span>
+                        <input type="text" name="name" id="abContactName" required autocomplete="name" placeholder="Jane Doe">
+                      </label>
+                      <label class="a9m-field">
+                        <span>Your Email</span>
+                        <input type="email" name="email" required autocomplete="email" placeholder="you@organization.com">
+                      </label>
+                    </div>
+
+                    <label class="a9m-field">
+                      <span>Organization or Project <em>(optional)</em></span>
+                      <input type="text" name="organization" autocomplete="organization" placeholder="Gallery, brand, artist, or cultural initiative">
+                    </label>
+
+                    <label class="a9m-field">
+                      <span>Message</span>
+                      <textarea name="message" rows="4" required placeholder="Tell me about the story, event, or brand experience you have in mind…"></textarea>
+                    </label>
+
+                    <div class="a9m-form-actions">
+                      <button type="submit" class="a9m-btn a9m-btn--solid" data-contact-submit>Send Message →</button>
+                      <a class="a9m-btn a9m-btn--ghost" href="${esc(bio.linkedin)}" target="_blank" rel="noopener noreferrer">Message on LinkedIn ↗</a>
+                    </div>
+
+                    <div class="a9m-form-status" data-contact-status role="status" aria-live="polite" hidden></div>
+                  </form>
+                </section>
+              </main>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     if (styleId === 'a1') {
       return `
         <div class="ab-open-bay a1-bay" data-about-bay aria-hidden="true">
@@ -329,8 +536,8 @@ export function createAboutController(ctx = {}) {
 
             <div class="a1-hero">
               <figure class="a1-mat">
-                <img class="ab-portrait-img" src="../img/portrait.jpg" width="773" height="806" alt="Vanessa Espín at Brooklyn Bridge Park, New York">
-                <figcaption class="a1-mat__cap">Brooklyn Bridge Park · NY</figcaption>
+                <img class="ab-portrait-img" src="../img/about-me.jpg" width="1290" height="1930" alt="Vanessa Espín with a visitor at Herencia Viva in Queens, New York">
+                <figcaption class="a1-mat__cap">Herencia Viva · Queens, NYC</figcaption>
               </figure>
               <div class="a1-hero-copy">
                 <span class="ab-eyebrow ab-eyebrow--brass">${esc(bio.eyebrow)}</span>
@@ -377,7 +584,7 @@ export function createAboutController(ctx = {}) {
         <div class="ab-open-bay a2-bay" data-about-bay aria-hidden="true"></div>
         <div class="a2-3d-caption" aria-hidden="true">
           <span class="a2-3d-caption__name">Vanessa Espín</span>
-          <span class="a2-3d-caption__sub">Brooklyn Bridge Park · New York</span>
+          <span class="a2-3d-caption__sub">Herencia Viva · Queens, NYC</span>
         </div>
 
         <div class="a2-float">
@@ -387,7 +594,7 @@ export function createAboutController(ctx = {}) {
           </div>
 
           <figure class="a2-mobile-portrait">
-            <img class="ab-portrait-img" src="../img/portrait.jpg" width="773" height="806" alt="Vanessa Espín at Brooklyn Bridge Park, New York">
+            <img class="ab-portrait-img" src="../img/about-me.jpg" width="1290" height="1930" alt="Vanessa Espín with a visitor at Herencia Viva in Queens, New York">
           </figure>
 
           <div class="a2-head a2-stagger-2">
@@ -458,10 +665,10 @@ export function createAboutController(ctx = {}) {
 
             <div class="a3-plate">
               <figure class="a3-plate__fig">
-                <img class="ab-portrait-img" src="../img/portrait.jpg" width="773" height="806" alt="Vanessa Espín at Brooklyn Bridge Park, New York">
+                <img class="ab-portrait-img" src="../img/about-me.jpg" width="1290" height="1930" alt="Vanessa Espín with a visitor at Herencia Viva in Queens, New York">
                 <figcaption class="a3-plate__cap">
                   <span>Vanessa Espín</span>
-                  <span>New York</span>
+                  <span>Queens, NYC</span>
                 </figcaption>
               </figure>
             </div>
@@ -512,7 +719,7 @@ export function createAboutController(ctx = {}) {
 
             <div class="a4-header">
               <figure class="a4-portrait-card">
-                <img class="ab-portrait-img" src="../img/portrait.jpg" width="773" height="806" alt="Vanessa Espín at Brooklyn Bridge Park, New York">
+                <img class="ab-portrait-img" src="../img/about-me.jpg" width="1290" height="1930" alt="Vanessa Espín with a visitor at Herencia Viva in Queens, New York">
               </figure>
               <div class="a4-head-copy">
                 <span class="ab-eyebrow ab-eyebrow--brass">${esc(bio.eyebrow)}</span>
@@ -561,8 +768,8 @@ export function createAboutController(ctx = {}) {
 
             <div class="a5-focal">
               <figure class="a5-portrait-frame" data-a5-portrait>
-                <img class="ab-portrait-img" src="../img/portrait.jpg" width="773" height="806" alt="Vanessa Espín at Brooklyn Bridge Park, New York">
-                <figcaption class="a5-portrait-cap">Vanessa Espín · New York</figcaption>
+                <img class="ab-portrait-img" src="../img/about-me.jpg" width="1290" height="1930" alt="Vanessa Espín with a visitor at Herencia Viva in Queens, New York">
+                <figcaption class="a5-portrait-cap">Herencia Viva · Queens, NYC</figcaption>
               </figure>
               <div class="a5-hero-text">
                 <span class="ab-eyebrow ab-eyebrow--brass">About</span>
@@ -616,7 +823,7 @@ export function createAboutController(ctx = {}) {
                 <h2 class="a6-statement">${esc(bio.statement)}</h2>
               </div>
               <figure class="a6-portrait-box">
-                <img class="ab-portrait-img" src="../img/portrait.jpg" width="773" height="806" alt="Vanessa Espín at Brooklyn Bridge Park, New York">
+                <img class="ab-portrait-img" src="../img/about-me.jpg" width="1290" height="1930" alt="Vanessa Espín with a visitor at Herencia Viva in Queens, New York">
               </figure>
               <p class="a6-door">${esc(bio.door)}</p>
             </section>
@@ -680,11 +887,11 @@ export function createAboutController(ctx = {}) {
                 <span class="a7-corner a7-corner--tr" aria-hidden="true"></span>
                 <span class="a7-corner a7-corner--bl" aria-hidden="true"></span>
                 <span class="a7-corner a7-corner--br" aria-hidden="true"></span>
-                <img class="ab-portrait-img" src="../img/portrait.jpg" width="773" height="806" alt="Vanessa Espín at Brooklyn Bridge Park, New York">
+                <img class="ab-portrait-img" src="../img/about-me.jpg" width="1290" height="1930" alt="Vanessa Espín with a visitor at Herencia Viva in Queens, New York">
               </div>
               <div class="a7-print-meta">
                 <span class="a7-print-name">Vanessa Espín</span>
-                <span class="ab-eyebrow">Brooklyn Bridge Park · New York</span>
+                <span class="ab-eyebrow">Herencia Viva · Queens, NYC</span>
               </div>
             </article>
 
@@ -744,7 +951,7 @@ export function createAboutController(ctx = {}) {
           <div class="a8-left">
             <div class="a8-portrait-row">
               <figure class="a8-portrait-frame">
-                <img class="ab-portrait-img" src="../img/portrait.jpg" width="773" height="806" alt="Vanessa Espín at Brooklyn Bridge Park, New York">
+                <img class="ab-portrait-img" src="../img/about-me.jpg" width="1290" height="1930" alt="Vanessa Espín with a visitor at Herencia Viva in Queens, New York">
               </figure>
               <p class="a8-door">${esc(bio.door)}</p>
             </div>
@@ -787,7 +994,7 @@ export function createAboutController(ctx = {}) {
         portraitAnchor = {
           cx: r.left + r.width * 0.5,
           cy: r.top + r.height * 0.48,
-          r0: Math.max(132, r.width * 0.68),
+          r0: Math.max(142, Math.hypot(r.width, r.height) * 0.44),
           valid: true,
         };
         return;
@@ -952,6 +1159,9 @@ export function createAboutController(ctx = {}) {
       stageEl.querySelectorAll('[data-about-chap]').forEach((b) => b.classList.toggle('is-current', b === chapBtn));
       const sec = stageEl.querySelector(`#${targetId}`);
       sec?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
+      if (targetId === 'abContact') {
+        setTimeout(() => stageEl.querySelector('#abContactName')?.focus({ preventScroll: true }), reducedMotion ? 20 : 380);
+      }
       return;
     }
 
@@ -962,6 +1172,71 @@ export function createAboutController(ctx = {}) {
         enterExhibitionFromAbout(activeIdx);
       } else {
         close();
+      }
+    }
+  });
+
+  stageEl.addEventListener('submit', async (e) => {
+    const form = e.target.closest('[data-about-contact-form]');
+    if (!form) return;
+    e.preventDefault();
+
+    const statusEl = form.querySelector('[data-contact-status]');
+    const submitBtn = form.querySelector('[data-contact-submit]');
+    const showStatus = (msg, isError = false) => {
+      if (!statusEl) return;
+      statusEl.hidden = false;
+      statusEl.classList.toggle('is-error', isError);
+      statusEl.textContent = msg;
+    };
+
+    const fd = new FormData(form);
+    if (String(fd.get('_gotcha') || '').trim()) {
+      form.reset();
+      showStatus('Thank you — your message has been received.');
+      return;
+    }
+
+    const name = String(fd.get('name') || '').trim();
+    const email = String(fd.get('email') || '').trim();
+    const organization = String(fd.get('organization') || '').trim();
+    const message = String(fd.get('message') || '').trim();
+
+    if (!name || !email || !email.includes('@') || !message) {
+      showStatus('Please enter your name, a valid email address, and a brief message.', true);
+      return;
+    }
+
+    const bio = resolveBio(ctx);
+    const relayUrl = bio.contactRelayUrl;
+
+    if (!relayUrl) {
+      showStatus('Inquiry captured in preview mode — connect a Formspree relay ID in data.js before launch, or message Vanessa directly on LinkedIn.');
+      return;
+    }
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending…';
+    }
+    try {
+      const res = await fetch(relayUrl, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, organization, message }),
+      });
+      if (res.ok) {
+        form.reset();
+        showStatus('Thank you — your message has been sent to Vanessa.');
+      } else {
+        showStatus('Could not send right now — please reach out via LinkedIn while we check the form.', true);
+      }
+    } catch {
+      showStatus('Network error — please reach out via LinkedIn and try again shortly.', true);
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send Message →';
       }
     }
   });
@@ -1023,6 +1298,7 @@ export function createAboutController(ctx = {}) {
     const blendedScale = lerp(prev.posterScale, tgt.posterScale, b);
     const posterScale = 1 + (blendedScale - 1) * m;
     const sideFade = lerp(prev.sideFade, tgt.sideFade, b) * m;
+    const centerFade = lerp(prev.centerFade || 0, tgt.centerFade || 0, b) * m;
     const nightKomorebi = lerp(prev.nightKomorebi, tgt.nightKomorebi, b) * m;
     const cameraZOffset = lerp(prev.cameraZOffset, tgt.cameraZOffset, b) * m;
 
@@ -1037,6 +1313,7 @@ export function createAboutController(ctx = {}) {
       posterShiftX,
       posterScale,
       sideFade,
+      centerFade,
       show3DPortrait,
       portraitPose,
       nightKomorebi,
@@ -1076,6 +1353,10 @@ export function createAboutController(ctx = {}) {
     isOpenBool = true;
     lastHoveredEx = -99;
     mountStyleDOM(currentStyle, !wasOpen);
+    if (!wasOpen) {
+      const scroller = stageEl.querySelector('[data-about-scroll]');
+      if (scroller) scroller.scrollTop = 0;
+    }
 
     stageEl.classList.remove('is-closing');
     stageEl.classList.toggle('is-instant', bootSnapActive);
@@ -1165,10 +1446,18 @@ export function createAboutController(ctx = {}) {
     }
   }
 
+  function setCardMood(moodId) {
+    if (!['f1', 'f2', 'f3'].includes(moodId)) return;
+    currentCardMood = moodId;
+    stageEl.dataset.cardMood = moodId;
+  }
+
   return {
     open,
     close,
     setStyle,
+    setCardMood,
+    getCardMood: () => currentCardMood,
     isOpen: () => isOpenBool,
     getStyle: () => currentStyle,
     getMix: () => mix,
