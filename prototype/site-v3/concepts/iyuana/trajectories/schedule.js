@@ -6,7 +6,7 @@ const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 // Canonical normalized positions `uCanon = px / 9300` along the 4-panel Iyuana route (`panels-4`)
 // (walk+lingers = 5540, END = 1900 -> 7440, HOLD_SE = 560 -> 8000, BACK = 1080 -> 9080, SP = 220 -> 9300)
 export const CANON_TOTAL_PX = 9300;
-export const SCHEDULE_VERSION = 6;
+export const SCHEDULE_VERSION = 7;
 
 export const STATION_DEFS = [
   {
@@ -46,18 +46,18 @@ export const U_ROOM_SETTLE = 9080 / CANON_TOTAL_PX; // Pull-back from closer pos
 export const SCHEDULE_PRESETS = {
   balanced: {
     version: SCHEDULE_VERSION,
-    name: 'Narrative Default ★ (31.5s · Exact GitHub 4.4s Fire Transition)',
-    departSec: 0.75,
+    name: 'Narrative Default ★ (33.0s · Unhurried Intro + Exact 4.4s Fire Transition)',
+    departSec: 1.45,
     stops: {
-      p1:     { arrive: 3.9,   leave: 5.9,   quote: STATION_DEFS[0].defaultQuote },
-      p2:     { arrive: 8.0,   leave: 10.0,  quote: STATION_DEFS[1].defaultQuote },
-      p3:     { arrive: 12.1,  leave: 14.3,  quote: STATION_DEFS[2].defaultQuote },
-      p4:     { arrive: 16.4,  leave: 18.4,  quote: STATION_DEFS[3].defaultQuote },
-      film:   { arrive: 20.33, leave: 21.30, quote: '' },
-      poster: { arrive: 25.70, leave: 27.95, quote: '' },
+      p1:     { arrive: 5.45,  leave: 7.45,  quote: STATION_DEFS[0].defaultQuote },
+      p2:     { arrive: 9.55,  leave: 11.55, quote: STATION_DEFS[1].defaultQuote },
+      p3:     { arrive: 13.65, leave: 15.85, quote: STATION_DEFS[2].defaultQuote },
+      p4:     { arrive: 17.95, leave: 19.95, quote: STATION_DEFS[3].defaultQuote },
+      film:   { arrive: 21.85, leave: 22.85, quote: '' },
+      poster: { arrive: 27.25, leave: 29.50, quote: '' },
     },
-    roomSec: 30.4,
-    totalSec: 31.5,
+    roomSec: 31.9,
+    totalSec: 33.0,
     extraKnots: [],
   },
   relaxed34: {

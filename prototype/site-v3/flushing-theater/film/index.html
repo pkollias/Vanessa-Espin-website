@@ -732,15 +732,18 @@ async function persistCues() {
   }
 }
 
-// Fast, high-contrast renderer
+// Fast, high-contrast renderer (Retina-sharp 2.0x DPR ceiling + >= 1.5x floor matching Iyuana)
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance', stencil: false });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+const fullDpr = Math.min(window.devicePixelRatio || 1, 2.0);
+const minSharpDpr = Math.min(window.devicePixelRatio || 1, 1.5);
+let paceDpr = fullDpr;
+renderer.setPixelRatio(fullDpr);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.98;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;
-const maxAniso = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
+const maxAniso = renderer.capabilities.getMaxAnisotropy();
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x030202);
@@ -750,6 +753,14 @@ const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.08, 8
 camera.rotation.order = 'YXZ';
 
 let needsRender = true;
+function syncEffectiveDpr(wantFullCrisp = false) {
+  const target = wantFullCrisp ? fullDpr : Math.max(minSharpDpr, paceDpr);
+  if (Math.abs(renderer.getPixelRatio() - target) > 0.01) {
+    renderer.setPixelRatio(target);
+    renderer.setSize(innerWidth, innerHeight, false);
+    needsRender = true;
+  }
+}
 function resize() {
   renderer.setSize(innerWidth, innerHeight, false);
   camera.aspect = innerWidth / Math.max(1, innerHeight);
@@ -781,7 +792,12 @@ function frameForTallScreen(u, fov, pos, look) {
   return Math.atan(tanV) * 360 / Math.PI;
 }
 window.addEventListener('resize', resize);
-import('/Vanessa-Espin-website/shared/film-pace.js').then(({ keepPace }) => keepPace({ renderer, min: 0.85, apply: resize })).catch(() => {});
+import('/Vanessa-Espin-website/shared/film-pace.js').then(({ keepPace }) => keepPace({
+  renderer,
+  min: minSharpDpr,
+  name: '/Vanessa-Espin-website/flushing-theater/film/v2',
+  apply: (s) => { paceDpr = Math.max(minSharpDpr, s); resize(); },
+})).catch(() => {});
 
 // ---- DARK BLENDER CHIAROSCURO LIGHT RIG ----
 const hemiSky = new THREE.Color().setRGB(0.023, 0.014, 0.024, THREE.LinearSRGBColorSpace);
@@ -1196,10 +1212,31 @@ loader.load('../assets/flushing-theater.glb', gltf => {
           tactileRig.disposeUnusedMap(m.roughnessMap);
           return floorOakShared.get(m.name);
         }
-        // Swap embedded cropped 408×525 poster texture for the full uncropped 1252×1826 Ayazamana poster!
+        // Swap embedded cropped 408×525 poster texture for the full uncropped 1252×1826 Ayazamana poster
+        // with 4-tap Rotated-Grid Supersampling (RGSS) + -0.75 LOD bias + matte cotton-rag finish for razor-sharp Retina print!
         if (m.name === 'poster_front') {
           tactileRig.disposeUnusedMap(m.map);
           m.map = uncroppedPosterTex;
+          m.roughness = 0.95;
+          m.metalness = 0.0;
+          if ('specularIntensity' in m) m.specularIntensity = 0.04;
+          m.onBeforeCompile = (sh) => {
+            sh.fragmentShader = sh.fragmentShader.replace(
+              '#include <map_fragment>',
+              `#ifdef USE_MAP
+                vec2 dux = dFdx(vMapUv);
+                vec2 duy = dFdy(vMapUv);
+                vec4 sampledDiffuseColor = 0.25 * (
+                    texture2D(map, vMapUv + 0.125 * dux + 0.375 * duy, -0.75)
+                  + texture2D(map, vMapUv - 0.375 * dux + 0.125 * duy, -0.75)
+                  + texture2D(map, vMapUv - 0.125 * dux - 0.375 * duy, -0.75)
+                  + texture2D(map, vMapUv + 0.375 * dux - 0.125 * duy, -0.75)
+                );
+                diffuseColor *= sampledDiffuseColor;
+              #endif`
+            );
+          };
+          m.customProgramCacheKey = () => 'poster-front-rgss-v1';
           m.needsUpdate = true;
         }
         for (const tk of ['map', 'normalMap', 'roughnessMap']) {
@@ -1375,6 +1412,9 @@ function applyMovieTime(tSec) {
 
   // 4. Editable Opener Logo + Second Text Cues + Closing Credits:
   applyCuesAtTime(tSec);
+
+  // Guarantee full 2.0x Retina crispness in the foyer poster approach & closing frame (where auditorium lights are culled)
+  if (sceneReady) syncEffectiveDpr(u >= 0.82 || !isPlaying);
 
   const labelOp = sm5((u - 0.895) / 0.070);
   labelEl.style.opacity = labelOp.toFixed(3);

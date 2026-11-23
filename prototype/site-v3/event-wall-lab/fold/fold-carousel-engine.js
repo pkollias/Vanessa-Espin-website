@@ -309,6 +309,18 @@ export async function mountFoldCarousel(options = {}) {
     stepPrev.style.top = `${viewerCenterY}px`;
     stepNext.style.top = `${viewerCenterY}px`;
 
+    if (!isFullscreen) {
+      // Anchor Full screen ⤢ once to the carousel's own hero-box ceiling (identical to the top of the tallest portrait image),
+      // so it stays 100% stationary across portrait, square, and landscape items without scanning images!
+      const stageHeroMaxH = Math.min(heroMaxH, heroMaxW * 1.5, upscale * 1350);
+      const stageCeilingTop = viewerCenterY - stageHeroMaxH / 2;
+      const fsTop = Math.max(2, Math.round(stageCeilingTop - 44));
+      if (fsBtn._top !== fsTop) {
+        fsBtn._top = fsTop;
+        fsBtn.style.top = `${fsTop}px`;
+      }
+    }
+
     items.forEach((it, i) => {
       const iw = it.w || 1080, ih = it.h || 1350;
       const sc = Math.min(heroMaxW / iw, heroMaxH / ih, upscale);
@@ -452,14 +464,6 @@ export async function mountFoldCarousel(options = {}) {
     // Guarantees wing1 <= 0.66 × activeHeroH and wing2 <= 0.475 × activeHeroH at ANY screen width/height or aspect ratio!
     const activeHeroH = lerp(HH[i0], HH[i1], clamp(vFocus - i0, 0, 1));
     const refWingH = Math.min(baseWingH, activeHeroH);
-    if (!isFullscreen) {
-      const heroTop = viewerCenterY - activeHeroH / 2;
-      const fsTop = Math.max(2, Math.round(heroTop - 44));
-      if (fsBtn._top !== fsTop) {
-        fsBtn._top = fsTop;
-        fsBtn.style.top = `${fsTop}px`;
-      }
-    }
 
     for (let i = 0; i < N; i++) {
       const ad = Math.abs(i - vFocus);

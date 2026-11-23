@@ -29,7 +29,7 @@
 // the dark stays dark. ?fire=a|b|c picks the variant; ?fire=0 is v1's white flood.
 import * as THREE from 'three';
 import { TRAJECTORIES, TRAJECTORY_LIST } from '../trajectories/paths.js?v=20261122g';
-import { SCHEDULE_PRESETS, SCHEDULE_VERSION, STATION_DEFS, cloneSchedule, compileSchedule, decodeScheduleParam } from '../trajectories/schedule.js?v=20261122g';
+import { SCHEDULE_PRESETS, SCHEDULE_VERSION, STATION_DEFS, cloneSchedule, compileSchedule, decodeScheduleParam } from '../trajectories/schedule.js?v=20261123g';
 import { IYUANA_TRACKS, createIyuanaAudio } from '../ambient-audio.js?v=20261122g';
 import { skipUnlitLights } from '/Vanessa-Espin-website/shared/film-lights.js';
 skipUnlitLights(THREE);   // a lamp's maths is skipped wherever its cone does not reach: same picture, far less work (see the file)
@@ -1345,10 +1345,10 @@ function applyStopWashAndTightWrap(boardIdx) {
 
 function renderIntroLockup(rawFilmTime, staticHold) {
   if (!intro) return;
-  const p1Arrive = compiledSched?.sched?.stops?.p1?.arrive ?? 3.9;
-  const scTime = Math.min(1, p1Arrive / 3.9);
-  const tAnim = (staticHold && rawFilmTime < 0.08) ? 1.3 * scTime : rawFilmTime;
-  if (tAnim >= 2.92 * scTime) {
+  const p1Arrive = compiledSched?.sched?.stops?.p1?.arrive ?? 5.45;
+  const scTime = Math.min(1, p1Arrive / 5.45);
+  const tAnim = (staticHold && rawFilmTime < 0.08) ? 2.4 * scTime : rawFilmTime;
+  if (tAnim >= 4.62 * scTime) {
     intro.style.opacity = '0';
     intro.style.visibility = 'hidden';
     intro.style.setProperty('--scrim-op', '0');
@@ -1356,12 +1356,12 @@ function renderIntroLockup(rawFilmTime, staticHold) {
   }
   intro.style.visibility = 'visible';
   intro.style.opacity = '1';
-  const scrimOp = ss(0.04 * scTime, 0.72 * scTime, tAnim) * (1 - ss(2.02 * scTime, 2.86 * scTime, tAnim));
+  const scrimOp = ss(0.12 * scTime, 1.05 * scTime, tAnim) * (1 - ss(3.44 * scTime, 4.56 * scTime, tAnim));
   intro.style.setProperty('--scrim-op', scrimOp.toFixed(3));
   const plates = [
-    [tl1El, 0.05, 0.65, 1.95, 2.65],
-    [tl2El, 0.15, 0.80, 2.06, 2.75],
-    [tl3El, 0.26, 0.95, 2.16, 2.86],
+    [tl1El, 0.20, 1.00, 3.48, 4.36],
+    [tl2El, 0.55, 1.45, 3.56, 4.46],
+    [tl3El, 1.10, 2.00, 3.64, 4.56],
   ];
   for (const [el, a0, a1, d0, d1] of plates) {
     if (!el) continue;
