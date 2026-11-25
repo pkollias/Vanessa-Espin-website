@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" href="/Vanessa-Espin-website/favicon.ico">
+<link rel="icon" href="/favicon.ico">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Event Experience — Movie + Unified Landing About &amp; Media Salon</title>
@@ -53,7 +53,7 @@
   /* Exact Landing Page Unified Paper Grain (multiply on light washes, screen on dark washes) */
   .grain {
     position: fixed; inset: -2rem; pointer-events: none; z-index: 120;
-    background-image: url('/Vanessa-Espin-website/landing-v3/img/noise.png');
+    background-image: url('/landing-v3/img/noise.png');
     background-size: 150px 150px;
     opacity: 0.042;
     mix-blend-mode: multiply;
@@ -475,10 +475,10 @@
 <!-- Top Navigation (Brand Curation Left · About Me Right) -->
 <nav class="top-nav" aria-label="Event navigation">
   <div class="top-nav__grp">
-    <a class="pill-btn" href="/Vanessa-Espin-website/landing-v3/live/" target="_top">← Brand Curation</a>
+    <a class="pill-btn" href="/landing-v3/live/" target="_top">← Brand Curation</a>
   </div>
   <div class="top-nav__grp top-nav__grp--right">
-    <a class="pill-btn" id="topAboutMeLink" href="/Vanessa-Espin-website/landing-v3/live/#about" target="_top">About Me</a>
+    <a class="pill-btn" id="topAboutMeLink" href="/landing-v3/live/#about" target="_top">About Me</a>
     <button class="pill-btn" type="button" id="topAboutExBtn" hidden style="display:none">About &amp; Media</button>
   </div>
 </nav>
@@ -488,7 +488,7 @@
   <div class="movie-sticky" id="movieSticky">
     <div class="movie-card" id="movieCard">
       <div class="still-fallback" id="stillFallback">
-        <img id="stillImg" src="/Vanessa-Espin-website/event-media/assets/iyuana/final-02.jpg" alt="">
+        <img id="stillImg" src="/event-media/assets/iyuana/final-02.jpg" alt="">
         <div class="still-fallback__vig"></div>
         <div class="still-fallback__title">
           <span id="stKind">Film &amp; Photography Exhibition</span>
@@ -862,7 +862,7 @@
     const ex = FOLD_EVENTS.find((e) => e.slug === slug) || FOLD_EVENTS[0];
     let raw = [];
     try {
-      const r = await fetch(`/Vanessa-Espin-website/event-media/manifests/${slug}.json`);
+      const r = await fetch(`/event-media/manifests/${slug}.json`);
       const d = await r.json();
       raw = Array.isArray(d.items) ? [...d.items] : [];
     } catch {
@@ -1303,7 +1303,7 @@
     if (ayazamanaPageAudio) ayazamanaPageAudio.setActiveEvent(state.eventSlug);
     if (allowPageAudio && state.eventSlug === 'iyuana' && !iyuanaPageAudio && !iyuanaLoading) {
       iyuanaLoading = true;
-      import('/Vanessa-Espin-website/concepts/iyuana/ambient-audio.js?v=20261122g').then(({ createIyuanaAudio }) => {
+      import('/concepts/iyuana/ambient-audio.js?v=20261122g').then(({ createIyuanaAudio }) => {
         iyuanaPageAudio = createIyuanaAudio({ initialTrack: qs.get('sound') || 'chant', initialEnabled: !sharedSoundMuted });
         if (!iyuanaPageAudio) return;
         iyuanaPageAudio.setActiveEvent(state.eventSlug);
@@ -1313,7 +1313,7 @@
     }
     if (allowPageAudio && state.eventSlug === 'ayazamana' && !ayazamanaPageAudio && !ayazamanaLoading) {
       ayazamanaLoading = true;
-      import('/Vanessa-Espin-website/flushing-theater/ambient-audio.js?v=20261123c').then(({ createAyazamanaAudio }) => {
+      import('/flushing-theater/ambient-audio.js?v=20261123c').then(({ createAyazamanaAudio }) => {
         ayazamanaPageAudio = createAyazamanaAudio({ initialTrack: qs.get('sound') || 'sanjuanito', initialEnabled: !sharedSoundMuted });
         if (!ayazamanaPageAudio) return;
         ayazamanaPageAudio.setActiveEvent(state.eventSlug);

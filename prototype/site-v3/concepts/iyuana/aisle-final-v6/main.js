@@ -31,7 +31,7 @@ import * as THREE from 'three';
 import { TRAJECTORIES, TRAJECTORY_LIST } from '../trajectories/paths.js?v=20261122g';
 import { SCHEDULE_PRESETS, SCHEDULE_VERSION, STATION_DEFS, cloneSchedule, compileSchedule, decodeScheduleParam } from '../trajectories/schedule.js?v=20261123g';
 import { IYUANA_TRACKS, createIyuanaAudio } from '../ambient-audio.js?v=20261122g';
-import { skipUnlitLights } from '/Vanessa-Espin-website/shared/film-lights.js';
+import { skipUnlitLights } from '/shared/film-lights.js';
 skipUnlitLights(THREE);   // a lamp's maths is skipped wherever its cone does not reach: same picture, far less work (see the file)
 
 const A = '../assets/';
@@ -44,11 +44,11 @@ try {
   }
 } catch {}
 
-// Load any saved v2 custom schedule from `/Vanessa-Espin-website/api/iyuana-trajectories` unless overridden by `?sched=` or `?dur=`
+// Load any saved v2 custom schedule from `/api/iyuana-trajectories` unless overridden by `?sched=` or `?dur=`
 let initialSched = decodeScheduleParam(qs.get('sched'));
 if (!initialSched && !qs.has('dur')) {
   try {
-    const r = await fetch('/Vanessa-Espin-website/api/iyuana-trajectories', { cache: 'no-store' });
+    const r = await fetch('/api/iyuana-trajectories', { cache: 'no-store' });
     if (r.ok) {
       const d = await r.json();
       if (d?.__schedule?.sched?.version === SCHEDULE_VERSION) initialSched = d.__schedule.sched;
@@ -1623,7 +1623,7 @@ let resizeT;
 addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(layoutAll, 80); });
 // Keep the film smooth without sacrificing Retina sharpness (floor >= 1.5 on Retina screens)
 const minSharpDpr = Math.min(window.devicePixelRatio || 1, 1.5);
-import('/Vanessa-Espin-website/shared/film-pace.js').then(({ keepPace }) => keepPace({ renderer, min: minSharpDpr, apply: (s) => { DPR = Math.max(minSharpDpr, s); layoutAll(); } })).catch(() => {});
+import('/shared/film-pace.js').then(({ keepPace }) => keepPace({ renderer, min: minSharpDpr, apply: (s) => { DPR = Math.max(minSharpDpr, s); layoutAll(); } })).catch(() => {});
 
 // ---------------------------------------------------------------- frame by frame
 const walker = { phase: 0, last: new THREE.Vector3(), speed: 0, init: false };
@@ -2068,7 +2068,7 @@ renderIntroLockup(filmTime, isStaticHold());
   renderer.compile(scene, camera);
   // Before the film starts: send every picture to the graphics card and build the fire lens's shader, so that neither
   // lands mid-film as a hitch (photographs used to be sent the first time their board came into view).
-  try { const { sendPictures } = await import('/Vanessa-Espin-website/shared/film-warm.js'); sendPictures(renderer, scene); } catch {}
+  try { const { sendPictures } = await import('/shared/film-warm.js'); sendPictures(renderer, scene); } catch {}
   if (new URLSearchParams(location.search).get('warm') !== 'off') {
     downMat.uniforms.uPre.value = 0; downMat.uniforms.tSrc.value = halfRT.texture; pass(downMat, qRT);
     fireMat.uniforms.tSrc.value = qRT.texture; pass(fireMat, fireRT);

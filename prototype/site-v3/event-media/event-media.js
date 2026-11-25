@@ -1,8 +1,8 @@
 // Event media: a narrow sampling strip where every item counter-pans, and an in-place viewer mode
 // where the clicked item unfolds whole at centre while left and right neighbours stay visible as diminishing wings.
 //
-//   import { mountEventMedia } from '/Vanessa-Espin-website/event-media/event-media.js';
-//   mountEventMedia({ manifest: '/Vanessa-Espin-website/event-media/manifests/iyuana.json' });
+//   import { mountEventMedia } from '/event-media/event-media.js';
+//   mountEventMedia({ manifest: '/event-media/manifests/iyuana.json' });
 
 const CSS_URL = new URL('./event-media.css' + new URL(import.meta.url).search, import.meta.url).href;
 const FONTS_URL = 'https://api.fontshare.com/v2/css?f[]=gambetta@300,400,401&f[]=switzer@400,500,600&display=swap';

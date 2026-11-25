@@ -6,7 +6,7 @@
 // The picture is identical (what is skipped was adding zero). Measured on the theater film, Nov 22, 2026:
 // about 35 -> 58 frames a second at standard resolution, 21 -> 53 on a Retina screen.
 //
-//   import { skipUnlitLights } from '/Vanessa-Espin-website/shared/film-lights.js';
+//   import { skipUnlitLights } from '/shared/film-lights.js';
 //   skipUnlitLights(THREE);        // once, before the first material is drawn
 export function skipUnlitLights(THREE) {
   const chunks = THREE && THREE.ShaderChunk;

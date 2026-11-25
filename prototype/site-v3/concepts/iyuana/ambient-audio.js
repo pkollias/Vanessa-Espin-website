@@ -2,9 +2,9 @@
 // (3D gallery walk + below-the-fold About & Media Salon + fullscreen media viewer).
 
 export const IYUANA_TRACKS = [
-  { id: 'chant',  label: '♪ Forest + Amazonian Chant ★', short: 'Chant',  src: '/Vanessa-Espin-website/concepts/iyuana/assets/audio/forest-chant.m4a' },
-  { id: 'forest', label: '♪ Pure Amazonian Night Forest', short: 'Forest', src: '/Vanessa-Espin-website/concepts/iyuana/assets/audio/amazon-forest.m4a' },
-  { id: 'flute',  label: '♪ Forest + Ceremonial Flute',   short: 'Flute',  src: '/Vanessa-Espin-website/concepts/iyuana/assets/audio/forest-flute.m4a' },
+  { id: 'chant',  label: '♪ Forest + Amazonian Chant ★', short: 'Chant',  src: '/concepts/iyuana/assets/audio/forest-chant.m4a' },
+  { id: 'forest', label: '♪ Pure Amazonian Night Forest', short: 'Forest', src: '/concepts/iyuana/assets/audio/amazon-forest.m4a' },
+  { id: 'flute',  label: '♪ Forest + Ceremonial Flute',   short: 'Flute',  src: '/concepts/iyuana/assets/audio/forest-flute.m4a' },
 ];
 
 export function createIyuanaAudio({ initialTrack = 'chant', initialEnabled = true, baseGain = 0.72 } = {}) {

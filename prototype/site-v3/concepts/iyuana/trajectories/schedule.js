@@ -1,5 +1,5 @@
 // Shared Piecewise-Monotonic (`C¹` Fritsch-Carlson PCHIP) Narrative Schedule for Iyuana (v3)
-// Drives BOTH `/Vanessa-Espin-website/concepts/iyuana/aisle-final-v6/` and `/Vanessa-Espin-website/concepts/iyuana/trajectories/`.
+// Drives BOTH `/concepts/iyuana/aisle-final-v6/` and `/concepts/iyuana/trajectories/`.
 
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
 

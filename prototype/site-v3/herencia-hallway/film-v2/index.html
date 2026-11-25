@@ -310,12 +310,12 @@ body.hud-hidden #hudMin {
 
 <!-- Event media: the "Media" link, the strip and the pop-up (shared module in /event-media/).
      It loads before the film's own script so it can pause the film's video while the viewer is open. -->
-<script type="module">import { mountEventMedia } from '/Vanessa-Espin-website/event-media/event-media.js?v=7'; mountEventMedia({ manifest: '/Vanessa-Espin-website/event-media/manifests/herencia-viva.json' });</script>
+<script type="module">import { mountEventMedia } from '/event-media/event-media.js?v=7'; mountEventMedia({ manifest: '/event-media/manifests/herencia-viva.json' });</script>
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
-import { skipUnlitLights } from '/Vanessa-Espin-website/shared/film-lights.js';
+import { skipUnlitLights } from '/shared/film-lights.js';
 skipUnlitLights(THREE);   // a light's maths is skipped wherever the light does not reach: same picture, less work (see the file)
 
 (async () => {
@@ -368,13 +368,13 @@ skipUnlitLights(THREE);   // a light's maths is skipped wherever the light does 
     fetch('../data.json').then(r => r.json()),
     fetch('../lab/kit-eyes/kit.json').then(r => r.json()),
     fetch('../lab/kit-release/kit.json').then(r => r.json()),
-    fetch('/Vanessa-Espin-website/api/herencia-hallway').then(r => r.json()).catch(() => ({})),
+    fetch('/api/herencia-hallway').then(r => r.json()).catch(() => ({})),
   ]);
   const ACTIVE_HANG_ITEMS = (HALLWAY_STORE?.['hang-D']?.edited && Array.isArray(HALLWAY_STORE['hang-D'].items) && HALLWAY_STORE['hang-D'].items.length)
     ? HALLWAY_STORE['hang-D'].items
     : CUR.items;
 
-  const API_URL = '/Vanessa-Espin-website/api/herencia-film-v2';
+  const API_URL = '/api/herencia-film-v2';
   let STORE = {};
   try { STORE = await fetch(API_URL).then(r => r.json()); } catch (e) {}
 
@@ -382,7 +382,7 @@ skipUnlitLights(THREE);   // a light's maths is skipped wherever the light does 
   BY.v078 = {
     id: 'v078',
     src: 'thumbs/v078.jpg',
-    video: USE_OPT_WEIGHT ? './opt/v078_opt.mp4' : '/Vanessa-Espin-website/concepts/herencia/assets/v078.mp4',
+    video: USE_OPT_WEIGHT ? './opt/v078_opt.mp4' : '/concepts/herencia/assets/v078.mp4',
     w: 720,
     h: 960,
   };
@@ -948,7 +948,7 @@ skipUnlitLights(THREE);   // a light's maths is skipped wherever the light does 
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
   renderer.setSize(window.innerWidth, window.innerHeight);
   // Keep the film smooth: when frames run late, draw at a lower resolution (shared helper; ?pace=off on the address disables it)
-  import('/Vanessa-Espin-website/shared/film-pace.js').then(({ keepPace }) => keepPace({ renderer, min: 0.85 })).catch(() => {});
+  import('/shared/film-pace.js').then(({ keepPace }) => keepPace({ renderer, min: 0.85 })).catch(() => {});
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.NoToneMapping;
   viewportEl.appendChild(renderer.domElement);
@@ -3249,7 +3249,7 @@ skipUnlitLights(THREE);   // a light's maths is skipped wherever the light does 
    * 8. REAL SCULPTED BLENDER `stand.glb` AT PAVLOS'S EXACT MASTERPIECE POSE
    *    (s = 6.15 m, x = +0.54 m, yaw = -8.5 deg, holding full-res 1760x2200 015.jpg!)
    * ========================================================================= */
-  const posterFullUrl = USE_OPT_WEIGHT ? './opt/art/015.jpg' : '/Vanessa-Espin-website/concepts/herencia/assets/015.jpg';
+  const posterFullUrl = USE_OPT_WEIGHT ? './opt/art/015.jpg' : '/concepts/herencia/assets/015.jpg';
   loadedAssetUrls.push(posterFullUrl);
   const posterTex = configureShaderSRGBTex(texLoader.load(posterFullUrl));
 
@@ -3260,7 +3260,7 @@ skipUnlitLights(THREE);   // a light's maths is skipped wherever the light does 
   scene.add(easelGroup);
 
   const gltfLoader = new GLTFLoader();
-  const MODEL_BASE = '/Vanessa-Espin-website/gemini-blender-rigs/herencia-elements-2/10-threejs-3d-flock/models';
+  const MODEL_BASE = '/gemini-blender-rigs/herencia-elements-2/10-threejs-3d-flock/models';
 
   const fallbackEasel = new THREE.Group();
   {
@@ -3868,7 +3868,7 @@ skipUnlitLights(THREE);   // a light's maths is skipped wherever the light does 
     const allowedNow = !PRIVACY_SAFE || PRIVACY_ALLOWED.has(it.id);
 
     const bestImgUrl = FULL_RES_IDS.has(it.id)
-      ? (USE_OPT_WEIGHT ? `./opt/art/${it.id}.jpg` : `/Vanessa-Espin-website/concepts/herencia/assets/${it.id}.jpg`)
+      ? (USE_OPT_WEIGHT ? `./opt/art/${it.id}.jpg` : `/concepts/herencia/assets/${it.id}.jpg`)
       : `../${meta.src}`;
 
     if (!allowedNow) {
@@ -4036,7 +4036,7 @@ skipUnlitLights(THREE);   // a light's maths is skipped wherever the light does 
   }
 
   async function initLivingPaintings() {
-    const baseDir = '/Vanessa-Espin-website/gemini-blender-rigs/herencia-elements-2/4-living-paintings';
+    const baseDir = '/gemini-blender-rigs/herencia-elements-2/4-living-paintings';
     await Promise.all(Object.values(livingState).map(async ls => {
       try {
         const meta = await fetch(`${baseDir}/${ls.id}/meta.json`).then(r => r.json());
@@ -4860,7 +4860,7 @@ skipUnlitLights(THREE);   // a light's maths is skipped wherever the light does 
         try { evaluateAndRenderScene(t, 0); } finally { WARM_UP.visiting = false; }
       };
       try {
-        const { warmFilm } = await import('/Vanessa-Espin-website/shared/film-warm.js');
+        const { warmFilm } = await import('/shared/film-warm.js');
         await warmFilm({ renderer, scene, camera, times, visit, first: t0 });
       } catch {}
       STATE.t = t0; STATE.monotonicFrontS = targetPaintFrontForMovieTime(t0);

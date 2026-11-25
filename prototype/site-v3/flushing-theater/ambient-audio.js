@@ -2,11 +2,11 @@
 // (Flushing Town Hall 3D theater film + below-the-fold About & Media Salon + fullscreen media viewer).
 
 export const AYAZAMANA_TRACKS = [
-  { id: 'sanjuanito', label: '♪ Sanjuanito — Atlas: Ecuador ★',       short: 'Sanjuanito',    src: '/Vanessa-Espin-website/flushing-theater/assets/audio/sanjuanito-ecuador.m4a' },
-  { id: 'canyon',     label: '♪ Solo Concert Hall Quena',             short: 'Solo Quena',    src: '/Vanessa-Espin-website/flushing-theater/assets/audio/canyon-quena.m4a' },
-  { id: 'condor',     label: '♪ Andean Ensemble: Charango & Quena',   short: 'Ensemble',      src: '/Vanessa-Espin-website/flushing-theater/assets/audio/andean-ensemble.m4a' },
-  { id: 'quena',      label: '♪ Nocturnal Quena & Panpipe Choir',     short: 'Quena Choir',   src: '/Vanessa-Espin-website/flushing-theater/assets/audio/quena-hall.m4a' },
-  { id: 'sikuri',     label: '♪ Bombo Heartbeat & Bamboo Quena',      short: 'Bombo & Flute', src: '/Vanessa-Espin-website/flushing-theater/assets/audio/bombo-panpipe.m4a' },
+  { id: 'sanjuanito', label: '♪ Sanjuanito — Atlas: Ecuador ★',       short: 'Sanjuanito',    src: '/flushing-theater/assets/audio/sanjuanito-ecuador.m4a' },
+  { id: 'canyon',     label: '♪ Solo Concert Hall Quena',             short: 'Solo Quena',    src: '/flushing-theater/assets/audio/canyon-quena.m4a' },
+  { id: 'condor',     label: '♪ Andean Ensemble: Charango & Quena',   short: 'Ensemble',      src: '/flushing-theater/assets/audio/andean-ensemble.m4a' },
+  { id: 'quena',      label: '♪ Nocturnal Quena & Panpipe Choir',     short: 'Quena Choir',   src: '/flushing-theater/assets/audio/quena-hall.m4a' },
+  { id: 'sikuri',     label: '♪ Bombo Heartbeat & Bamboo Quena',      short: 'Bombo & Flute', src: '/flushing-theater/assets/audio/bombo-panpipe.m4a' },
 ];
 
 export function createAyazamanaAudio({ initialTrack = 'sanjuanito', initialEnabled = true, baseGain = 0.72 } = {}) {

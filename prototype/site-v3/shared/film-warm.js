@@ -7,7 +7,7 @@
 // This visits the film's moments ahead of time, drawing each into a 2 x 2 pixel corner, so that all of that work is
 // done while the opening frame is held. Then the film starts and nothing new has to be built.
 //
-//   const { warmFilm } = await import('/Vanessa-Espin-website/shared/film-warm.js');
+//   const { warmFilm } = await import('/shared/film-warm.js');
 //   await warmFilm({ renderer, scene, camera, times, visit, draw });
 //
 // renderer, scene, camera   the film's three.js objects

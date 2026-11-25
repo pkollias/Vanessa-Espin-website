@@ -87,7 +87,7 @@ html.evm-lock { overflow: hidden; }
 }
 .evm__grain {
   position: absolute; inset: -2rem; z-index: 6; pointer-events: none;
-  background-image: url(/Vanessa-Espin-website/landing-v3/img/noise.png); background-size: 150px 150px;
+  background-image: url(/landing-v3/img/noise.png); background-size: 150px 150px;
   opacity: 0.068; mix-blend-mode: screen;
 }
 

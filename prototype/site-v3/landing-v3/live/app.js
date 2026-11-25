@@ -1605,8 +1605,8 @@ function primeEventAudioFromGesture(slug) {
   }
   const key = slug === 'iyuana' ? 'chant' : 'ayazamana:sanjuanito';
   const url = slug === 'iyuana'
-    ? '/Vanessa-Espin-website/concepts/iyuana/assets/audio/forest-chant.m4a'
-    : '/Vanessa-Espin-website/flushing-theater/assets/audio/sanjuanito-ecuador.m4a';
+    ? '/concepts/iyuana/assets/audio/forest-chant.m4a'
+    : '/flushing-theater/assets/audio/sanjuanito-ecuador.m4a';
   if (!bridge.buffers.has(key)) {
     const p = fetch(url)
       .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(`HTTP ${r.status}`))))
@@ -2135,7 +2135,7 @@ function applyCustomWallLive(slug, hex, intensity) {
 async function loadSavedWallColors() {
   if (document.body.classList.contains('clean-hud')) return;
   try {
-    const r = await fetch('/Vanessa-Espin-website/api/landing-wall-colors', { cache: 'no-store' });
+    const r = await fetch('/api/landing-wall-colors', { cache: 'no-store' });
     if (!r.ok) return;
     const d = await r.json();
     const saved = d?.walls?.colors;
@@ -2184,7 +2184,7 @@ $('#bench').addEventListener('click', async (e) => {
     const colors = {};
     for (const item of EXHIBITIONS) colors[item.slug] = getEffectiveWallPickerValue(item.slug);
     try {
-      await fetch('/Vanessa-Espin-website/api/landing-wall-colors', {
+      await fetch('/api/landing-wall-colors', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: 'walls', colors, updatedAt: new Date().toISOString() }),

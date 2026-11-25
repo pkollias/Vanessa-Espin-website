@@ -2,7 +2,7 @@
 // The three event films shade a great many pixels on a Retina screen. When frames run late, this lowers the resolution the film
 // draws at, one step at a time, and raises it again when there is clear room. On a machine that keeps up, it never does anything.
 //
-//   import('/Vanessa-Espin-website/shared/film-pace.js').then(({ keepPace }) => keepPace({ renderer, min: 1, apply: resize }));
+//   import('/shared/film-pace.js').then(({ keepPace }) => keepPace({ renderer, min: 1, apply: resize }));
 //
 // renderer  the film's three.js renderer
 // min       the lowest resolution scale this film may fall to (1 = one drawn pixel per CSS pixel)

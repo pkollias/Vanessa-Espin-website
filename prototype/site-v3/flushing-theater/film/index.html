@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" href="/Vanessa-Espin-website/favicon.ico">
+<link rel="icon" href="/favicon.ico">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ayazamana — Traditional Dance</title>
@@ -435,10 +435,10 @@
   <span class="sep"></span>
   <button id="btn-sound" class="active" title="Toggle Ambient Soundscape (M)">&#9834; Sound</button>
   <select id="sound-sel" title="Switch Ayazamana Soundscape"></select>
-  <a href="/Vanessa-Espin-website/flushing-theater/audio/" style="color:#f6dfaf;font-weight:500" title="Compare &amp; mark all 5 Ayazamana audio options">Audition &nearr;</a>
-  <a href="/Vanessa-Espin-website/flushing-theater/logo-lab/" style="color:#f7d43b;font-weight:500" title="Compare 8 poster-palette colorful AYAZAMANA logos">Logo Lab &nearr;</a>
+  <a href="/flushing-theater/audio/" style="color:#f6dfaf;font-weight:500" title="Compare &amp; mark all 5 Ayazamana audio options">Audition &nearr;</a>
+  <a href="/flushing-theater/logo-lab/" style="color:#f7d43b;font-weight:500" title="Compare 8 poster-palette colorful AYAZAMANA logos">Logo Lab &nearr;</a>
   <span class="sep"></span>
-  <a href="/Vanessa-Espin-website/flushing-theater/trajectories/" style="color:#93c5fd;font-weight:500">3D Plot &nearr;</a>
+  <a href="/flushing-theater/trajectories/" style="color:#93c5fd;font-weight:500">3D Plot &nearr;</a>
   <span class="sep"></span>
   <button class="active" data-fmt="01">01 Wash</button>
   <button data-fmt="02">02 Banners</button>
@@ -477,7 +477,7 @@
 <div class="tap-state" id="tap-state" aria-hidden="true"><svg id="tap-icon" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg></div>
 <div class="prog-bar" id="prog-bar" title="Click or drag to jump to any part of the video"><span class="prog-tip" id="prog-tip">0:00</span><div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div></div>
 
-<script type="module">import { mountEventMedia } from '/Vanessa-Espin-website/event-media/event-media.js?v=7'; mountEventMedia({ manifest: '/Vanessa-Espin-website/event-media/manifests/ayazamana.json', button: false });</script>
+<script type="module">import { mountEventMedia } from '/event-media/event-media.js?v=7'; mountEventMedia({ manifest: '/event-media/manifests/ayazamana.json', button: false });</script>
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -485,7 +485,7 @@ import { TRAJECTORIES, DEFAULT_FILM_DURATION } from '../trajectories/paths.js?v=
 import { addPavlosSeatRoseEasterEgg } from '../trajectories/rose.js';
 import { createTactileMaterialRig } from '../trajectories/tactile.js';
 import { AYAZAMANA_TRACKS, createAyazamanaAudio } from '../ambient-audio.js?v=20261123c';
-import { skipUnlitLights } from '/Vanessa-Espin-website/shared/film-lights.js';
+import { skipUnlitLights } from '/shared/film-lights.js';
 skipUnlitLights(THREE);
 
 const qs = new URLSearchParams(location.search);
@@ -516,7 +516,7 @@ const tapStateEl = document.getElementById('tap-state');
 const tapIconEl = document.getElementById('tap-icon');
 
 // ---- EDITABLE OPENER LOGO & SUBTITLE CUES (Starts with Big Extracted Poster Logo, then adds Second Text while Logo still exists!) ----
-const CUES_API = '/Vanessa-Espin-website/api/ayazamana-texts';
+const CUES_API = '/api/ayazamana-texts';
 const LOGO_SRCS = {
   ivory:              '../assets/title/ayazamana-logo-ivory.png?v=20261123f',
   white:              '../assets/title/ayazamana-logo-white.png?v=20261123f',
@@ -792,10 +792,10 @@ function frameForTallScreen(u, fov, pos, look) {
   return Math.atan(tanV) * 360 / Math.PI;
 }
 window.addEventListener('resize', resize);
-import('/Vanessa-Espin-website/shared/film-pace.js').then(({ keepPace }) => keepPace({
+import('/shared/film-pace.js').then(({ keepPace }) => keepPace({
   renderer,
   min: minSharpDpr,
-  name: '/Vanessa-Espin-website/flushing-theater/film/v2',
+  name: '/flushing-theater/film/v2',
   apply: (s) => { paceDpr = Math.max(minSharpDpr, s); resize(); },
 })).catch(() => {});
 
@@ -1278,7 +1278,7 @@ loader.load('../assets/flushing-theater.glb', gltf => {
   const warmTimes = []; for (let t = 0; t <= FILM_DURATION; t += 1.0) warmTimes.push(t);
   warmTimes.push(FILM_DURATION * 0.70, FILM_DURATION * 0.80, FILM_DURATION);
   needsRender = true;
-  import('/Vanessa-Espin-website/shared/film-warm.js')
+  import('/shared/film-warm.js')
     .then(({ warmFilm }) => warmFilm({ renderer, scene, camera, times: warmTimes, visit: applyMovieTime, first: filmTime }))
     .catch(() => {})
     .then(startFilm);
