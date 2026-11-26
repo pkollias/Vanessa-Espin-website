@@ -2565,13 +2565,14 @@ export class HK02Hall {
       entGlow.add(bounce);
     }
 
-    const skyEnd = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 5.2), this.biforaSkyMat || M.sky);
-    skyEnd.position.set(0, 2.2, -(D.VS1 + 0.34)); g.add(skyEnd);
+    const skyEnd = new THREE.Mesh(new THREE.PlaneGeometry(3.20, 4.00), this.biforaSkyMat || M.sky);
+    skyEnd.position.set(0, 2.15, -(D.VS1 + 0.26)); g.add(skyEnd);
     if (L.hall.vestRightWindow) {
-      const sMid = 22.02;
-      const skySide = new THREE.Mesh(new THREE.PlaneGeometry(4.8, 5.0), this.biforaSkyMat || M.sky);
+      // Strictly confined behind the Right-Alcove Bifora window (`s in [20.42..23.82]`, `y in [0.20..4.10]`,
+      // `x = D.VH + 0.22 = 1.46 m`) so it NEVER protrudes past the `s = 20.00` arch pier into the main corridor!
+      const skySide = new THREE.Mesh(new THREE.PlaneGeometry(3.40, 3.90), this.biforaSkyMat || M.sky);
       skySide.rotation.y = -Math.PI / 2;
-      skySide.position.set(D.VH + 0.34, 2.2, -sMid);
+      skySide.position.set(D.VH + 0.22, 2.15, -22.12);
       g.add(skySide);
       this.skySideMesh = skySide;
     }

@@ -9,7 +9,7 @@
 //   5. Sconces Toggle (`Matte-Black Horizontal Bars ★` vs `GitHub 1862 Blackened-Iron & Brass Opaline Bells ★`) + Museum Gallery Cards
 
 import * as THREE from 'three';
-import { CATALOG, artSize } from './scene.js?v=20261126v37';
+import { CATALOG, artSize } from './scene.js?v=20261126v38';
 import { computeIndoorLightRig, kelvinWarmthTint } from './fixtures.js?v=20261125v31';
 
 const lin = (r, g, b) => new THREE.Color().setRGB(r, g, b, THREE.LinearSRGBColorSpace);
