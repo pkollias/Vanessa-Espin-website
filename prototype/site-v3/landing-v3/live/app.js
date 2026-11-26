@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { SITE, EXHIBITIONS, BIO, CONCEPTS, PORTALS, ABOUT_CONCEPTS, INTRO_CONCEPTS, COPY_MODES, SCROLL_CUES, COLOR_MODES, POSTER_SWATCHES, CARD_MOODS } from './data.js?v=20261126e';
+import { SITE, EXHIBITIONS, BIO, CONCEPTS, PORTALS, ABOUT_CONCEPTS, INTRO_CONCEPTS, COPY_MODES, SCROLL_CUES, COLOR_MODES, POSTER_SWATCHES, CARD_MOODS } from './data.js?v=20261126f';
 import { createAboutController } from './about-concepts.js?v=20261124m';
 import { createIntroController } from './intro-concepts.js?v=20261123d';
 import { createScrollCueController } from './scroll-cues.js?v=20261123d';
@@ -2540,6 +2540,23 @@ const ensureCanvasEntryAudioOnGesture = () => {
 };
 glCanvas.addEventListener('touchend', ensureCanvasEntryAudioOnGesture, { passive: true });
 glCanvas.addEventListener('click', ensureCanvasEntryAudioOnGesture);
+
+// On a direct hash reload (/#herencia-viva, /#iyuana, /#ayazamana — Ctrl+R or phone refresh),
+// glCanvas sits behind the filmStage iframe and browser autoplay blocks sound until a user gesture.
+// Unlock & prime parent-owned audio on the first tap/click/key anywhere without overriding user mute.
+const ensureReloadFilmAudioOnGesture = () => {
+  if (!state.inFilm || state.drawerOpen) return;
+  try {
+    const sh = filmFrame()?.contentWindow?.StageHost;
+    if (sh?.isSoundMuted?.()) return;
+    const ex = EXHIBITIONS[state.active];
+    if (ex) primeEventAudioFromGesture(ex.slug);
+    sh?.unlockAudio?.();
+  } catch {}
+};
+for (const ev of ['touchend', 'pointerup', 'click', 'keydown']) {
+  window.addEventListener(ev, ensureReloadFilmAudioOnGesture, { capture: true, passive: true });
+}
 
 // Wheel: Linear 3-poster scroll (works right over the poster too!); one notch = one poster (0.51s glide)
 let wheelAcc = 0, lastWheel = -1e9, wheelLockedUntil = 0;

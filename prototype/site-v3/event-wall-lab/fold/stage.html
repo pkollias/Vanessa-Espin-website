@@ -229,6 +229,19 @@
     font: 400 11px/1 var(--sans); font-variant-numeric: tabular-nums; opacity: 0.88;
     padding: 0 3px;
   }
+  .sound-wake-pill {
+    position: absolute; left: 50%; bottom: 58px; transform: translateX(-50%); z-index: 18;
+    appearance: none; cursor: pointer;
+    border: var(--hair) solid var(--film-pill-bd); background: var(--film-pill-bg);
+    color: var(--film-ink); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    padding: 9px 18px; border-radius: 999px;
+    font: 500 12px/1 var(--sans); letter-spacing: 0.05em;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.28);
+    transition: opacity 0.24s ease, transform 0.22s var(--ease-out), border-color 0.2s ease;
+  }
+  .sound-wake-pill:hover { border-color: var(--film-ink); transform: translateX(-50%) translateY(-1px); }
+  body.is-film-loading .sound-wake-pill,
+  body.below-active .sound-wake-pill { opacity: 0 !important; pointer-events: none !important; }
 
   .prog-seam {
     position: absolute; left: 0; right: 0; bottom: 0; height: 22px; z-index: 15;
@@ -767,6 +780,9 @@
         <span class="play-lbl" id="playLbl">Play Film · 0:27</span>
       </div>
 
+      <!-- Reload Audio Wake Pill (shown ONLY when browser autoplay policy blocks sound on direct reload) -->
+      <button type="button" class="sound-wake-pill" id="soundWakePill" hidden>&#9834; Tap for Sound</button>
+
       <!-- Bottom Player Controls: Play/Pause · Replay · Sound · Clock -->
       <div class="playing-mini">
         <button type="button" id="miniPauseBtn">Pause</button>
@@ -806,7 +822,7 @@
 </main>
 
 <script type="module">
-  import { FOLD_EVENTS, CONCEPTS } from './data.js?v=20261125g';
+  import { FOLD_EVENTS, CONCEPTS } from './data.js?v=20261126f';
   let mountFoldCarouselFn = null;
   async function getMountFoldCarousel() {
     if (!mountFoldCarouselFn) {
@@ -1595,17 +1611,28 @@
   $('miniReplayBtn').addEventListener('click', (e) => { e.stopPropagation(); replayMovie(); });
 
   // Click anywhere on the movie stage to pause or resume playback
+  // (If audio was blocked by browser autoplay policy on a direct reload, first tap wakes sound without pausing!)
   let cardDown = null;
   $('movieCard').addEventListener('pointerdown', (e) => {
     if (e.button !== undefined && e.button !== 0) return;
-    if (e.target.closest('#progSeam, .playing-mini, .play-gate, #filmLoader')) return;
-    cardDown = { x: e.clientX, y: e.clientY };
+    if (e.target.closest('#progSeam, .playing-mini, .play-gate, #filmLoader, #soundWakePill')) return;
+    const cur = currentPageAudio();
+    cardDown = { x: e.clientX, y: e.clientY, wasWaitingSound: Boolean(cur && cur.getState().waitingGesture) };
   });
   $('movieCard').addEventListener('pointerup', (e) => {
     if (!cardDown) return;
     const moved = Math.hypot(e.clientX - cardDown.x, e.clientY - cardDown.y);
+    const wakeOnly = cardDown.wasWaitingSound;
     cardDown = null;
-    if (moved < 7) togglePlay();
+    if (moved < 7) {
+      const cur = currentPageAudio();
+      if (wakeOnly || (cur && cur.getState().waitingGesture)) {
+        cur?.unlock?.();
+        updateBottomSoundBtn();
+        return;
+      }
+      togglePlay();
+    }
   });
 
   // Click OR drag anywhere along #progSeam to jump/scrub to specific parts of the video
@@ -1765,13 +1792,28 @@
 
   function updateBottomSoundBtn() {
     const soundBtn = $('bottomSoundBtn');
-    if (!soundBtn) return;
+    const wakePill = $('soundWakePill');
     const cur = currentPageAudio();
-    soundBtn.hidden = !cur;
+    if (soundBtn) soundBtn.hidden = !cur;
     if (cur) {
       const st = cur.getState();
-      soundBtn.textContent = st.muted ? '♪ Muted' : (st.waitingGesture ? '♪ Sound (Tap)' : '♪ Sound');
+      if (soundBtn) soundBtn.textContent = st.muted ? '♪ Muted' : (st.waitingGesture ? '♪ Sound (Tap)' : '♪ Sound');
+      if (wakePill) wakePill.hidden = !(st.waitingGesture && !st.muted && state.playState !== 'ended');
+    } else if (wakePill) {
+      wakePill.hidden = true;
     }
+  }
+
+  const wakePillEl = $('soundWakePill');
+  if (wakePillEl) {
+    wakePillEl.onclick = (e) => {
+      e.stopPropagation();
+      const cur = currentPageAudio();
+      if (!cur) return;
+      sharedSoundMuted = false;
+      cur.unlock();
+      updateBottomSoundBtn();
+    };
   }
 
   const bottomSoundBtnEl = $('bottomSoundBtn');
@@ -1781,9 +1823,9 @@
       const cur = currentPageAudio();
       if (!cur) return;
       sharedSoundMuted = !cur.toggle();
-      if (iyuanaPageAudio) iyuanaPageAudio.setMuted(sharedSoundMuted);
-      if (herenciaPageAudio) herenciaPageAudio.setMuted(sharedSoundMuted);
-      if (ayazamanaPageAudio) ayazamanaPageAudio.setMuted(sharedSoundMuted);
+      if (iyuanaPageAudio && iyuanaPageAudio !== cur) iyuanaPageAudio.setMuted(sharedSoundMuted);
+      if (herenciaPageAudio && herenciaPageAudio !== cur) herenciaPageAudio.setMuted(sharedSoundMuted);
+      if (ayazamanaPageAudio && ayazamanaPageAudio !== cur) ayazamanaPageAudio.setMuted(sharedSoundMuted);
       updateBottomSoundBtn();
     };
   }
@@ -1794,7 +1836,7 @@
     if (ayazamanaPageAudio) ayazamanaPageAudio.setActiveEvent(state.eventSlug);
     if (allowPageAudio && state.eventSlug === 'iyuana' && !iyuanaPageAudio && !iyuanaLoading) {
       iyuanaLoading = true;
-      import('/concepts/iyuana/ambient-audio.js?v=20261124m').then(({ createIyuanaAudio }) => {
+      import('/concepts/iyuana/ambient-audio.js?v=20261126f').then(({ createIyuanaAudio }) => {
         iyuanaPageAudio = createIyuanaAudio({ initialTrack: qs.get('sound') || 'chant', initialEnabled: !sharedSoundMuted });
         if (!iyuanaPageAudio) return;
         iyuanaPageAudio.setActiveEvent(state.eventSlug);
@@ -1804,7 +1846,7 @@
     }
     if (allowPageAudio && state.eventSlug === 'herencia-viva' && !herenciaPageAudio && !herenciaLoading) {
       herenciaLoading = true;
-      import('/herencia-hallway/audio/ambient-audio.js?v=20261124m').then(({ createHerenciaAudio }) => {
+      import('/herencia-hallway/audio/ambient-audio.js?v=20261126f').then(({ createHerenciaAudio }) => {
         herenciaPageAudio = createHerenciaAudio({ initialTrack: qs.get('sound') || 'granados', initialEnabled: !sharedSoundMuted });
         if (!herenciaPageAudio) return;
         herenciaPageAudio.setActiveEvent(state.eventSlug);
@@ -1814,7 +1856,7 @@
     }
     if (allowPageAudio && state.eventSlug === 'ayazamana' && !ayazamanaPageAudio && !ayazamanaLoading) {
       ayazamanaLoading = true;
-      import('/flushing-theater/ambient-audio.js?v=20261124m').then(({ createAyazamanaAudio }) => {
+      import('/flushing-theater/ambient-audio.js?v=20261126f').then(({ createAyazamanaAudio }) => {
         ayazamanaPageAudio = createAyazamanaAudio({ initialTrack: qs.get('sound') || 'sanjuanito', initialEnabled: !sharedSoundMuted });
         if (!ayazamanaPageAudio) return;
         ayazamanaPageAudio.setActiveEvent(state.eventSlug);
@@ -1832,6 +1874,11 @@
       const cur = currentPageAudio();
       if (cur && paused) cur.setActiveEvent('overlay-paused');
       else if (cur && !paused) cur.setActiveEvent(state.eventSlug);
+    },
+    isSoundMuted() { return sharedSoundMuted; },
+    unlockAudio() {
+      const cur = currentPageAudio();
+      if (cur && !sharedSoundMuted) { cur.unlock(); updateBottomSoundBtn(); }
     },
   };
 
@@ -1875,8 +1922,7 @@
 
       if (state.eventSlug !== prevSlug) {
         syncPageAudioEvent();
-        syncPageAudioEvent();
-  state.mediaItems = await loadManifest(state.eventSlug);
+        state.mediaItems = await loadManifest(state.eventSlug);
         applyThemeTokens();
         await mountSalonAndCarousel(typeof d.mediaIdx === 'number' ? d.mediaIdx : 0);
         mountMovie();

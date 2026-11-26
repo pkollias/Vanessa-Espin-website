@@ -277,7 +277,7 @@ import { HK02MockManager } from './hk02/mocks.js?v=20261126v38';
 import { buildTimeline, sm3, sm5, ramp, FLIGHT7_PACE } from './hk02/path.js?v=20261126v37';
 import { makePaintUniforms, ensurePaintAssets, syncPaintShields, installPaint } from './hk02/paint.js?v=20261126v37';
 import { createHerenciaLogoOpener } from './hk02/logo-opener.js?v=20261126v37';
-import { createHerenciaAudio } from '/herencia-hallway/audio/ambient-audio.js?v=20261124c';
+import { createHerenciaAudio } from '/herencia-hallway/audio/ambient-audio.js?v=20261126f';
 
 const Q = new URLSearchParams(location.search);
 if (Q.get('hud') === '0' || Q.get('clean') === '1') document.body.classList.add('clean');
@@ -683,31 +683,31 @@ function patchWorld(k) {
 
 function makeSpecs() {
   const k = D.HW / 1.48;
-  const p1 = patchWorld('d1'), p2 = patchWorld('d2'), p4 = patchWorld('d4');
+  const p1 = patchWorld('d1');
   const sgDove = p1 ? p1.wallSg : -1;
-  const bl = L.cam.blink;
-  const at = off => bl.s + flightDir * off;
   const S = [];
-  // Intrinsically separated, C-infinity smooth 6-bird luminous flock (4 white doves + 2 early pale silver pigeons):
-  // Slow majestic gliding arcs (`wFreq 0.58-0.68`), long 2.55 s quintic takeoff out of `003` (zero 28s yank!),
-  // and guaranteed >= 0.62 m 3D clearance around the poster easel & >= 1.15 m clearance from the camera lens!
+  // Intrinsically separated, C-infinity smooth 6-bird luminous flock (4 white doves + 2 pale silver pigeons):
+  // - Bird 1 (`d1`) detaches directly off Woman `003` to start the awakening sequence.
+  // - Birds 2–6 ALL launch strictly BEHIND the camera backplane (`zc <= -1.05 m`, off-frustum across 9:16..21:9
+  //   with full wingspan margin!) from the sunlit alcove, then sweep smoothly INTO frame during the crane glide,
+  //   keeping `>= 0.88 m` lens clearance, `>= 0.70 m` easel clearance, `>= 0.55 m` arch clearance & smooth C∞ arcs!
   const dove = (p, t0, vSpd, vBurst, lane, yHall, yArch, sz, wAmp, wFreq, wPh, sAmp, sFreq, flaps, patch) =>
     p && S.push({ sp: 'dove', patch, t0, v: vSpd, vBurst, s0: p.s, x0: p.x, y0: p.y, xLane: sgDove * lane * k, yHall, yArch, sz, wAmp, wFreq, wPh, sAmp, sFreq, flaps });
   // 1. Hero Painted White Dove `d1`: majestic slow-arc takeoff from `003`, gliding prominently down the hall & out the sunlit doors!
   dove(p1, 0.52, 1.96, 1.18,  0.24, 1.92, 2.10, 1.16, 0.22, 0.62, 0.65, 0.10, 0.78, [[0.52, 1.80], [3.70, 4.70], [6.05, 7.15]], 'd1');
-  // 2. Painted White Dove `d2`: low graceful glide strictly on the wide-open side opposite the easel (`>= 0.80 m` easel clearance!)
-  dove(p2, 1.05, 2.36, 1.22,  0.62, 1.54, 1.68, 1.10, 0.18, 0.58, 2.95, 0.09, 0.80, [[1.05, 2.20], [4.25, 5.15], [6.40, 7.35]], 'd2');
-  // 3. Painted White Dove `d4`: smooth upper-left flanker arcing cleanly high & clear past the easel!
-  dove(p4, 1.24, 2.44, 1.24,  0.42, 2.34, 2.40, 1.08, 0.20, 0.66, 4.90, 0.10, 0.82, [[1.24, 2.35], [4.45, 5.35], [6.50, 7.50]], 'd4');
 
-  const other = (sp, t0, vSpd, vBurst, off, x0, lane, y0, yHall, yArch, sz, wAmp, wFreq, wPh, sAmp, sFreq, flaps) =>
-    S.push({ sp, t0, v: vSpd, vBurst, s0: at(off), x0: -sgDove * x0 * k, y0, xLane: -sgDove * lane * k, yHall, yArch, sz, wAmp, wFreq, wPh, sAmp, sFreq, flaps });
-  // 4. Lead Scout Pale Pigeon: glides high ahead through the arch & triggers the grand double entrance doors open right in view!
-  other('pigeon', 0.82, 2.76, 1.25, 1.45, 0.44,  0.34, 2.20, 2.34, 2.42, 1.08, 0.22, 0.68, 1.30, 0.10, 0.84, [[0.82, 1.90], [3.85, 4.75], [5.75, 6.60]]);
-  // 5. High Soaring White Dove: wide sculptural arc high above easel & corridor, curving smoothly down through the sunlit threshold!
-  other('dove',   1.12, 2.56, 1.25, 2.45, 0.50,  0.08, 2.40, 2.48, 2.54, 1.06, 0.24, 0.64, 3.90, 0.10, 0.76, [[1.12, 2.20], [4.25, 5.15], [6.10, 7.05]]);
-  // 6. Close-range Pale Pigeon overtaker: sweeps smoothly from the right into a high open lane, clearing the easel by `>= 0.65 m`!
-  other('pigeon', 1.85, 2.36, 1.26, 2.35, 0.44,  0.24, 1.98, 2.18, 2.24, 1.06, 0.22, 0.66, 5.40, 0.10, 0.86, [[1.85, 2.90], [4.85, 5.75], [6.65, 7.60]]);
+  const behind = (sp, t0, vSpd, vBurst, s0, x0, lane, y0, yHall, yArch, sz, wAmp, wFreq, wPh, sAmp, sFreq, flaps) =>
+    S.push({ sp, patch: null, t0, v: vSpd, vBurst, s0: Math.min(D.VS1 - 0.22, s0), x0, y0, xLane: lane * k, yHall, yArch, sz, wAmp, wFreq, wPh, sAmp, sFreq, flaps });
+  // 2. Low Graceful White Dove: launches behind camera in alcove, sweeps past lower-left edge into open lane opposite the easel (`>= 1.25 m` easel clearance!)
+  behind('dove',   1.62, 3.06, 1.24, 23.72, -0.76, sgDove * 0.68,  1.46, 1.52, 1.58, 1.10, 0.16, 0.58, 2.95, 0.08, 0.80, [[1.62, 2.75], [4.55, 5.45], [6.55, 7.50]]);
+  // 3. Upper-Left Flanker White Dove: launches behind camera in alcove, sweeps high past upper-left frame border into corridor!
+  behind('dove',   1.55, 3.16, 1.26, 23.75, -0.70, sgDove * 0.54,  3.14, 2.38, 2.82, 1.08, 0.18, 0.64, 4.90, 0.09, 0.82, [[1.55, 2.65], [4.45, 5.35], [6.40, 7.35]]);
+  // 4. Lead Scout Pale Pigeon: launches strictly behind camera high-right, overtakes early (~29.7 s) & triggers the grand double doors open right on beat!
+  behind('pigeon', 1.18, 3.55, 1.32, 23.62,  0.64, -sgDove * 0.16, 3.10, 2.74, 2.84, 1.08, 0.16, 0.62, 1.30, 0.08, 0.78, [[1.18, 2.25], [3.95, 4.85], [5.75, 6.60]]);
+  // 5. High Soaring White Dove: launches behind camera overhead, arcs cleanly above lens & easel down through the sunlit threshold!
+  behind('dove',   1.82, 3.26, 1.28, 23.78,  0.18, sgDove * 0.22,  3.24, 2.58, 2.96, 1.06, 0.20, 0.62, 3.90, 0.09, 0.76, [[1.82, 2.90], [4.65, 5.55], [6.45, 7.40]]);
+  // 6. Close-Range Pale Pigeon Overtaker: launches behind camera high-right, sweeps cleanly past right edge of lens during mid crane (`>= 0.92 m` lens clearance)!
+  behind('pigeon', 2.15, 3.24, 1.30, 23.72,  0.66, -sgDove * 0.34, 3.00, 2.70, 2.78, 1.06, 0.15, 0.58, 5.40, 0.07, 0.76, [[2.15, 3.20], [5.05, 5.95], [6.75, 7.70]]);
   return S;
 }
 
@@ -722,7 +722,7 @@ function birdBase(b, tf) {
   // 100% C-infinity forward cruise + smooth sunlit-door burst (ZERO corner discontinuities or hard clamps!)
   const burstInt = (b.vBurst || 0) * softplus(dt - 4.75, 0.90) * sm5((dt - 3.6) / 2.6);
   const s = b.s0 + flightDir * (vBird * dt + burstInt - 0.36 * (1 - Math.exp(-dt / 0.72)));
-  // Long, silky 2.55 s quintic takeoff arc out of `003` so Hero `d1` never yanks sideways at 28 s!
+  // Long, silky 2.55 s quintic takeoff arc out of `003` / alcove so zero birds ever yank sideways!
   const join = sm5(dt / 2.55);
   const bell = Math.exp(-(((s - sMid) / 4.2) ** 2));
   const doorFunnel = flightDir < 0 ? (1.0 - 0.66 * sm5((9.6 - s) / 6.0)) : 1.0;
@@ -746,10 +746,10 @@ function birdBase(b, tf) {
     }
   }
 
-  // Smooth C-infinity descent into doorway height (`<= 2.08 m` at threshold — zero `Math.min` corner!)
+  // Smooth C-infinity descent into doorway height (`<= 2.08 m` at threshold over 6.8 m — ultra-gentle turn rate!)
   const dEnt = s - D.Y0;
-  if (flightDir < 0 && dEnt < 5.0) {
-    const wDoorY = sm5((5.0 - dEnt) / 5.0);
+  if (flightDir < 0 && dEnt < 6.8) {
+    const wDoorY = sm5((6.8 - dEnt) / 6.8);
     y = y + (softmin(y, 2.08, 0.24) - y) * wDoorY;
   }
 
@@ -761,6 +761,13 @@ function birdBase(b, tf) {
   x = envX * Math.tanh(x / envX);
   y = clamp(y, 1.24, Math.min(3.60, L.hall.ceiling - 0.62));
   return { s, x, y };
+}
+
+// Compute lead-bird door-arrival time up front so both the double doors and behind-camera leaf gust align seamlessly!
+const ent = hall.entranceLeaves || [];
+let firstOut = Infinity;
+if (flightDir < 0 && ent.length) {
+  for (const b of SPECS) for (let tf = b.t0; tf < 30; tf += 0.05) { if (birdBase(b, tf).s < D.Y0 + 0.2) { firstOut = Math.min(firstOut, tf); break; } }
 }
 
 // Intrinsically separated trajectories -> ZERO discontinuous repulsion pop-ins when new birds launch!
@@ -794,16 +801,21 @@ function buildLeafGustSpecs() {
   leafState.redItems = [];
   leafState.greenItems = [];
   const N_LEAVES = 120;
+  const tGust0 = isFinite(firstOut) ? (firstOut - 1.56) : 5.00;
   for (let i = 0; i < N_LEAVES; i++) {
     const side = (i % 2 === 0) ? -1 : 1; // -1 = corridor left (-x, screen right), +1 = corridor right (+x, screen left)
     const isRed = (i % 11 < 6); // ~55% crimson red (006), ~45% emerald-olive green (010)
+    const delay = Math.pow(leafRnd(i, 1), 1.35) * 1.25; // crisp sudden gust front wave + swirling tail
+    // Spawn EVERY leaf strictly BEHIND the camera backplane at its exact launch moment (`zc <= -1.25 m`, ZERO in-frame pop-in!)
+    // so the entire red & green gust overtakes the lens from behind at floor level right as the doors swing open (~33.2 s)!
+    const tSpawn = TL.T_BLINK + (tGust0 + delay) / FLIGHT7_PACE;
+    const camAtSpawn = TL.poseAt(Math.min(tSpawn, TL.T_END));
+    const s0 = clamp(camAtSpawn.s - flightDir * (1.48 + leafRnd(i, 2) * 1.45), D.Y0 + 2.0, D.VS1 - 0.35);
     const spec = {
-      i, side, isRed,
-      delay: Math.pow(leafRnd(i, 1), 1.45) * 1.48,    // crisp sudden gust front wave + swirling tail
-      s0: 9.6 + leafRnd(i, 2) * 3.8,                  // corridor floor ahead/beside camera as doors swing open
+      i, side, isRed, delay, s0,
       x0: side * (0.76 + leafRnd(i, 3) * 0.56),       // left & right floor channels (40..96 cm inward from walls, NOT on walls!)
       y0: 0.042 + Math.pow(leafRnd(i, 4), 1.55) * 0.24, // almost floor level (4.2..28 cm off floorboards!)
-      spd: 4.7 + leafRnd(i, 5) * 2.2,                 // brisk sudden wind gust rushing out the open doorway
+      spd: 6.4 + leafRnd(i, 5) * 2.4,                 // brisk wind gust overtaking camera from behind & rushing out the open doors
       laneDoor: (leafRnd(i, 6) * 2 - 1) * 0.56,       // funnels cleanly through open 1.68 m double doorway
       waveAmp: 0.14 + leafRnd(i, 7) * 0.15,
       waveFreq: 2.5 + leafRnd(i, 8) * 1.7,
@@ -897,7 +909,7 @@ if (birdsOn) await ensureBirds();
 function updateLeafGust(t) {
   if (!leafState.redMeshes.length && !leafState.greenMeshes.length) return;
   const tf = (t - TL.T_BLINK) * FLIGHT7_PACE;
-  const tGust0 = isFinite(firstOut) ? (firstOut - 0.85) : 5.64; // erupts in a sudden gust right as doors finish swinging open (~33.0 -> 33.3 s)!
+  const tGust0 = isFinite(firstOut) ? (firstOut - 1.56) : 5.00; // launches strictly behind camera so front wave sweeps INTO frame at ~33.2 s right as doors finish opening!
   if (manualPose || !birdsOn || flightDir >= 0 || tf < tGust0) {
     leafGroup.visible = false;
     return;
@@ -911,7 +923,7 @@ function updateLeafGust(t) {
         for (const im of meshes) im.setMatrixAt(k, _lfZeroM);
         continue;
       }
-      const ta = 0.19;
+      const ta = 0.14;
       const dist = lf.spd * (dt - ta * (1 - Math.exp(-dt / ta)));
       const s = lf.s0 - dist;
       if (s < D.Y0 - 2.6) {
@@ -950,10 +962,9 @@ function updateLeafGust(t) {
       const doorLift = 0.15 * sm5(clamp((6.8 - s) / 3.8, 0, 1)) * lf.liftK;
       const y = Math.max(0.032, lf.y0 + hop + doorLift);
 
-      // Smooth fade-in on gust catch + smooth shrink outside doorway
-      const scIn = sm3(dt / 0.18);
+      // Full-sized off-camera entry (ZERO in-frame scale pop!) + smooth shrink outside sunlit doorway
       const scOut = sm3(clamp((s - (D.Y0 - 2.6)) / 1.4, 0, 1));
-      const sc = lf.sc * scIn * scOut;
+      const sc = lf.sc * scOut;
 
       // Natural aerodynamic tumbling & banking along the corridor wind axis (+Z = -s)
       const ph = dt * lf.waveFreq + lf.wavePh;
@@ -1002,8 +1013,9 @@ function updateBirds(t) {
     const ax = dt > hT ? (pn.x - 2 * p.x + pp.x) / (hT * hT) : 0;
     const bankDeg = clamp(-(vx * 16 + ax * 22) * -flightDir, -26, 26);
     r.bank.rotation.set(0, 0, THREE.MathUtils.degToRad(bankDeg));
-    const grow = sm3(ramp(tf, r.spec.t0, r.spec.t0 + 0.34));
-    const minSc = r.spec.patch ? 0.85 : 0.62;
+    // Hero painted dove `d1` grows smoothly off `003`; birds 2–6 launch full-size behind the camera (ZERO pop-in!)
+    const grow = r.spec.patch ? sm3(ramp(tf, r.spec.t0, r.spec.t0 + 0.34)) : 1.0;
+    const minSc = r.spec.patch ? 0.85 : 1.0;
     r.carrier.scale.setScalar((minSc + (1.0 - minSc) * grow) * r.spec.sz * r.baseScale);
 
     const wTakeoff = (r.acts.takeoff && r.spec.patch) ? (1 - sm3(dt / 0.85)) : 0;
@@ -1023,11 +1035,6 @@ function updateBirds(t) {
 }
 
 // ---------------------------------------------------------------- per-frame state
-const ent = hall.entranceLeaves || [];
-let firstOut = Infinity;
-if (flightDir < 0 && ent.length) {
-  for (const b of SPECS) for (let tf = b.t0; tf < 30; tf += 0.05) { if (birdBase(b, tf).s < D.Y0 + 0.2) { firstOut = Math.min(firstOut, tf); break; } }
-}
 
 const $ = id => document.getElementById(id), $beat = $('beat');
 let wallClock = 0;
@@ -1435,7 +1442,7 @@ window.__herenciaAudio = ambientAudio;
     const syncSoundBtns = (st) => {
       const lbl = st.muted ? '♪ Muted' : (st.waitingGesture ? '♪ Arabesca (Tap)' : '♪ Arabesca ★');
       if ($snd) { $snd.textContent = lbl; $snd.classList.toggle('on', !st.muted); }
-      if ($cleanSnd) { $cleanSnd.textContent = st.muted ? '♪ Muted' : '♪ Arabesca'; }
+      if ($cleanSnd) { $cleanSnd.textContent = st.muted ? '♪ Muted' : (st.waitingGesture ? '♪ Arabesca (Tap)' : '♪ Arabesca'); }
     };
     ambientAudio.onStateChange(syncSoundBtns);
     if ($snd) $snd.onclick = () => ambientAudio.toggle();
@@ -1504,7 +1511,7 @@ window.__setRoomView = (idx) => { setRoomViewIdx(idx); evaluate(t, t); hall.rend
 window.__setArchMode = (m) => { archMode = +m; syncArchUI(); evaluate(t, t); hall.render(camera); };
 window.__setArchBrick = (on) => { archMode = on ? 1 : 0; syncArchUI(); evaluate(t, t); hall.render(camera); };
 window.__setPaintMode = (m) => { paintOn = m > 0; if (paintOn) { ensurePaintAssets(PU); PU.uPaintMode.value = m; } $('bPaint').classList.toggle('on', paintOn); hall.markReflDirty(); evaluate(t, t); hall.render(camera); };
-window.__setFlightMode = (fm) => { flightMode = fm; TL = buildTimeline(L, { flightMode }); window.__TL = TL; evaluate(t, t); hall.render(camera); };
+window.__setFlightMode = (fm) => { flightMode = fm; TL = buildTimeline(L, { flightMode }); buildLeafGustSpecs(); window.__TL = TL; evaluate(t, t); hall.render(camera); };
 window.__setCloths = async (on) => { clothsOn = !!on; $('bCloths').classList.toggle('on', clothsOn); if (clothsOn) await ensureBlueCloths(); hall.markReflDirty(); evaluate(t, t); hall.render(camera); };
 window.__setMock = (patch) => { mockMgr.applyState(patch); syncMockButtons(); evaluate(t, t); hall.render(camera); };
 window.__mockMgr = mockMgr;

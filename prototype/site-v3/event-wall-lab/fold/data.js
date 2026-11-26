@@ -55,7 +55,7 @@ export const FOLD_EVENTS = [
     sub: 'Threads of Memory',
     kind: 'Painting Exhibition',
     location: 'Manhattan, Queens · NYC · May 16–31, 2026',
-    filmUrl: '/herencia-hallway/townhall-revival/film.html?clean=1&autoplay=1&birds=1&paint=0&cloths=1',
+    filmUrl: '/herencia-hallway/townhall-revival/film.html?clean=1&autoplay=1&birds=1&paint=0&cloths=1&v=20261126f',
     stillPlate: '/event-media/assets/herencia-viva/final-13.jpg',
     poster: '/landing-v3/img/herencia-viva-ayllu.png',
     posterW: 1080,
