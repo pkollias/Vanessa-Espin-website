@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { SITE, EXHIBITIONS, BIO, CONCEPTS, PORTALS, ABOUT_CONCEPTS, INTRO_CONCEPTS, COPY_MODES, SCROLL_CUES, COLOR_MODES, POSTER_SWATCHES, CARD_MOODS } from './data.js?v=20261124m';
+import { SITE, EXHIBITIONS, BIO, CONCEPTS, PORTALS, ABOUT_CONCEPTS, INTRO_CONCEPTS, COPY_MODES, SCROLL_CUES, COLOR_MODES, POSTER_SWATCHES, CARD_MOODS } from './data.js?v=20261126e';
 import { createAboutController } from './about-concepts.js?v=20261124m';
 import { createIntroController } from './intro-concepts.js?v=20261123d';
 import { createScrollCueController } from './scroll-cues.js?v=20261123d';

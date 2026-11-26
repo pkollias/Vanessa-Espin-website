@@ -162,8 +162,8 @@ export const BIO = {
   letterHeading: 'For Clients & Collaborators',
   letterSalutation: 'Working With Vanessa',
   letterBody: 'Vanessa is a creative dedicated to organizing, clarifying, and positioning personal and experiential brands with purpose. Whether you’re an individual, artist, founder, or cultural initiative, Vanessa helps your story become something people can understand, remember, and connect with.',
-  // Paste an opaque Formspree / Web3Forms relay endpoint (e.g. 'https://formspree.io/f/xxxxxxxx') before launch — zero email exposed in code!
-  contactRelayUrl: '',
+  // Opaque Formspree relay endpoint — keeps Vanessa's real email address completely out of public code!
+  contactRelayUrl: 'https://formspree.io/f/mrpqjdre',
   linkedin: 'https://www.linkedin.com/in/vanessaespin',
 };
 
