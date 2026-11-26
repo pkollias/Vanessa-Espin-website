@@ -60,12 +60,19 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   opacity: 0.042; mix-blend-mode: multiply;
 }
 .stage-boot-loader__seam {
-  position: absolute; top: 15%; bottom: 15%; left: 50%; width: 1px;
+  position: absolute; top: 15%; bottom: 17%; left: 50%; width: 1px;
   transform: translateX(-50%); background: var(--fl-rule);
 }
 .stage-boot-loader__fill {
   position: absolute; left: -0.5px; bottom: 0; width: 2px; height: 5%;
   background: var(--fl-accent); box-shadow: 0 0 14px var(--fl-accent);
+}
+.stage-boot-loader__loading {
+  position: absolute; left: 50%; top: calc(83% + 14px);
+  transform: translateX(-50%);
+  font: 500 clamp(8px, 0.78vw, 9.5px)/1 var(--sans);
+  letter-spacing: 0.26em; text-transform: uppercase;
+  color: rgba(226, 220, 212, 0.44); white-space: nowrap;
 }
 .stage-boot-loader__flank {
   position: absolute; top: 50%; transform: translateY(-50%);
@@ -89,6 +96,12 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .stage-boot-loader__hair {
   display: block; margin-top: 14px; width: 52px; height: 1px;
   background: var(--fl-accent); opacity: 0.78; transform: scaleX(0.22);
+}
+.stage-boot-loader__l03-loading {
+  display: block; margin-top: 11px;
+  font: 500 clamp(8px, 0.78vw, 9.5px)/1 var(--sans);
+  letter-spacing: 0.26em; text-transform: uppercase;
+  color: rgba(226, 220, 212, 0.44);
 }
 .film-nav {
   position: fixed; top: 18px; left: 20px; right: 20px; z-index: 65;

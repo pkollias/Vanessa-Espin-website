@@ -1756,9 +1756,9 @@ function buildStageBootLoader(ex, mode) {
   el.style.setProperty('--fl-rule', th.rule);
   el.style.setProperty('--fl-accent', th.accent);
   if (mode === 'l03') {
-    el.innerHTML = `<div class="stage-boot-loader__grain"></div><div class="stage-boot-loader__l03"><h2 class="stage-boot-loader__word">${ex.name}</h2><p class="stage-boot-loader__sub">${ex.sub}</p><span class="stage-boot-loader__hair"></span></div>`;
+    el.innerHTML = `<div class="stage-boot-loader__grain"></div><div class="stage-boot-loader__l03"><h2 class="stage-boot-loader__word">${ex.name}</h2><p class="stage-boot-loader__sub">${ex.sub}</p><span class="stage-boot-loader__hair"></span><span class="stage-boot-loader__l03-loading">Loading</span></div>`;
   } else {
-    el.innerHTML = `<div class="stage-boot-loader__grain"></div><div class="stage-boot-loader__seam"><div class="stage-boot-loader__fill"></div></div><div class="stage-boot-loader__flank stage-boot-loader__flank--r"><h2 class="stage-boot-loader__title">${ex.name}</h2></div>`;
+    el.innerHTML = `<div class="stage-boot-loader__grain"></div><div class="stage-boot-loader__seam"><div class="stage-boot-loader__fill"></div></div><span class="stage-boot-loader__loading">Loading</span><div class="stage-boot-loader__flank stage-boot-loader__flank--r"><h2 class="stage-boot-loader__title">${ex.name}</h2></div>`;
   }
   return el;
 }
