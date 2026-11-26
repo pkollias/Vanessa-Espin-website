@@ -340,9 +340,19 @@ function layout(d) {
 
 const texLoader = new THREE.TextureLoader();
 const loads = [];
+const filmLoadState = (window.__filmLoad = { progress: 0.08, ready: false });
+let loadsDone = 0;
+function trackLoadProgress(p) {
+  p.then(() => {}, () => {}).finally(() => {
+    loadsDone++;
+    const ratio = loadsDone / Math.max(1, loads.length);
+    filmLoadState.progress = Math.max(filmLoadState.progress, 0.10 + 0.68 * ratio);
+  });
+  return p;
+}
 function photo(src) {
   const p = new Promise((res, rej) => texLoader.load(src, (t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = maxAniso; res(t); }, undefined, rej));
-  loads.push(p);
+  loads.push(trackLoadProgress(p));
   return p;
 }
 photo('./floor-strips.jpg').then((t) => { t.colorSpace = THREE.NoColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; floorU.uAtlas.value = t; });
@@ -1992,6 +2002,7 @@ function frame(now) {
   cu.uTime.value = time; cu.uDofScale.value = 2.0;
   cu.uFade.value = (isStaticHold() || MANUAL || isScrubbing) ? 1 : overtureT0 === null ? 0 : clamp((now - overtureT0) / 380);
   pass(compMat, null);
+  if (!filmLoadState.ready) { filmLoadState.progress = 1; filmLoadState.ready = true; }
   if (!MANUAL) requestAnimationFrame(frame);
 }
 
@@ -2064,6 +2075,7 @@ renderIntroLockup(filmTime, isStaticHold());
   const gobos = await gobosP;
   if (gobos) { boards.forEach((b) => { b.goboTex = gobos[b.gobo % gobos.length]; }); POOL.forEach((p) => { p.lamp.l.map = gobos[0]; }); }
   window.__aisle.gobos = gobos;
+  filmLoadState.progress = Math.max(filmLoadState.progress, 0.85);
   if (MANUAL) await filmP;
   renderer.compile(scene, camera);
   // Before the film starts: send every picture to the graphics card and build the fire lens's shader, so that neither
@@ -2074,6 +2086,7 @@ renderIntroLockup(filmTime, isStaticHold());
     fireMat.uniforms.tSrc.value = qRT.texture; pass(fireMat, fireRT);
     renderer.setRenderTarget(null);
   }
+  filmLoadState.progress = Math.max(filmLoadState.progress, 0.96);
   overtureT0 = performance.now(); prev = overtureT0;
   if (MANUAL) { manual.now = overtureT0 + 4000; prev = manual.now - 33; window.__aisle.ready = true; }
   else {

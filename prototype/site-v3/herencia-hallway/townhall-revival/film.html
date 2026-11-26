@@ -1,0 +1,1516 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.ico">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Herencia Viva · Town Hall film (Cycles-Baked HK02)</title>
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+               "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+</script>
+<style>
+html, body { margin:0; height:100%; overflow:hidden; background:#efe9de; font:12px/1.35 -apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif; }
+canvas { display:block; width:100%; height:100%; }
+#mediumBadge {
+  position:fixed; left:12px; top:12px; z-index:10;
+  background:rgba(24,22,19,0.78); color:#f8f5ee; padding:5px 10px; border-radius:6px;
+  font-size:11.5px; font-weight:600; letter-spacing:0.01em; backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,0.18); pointer-events:none;
+}
+#mediumBadge .dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:#4ade80; margin-right:6px; vertical-align:0px; }
+#mediumBadge.live .dot { background:#fbbf24; }
+#hud { position:fixed; left:12px; right:12px; bottom:12px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+  background:rgba(24,22,19,0.86); color:#f8f5ee; padding:8px 12px; border-radius:8px; backdrop-filter: blur(10px); z-index:10; }
+#hud button, #hud a { font:inherit; font-size:11px; padding:4px 8px; border-radius:4px; border:1px solid rgba(255,255,255,0.2);
+  background:rgba(255,255,255,0.08); color:#f8f5ee; cursor:pointer; text-decoration:none; white-space:nowrap; }
+#hud button.on { background:#c96b2c; border-color:#f2a16b; }
+#hud button.sub-m { font-size:10.5px; padding:3px 7px; opacity:0.88; }
+#hud button.sub-m.on { background:#2563eb; border-color:#7cb3ff; opacity:1; }
+#hud button.flt-m { font-size:10.5px; padding:3px 8px; opacity:0.92; }
+#hud button.flt-m.on { background:#0d9488; border-color:#5eead4; opacity:1; font-weight:600; }
+#hud button.jmp-m { font-size:10.5px; padding:3px 7px; background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.26); }
+#hud button.jmp-m:hover, #hud button.flt-m:hover { background:rgba(255,255,255,0.2); }
+.sep { width:1px; height:16px; background:rgba(255,255,255,0.16); margin:0 2px; }
+#play { background:#26824b !important; border-color:#5cd68d !important; font-weight:700; min-width:74px; }
+#scrub { flex:1; min-width:130px; accent-color:#c96b2c; }
+#beat { min-width:155px; color:#d8cfbf; font-size:11.5px; }
+#t { font-variant-numeric:tabular-nums; color:#bfb6a6; min-width:70px; text-align:right; }
+#archLab {
+  position:fixed; left:12px; bottom:96px; z-index:12; width:292px; display:none;
+  background:rgba(24,22,19,0.90); color:#f8f5ee; padding:11px 13px; border-radius:9px;
+  border:1px solid rgba(242,161,107,0.38); backdrop-filter:blur(12px); box-shadow:0 10px 28px rgba(0,0,0,0.32);
+}
+#archLab.open { display:block; }
+#archLab .al-hd { display:flex; justify-content:space-between; align-items:center; font-weight:700; font-size:11.5px; margin-bottom:8px; color:#f7d7bf; }
+#archLab .al-modes { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:9px; }
+#archLab .al-modes button, #archLab .al-ft button {
+  font:inherit; font-size:10.5px; padding:3px 7px; border-radius:4px; cursor:pointer;
+  border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.08); color:#f8f5ee;
+}
+#archLab .al-modes button.on { background:#c96b2c; border-color:#f2a16b; font-weight:600; }
+#archLab .al-row { display:grid; grid-template-columns:108px 1fr 44px; align-items:center; gap:6px; margin:5px 0; font-size:11px; color:#dfd6c7; }
+#archLab .al-row input[type=range] { width:100%; accent-color:#e59563; }
+#archLab .al-val { text-align:right; font-variant-numeric:tabular-nums; color:#f7d7bf; font-size:10.5px; }
+#archLab .al-ft { display:flex; justify-content:space-between; gap:6px; margin-top:8px; padding-top:7px; border-top:1px solid rgba(255,255,255,0.12); }
+#mockLab {
+  position:fixed; right:12px; bottom:96px; z-index:12; width:394px; max-height:calc(100vh - 120px); overflow-y:auto; display:none;
+  background:rgba(20,18,16,0.92); color:#f8f5ee; padding:12px 14px; border-radius:10px;
+  border:1px solid rgba(94,234,212,0.42); backdrop-filter:blur(14px); box-shadow:0 12px 32px rgba(0,0,0,0.40);
+}
+#mockLab.open { display:block; }
+#mockLab .ml-hd { display:flex; justify-content:space-between; align-items:center; font-weight:700; font-size:12px; margin-bottom:8px; color:#99f6e4; }
+#mockLab .ml-sec { margin:7px 0 3px; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:#bfb6a6; }
+#mockLab .ml-pills { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:5px; }
+#mockLab .ml-pills button {
+  font:inherit; font-size:10.5px; padding:3px 7px; border-radius:4px; cursor:pointer;
+  border:1px solid rgba(255,255,255,0.2); background:rgba(255,255,255,0.08); color:#f8f5ee;
+}
+#mockLab .ml-pills button:hover { background:rgba(255,255,255,0.18); }
+#mockLab .ml-pills button.on { background:#0d9488; border-color:#5eead4; font-weight:600; color:#fff; }
+#mockLab .ml-pills button.preset { background:rgba(201,107,44,0.22); border-color:rgba(242,161,107,0.45); }
+#mockLab .ml-pills button.preset.on { background:#c96b2c; border-color:#f2a16b; }
+#mockLab .ml-slider { display:grid; grid-template-columns:94px 1fr 52px; align-items:center; gap:7px; margin:4px 0 6px; font-size:10.5px; color:#dfd6c7; }
+#mockLab .ml-slider input[type=range] { width:100%; accent-color:#5eead4; }
+#mockLab .ml-slider span.v { text-align:right; font-variant-numeric:tabular-nums; color:#99f6e4; font-weight:700; }
+#hud button#bMockLab { background:rgba(13,148,136,0.28); border-color:#5eead4; font-weight:600; }
+#hud button#bMockLab.on { background:#0d9488; border-color:#99f6e4; }
+#cleanSound {
+  position:fixed; right:14px; bottom:14px; z-index:10; display:none;
+  font:inherit; font-size:11px; padding:5px 10px; border-radius:999px;
+  border:1px solid rgba(255,255,255,0.22); background:rgba(24,22,19,0.78);
+  color:#f8f5ee; cursor:pointer; backdrop-filter:blur(8px);
+}
+@media (max-width: 680px) {
+  #hud { left:6px; right:6px; bottom:6px; padding:6px 8px; gap:4px; max-height:34vh; overflow-y:auto; }
+  #hud button, #hud a { font-size:10px; padding:3px 6px; }
+  #beat { display:none; }
+  #mockLab { left:6px; right:6px; width:auto; bottom:118px; max-height:54vh; }
+  #mediumBadge { left:8px; top:8px; font-size:10.5px; padding:4px 8px; }
+}
+body.clean #hud, body.clean #mediumBadge, body.clean #archLab, body.clean #mockLab { display:none !important; }
+body.clean:not(.in-stage):not(.cap-mode) #cleanSound { display:inline-block; }
+.film-grain {
+  position:fixed; inset:-2rem; pointer-events:none; z-index:6;
+  background-image:url('/landing-v3/img/noise.png');
+  background-size:150px 150px;
+  opacity:0.042; mix-blend-mode:multiply;
+}
+body.in-stage .film-grain, body.cap-mode .film-grain { display:none !important; }
+#loading { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; color:#6a6257; font-size:13px; pointer-events:none; }
+</style>
+<style>.cinema-pill, .review-pill, #hud, #hudMin, #mediumBadge, #cleanSound, #archLab, #mockLab, .lab-drawer, .text-studio, .cue-lanes { visibility: hidden !important; pointer-events: none !important; }</style>
+</head>
+<body>
+<div class="film-grain" aria-hidden="true"></div>
+<div id="loading">Loading Cycles-baked HK02 Town Hall…</div>
+<div id="mediumBadge"><span class="dot"></span><span id="mediumText">Cycles-Baked HK02 · 60 fps WebGL</span></div>
+<button id="cleanSound" type="button" title="Granados — Danza Española XII: Arabesca (M to mute)">♪ Arabesca</button>
+
+<div id="archLab">
+  <div class="al-hd">
+    <span>HK02 Arch Wallpaper &amp; Trim Lab</span>
+    <button id="alClose" type="button" style="background:none;border:0;color:#bfb6a6;cursor:pointer;font-size:13px;">✕</button>
+  </div>
+  <div class="al-modes">
+    <button type="button" data-amode="1" class="on">Wallpaper ★</button>
+    <button type="button" data-amode="2">Fluted Peach</button>
+    <button type="button" data-amode="3">Champagne Linen</button>
+    <button type="button" data-amode="4">Terracotta</button>
+    <button type="button" data-amode="0">White Plaster</button>
+  </div>
+  <div class="al-row">
+    <span>Stripe Width</span>
+    <input type="range" id="alPitch" min="11" max="32" step="0.4" value="19.6">
+    <span class="al-val" id="alPitchV">19.6cm</span>
+  </div>
+  <div class="al-row">
+    <span>Peach Warmth</span>
+    <input type="range" id="alWarm" min="25" max="145" step="5" value="100">
+    <span class="al-val" id="alWarmV">100%</span>
+  </div>
+  <div class="al-row">
+    <span>Stripe / Tooth</span>
+    <input type="range" id="alTex" min="0" max="140" step="5" value="100">
+    <span class="al-val" id="alTexV">100%</span>
+  </div>
+  <div class="al-row">
+    <span>Curved Arch Rim</span>
+    <input type="range" id="alRim" min="0" max="130" step="5" value="100">
+    <span class="al-val" id="alRimV">100%</span>
+  </div>
+  <div class="al-ft">
+    <button type="button" id="alZoom">Zoom to Arch</button>
+    <button type="button" id="alReset">Reset HK02 ★</button>
+  </div>
+</div>
+
+<div id="mockLab">
+  <div class="ml-hd">
+    <span>✦ 1862 Town Hall Light Balance, Warmth, Sconce &amp; Trim Lab</span>
+    <button id="mlClose" type="button" style="background:none;border:0;color:#bfb6a6;cursor:pointer;font-size:13px;">✕</button>
+  </div>
+  <div class="ml-sec">1-Click Town Hall Combos</div>
+  <div class="ml-pills" id="mlPresets">
+    <button type="button" class="preset on" data-mpreset="thDefault">Town Hall · S5 Plaster Uplight ★</button>
+    <button type="button" class="preset" data-mpreset="thBlackBar">Town Hall · Black Horiz Bars</button>
+    <button type="button" class="preset" data-mpreset="thGlobe">Town Hall · S4 Opaline Globe</button>
+    <button type="button" class="preset" data-mpreset="thSaddle">Saddle-Chestnut + S5 Uplight</button>
+  </div>
+
+  <div class="ml-sec">1 · Sconces &amp; Dual Ceiling Light Rods</div>
+  <div class="ml-pills">
+    <button type="button" data-mk="sconces" data-mv="plaster" class="on">S5 · Plaster Uplight ★</button>
+    <button type="button" data-mk="sconces" data-mv="alabaster">S1 · Fluted Alabaster</button>
+    <button type="button" data-mk="sconces" data-mv="globe">S4 · Ivory Rosette + Globe</button>
+    <button type="button" data-mk="sconces" data-mv="black_bar">Black Horiz Bar</button>
+    <button type="button" data-mk="sconces" data-mv="s4_bars">S4 + Black Bars</button>
+    <button type="button" data-mk="sconces" data-mv="github_brass">GitHub Brass Bell</button>
+    <button type="button" data-mk="sconces" data-mv="off">Sconces Off</button>
+  </div>
+  <div class="ml-pills">
+    <button type="button" data-mk="ceilingSpine" data-mv="1" class="on">Ceiling Rods + L/R Spots ★</button>
+    <button type="button" data-mk="ceilingSpine" data-mv="0">Rods Off</button>
+    <button type="button" data-mk="frameAccents" data-mv="1" class="on">Brass+Floater Frames ★</button>
+    <button type="button" data-mk="cards" data-mv="1" class="on">Gallery Cards ★</button>
+  </div>
+
+  <div class="ml-sec">2 · Darkened 1862 Town Hall Wood Strip Floors</div>
+  <div class="ml-pills">
+    <button type="button" data-mk="floorMode" data-mv="0" class="on">F1 · Dark Cherry-Cognac ★</button>
+    <button type="button" data-mk="floorMode" data-mv="1">F2 · Saddle-Chestnut</button>
+    <button type="button" data-mk="floorMode" data-mv="2">F3 · Aged Heart-Pine</button>
+    <button type="button" data-mk="floorMode" data-mv="3">F4 · HK02 Wide Honey</button>
+  </div>
+
+  <div class="ml-sec">3 · Gallery White Plaster, Whiteness &amp; Trim Accents</div>
+  <div class="ml-pills">
+    <button type="button" data-mk="wallGrade" data-mv="3" class="on">Crisp Gallery White ★</button>
+    <button type="button" data-mk="wallGrade" data-mv="2">Warm Chalk-Ivory</button>
+    <button type="button" data-mk="wallGrade" data-mv="1">HK02 Alabaster</button>
+    <button type="button" data-mk="wallGrade" data-mv="4">Daylight Gradient</button>
+  </div>
+  <div class="ml-slider">
+    <span>Wall Whiteness</span>
+    <input type="range" id="mlWhiteSlider" min="0.80" max="1.60" step="0.02" value="1.28">
+    <span class="v" id="mlWhiteVal">128%</span>
+  </div>
+  <div class="ml-pills">
+    <button type="button" data-mk="trimPaint" data-mv="chalk" class="on">Trim: Crisp Chalk ★</button>
+    <button type="button" data-mk="trimPaint" data-mv="pearl">Trim: Soft Pearl-White</button>
+    <button type="button" data-mk="trimPaint" data-mv="putty">Trim: Warm Putty (-8%)</button>
+  </div>
+
+  <div class="ml-sec">4 · Parameterized Light Balance, Warmth &amp; Split Shadows</div>
+  <div class="ml-slider">
+    <span>Ambient Light</span>
+    <input type="range" id="mlGainSlider" min="0.35" max="1.15" step="0.01" value="0.39">
+    <span class="v" id="mlGainVal">39%</span>
+  </div>
+  <div class="ml-slider">
+    <span>Wall Fixtures</span>
+    <input type="range" id="mlSconceSlider" min="0.00" max="2.50" step="0.05" value="2.15">
+    <span class="v" id="mlSconceVal">215%</span>
+  </div>
+  <div class="ml-slider">
+    <span>Ceiling Spots</span>
+    <input type="range" id="mlSpotSlider" min="0.00" max="2.50" step="0.05" value="1.05">
+    <span class="v" id="mlSpotVal">105%</span>
+  </div>
+  <div class="ml-slider">
+    <span>Light Warmth</span>
+    <input type="range" id="mlWarmSlider" min="0.00" max="1.00" step="0.01" value="1.00">
+    <span class="v" id="mlWarmVal">2300K</span>
+  </div>
+  <div class="ml-slider">
+    <span>Door/Trim Shad</span>
+    <input type="range" id="mlShadSlider" min="0.00" max="2.00" step="0.02" value="0.84">
+    <span class="v" id="mlShadVal">84%</span>
+  </div>
+  <div class="ml-slider">
+    <span>Ceiling Pattern</span>
+    <input type="range" id="mlCeilShadSlider" min="0.00" max="2.20" step="0.05" value="1.80">
+    <span class="v" id="mlCeilShadVal">180%</span>
+  </div>
+  <div class="ml-slider">
+    <span>Floor Blacks</span>
+    <input type="range" id="mlFloorSlider" min="0.00" max="2.00" step="0.05" value="0.70">
+    <span class="v" id="mlFloorVal">70%</span>
+  </div>
+  <div class="ml-slider">
+    <span>Ceiling Height</span>
+    <input type="range" id="mlCeilSlider" min="4.40" max="5.35" step="0.02" value="5.06">
+    <span class="v" id="mlCeilVal">5.06 m</span>
+  </div>
+</div>
+
+<div id="hud">
+  <button class="flt-m on" data-rview="0" title="Tall 4.86 m, narrowed 3.44 m Flushing Town Hall corridor with Crisp Gallery White walls, Black Horiz Bars &amp; darkened cherry strip floor">1 · Corridor ★</button>
+  <button class="flt-m" data-rview="1" title="End poster view framing both the 015 poster stand AND the 4.86 m pressed-tin ceiling &amp; light rod behind it">2 · Poster &amp; Ceiling ★</button>
+  <button class="flt-m" data-rview="2" title="Close inspection of the 1862 arched 5-spoke fanlight door, deep-shadow fluted pilasters, impost dentils, 6-panel bolections &amp; 5-step baseboard">3 · Door &amp; Shadows ★</button>
+  <button class="flt-m" data-rview="3" title="Narrowed 2.48 m alcove framing Women 003 (Left, blinks) &amp; 010 (Right, eyes follow you) across from each other + Romanesque Bifora window">4 · Women &amp; Bifora ★</button>
+  <button class="flt-m" data-rview="4" title="Upward inspection of the 4.86 m 3D pressed-tin ceiling, central dark-slot track spine &amp; L/R ivory-brass spots">5 · Ceiling Rod ★</button>
+  <button class="flt-m" data-rview="5" title="Close view of flanking sconce, antique-brass inner fillet + shadow-gap museum frame &amp; gallery card">6 · Sconces &amp; Frame ★</button>
+  <button id="bArch" class="jmp-m" title="Cycle arch finish (default: Crisp Gallery Plaster)">Arch: Plaster ★</button>
+  <button id="bArchLab" class="jmp-m" title="Open optional Arch Finish sliders">⚙ Arch Lab</button>
+  <button id="bMockLab" class="jmp-m" title="Open Town Hall Lab: Light Balance, Warmth, Shadow Depth, Sconces, Darkened Wood Floors &amp; Trim">✦ Town Hall Lab ★</button>
+  <span class="sep"></span>
+  <button id="play" title="Play walk (or drag canvas + scroll/WASD to inspect room freely)">▶ Play</button>
+  <button id="bSound" class="on" title="Enrique Granados — Danza Española, Op. 37: XII. Arabesca (M to mute)">♪ Arabesca ★</button>
+  <input type="range" id="scrub" min="0" max="1000" value="0">
+  <span id="t">HK02 Room</span>
+  <span id="beat">Drag to look · Scroll/WASD to step</span>
+  <span class="sep"></span>
+  <button id="bCloths" title="Optional moving cloths on 085 &amp; 087 (off while inspecting HK02 room)">Blue Cloths</button>
+  <button id="bBirds" title="Optional 3D birds (off while inspecting HK02 room)">Birds</button>
+  <button id="bPaint" title="Optional wall colour wave (off while inspecting HK02 room)">Colours</button>
+  <a href="./layout.html" target="_blank">Edit layout ↗</a>
+  <button id="bHide" title="H">Hide (H)</button>
+</div>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+import { HK02Hall, DEFAULT_LAYOUT, CLASSIC_HK02_LAYOUT, ARCH_FINISH_MODES, upgradeSavedLayoutIfPrePolish, cloneLayout, dims, wallX, makeArtMaterial, makeStripArtMaterial } from './hk02/scene.js?v=20261126v37';
+import { HK02MockManager } from './hk02/mocks.js?v=20261126v37';
+import { buildTimeline, sm3, sm5, ramp, FLIGHT7_PACE } from './hk02/path.js?v=20261126v37';
+import { makePaintUniforms, ensurePaintAssets, syncPaintShields, installPaint } from './hk02/paint.js?v=20261126v37';
+import { createHerenciaLogoOpener } from './hk02/logo-opener.js?v=20261126v37';
+import { createHerenciaAudio } from '/herencia-hallway/audio/ambient-audio.js?v=20261124c';
+
+const Q = new URLSearchParams(location.search);
+if (Q.get('hud') === '0' || Q.get('clean') === '1') document.body.classList.add('clean');
+if (Q.has('cap')) document.body.classList.add('cap-mode');
+const parentOwnsAudio = (() => {
+  try { return window.parent !== window && !!window.parent.__herenciaAudioOwned; } catch { return false; }
+})();
+if (parentOwnsAudio) document.body.classList.add('in-stage');
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+// Kick off renderer, parallel Cycles room fetch (`HK02Hall`), AND saved layout check simultaneously at t = 0 ms!
+const layoutPromise = (async () => {
+  if (Q.get('classic') === '1') return cloneLayout(CLASSIC_HK02_LAYOUT);
+  if (Q.get('default') === '1') return cloneLayout(DEFAULT_LAYOUT);
+  try {
+    const st = await (await fetch('/api/herencia-townhall-layout')).json();
+    const pick = Q.get('v') ? st[Q.get('v')] : st.current;
+    if (pick) return upgradeSavedLayoutIfPrePolish(pick);
+  } catch {}
+  return cloneLayout(DEFAULT_LAYOUT);
+})();
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: Q.has('cap') });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+import('/shared/film-pace.js').then(({ keepPace }) => keepPace({ renderer, min: 1.0 })).catch(() => {});
+document.body.prepend(renderer.domElement);
+
+const filmLoadState = (window.__filmLoad = { progress: 0.08, ready: false });
+THREE.DefaultLoadingManager.onProgress = (_url, loaded, total) => {
+  if (total > 0) filmLoadState.progress = Math.max(filmLoadState.progress, 0.10 + 0.62 * Math.min(1, loaded / total));
+};
+THREE.DefaultLoadingManager.onLoad = () => {
+  filmLoadState.progress = Math.max(filmLoadState.progress, 0.74);
+};
+const logoOpener = createHerenciaLogoOpener(renderer.domElement, { enabled: Q.get('logo') !== '0' });
+logoOpener.syncSavedConfig();
+window.__logoOpener = logoOpener;
+
+const PU = makePaintUniforms();
+if (Q.has('sat')) PU.uPaintSat.value = +Q.get('sat');
+if (Q.has('pmode')) PU.uPaintMode.value = +Q.get('pmode');
+
+const hall = new HK02Hall(renderer, { paintUniforms: PU, forceLive: Q.get('live') === '1' });
+installPaint(hall.M.wall, PU);
+
+let L = await layoutPromise;
+if (Q.has('vestWin')) L.hall.vestRightWindow = Q.get('vestWin') !== '0';
+if (Q.has('arch')) L.hall.archFinish = Q.get('arch');
+if (Q.has('doorSwing')) L.doors.forEach(d => { d.swing = Q.get('doorSwing'); });
+if (Q.has('doorOpen')) L.doors.filter(d => d.wall === 'R').forEach(d => { d.open = +Q.get('doorOpen'); });
+syncPaintShields(PU, L);
+
+await hall.build(L);
+const mockMgr = new HK02MockManager(hall, L);
+hall.rebuildReflCaches();
+if (Q.has('plank') && hall.bakedU) hall.bakedU.uPlankAcross.value = Q.get('plank') === 'long' ? 0.0 : 1.0;
+
+// Update Medium Badge truthfully
+const $badge = document.getElementById('mediumBadge');
+const $mText = document.getElementById('mediumText');
+if (hall.isUsingBaked) {
+  $badge.classList.remove('live');
+  $mText.textContent = 'Cycles-Baked HK02 · 60 fps WebGL';
+} else {
+  $badge.classList.add('live');
+  $mText.textContent = 'Live Unbaked Preview · 60 fps WebGL';
+}
+
+const D = dims(L);
+PU.uPaintBandA.value = D.Y0; PU.uPaintBandB.value = D.VS1;
+const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.04, 80);
+addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); });
+
+let flightMode = Q.has('flight') ? +Q.get('flight') : 1;
+let TL = buildTimeline(L, { flightMode });
+const flightDir = Math.sign(L.cam.end.s - L.cam.blink.s) || -1;
+
+// ---------------------------------------------------------------- Moving Blue Cloths (`085` & `087` `s3_windy` — ON by default, activated after the blink!)
+const STRIP_DIR = './baked/art/';
+const CLOTH_META = {
+  '085': { webWH: [865, 924], bbox: [32, 141, 732, 783], phase: 0 },
+  '087': { webWH: [845, 924], bbox: [0, 149, 845, 733],  phase: 9 },
+};
+let clothsOn = Q.get('cloths') !== '0';
+let manualClothsPreview = false;
+const livingCloths = [];
+let clothsPromise = null;
+
+function ensureBlueCloths() {
+  if (clothsPromise) return clothsPromise;
+  const tl = new THREE.TextureLoader();
+  clothsPromise = Promise.all(Object.entries(CLOTH_META).map(async ([id, meta]) => {
+    const am = hall.artMeshes[id];
+    if (!am) return;
+    try {
+      const stripTex = await new Promise((res, rej) => {
+        tl.load(`${STRIP_DIR}${id}_s3_strip.webp?v=20261125v19`, tx => {
+          tx.colorSpace = THREE.SRGBColorSpace;
+          tx.generateMipmaps = false;
+          tx.minFilter = THREE.LinearFilter;
+          tx.magFilter = THREE.LinearFilter;
+          res(tx);
+        }, undefined, rej);
+      });
+      renderer.initTexture(stripTex);
+      const [Wweb, Hweb] = meta.webWH;
+      const [bx, by, bw, bh] = meta.bbox;
+      const subW = am.w * (bw / Wweb);
+      const subH = am.h * (bh / Hweb);
+      const mat = makeStripArtMaterial(stripTex);
+      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(subW, subH), mat);
+      mesh.position.set(
+        -am.w * 0.5 + ((bx + bw * 0.5) / Wweb) * am.w,
+         am.h * 0.5 - ((by + bh * 0.5) / Hweb) * am.h,
+         0.0536
+      );
+      mesh.userData.noRefl = true;
+      mesh.visible = false;
+      am.group.add(mesh);
+      livingCloths.push({ id, mesh, cellU: mat.userData.uStripCell.value, phase: meta.phase, drawn: -1 });
+    } catch (e) {
+      console.warn('Blue cloth strip fallback:', id, e);
+    }
+  })).then(async () => {
+    hall.rebuildReflCaches();
+    try { await renderer.compileAsync(hall.scene, camera); } catch {}
+    hall.markReflDirty();
+  });
+  return clothsPromise;
+}
+if (clothsOn) await ensureBlueCloths();
+
+function updateBlueCloths(tFilm, wallClockSec) {
+  if (!livingCloths.length) return;
+  const tf = (tFilm - TL.T_BLINK) * FLIGHT7_PACE;
+  // Activated right after 003 blinks (`tf >= 0.52`, simultaneous with the awakening sequence)!
+  const activeNow = clothsOn && (manualPose ? manualClothsPreview : tf >= 0.52);
+  const animClock = manualPose ? wallClockSec : Math.max(0, tFilm - TL.T_BLINK);
+  const baseFrame = Math.floor(animClock * 12.0);
+  for (const lc of livingCloths) {
+    lc.mesh.visible = activeNow;
+    if (!activeNow) continue;
+    const fr = ((baseFrame + lc.phase) % 24 + 24) % 24;
+    if (fr !== lc.drawn) {
+      lc.drawn = fr;
+      lc.cellU.set(fr % 6, Math.floor(fr / 6));
+    }
+  }
+}
+
+// ---------------------------------------------------------------- Eyes + painted doves (`003` Left blinks & activates; `010` Right continuously tracks subject!)
+const KIT = '/herencia-hallway/film-v2/opt/kits/';
+const EYEBOX = { '003': [814, 877, 550, 87], '010': [736, 882, 542, 90] };
+const ARTPX = { '003': [2036, 2200], '010': [2054, 2200] };
+const PATCH = { d1: [1651, 1335, 385, 632], d2: [270, 1467, 311, 229], d4: [599, 1196, 258, 361] };
+const loadImg = src => new Promise((res, rej) => { const i = new Image(); i.crossOrigin = 'anonymous'; i.onload = () => res(i); i.onerror = rej; i.src = src; });
+const women = {};
+let womenPromise = null;
+
+function plateMesh(id, box, tex, customMat = null) {
+  const am = hall.artMeshes[id]; const [W, H] = ARTPX[id]; const [bx, by, bw, bh] = box;
+  const m = new THREE.Mesh(
+    new THREE.PlaneGeometry(am.w * bw / W, am.h * bh / H),
+    customMat || makeArtMaterial(tex, { polygonOffset: true, frameShadow: false })
+  );
+  m.position.set(-am.w / 2 + (bx + bw / 2) / W * am.w, am.h / 2 - (by + bh / 2) / H * am.h, 0.0532);
+  m.userData.noRefl = true;
+  m.visible = false; am.group.add(m); return m;
+}
+function canvasTex(base, origWH, box, over, row, rowH) {
+  const [W, H] = origWH;
+  const [bx, by, bw, bh] = box;
+  const sx = base.naturalWidth / W, sy = base.naturalHeight / H;
+  const c = document.createElement('canvas'); c.width = bw; c.height = bh;
+  const g = c.getContext('2d');
+  g.drawImage(base, bx * sx, by * sy, bw * sx, bh * sy, 0, 0, bw, bh);
+  if (row !== undefined && over) g.drawImage(over, 0, row * rowH, bw, rowH, 0, 0, bw, bh);
+  else if (over) g.drawImage(over, 0, 0, bw, bh);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.generateMipmaps = false;
+  t.minFilter = THREE.LinearFilter;
+  t.magFilter = THREE.LinearFilter;
+  return t;
+}
+
+// Single 7-row vertical atlas (`550 x 609`, no mips) + uniform `uRowIdx` shader for `003` (Left woman):
+// Mesh stays `visible = true` at all times (`uRowIdx = 0` = base gaze, `1..6` = turn + blink), so `T_BLINK` has
+// ZERO texture swaps, ZERO visibility toggles, and ZERO `material.needsUpdate = true` shader re-binds!
+function makeBlinkEyeMaterial(base, origWH, box, over) {
+  const [W, H] = origWH;
+  const [bx, by, bw, bh] = box;
+  const sx = base.naturalWidth / W, sy = base.naturalHeight / H;
+  const rowH = over.height / 6;
+  const c = document.createElement('canvas');
+  c.width = bw;
+  c.height = bh * 7;
+  const g = c.getContext('2d');
+  for (let r = 0; r < 7; r++) {
+    const yOff = r * bh;
+    g.drawImage(base, bx * sx, by * sy, bw * sx, bh * sy, 0, yOff, bw, bh);
+    if (r > 0) g.drawImage(over, 0, (r - 1) * rowH, bw, rowH, 0, yOff, bw, bh);
+  }
+  const atlas = new THREE.CanvasTexture(c);
+  atlas.colorSpace = THREE.SRGBColorSpace;
+  atlas.minFilter = THREE.LinearFilter;
+  atlas.magFilter = THREE.LinearFilter;
+  atlas.generateMipmaps = false;
+
+  const uRowIdx = { value: 0.0 };
+  const mat = new THREE.ShaderMaterial({
+    uniforms: { tAtlas: { value: atlas }, uRowIdx },
+    polygonOffset: true,
+    polygonOffsetFactor: -2,
+    polygonOffsetUnits: -2,
+    toneMapped: false,
+    vertexShader: /* glsl */`
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: /* glsl */`
+      uniform sampler2D tAtlas;
+      uniform float uRowIdx;
+      varying vec2 vUv;
+      void main() {
+        float r = clamp(floor(uRowIdx + 0.5), 0.0, 6.0);
+        float vLocal = clamp(vUv.y, 0.012, 0.988);
+        float vAtlas = (6.0 - r + vLocal) / 7.0;
+        // WebGL2 SRGB8_ALPHA8 CanvasTexture already decodes sRGB -> linear on sample; apply exact makeArtMaterial pigment balance!
+        vec3 linCol = texture2D(tAtlas, vec2(clamp(vUv.x, 0.003, 0.997), vAtlas)).rgb * vec3(1.004, 1.000, 0.992);
+        gl_FragColor = vec4(clamp(linCol, 0.0, 1.0), 1.0);
+        #include <colorspace_fragment>
+      }
+    `,
+  });
+  mat.userData.uRowIdx = uRowIdx;
+  mat.userData.atlas = atlas;
+  return mat;
+}
+
+// Builds a 5-row vertical atlas (542 x 450) of `010`'s 5 Gemini-painted open-eye gaze states (`row 0` = far-left .. `row 4` = far-right)
+// and a 60 fps continuous cross-fading + masked iris micro-pursuit shader (`makeTrackingEyeMaterial`) so `010` smoothly follows
+// the 3D subject (`camera.position`) across the alcove without ever blinking or shifting her eyelids!
+function makeTrackingEyeMaterial(base, origWH, box, over) {
+  const [W, H] = origWH;
+  const [bx, by, bw, bh] = box;
+  const sx = base.naturalWidth / W, sy = base.naturalHeight / H;
+  const rowH = over.height / 6;
+  const c = document.createElement('canvas');
+  c.width = bw;
+  c.height = bh * 5;
+  const g = c.getContext('2d');
+  // Row 0 (top of canvas) = original base gaze; Rows 1..4 = Gemini gaze progression 0..3
+  for (let r = 0; r < 5; r++) {
+    const yOff = r * bh;
+    g.drawImage(base, bx * sx, by * sy, bw * sx, bh * sy, 0, yOff, bw, bh);
+    if (r > 0) {
+      g.drawImage(over, 0, (r - 1) * rowH, bw, rowH, 0, yOff, bw, bh);
+    }
+  }
+  const atlas = new THREE.CanvasTexture(c);
+  atlas.colorSpace = THREE.SRGBColorSpace;
+  atlas.minFilter = THREE.LinearFilter;
+  atlas.magFilter = THREE.LinearFilter;
+  atlas.generateMipmaps = false;
+
+  const uGazeIdx   = { value: 2.0 };                    // continuous [0.0 .. 4.0] across 5 painted gaze frames
+  const uIrisShift = { value: new THREE.Vector2(0, 0) }; // masked sub-pixel iris pursuit inside sclera apertures
+
+  const mat = new THREE.ShaderMaterial({
+    uniforms: {
+      tAtlas:     { value: atlas },
+      uGazeIdx,
+      uIrisShift,
+    },
+    polygonOffset: true,
+    polygonOffsetFactor: -2,
+    polygonOffsetUnits: -2,
+    toneMapped: false,
+    vertexShader: /* glsl */`
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: /* glsl */`
+      uniform sampler2D tAtlas;
+      uniform float uGazeIdx;
+      uniform vec2 uIrisShift;
+      varying vec2 vUv;
+
+      float eyeApertureMask(vec2 uv) {
+        // Exact sclera/iris apertures of 010 (542 x 90 plate); 0.0 on eyelids, nose bridge & border!
+        vec2 dL = (uv - vec2(0.202, 0.49)) / vec2(0.142, 0.32);
+        vec2 dR = (uv - vec2(0.822, 0.49)) / vec2(0.142, 0.32);
+        float mL = 1.0 - smoothstep(0.28, 0.98, dot(dL, dL));
+        float mR = 1.0 - smoothstep(0.28, 0.98, dot(dR, dR));
+        float edgeSafe = smoothstep(0.02, 0.08, min(min(uv.x, 1.0 - uv.x), min(uv.y, 1.0 - uv.y)));
+        return max(mL, mR) * edgeSafe;
+      }
+
+      vec3 sampleRow(float rowIdx, vec2 uv) {
+        // Canvas row 0 is at top -> flipY=true puts row r in v range [(4.0 - r)/5.0 .. (5.0 - r)/5.0]
+        float vLocal = clamp(uv.y, 0.012, 0.988);
+        float vAtlas = (4.0 - rowIdx + vLocal) / 5.0;
+        return texture2D(tAtlas, vec2(clamp(uv.x, 0.003, 0.997), vAtlas)).rgb;
+      }
+
+      void main() {
+        float mask = eyeApertureMask(vUv);
+        vec2 uvSample = vUv - uIrisShift * mask;
+        float g = clamp(uGazeIdx, 0.0, 4.0);
+        float r0 = floor(g);
+        float r1 = min(4.0, r0 + 1.0);
+        float f  = g - r0;
+        // WebGL2 SRGB8_ALPHA8 CanvasTexture already decodes sRGB -> linear on sample!
+        vec3 shiftedLin = mix(sampleRow(r0, uvSample), sampleRow(r1, uvSample), f);
+        // When iris shifts right (+uIrisShift.x > 0), keep outer left sclera clean warm ivory instead of stretching dark inner canthus!
+        float canthusGuard = smoothstep(0.012, 0.042, uIrisShift.x)
+                           * (smoothstep(0.135, 0.085, vUv.x) * step(0.055, vUv.x)
+                            + smoothstep(0.755, 0.705, vUv.x) * step(0.680, vUv.x)) * mask;
+        vec3 scleraWarm = mix(shiftedLin, vec3(0.74, 0.67, 0.60), canthusGuard * 0.72);
+        vec3 linCol = scleraWarm * vec3(1.004, 1.000, 0.992);
+        gl_FragColor = vec4(clamp(linCol, 0.0, 1.0), 1.0);
+        #include <colorspace_fragment>
+      }
+    `,
+  });
+  mat.userData.uGazeIdx = uGazeIdx;
+  mat.userData.uIrisShift = uIrisShift;
+  mat.userData.atlas = atlas;
+  return mat;
+}
+
+function waitArtImage(id) {
+  return new Promise((res, rej) => {
+    const check = () => {
+      const im = hall.artMeshes[id]?.mat?.map?.image;
+      if (im && im.complete && im.naturalWidth > 0) return res(im);
+      setTimeout(check, 40);
+    };
+    check();
+    setTimeout(() => rej(new Error('art image timeout ' + id)), 8000);
+  });
+}
+const nextTick = () => new Promise(r => setTimeout(r, 0));
+function ensureWomen() {
+  if (womenPromise) return womenPromise;
+  womenPromise = (async () => {
+    for (const id of ['003', '010']) {
+      if (!hall.artMeshes[id]) continue;
+      const [base, eyes] = await Promise.all([waitArtImage(id), loadImg(KIT + `eyes-gemini-${id}.webp`)]);
+      if (id === '010') {
+        const trackMat = makeTrackingEyeMaterial(base, ARTPX[id], EYEBOX[id], eyes);
+        renderer.initTexture(trackMat.userData.atlas);
+        const mesh = plateMesh(id, EYEBOX[id], null, trackMat);
+        mesh.visible = true;
+        women[id] = { mesh, trackMat, smoothGaze: 3.8, smoothShiftX: 0.0, smoothShiftY: 0.0 };
+        await nextTick();
+      } else {
+        const blinkMat = makeBlinkEyeMaterial(base, ARTPX[id], EYEBOX[id], eyes);
+        renderer.initTexture(blinkMat.userData.atlas);
+        const mesh = plateMesh(id, EYEBOX[id], null, blinkMat);
+        mesh.visible = true;
+        const patches = {};
+        for (const [k, box] of Object.entries(PATCH)) {
+          const img = await loadImg(KIT + `fix3_${k}.webp`);
+          const ptex = canvasTex(base, ARTPX[id], box, img);
+          renderer.initTexture(ptex);
+          patches[k] = plateMesh(id, box, ptex);
+          await nextTick();
+        }
+        women[id] = { mesh, blinkMat, shown: -1, patches };
+      }
+    }
+    hall.rebuildReflCaches();
+    try { await renderer.compileAsync(hall.scene, camera); } catch {}
+  })().catch(e => console.warn('eye kit', e));
+  return womenPromise;
+}
+
+// ---------------------------------------------------------------- Multi-Speed `w200` 3D Doves & Pigeons
+const LOCAL_MOD = './models/';
+const LEGACY_MOD = '/gemini-blender-rigs/herencia-elements-2/10-threejs-3d-flock/models/';
+const gl = new GLTFLoader();
+const flock = new THREE.Group(); hall.scene.add(flock);
+const birds = [];
+let birdsOn = Q.get('birds') !== '0', paintOn = Q.get('paint') === '1';
+if (paintOn) ensurePaintAssets(PU);
+
+function patchWorld(k) {
+  const a = L.art.find(q => q.id === '003'); if (!a) return null;
+  const am = hall.artMeshes['003']; const [W, H] = ARTPX['003']; const [x, y, w, h] = PATCH[k];
+  const u = (x + w / 2) / W - 0.5, v = 0.5 - (y + h / 2) / H;
+  const sg = a.wall === 'L' ? -1 : 1;
+  return { s: a.s + (a.wall === 'L' ? 1 : -1) * u * am.w, y: a.y + v * am.h, x: wallX(L, a.wall, a.s) - sg * 0.08, wallSg: sg };
+}
+
+function makeSpecs() {
+  const k = D.HW / 1.48;
+  const p1 = patchWorld('d1'), p2 = patchWorld('d2'), p4 = patchWorld('d4');
+  const sgDove = p1 ? p1.wallSg : -1;
+  const bl = L.cam.blink;
+  const at = off => bl.s + flightDir * off;
+  const S = [];
+  // Intrinsically separated, C-infinity smooth 6-bird luminous flock (4 white doves + 2 early pale silver pigeons):
+  // Slow majestic gliding arcs (`wFreq 0.58-0.68`), long 2.55 s quintic takeoff out of `003` (zero 28s yank!),
+  // and guaranteed >= 0.62 m 3D clearance around the poster easel & >= 1.15 m clearance from the camera lens!
+  const dove = (p, t0, vSpd, vBurst, lane, yHall, yArch, sz, wAmp, wFreq, wPh, sAmp, sFreq, flaps, patch) =>
+    p && S.push({ sp: 'dove', patch, t0, v: vSpd, vBurst, s0: p.s, x0: p.x, y0: p.y, xLane: sgDove * lane * k, yHall, yArch, sz, wAmp, wFreq, wPh, sAmp, sFreq, flaps });
+  // 1. Hero Painted White Dove `d1`: majestic slow-arc takeoff from `003`, gliding prominently down the hall & out the sunlit doors!
+  dove(p1, 0.52, 1.96, 1.18,  0.24, 1.92, 2.10, 1.16, 0.22, 0.62, 0.65, 0.10, 0.78, [[0.52, 1.80], [3.70, 4.70], [6.05, 7.15]], 'd1');
+  // 2. Painted White Dove `d2`: low graceful glide strictly on the wide-open side opposite the easel (`>= 0.80 m` easel clearance!)
+  dove(p2, 1.05, 2.36, 1.22,  0.62, 1.54, 1.68, 1.10, 0.18, 0.58, 2.95, 0.09, 0.80, [[1.05, 2.20], [4.25, 5.15], [6.40, 7.35]], 'd2');
+  // 3. Painted White Dove `d4`: smooth upper-left flanker arcing cleanly high & clear past the easel!
+  dove(p4, 1.24, 2.44, 1.24,  0.42, 2.34, 2.40, 1.08, 0.20, 0.66, 4.90, 0.10, 0.82, [[1.24, 2.35], [4.45, 5.35], [6.50, 7.50]], 'd4');
+
+  const other = (sp, t0, vSpd, vBurst, off, x0, lane, y0, yHall, yArch, sz, wAmp, wFreq, wPh, sAmp, sFreq, flaps) =>
+    S.push({ sp, t0, v: vSpd, vBurst, s0: at(off), x0: -sgDove * x0 * k, y0, xLane: -sgDove * lane * k, yHall, yArch, sz, wAmp, wFreq, wPh, sAmp, sFreq, flaps });
+  // 4. Lead Scout Pale Pigeon: glides high ahead through the arch & triggers the grand double entrance doors open right in view!
+  other('pigeon', 0.82, 2.76, 1.25, 1.45, 0.44,  0.34, 2.20, 2.34, 2.42, 1.08, 0.22, 0.68, 1.30, 0.10, 0.84, [[0.82, 1.90], [3.85, 4.75], [5.75, 6.60]]);
+  // 5. High Soaring White Dove: wide sculptural arc high above easel & corridor, curving smoothly down through the sunlit threshold!
+  other('dove',   1.12, 2.56, 1.25, 2.45, 0.50,  0.08, 2.40, 2.48, 2.54, 1.06, 0.24, 0.64, 3.90, 0.10, 0.76, [[1.12, 2.20], [4.25, 5.15], [6.10, 7.05]]);
+  // 6. Close-range Pale Pigeon overtaker: sweeps smoothly from the right into a high open lane, clearing the easel by `>= 0.65 m`!
+  other('pigeon', 1.85, 2.36, 1.26, 2.35, 0.44,  0.24, 1.98, 2.18, 2.24, 1.06, 0.22, 0.66, 5.40, 0.10, 0.86, [[1.85, 2.90], [4.85, 5.75], [6.65, 7.60]]);
+  return S;
+}
+
+const SPECS = makeSpecs();
+const sMid = L.cam.blink.s + flightDir * 3.8;
+const softplus = (z, k = 0.6) => k * Math.log(1 + Math.exp(clamp(z / k, -20, 20)));
+const softmin = (a, b, k = 0.22) => a - softplus(a - b, k);
+
+function birdBase(b, tf) {
+  const dt = Math.max(0, tf - b.t0);
+  const vBird = b.v || 2.35;
+  // 100% C-infinity forward cruise + smooth sunlit-door burst (ZERO corner discontinuities or hard clamps!)
+  const burstInt = (b.vBurst || 0) * softplus(dt - 4.75, 0.90) * sm5((dt - 3.6) / 2.6);
+  const s = b.s0 + flightDir * (vBird * dt + burstInt - 0.36 * (1 - Math.exp(-dt / 0.72)));
+  // Long, silky 2.55 s quintic takeoff arc out of `003` so Hero `d1` never yanks sideways at 28 s!
+  const join = sm5(dt / 2.55);
+  const bell = Math.exp(-(((s - sMid) / 4.2) ** 2));
+  const doorFunnel = flightDir < 0 ? (1.0 - 0.66 * sm5((9.6 - s) / 6.0)) : 1.0;
+  const weaveEnv = sm5(dt / 2.10) * doorFunnel;
+  const weaveX = (b.wAmp || 0.22) * Math.sin(dt * (b.wFreq || 0.64) + (b.wPh || 0.0)) * weaveEnv;
+  let x = (b.x0 + (b.xLane - b.x0) * join) * (0.34 + 0.66 * doorFunnel) + weaveX;
+  const yT = b.yHall + (b.yArch - b.yHall) * bell;
+  const swoopY = (b.sAmp || 0.10) * Math.sin(dt * (b.sFreq || 0.80) + (b.wPh || 0.0) * 0.7) * sm5(dt / 1.80);
+  let y = b.y0 + (yT - b.y0) * join + swoopY;
+
+  // Smooth C-infinity avoidance halo around the poster easel (`L.stand`) so NO bird ever flies through the board or legs!
+  if (L.stand) {
+    const eProxS = Math.exp(-(((s - L.stand.s) / 2.60) ** 2));
+    if (eProxS > 0.0005) {
+      const dxE = x - L.stand.x;
+      const inX = Math.exp(-((dxE / 0.96) ** 2));
+      const belowTop = 1.0 - sm5((y - 2.08) / 0.55);
+      const steerSide = (L.stand.x >= 0 ? -1 : 1);
+      x += steerSide * 0.78 * eProxS * inX * belowTop;
+      y += 0.36 * eProxS * inX * belowTop;
+    }
+  }
+
+  // Smooth C-infinity descent into doorway height (`<= 2.08 m` at threshold — zero `Math.min` corner!)
+  const dEnt = s - D.Y0;
+  if (flightDir < 0 && dEnt < 5.0) {
+    const wDoorY = sm5((5.0 - dEnt) / 5.0);
+    y = y + (softmin(y, 2.08, 0.24) - y) * wDoorY;
+  }
+
+  // Smooth C-infinity corridor width envelope (soft `tanh` — ZERO wall/arch snap kinks!)
+  const wAlc = sm5((s - (D.L - 2.0)) / 3.0);
+  const wEnt = flightDir < 0 ? sm5((D.Y0 + 4.9 - s) / 5.0) : 0;
+  let envX = (D.HW - 0.36) * (1 - wAlc) + (D.VH - 0.34) * wAlc;
+  envX = envX * (1 - wEnt) + 0.50 * wEnt;
+  x = envX * Math.tanh(x / envX);
+  y = clamp(y, 1.24, Math.min(3.60, L.hall.ceiling - 0.62));
+  return { s, x, y };
+}
+
+// Intrinsically separated trajectories -> ZERO discontinuous repulsion pop-ins when new birds launch!
+function flockAt(tf) {
+  const act = [];
+  SPECS.forEach((b, i) => {
+    if (tf >= b.t0) {
+      const p = birdBase(b, tf);
+      if (flightDir < 0 ? p.s > D.Y0 - 3.2 : p.s < D.VS1 - 0.4) act.push({ i, ...p });
+    }
+  });
+  return act;
+}
+
+function flapW(tf, wins) {
+  let w = 0;
+  for (const [a, b] of wins) if (tf >= a - 0.3 && tf <= b + 0.4) w = Math.max(w, sm3(ramp(tf, a - 0.3, a + 0.18)) * (1 - sm3(ramp(tf, b - 0.18, b + 0.4))));
+  return w;
+}
+
+let birdsPromise = null;
+const leafGroup = new THREE.Group();
+leafGroup.visible = false;
+hall.scene.add(leafGroup);
+const leafState = { redMeshes: [], greenMeshes: [], redItems: [], greenItems: [] };
+const leafRnd = (i, k) => { const x = Math.sin((i + 1) * 127.1 + (k + 1) * 311.7) * 43758.5453; return x - Math.floor(x); };
+const _lfM = new THREE.Matrix4(), _lfQ = new THREE.Quaternion(), _lfE = new THREE.Euler(), _lfP = new THREE.Vector3(), _lfS = new THREE.Vector3();
+const _lfZeroM = new THREE.Matrix4().makeScale(0, 0, 0);
+
+function buildLeafGustSpecs() {
+  leafState.redItems = [];
+  leafState.greenItems = [];
+  const N_LEAVES = 120;
+  for (let i = 0; i < N_LEAVES; i++) {
+    const side = (i % 2 === 0) ? -1 : 1; // -1 = corridor left (-x, screen right), +1 = corridor right (+x, screen left)
+    const isRed = (i % 11 < 6); // ~55% crimson red (006), ~45% emerald-olive green (010)
+    const spec = {
+      i, side, isRed,
+      delay: Math.pow(leafRnd(i, 1), 1.45) * 1.48,    // crisp sudden gust front wave + swirling tail
+      s0: 9.6 + leafRnd(i, 2) * 3.8,                  // corridor floor ahead/beside camera as doors swing open
+      x0: side * (0.76 + leafRnd(i, 3) * 0.56),       // left & right floor channels (40..96 cm inward from walls, NOT on walls!)
+      y0: 0.042 + Math.pow(leafRnd(i, 4), 1.55) * 0.24, // almost floor level (4.2..28 cm off floorboards!)
+      spd: 4.7 + leafRnd(i, 5) * 2.2,                 // brisk sudden wind gust rushing out the open doorway
+      laneDoor: (leafRnd(i, 6) * 2 - 1) * 0.56,       // funnels cleanly through open 1.68 m double doorway
+      waveAmp: 0.14 + leafRnd(i, 7) * 0.15,
+      waveFreq: 2.5 + leafRnd(i, 8) * 1.7,
+      wavePh: leafRnd(i, 9) * Math.PI * 2,
+      hopAmp: 0.055 + leafRnd(i, 10) * 0.16,
+      sc: 1.85 + leafRnd(i, 11) * 0.85,
+      tumbler: leafRnd(i, 12) < 0.52,
+      spinRate: (leafRnd(i, 13) < 0.5 ? -1 : 1) * (4.5 + leafRnd(i, 14) * 5.2),
+      yawOff: (leafRnd(i, 15) * 2 - 1) * 0.65,
+      liftK: 0.35 + 0.65 * leafRnd(i, 16),
+    };
+    if (isRed) leafState.redItems.push(spec);
+    else leafState.greenItems.push(spec);
+  }
+}
+buildLeafGustSpecs();
+
+function ensureBirds() {
+  if (birdsPromise) return birdsPromise;
+  birdsPromise = (async () => {
+    const [dv, pg, lfG] = await Promise.all([
+      gl.loadAsync(LOCAL_MOD + 'dove_w200.glb'),
+      gl.loadAsync(LOCAL_MOD + 'pigeon_w200.glb'),
+      gl.loadAsync(LOCAL_MOD + 'r12-l01.glb'),
+    ]);
+    const src = { dove: dv, pigeon: pg };
+    for (const spec of SPECS) {
+      const g = src[spec.sp];
+      const isW200 = (spec.sp === 'dove' || spec.sp === 'pigeon');
+      const clone = SkeletonUtils.clone(g.scene);
+      clone.traverse(o => {
+        if (o.isLine || o.isPoints) o.visible = false;
+        if (o.isMesh) {
+          o.castShadow = !hall.isUsingBaked; o.receiveShadow = !hall.isUsingBaked;
+          const m = o.material;
+          if (m.alphaTest > 0) m.alphaTest = Math.max(m.alphaTest, 0.56);
+          if (m.isMeshStandardMaterial) {
+            m.envMapIntensity = isW200 ? 0.30 : 0.18;
+            if (isW200 && o.geometry?.attributes?.color) m.vertexColors = true;
+          }
+        }
+      });
+      const mixer = new THREE.AnimationMixer(clone);
+      const f = n => g.animations.find(a => a.name === n);
+      const acts = { takeoff: f('takeoff'), flap: f('wingbeat'), glide: f('glide'), bl: f('bank-left'), br: f('bank-right') };
+      for (const k in acts) {
+        if (acts[k]) { acts[k] = mixer.clipAction(acts[k]); acts[k].play(); acts[k].setEffectiveWeight(0); }
+      }
+      const carrier = new THREE.Group(), bank = new THREE.Group();
+      bank.add(clone); carrier.add(bank); carrier.visible = false; flock.add(carrier);
+      const spdScale = 0.90 + 0.12 * ((spec.v || 2.35) / 2.35);
+      const rate = (spec.sp === 'dove' ? 3.25 : 3.05) * spdScale;
+      const baseScale = 0.98;
+      birds.push({ spec, isW200, baseScale, carrier, bank, mixer, acts, rate, phase: birds.length * 0.43 });
+    }
+
+    // Build 4 InstancedMeshes (`red_dors`, `red_vent`, `green_dors`, `green_vent`) from sculpted impasto `r12-l01.glb` (`leaf_ex_0` red, `leaf_ex_1` green)
+    const buildLeafInst = (nodeName, count, isRed) => {
+      const node = lfG.scene.getObjectByName(nodeName);
+      if (!node || !count) return [];
+      const out = [];
+      node.traverse(c => {
+        if (!c.isMesh) return;
+        const m = c.material.clone();
+        m.transparent = false;
+        m.alphaTest = Math.max(m.alphaTest || 0, 0.46);
+        m.envMapIntensity = 0.42;
+        if (m.isMeshStandardMaterial) {
+          m.emissive = new THREE.Color(isRed ? 0x420e09 : 0x16300b);
+          m.emissiveIntensity = 0.24;
+        }
+        const im = new THREE.InstancedMesh(c.geometry, m, count);
+        im.frustumCulled = false;
+        im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+        for (let k = 0; k < count; k++) im.setMatrixAt(k, _lfZeroM);
+        im.instanceMatrix.needsUpdate = true;
+        leafGroup.add(im);
+        out.push(im);
+      });
+      return out;
+    };
+    leafState.redMeshes   = buildLeafInst('leaf_ex_0', leafState.redItems.length, true);
+    leafState.greenMeshes = buildLeafInst('leaf_ex_1', leafState.greenItems.length, false);
+
+    try { await renderer.compileAsync(hall.scene, camera); } catch {}
+  })().catch(e => console.warn('birds', e));
+  return birdsPromise;
+}
+if (birdsOn) await ensureBirds();
+
+function updateLeafGust(t) {
+  if (!leafState.redMeshes.length && !leafState.greenMeshes.length) return;
+  const tf = (t - TL.T_BLINK) * FLIGHT7_PACE;
+  const tGust0 = isFinite(firstOut) ? (firstOut - 0.85) : 5.64; // erupts in a sudden gust right as doors finish swinging open (~33.0 -> 33.3 s)!
+  if (manualPose || !birdsOn || flightDir >= 0 || tf < tGust0) {
+    leafGroup.visible = false;
+    return;
+  }
+  let anyVis = false;
+  const updateBatch = (items, meshes) => {
+    for (let k = 0; k < items.length; k++) {
+      const lf = items[k];
+      const dt = tf - (tGust0 + lf.delay);
+      if (dt <= 0) {
+        for (const im of meshes) im.setMatrixAt(k, _lfZeroM);
+        continue;
+      }
+      const ta = 0.19;
+      const dist = lf.spd * (dt - ta * (1 - Math.exp(-dt / ta)));
+      const s = lf.s0 - dist;
+      if (s < D.Y0 - 2.6) {
+        for (const im of meshes) im.setMatrixAt(k, _lfZeroM);
+        continue;
+      }
+      anyVis = true;
+      const uHall = sm5(clamp((lf.s0 - s) / Math.max(1.5, lf.s0 - D.Y0), 0, 1));
+      const doorFunnel = 1.0 - 0.74 * sm5(clamp((7.5 - s) / 4.2, 0, 1));
+      let x = lf.x0 + (lf.laneDoor - lf.x0) * Math.pow(uHall, 1.32)
+            + lf.waveAmp * Math.sin(dt * lf.waveFreq + lf.wavePh) * sm3(dt / 0.30) * doorFunnel;
+
+      // Smooth corridor-to-doorway envelope
+      const wEnt = sm5(clamp((6.5 - s) / 3.4, 0, 1));
+      const envX = (D.HW - 0.22) * (1 - wEnt) + 0.60 * wEnt;
+      x = envX * Math.tanh(x / envX);
+
+      // Guaranteed aerodynamic streamline split around the poster holder (`L.stand` at s = 8.65, x = +0.44)!
+      if (L.stand) {
+        const dsE = s - L.stand.s;
+        const eProxS = Math.exp(-((dsE / 1.65) ** 2));
+        if (eProxS > 0.001) {
+          const dxE = x - L.stand.x;
+          const pushDir = (lf.side > 0 && dxE > -0.10) ? 1 : (dxE >= 0.24 ? 1 : -1);
+          const minClear = 0.86; // easel half-width (0.42 m) + generous 44 cm visual margin around all 3 oak legs!
+          const distSide = dxE * pushDir;
+          if (distSide < minClear) {
+            x += pushDir * (minClear - distSide) * eProxS * 1.12;
+          }
+        }
+      }
+      x = clamp(x, -(D.HW - 0.16), D.HW - 0.16);
+
+      // Floor-skimming low wind gust (4..48 cm off floorboards, gently lifting as it rushes out the sunlit doors!)
+      const hop = lf.hopAmp * (0.52 + 0.48 * Math.sin(dt * (lf.waveFreq * 1.25) + lf.wavePh * 1.3)) * sm3(dt / 0.28);
+      const doorLift = 0.15 * sm5(clamp((6.8 - s) / 3.8, 0, 1)) * lf.liftK;
+      const y = Math.max(0.032, lf.y0 + hop + doorLift);
+
+      // Smooth fade-in on gust catch + smooth shrink outside doorway
+      const scIn = sm3(dt / 0.18);
+      const scOut = sm3(clamp((s - (D.Y0 - 2.6)) / 1.4, 0, 1));
+      const sc = lf.sc * scIn * scOut;
+
+      // Natural aerodynamic tumbling & banking along the corridor wind axis (+Z = -s)
+      const ph = dt * lf.waveFreq + lf.wavePh;
+      let rx, ry, rz;
+      if (lf.tumbler) {
+        rx = dt * lf.spinRate;
+        ry = lf.yawOff + 0.35 * Math.sin(ph);
+        rz = 0.55 * Math.cos(ph * 0.8);
+      } else {
+        rx = 0.42 + 0.48 * Math.sin(ph + 0.25);
+        ry = Math.PI * 0.5 + lf.yawOff + 0.55 * Math.sin(ph);
+        rz = 0.45 * Math.sin(ph * 1.3);
+      }
+      _lfE.set(rx, ry, rz, 'YXZ');
+      _lfQ.setFromEuler(_lfE);
+      _lfP.set(x, y, -s);
+      _lfS.setScalar(sc);
+      _lfM.compose(_lfP, _lfQ, _lfS);
+      for (const im of meshes) im.setMatrixAt(k, _lfM);
+    }
+    for (const im of meshes) im.instanceMatrix.needsUpdate = true;
+  };
+  updateBatch(leafState.redItems, leafState.redMeshes);
+  updateBatch(leafState.greenItems, leafState.greenMeshes);
+  leafGroup.visible = anyVis;
+}
+
+const v0 = new THREE.Vector3(), v1 = new THREE.Vector3();
+function updateBirds(t) {
+  const tf = (t - TL.T_BLINK) * FLIGHT7_PACE;
+  birds.forEach(b => b.carrier.visible = false);
+  if (!birdsOn || tf < 0) return;
+  const now = flockAt(tf);
+  for (const p of now) {
+    const r = birds[p.i]; if (!r) continue;
+    const dt = Math.max(0, tf - r.spec.t0);
+    // Smooth central tangent & aerodynamic curvature bank (ZERO sudden lookAt/roll flicks!)
+    const hT = 0.08;
+    const pn = birdBase(r.spec, tf + hT);
+    const pp = dt > hT ? birdBase(r.spec, tf - hT) : p;
+    v0.set(p.x, p.y, -p.s);
+    v1.set(p.x + (pn.x - pp.x), p.y + (pn.y - pp.y), -(p.s + (pn.s - pp.s)));
+    r.carrier.visible = true; r.carrier.position.copy(v0);
+    if (v1.distanceToSquared(v0) > 1e-7) r.carrier.lookAt(v1);
+    const vx = (pn.x - pp.x) / (dt > hT ? 2 * hT : hT);
+    const ax = dt > hT ? (pn.x - 2 * p.x + pp.x) / (hT * hT) : 0;
+    const bankDeg = clamp(-(vx * 16 + ax * 22) * -flightDir, -26, 26);
+    r.bank.rotation.set(0, 0, THREE.MathUtils.degToRad(bankDeg));
+    const grow = sm3(ramp(tf, r.spec.t0, r.spec.t0 + 0.34));
+    const minSc = r.spec.patch ? 0.85 : 0.62;
+    r.carrier.scale.setScalar((minSc + (1.0 - minSc) * grow) * r.spec.sz * r.baseScale);
+
+    const wTakeoff = (r.acts.takeoff && r.spec.patch) ? (1 - sm3(dt / 0.85)) : 0;
+    const wFlapRaw = flapW(tf, r.spec.flaps);
+    const wF = Math.max(0, wFlapRaw * (1 - wTakeoff));
+    const wG = Math.max(0, 1 - wTakeoff - wF);
+    const bn = clamp(bankDeg / 26, -1, 1);
+    const ab = Math.min(0.60, Math.abs(bn)) * wG;
+
+    r.acts.takeoff?.setEffectiveWeight(wTakeoff);
+    r.acts.flap?.setEffectiveWeight(wF);
+    r.acts.glide?.setEffectiveWeight(Math.max(0, wG - ab));
+    r.acts.bl?.setEffectiveWeight(bn > 0 ? ab : 0);
+    r.acts.br?.setEffectiveWeight(bn < 0 ? ab : 0);
+    r.mixer.setTime(dt * r.rate + r.phase);
+  }
+}
+
+// ---------------------------------------------------------------- per-frame state
+const ent = hall.entranceLeaves || [];
+let firstOut = Infinity;
+if (flightDir < 0 && ent.length) {
+  for (const b of SPECS) for (let tf = b.t0; tf < 30; tf += 0.05) { if (birdBase(b, tf).s < D.Y0 + 0.2) { firstOut = Math.min(firstOut, tf); break; } }
+}
+
+const $ = id => document.getElementById(id), $beat = $('beat');
+let wallClock = 0;
+
+// 6 Instant Town Hall Inspection Camera Views (Desktop + Mobile Responsive Framing!)
+const ROOM_VIEWS = [
+  { label: '1862 Town Hall Corridor ★',       s: 8.85,  x: -0.14, h: 1.56, dir:   2.5, pitch:  2.4,  fov: 54.0 },
+  { label: 'Poster & Ceiling ★',              s: 6.45,  x:  0.08, h: 1.50, dir: 357.5, pitch:  3.5,  fov: 58.0 },
+  { label: 'Arched Door & Deep Shadows ★',    s: 13.55, x: -0.52, h: 1.46, dir:  42.0, pitch:  0.8,  fov: 54.0 },
+  { label: 'Women Across (003 & 010) & Bifora ★', s: 19.35, x: 0.00, h: 1.62, dir: 0.0, pitch: 1.2, fov: 56.0 },
+  { label: 'Ceiling Rod & Spots ★',           s: 8.20,  x: -0.08, h: 1.56, dir:   1.5, pitch: 21.0,  fov: 56.0 },
+  { label: 'Sconces & Frame Accents ★',       s: 10.65, x:  0.56, h: 1.66, dir: 256.0, pitch:  1.5,  fov: 50.0 },
+];
+let manualPose = null;
+if (Q.has('rview')) {
+  manualPose = { ...(ROOM_VIEWS[+Q.get('rview')] || ROOM_VIEWS[0]) };
+} else if (!Q.has('t') && !Q.has('cap') && Q.get('autoplay') !== '1' && Q.get('play') !== '1') {
+  manualPose = { ...ROOM_VIEWS[0] };
+}
+
+// Aspect-adaptive framing for upright mobile phones (`aspect < 1.12`):
+// Widens vertical FOV smoothly (Hor+) so both corridor walls, the 015 poster & easel, AND the 4.86 m
+// pressed-tin ceiling + central light rod stay completely visible on portrait phones as well as desktops!
+function applyResponsivePose(cam, rawPose) {
+  const asp = cam.aspect || (innerWidth / Math.max(1, innerHeight));
+  if (asp >= 1.12) {
+    HK02Hall.applyPose(cam, rawPose);
+    return;
+  }
+  const baseFov = rawPose.fov || 55.0;
+  const minHalfTanX = 0.455; // >= ~49 deg horizontal FOV even on 390x844 phones
+  const needTanY = minHalfTanX / Math.max(0.42, asp);
+  const baseTanY = Math.tan(THREE.MathUtils.degToRad(baseFov * 0.5));
+  const effFov = Math.min(82.0, THREE.MathUtils.radToDeg(2.0 * Math.atan(Math.max(baseTanY, needTanY))));
+  // C1-smooth pull-back near the poster on narrow/portrait viewports (ZERO step jump at s = 7.2 m!):
+  const aspW = sm3((1.12 - asp) / 0.35);
+  const nearEndW = sm3((8.6 - rawPose.s) / 2.2) * aspW;
+  HK02Hall.applyPose(cam, {
+    ...rawPose,
+    s: Math.max(D.Y0 + 0.45, rawPose.s - 0.18 * nearEndW),
+    fov: effFov,
+  });
+}
+
+function evaluate(t, clothSec = t) {
+  camera.near = 0.04;
+  if (hall.bakedU) hall.bakedU.uTime.value = clothSec;
+  if (manualPose) {
+    applyResponsivePose(camera, manualPose);
+  } else {
+    applyResponsivePose(camera, TL.poseAt(Math.min(t, TL.T_END)));
+  }
+  updateBlueCloths(t, clothSec);
+  logoOpener.update(t, !manualPose && t < TL.T_LOGO);
+
+  // 1) `010` (Right alcove wall, leaves on head): continuously moves her eyes following the 3D subject (`camera.position`) — NEVER blinks!
+  const a3 = L.art.find(q => q.id === '003'), a10 = L.art.find(q => q.id === '010');
+  const w10 = women['010'];
+  if (w10 && w10.trackMat && a10) {
+    const camS = -camera.position.z, camX = camera.position.x, camY = camera.position.y;
+    const am10 = hall.artMeshes['010'];
+    const sg10 = a10.wall === 'L' ? -1 : 1; // +1 on Right wall
+    const eyeWorldX = wallX(L, a10.wall, a10.s) - sg10 * 0.05;
+    const eyeWorldY = a10.y + (0.5 - 927 / 2200) * (am10 ? am10.h : 1.62);
+    const eyeWorldS = a10.s;
+    const dNorm = Math.max(0.42, (eyeWorldX - camX) * sg10);
+    // On Right wall (facing -X), viewer's right (+localX on canvas) is toward -s (corridor):
+    const dCanvasRight = (eyeWorldS - camS) * sg10;
+    const horizAngle = Math.atan2(dCanvasRight, dNorm); // rad: + when subject is toward corridor, - when toward window
+    const vertAngle  = Math.atan2(camY - eyeWorldY, dNorm);
+
+    // Map horizAngle in [-0.45 .. +0.65] rad onto painted gaze index [0.0 .. 4.0] + expressive 2D iris pursuit across her sclera!
+    const tgtGaze   = clamp((horizAngle + 0.36) / 0.88 * 4.0, 0.0, 4.0);
+    const tgtShiftX = clamp(horizAngle * 0.056 + 0.010, -0.018, 0.048);
+    const tgtShiftY = clamp(vertAngle  * 0.058, -0.032, 0.032);
+
+    const alpha = Q.has('cap') ? 1.0 : 0.22;
+    w10.smoothGaze   += (tgtGaze   - w10.smoothGaze)   * alpha;
+    w10.smoothShiftX += (tgtShiftX - w10.smoothShiftX) * alpha;
+    w10.smoothShiftY += (tgtShiftY - w10.smoothShiftY) * alpha;
+
+    w10.mesh.visible = true;
+    w10.trackMat.userData.uGazeIdx.value = w10.smoothGaze;
+    w10.trackMat.userData.uIrisShift.value.set(w10.smoothShiftX, w10.smoothShiftY);
+  }
+
+  // 2) `003` (Left alcove wall, blue headcloth + doves): turns her eyes, BLINKS at T_BLINK, and activates the sequence!
+  const w3 = women['003'];
+  if (w3 && w3.blinkMat) {
+    const k = manualPose ? 0 : TL.eyeAt('003', t);
+    if (k !== w3.shown) {
+      w3.shown = k;
+      w3.blinkMat.userData.uRowIdx.value = k;
+    }
+  }
+
+  const tf = (t - TL.T_BLINK) * FLIGHT7_PACE;
+  const p003 = women['003']?.patches;
+  if (p003) for (const sp of SPECS) if (sp.patch && p003[sp.patch]) p003[sp.patch].visible = !manualPose && birdsOn && tf >= sp.t0;
+  if (manualPose) birds.forEach(b => b.carrier.visible = false);
+  else updateBirds(t);
+  updateLeafGust(t);
+
+  const open = (!manualPose && birdsOn && isFinite(firstOut)) ? sm3(ramp(tf, firstOut - 1.6, firstOut - 0.3)) : 0;
+  for (const lf of ent) {
+    const isR = /(_R|R_leaf)$/.test(lf.name), isPlain = /plain_leaf$/.test(lf.name);
+    lf.rotation.y = lf.userData.baseY + THREE.MathUtils.degToRad(80 * open) * (isPlain ? 1 : (isR ? 1 : -1));
+  }
+  hall.setEntranceOpen?.(open);
+  PU.uPaintOrigin.value = a3 ? a3.s : L.cam.blink.s;
+  const tPostBlink = t - (TL.T_BLINK + 0.56);
+  PU.uPaintActive.value = (!manualPose && paintOn && tPostBlink > 0) ? 1 : (manualPose && paintOn ? 1 : 0);
+  PU.uPaintRadius.value = manualPose ? (paintOn ? 30.0 : 0.0) : Math.max(0, tPostBlink * 3.25);
+
+  if (manualPose) {
+    $beat.textContent = `${manualPose.label || 'Free Look'} · Drag/Scroll/WASD`;
+  } else if (t < TL.T_LOGO) {
+    $beat.textContent = 'Opening · Herencia Viva: Threads of Memory';
+  } else if (t < TL.T_WALK) {
+    const f = (t - TL.T_LOGO) / Math.max(0.01, TL.T_WALK - TL.T_LOGO);
+    $beat.textContent = f < 0.22 ? 'Walk · Fish (086)' : f < 0.42 ? 'Walk · Fruit-Tree Woman (010)' : f < 0.62 ? 'Walk · Mona Lisa (090)' : f < 0.82 ? 'Walk · Red Tree (006)' : 'Alcove · Woman with Doves (003)';
+  } else if (t < TL.T_BLINK) $beat.textContent = 'Her eyes meet yours (003)';
+  else if (t < TL.T_BLINK + 0.65) $beat.textContent = 'She blinks · sequence awakens';
+  else if (t < TL.T_END) $beat.textContent = ['', 'Flight 1 · Hero overtake', 'Flight 2 · High crane', 'Flight 3 · Upfront pass'][flightMode] || 'Bird flight';
+  else $beat.textContent = 'The poster (085 & 087 cloths)';
+}
+
+// ---------------------------------------------------------------- controls + Interactive Arch Lab + free-look + loop
+let t = Q.has('t') ? +Q.get('t') : 0;
+let playing = (Q.get('autoplay') === '1' || Q.get('play') === '1') && !Q.has('cap');
+if (!manualPose || playing) ensureWomen();
+const sync = () => { $('play').textContent = playing ? '❚❚ Pause' : '▶ Play'; };
+$('play').onclick = () => {
+  manualPose = null;
+  ensureWomen();
+  if (birdsOn) ensureBirds();
+  document.querySelectorAll('[data-rview]').forEach(b => b.classList.remove('on'));
+  if (!playing && t >= TL.TOTAL - 0.01) t = 0;
+  playing = !playing; sync();
+};
+$('scrub').oninput = e => {
+  manualPose = null;
+  ensureWomen();
+  if (birdsOn) ensureBirds();
+  document.querySelectorAll('[data-rview]').forEach(b => b.classList.remove('on'));
+  playing = false; sync();
+  t = e.target.value / 1000 * TL.TOTAL;
+};
+
+const setRoomViewIdx = (idx) => {
+  playing = false; sync();
+  manualPose = { ...ROOM_VIEWS[idx] };
+  document.querySelectorAll('[data-rview]').forEach(b => b.classList.toggle('on', +b.dataset.rview === idx));
+};
+document.querySelectorAll('[data-rview]').forEach(btn => {
+  const idx = +btn.dataset.rview;
+  btn.classList.toggle('on', !!manualPose && idx === (+Q.get('rview') || 0));
+  btn.onclick = () => setRoomViewIdx(idx);
+});
+
+// Interactive Arch Finish Lab (defaults to Clean White Plaster per Pavlos!)
+const ARCH_LABELS = ['Arch: Plaster ★', 'Arch: Wallpaper', 'Arch: Fluted', 'Arch: Linen', 'Arch: Terracotta'];
+const ARCH_CYCLE  = [0, 1, 2, 3];
+let archMode = Q.has('arch') ? (ARCH_FINISH_MODES[Q.get('arch')] ?? 0) : (ARCH_FINISH_MODES[L.hall.archFinish || 'plaster'] ?? 0);
+const syncArchUI = () => {
+  const b = $('bArch');
+  if (b) {
+    b.textContent = ARCH_LABELS[archMode] || 'Arch: Plaster ★';
+    b.classList.toggle('on', archMode > 0);
+  }
+  document.querySelectorAll('[data-amode]').forEach(mb => mb.classList.toggle('on', +mb.dataset.amode === archMode));
+  hall.setArchFinish(archMode);
+};
+syncArchUI();
+$('bArch').onclick = () => {
+  const ci = ARCH_CYCLE.indexOf(archMode);
+  archMode = ARCH_CYCLE[(ci + 1) % ARCH_CYCLE.length];
+  syncArchUI();
+};
+$('bArchLab').onclick = () => {
+  const p = $('archLab');
+  const open = p.classList.toggle('open');
+  $('bArchLab').classList.toggle('on', open);
+};
+$('alClose').onclick = () => { $('archLab').classList.remove('open'); $('bArchLab').classList.remove('on'); };
+document.querySelectorAll('[data-amode]').forEach(mb => {
+  mb.onclick = () => { archMode = +mb.dataset.amode; syncArchUI(); };
+});
+$('alPitch').oninput = e => {
+  const cm = +e.target.value;
+  $('alPitchV').textContent = `${cm.toFixed(1)}cm`;
+  if (hall.bakedU) { hall.bakedU.uArchPitch.value = cm / 100.0; hall.markReflDirty(); }
+};
+$('alWarm').oninput = e => {
+  const pct = +e.target.value;
+  $('alWarmV').textContent = `${pct}%`;
+  if (hall.bakedU) { hall.bakedU.uArchWarmth.value = pct / 100.0; hall.markReflDirty(); }
+};
+$('alTex').oninput = e => {
+  const pct = +e.target.value;
+  $('alTexV').textContent = `${pct}%`;
+  if (hall.bakedU) { hall.bakedU.uArchTexture.value = pct / 100.0; hall.markReflDirty(); }
+};
+$('alRim').oninput = e => {
+  const pct = +e.target.value;
+  $('alRimV').textContent = `${pct}%`;
+  if (hall.bakedU) { hall.bakedU.uArchRim.value = pct / 100.0; hall.markReflDirty(); }
+};
+$('alZoom').onclick = () => setRoomViewIdx(0);
+$('alReset').onclick = () => {
+  archMode = 0;
+  $('alPitch').value = 19.6; $('alPitchV').textContent = '19.6cm';
+  $('alWarm').value = 100;   $('alWarmV').textContent = '100%';
+  $('alTex').value = 100;    $('alTexV').textContent = '100%';
+  $('alRim').value = 100;    $('alRimV').textContent = '100%';
+  if (hall.bakedU) {
+    hall.bakedU.uArchPitch.value = 0.196;
+    hall.bakedU.uArchWarmth.value = 1.00;
+    hall.bakedU.uArchTexture.value = 1.00;
+    hall.bakedU.uArchRim.value = 1.00;
+  }
+  syncArchUI();
+};
+
+// ---------------------------------------------------------------- Instant Town Hall Lab (`hk02/mocks.js` + `hk02/fixtures.js`)
+const BASE_V8_LIGHT = { contrastFix: true, sideWindows: 'off', trimPaint: 'chalk', wallGrade: 3, wallWhite: 1.28, ceilHeight: 5.06, ceilingSpine: true, frameAccents: true, cards: true, ambientGain: 0.39, sconceGain: 2.15, spotGain: 1.05, lightWarmth: 1.00, shadowDepth: 0.84, ceilShadowDepth: 1.80, floorDark: 0.70 };
+const MOCK_PRESETS = {
+  thDefault:  { ...BASE_V8_LIGHT, sconces: 'plaster',   floorMode: 0 },
+  thBlackBar: { ...BASE_V8_LIGHT, sconces: 'black_bar', floorMode: 0 },
+  thS4Bars:   { ...BASE_V8_LIGHT, sconces: 's4_bars',   floorMode: 0 },
+  thGlobe:    { ...BASE_V8_LIGHT, sconces: 'globe',     floorMode: 0 },
+  thSaddle:   { ...BASE_V8_LIGHT, sconces: 'plaster',   floorMode: 1 },
+  thPlaster:  { ...BASE_V8_LIGHT, sconces: 'plaster',   floorMode: 0 },
+  thGithub:   { ...BASE_V8_LIGHT, sconces: 'github_brass', floorMode: 0 },
+  mockOak:    { ...BASE_V8_LIGHT, sconces: 'plaster',   floorMode: 0 },
+  hk02:       { ...BASE_V8_LIGHT, trimPaint: 'chalk', wallGrade: 1, wallWhite: 1.00, ceilingSpine: false, sconces: 'off', cards: false, floorMode: 3, ambientGain: 1.00, sconceGain: 0.0, spotGain: 0.0, shadowDepth: 0.35, ceilShadowDepth: 0.45, floorDark: 0.0, ceilHeight: 4.86 },
+};
+function warmthKelvinLabel(w) {
+  return `${Math.round(3500 - clamp(w, 0, 1) * 1200)}K`;
+}
+function syncMockButtons() {
+  const st = mockMgr.state;
+  document.querySelectorAll('[data-mk]').forEach(btn => {
+    const k = btn.dataset.mk, v = btn.dataset.mv;
+    if (k === 'ceilHeight') {
+      btn.classList.toggle('on', Math.abs((+st.ceilHeight || 5.06) - (+v)) < 0.03);
+      return;
+    }
+    let cur = st[k];
+    if (typeof cur === 'boolean') cur = cur ? '1' : '0';
+    else cur = String(cur);
+    btn.classList.toggle('on', cur === v);
+  });
+  const setSl = (idSl, idVal, val, fmt) => {
+    const sl = $(idSl), sv = $(idVal);
+    if (sl && sv) { sl.value = val.toFixed(2); sv.textContent = fmt(val); }
+  };
+  setSl('mlWhiteSlider',    'mlWhiteVal',    +(st.wallWhite       ?? 1.28), v => `${Math.round(v * 100)}%`);
+  setSl('mlCeilSlider',     'mlCeilVal',     +(st.ceilHeight      ?? 5.06), v => `${v.toFixed(2)} m`);
+  setSl('mlGainSlider',     'mlGainVal',     +(st.ambientGain     ?? st.indoorGain ?? 0.39), v => `${Math.round(v * 100)}%`);
+  setSl('mlSconceSlider',   'mlSconceVal',   +(st.sconceGain      ?? 2.15), v => `${Math.round(v * 100)}%`);
+  setSl('mlSpotSlider',     'mlSpotVal',     +(st.spotGain        ?? 1.05), v => `${Math.round(v * 100)}%`);
+  setSl('mlWarmSlider',     'mlWarmVal',     +(st.lightWarmth     ?? 1.00), v => warmthKelvinLabel(v));
+  setSl('mlShadSlider',     'mlShadVal',     +(st.shadowDepth     ?? 0.84), v => `${Math.round(v * 100)}%`);
+  setSl('mlCeilShadSlider', 'mlCeilShadVal', +(st.ceilShadowDepth ?? 1.80), v => `${Math.round(v * 100)}%`);
+  setSl('mlFloorSlider',    'mlFloorVal',    +(st.floorDark       ?? 0.70), v => `${Math.round(v * 100)}%`);
+}
+$('bMockLab').classList.remove('on');
+$('bMockLab').onclick = () => {
+  const open = $('mockLab').classList.toggle('open');
+  $('bMockLab').classList.toggle('on', open);
+};
+$('mlClose').onclick = () => { $('mockLab').classList.remove('open'); $('bMockLab').classList.remove('on'); };
+document.querySelectorAll('[data-mpreset]').forEach(pb => {
+  pb.onclick = () => {
+    const p = MOCK_PRESETS[pb.dataset.mpreset];
+    if (!p) return;
+    document.querySelectorAll('[data-mpreset]').forEach(b => b.classList.toggle('on', b === pb));
+    mockMgr.applyState(p);
+    syncMockButtons();
+  };
+});
+document.querySelectorAll('[data-mk]').forEach(btn => {
+  btn.onclick = () => {
+    const k = btn.dataset.mk, raw = btn.dataset.mv;
+    let val = raw;
+    if (k === 'contrastFix' || k === 'alcoveSideWin' || k === 'cards' || k === 'ceilingSpine' || k === 'frameAccents') {
+      if (k === 'cards' || k === 'frameAccents') val = !mockMgr.state[k];
+      else val = (raw === '1');
+    } else if (k === 'floorMode' || k === 'wallGrade' || k === 'ceilHeight' || k === 'indoorGain' || k === 'ambientGain') {
+      val = +raw;
+    }
+    const patch = { [k]: val };
+    document.querySelectorAll('[data-mpreset]').forEach(b => b.classList.remove('on'));
+    mockMgr.applyState(patch);
+    syncMockButtons();
+  };
+});
+for (const [idSl, stateKey] of [
+  ['mlWhiteSlider',    'wallWhite'],
+  ['mlCeilSlider',     'ceilHeight'],
+  ['mlGainSlider',     'ambientGain'],
+  ['mlSconceSlider',   'sconceGain'],
+  ['mlSpotSlider',     'spotGain'],
+  ['mlWarmSlider',     'lightWarmth'],
+  ['mlShadSlider',     'shadowDepth'],
+  ['mlCeilShadSlider', 'ceilShadowDepth'],
+  ['mlFloorSlider',    'floorDark'],
+]) {
+  const el = $(idSl);
+  if (el) {
+    el.oninput = e => {
+      document.querySelectorAll('[data-mpreset]').forEach(b => b.classList.remove('on'));
+      mockMgr.applyState({ [stateKey]: +e.target.value });
+      syncMockButtons();
+    };
+  }
+}
+if (Q.has('mock') || Q.get('lab') === '1') {
+  if (Q.has('mock')) {
+    const mp = MOCK_PRESETS[Q.get('mock')] || MOCK_PRESETS.thDefault;
+    mockMgr.applyState(mp);
+  }
+  $('mockLab').classList.add('open');
+  $('bMockLab').classList.add('on');
+}
+syncMockButtons();
+
+function getWarmExtras() {
+  const ex = [...Object.values(women['003']?.patches || {})];
+  if (birdsOn) for (const b of birds) ex.push(b.carrier);
+  if (clothsOn) for (const lc of livingCloths) ex.push(lc.mesh);
+  if (birdsOn) ex.push(...leafState.redMeshes, ...leafState.greenMeshes);
+  return ex;
+}
+
+$('bCloths').classList.toggle('on', clothsOn);
+$('bBirds').classList.toggle('on', birdsOn);
+$('bPaint').classList.toggle('on', paintOn);
+$('bCloths').onclick = async e => {
+  if (manualPose) {
+    clothsOn = true;
+    manualClothsPreview = !manualClothsPreview;
+    e.target.classList.toggle('on', manualClothsPreview);
+  } else {
+    clothsOn = !clothsOn;
+    e.target.classList.toggle('on', clothsOn);
+  }
+  if (clothsOn) { await ensureBlueCloths(); hall.warmAllRenderPaths(camera, getWarmExtras()); }
+  hall.markReflDirty();
+};
+$('bBirds').onclick  = async e => { birdsOn = !birdsOn; e.target.classList.toggle('on', birdsOn); if (birdsOn) { await ensureBirds(); hall.warmAllRenderPaths(camera, getWarmExtras()); } hall.markReflDirty(); };
+$('bPaint').onclick  = e => { paintOn = !paintOn; if (paintOn) ensurePaintAssets(PU); e.target.classList.toggle('on', paintOn); hall.markReflDirty(); };
+
+$('bHide').onclick = () => document.body.classList.toggle('clean');
+
+// Interactive Canvas Drag-Look + Scroll-Step + WASD Inspection!
+let dragging = false, dragX = 0, dragY = 0;
+const keysHeld = new Set();
+function ensureManualFromCurrent() {
+  if (!manualPose) {
+    manualPose = { ...HK02Hall.readPose(camera), label: 'Free Look' };
+    playing = false; sync();
+    document.querySelectorAll('[data-rview]').forEach(b => b.classList.remove('on'));
+  }
+}
+renderer.domElement.addEventListener('pointerdown', e => {
+  if (e.button !== 0) return;
+  dragging = true; dragX = e.clientX; dragY = e.clientY;
+  renderer.domElement.setPointerCapture(e.pointerId);
+  ensureManualFromCurrent();
+});
+renderer.domElement.addEventListener('pointermove', e => {
+  if (!dragging || !manualPose) return;
+  const dx = e.clientX - dragX, dy = e.clientY - dragY;
+  dragX = e.clientX; dragY = e.clientY;
+  manualPose.dir = ((manualPose.dir + dx * 0.16) % 360 + 360) % 360;
+  manualPose.pitch = clamp((manualPose.pitch || 0) - dy * 0.14, -65, 65);
+  manualPose.label = 'Free Look';
+});
+addEventListener('pointerup', () => { dragging = false; });
+renderer.domElement.addEventListener('wheel', e => {
+  e.preventDefault();
+  ensureManualFromCurrent();
+  const rad = THREE.MathUtils.degToRad(manualPose.dir);
+  const step = -e.deltaY * 0.0038;
+  manualPose.s = clamp(manualPose.s + Math.cos(rad) * step, D.Y0 + 0.45, D.VS1 - 0.55);
+  const maxX = manualPose.s > D.L - 0.25 ? D.VH - 0.28 : D.HW - 0.34;
+  manualPose.x = clamp(manualPose.x + Math.sin(rad) * step, -maxX, maxX);
+  manualPose.label = 'Free Look';
+}, { passive: false });
+
+// ---------------------------------------------------------------- Herencia Viva Audio (`H10` Granados — Arabesca ★)
+const ambientAudio = (!parentOwnsAudio && !Q.has('cap') && Q.get('embed') !== '1' && Q.get('sound') !== '0')
+  ? createHerenciaAudio({ initialTrack: Q.get('sound') || 'granados', initialEnabled: true })
+  : null;
+window.__herenciaAudio = ambientAudio;
+{
+  const $snd = $('bSound');
+  const $cleanSnd = $('cleanSound');
+  if (!ambientAudio) {
+    if ($snd) $snd.style.display = 'none';
+    if ($cleanSnd) $cleanSnd.style.display = 'none';
+  } else {
+    const syncSoundBtns = (st) => {
+      const lbl = st.muted ? '♪ Muted' : (st.waitingGesture ? '♪ Arabesca (Tap)' : '♪ Arabesca ★');
+      if ($snd) { $snd.textContent = lbl; $snd.classList.toggle('on', !st.muted); }
+      if ($cleanSnd) { $cleanSnd.textContent = st.muted ? '♪ Muted' : '♪ Arabesca'; }
+    };
+    ambientAudio.onStateChange(syncSoundBtns);
+    if ($snd) $snd.onclick = () => ambientAudio.toggle();
+    if ($cleanSnd) $cleanSnd.onclick = () => ambientAudio.toggle();
+  }
+}
+
+addEventListener('keydown', e => {
+  if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT')) return;
+  if (e.key === ' ') { e.preventDefault(); $('play').click(); return; }
+  if (e.key === 'h' || e.key === 'H') { document.body.classList.toggle('clean'); return; }
+  if ((e.key === 'm' || e.key === 'M') && ambientAudio) { ambientAudio.toggle(); return; }
+  if (/^(Key[WASDQE]|Arrow(Up|Down|Left|Right))$/.test(e.code)) keysHeld.add(e.code);
+});
+addEventListener('keyup', e => keysHeld.delete(e.code));
+sync();
+
+// Upload all paintings, eye plates, cloths & birds + warm BOTH `reflRT` (`srgb-linear`) and main (`srgb`) shader variants
+// BEFORE `#loading` is removed -> 0 mid-walk texture uploads and 0 mid-crane shader compilation freezes!
+if (Q.has('cap')) await hall.warmTexturesStaggered();
+filmLoadState.progress = Math.max(filmLoadState.progress, 0.78);
+await Promise.all([
+  hall.warmTexturesStaggered(),
+  logoOpener.warm(),
+  ensureWomen(),
+  clothsOn ? ensureBlueCloths() : null,
+  birdsOn ? ensureBirds() : null,
+]);
+filmLoadState.progress = Math.max(filmLoadState.progress, 0.94);
+evaluate(t, t);
+hall.warmAllRenderPaths(camera, getWarmExtras());
+hall.render(camera);
+$('loading').remove();
+filmLoadState.progress = 1.0;
+filmLoadState.ready = true;
+window.__ready = true;
+
+let prev = performance.now();
+function loop(now) {
+  requestAnimationFrame(loop);
+  const dt = Math.min(0.05, (now - prev) / 1000); prev = now;
+  wallClock += dt;
+  if (keysHeld.size > 0) {
+    ensureManualFromCurrent();
+    const rad = THREE.MathUtils.degToRad(manualPose.dir);
+    const fwd = (keysHeld.has('KeyW') || keysHeld.has('ArrowUp') ? 1 : 0) - (keysHeld.has('KeyS') || keysHeld.has('ArrowDown') ? 1 : 0);
+    const str = (keysHeld.has('KeyD') || keysHeld.has('ArrowRight') ? 1 : 0) - (keysHeld.has('KeyA') || keysHeld.has('ArrowLeft') ? 1 : 0);
+    const v = 2.6 * dt;
+    manualPose.s = clamp(manualPose.s + (Math.cos(rad) * fwd - Math.sin(rad) * str) * v, D.Y0 + 0.45, D.VS1 - 0.55);
+    const maxX = manualPose.s > D.L - 0.25 ? D.VH - 0.28 : D.HW - 0.34;
+    manualPose.x = clamp(manualPose.x + (Math.sin(rad) * fwd + Math.cos(rad) * str) * v, -maxX, maxX);
+    if (keysHeld.has('KeyE')) manualPose.h = clamp((manualPose.h || 1.58) + 1.2 * dt, 0.55, D.C - 0.45);
+    if (keysHeld.has('KeyQ')) manualPose.h = clamp((manualPose.h || 1.58) - 1.2 * dt, 0.55, D.C - 0.45);
+    manualPose.label = 'Free Look';
+  }
+  if (playing) { t += dt; if (t >= TL.TOTAL) { t = TL.TOTAL; playing = false; sync(); } }
+  $('scrub').value = Math.round(t / TL.TOTAL * 1000);
+  $('t').textContent = manualPose ? `s=${manualPose.s.toFixed(1)}m` : `${t.toFixed(1)} / ${TL.TOTAL.toFixed(1)} s`;
+  evaluate(t, playing ? t : wallClock);
+  hall.render(camera);
+}
+
+window.__seek = (tt) => { manualPose = null; ensureWomen(); if (birdsOn) ensureBirds(); playing = false; sync(); t = tt; $('scrub').value = Math.round(t / TL.TOTAL * 1000); $('t').textContent = `${t.toFixed(1)} / ${TL.TOTAL.toFixed(1)} s`; evaluate(t, tt); hall.render(camera); };
+window.__setPose = (p) => { playing = false; sync(); manualPose = { ...p }; evaluate(t, t); hall.render(camera); };
+window.__setRoomView = (idx) => { setRoomViewIdx(idx); evaluate(t, t); hall.render(camera); };
+window.__setArchMode = (m) => { archMode = +m; syncArchUI(); evaluate(t, t); hall.render(camera); };
+window.__setArchBrick = (on) => { archMode = on ? 1 : 0; syncArchUI(); evaluate(t, t); hall.render(camera); };
+window.__setPaintMode = (m) => { paintOn = m > 0; if (paintOn) { ensurePaintAssets(PU); PU.uPaintMode.value = m; } $('bPaint').classList.toggle('on', paintOn); hall.markReflDirty(); evaluate(t, t); hall.render(camera); };
+window.__setFlightMode = (fm) => { flightMode = fm; TL = buildTimeline(L, { flightMode }); window.__TL = TL; evaluate(t, t); hall.render(camera); };
+window.__setCloths = async (on) => { clothsOn = !!on; $('bCloths').classList.toggle('on', clothsOn); if (clothsOn) await ensureBlueCloths(); hall.markReflDirty(); evaluate(t, t); hall.render(camera); };
+window.__setMock = (patch) => { mockMgr.applyState(patch); syncMockButtons(); evaluate(t, t); hall.render(camera); };
+window.__mockMgr = mockMgr;
+window.__TL = TL;
+window.__hall = hall;
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

@@ -8,8 +8,12 @@
 <title>Event Experience — Movie + Unified Landing About &amp; Media Salon</title>
 <link rel="preconnect" href="https://api.fontshare.com">
 <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
-<link href="https://api.fontshare.com/v2/css?f[]=gambetta@300,400,401,500,600&f[]=switzer@400,500,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="./fold-carousel.css?v=20261123c">
+<link href="https://api.fontshare.com/v2/css?f[]=gambetta@300,400,401,500,600&f[]=switzer@400,500,600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="./fold-carousel.css?v=20261123c" media="print" onload="this.media='all'">
+<noscript>
+  <link href="https://api.fontshare.com/v2/css?f[]=gambetta@300,400,401,500,600&f[]=switzer@400,500,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./fold-carousel.css?v=20261123c">
+</noscript>
 <style>
   :root {
     --serif: 'Gambetta', Georgia, serif;
@@ -112,20 +116,20 @@
     position: relative;
     width: 100%;
     height: calc(100vh - 48px);
-    height: calc(100lvh - 48px);
+    height: calc(100dvh - 48px);
     z-index: 2;
     background: var(--room-bg);
   }
   body[data-palette="l4"] .movie-runway { background: transparent; }
   body[data-palette="l4"] .movie-sticky {
-    position: fixed; top: 0; left: 0; right: 0; height: 100vh; height: 100lvh; z-index: 1;
+    position: fixed; top: 0; left: 0; right: 0; height: 100vh; height: 100dvh; z-index: 1;
   }
 
   .movie-sticky {
     position: sticky; top: 0;
     width: 100%;
     height: calc(100vh - 48px);
-    height: calc(100lvh - 48px);
+    height: calc(100dvh - 48px);
     overflow: hidden;
     display: flex; align-items: center; justify-content: center;
     background: var(--room-bg);
@@ -279,6 +283,10 @@
     border-top-color: rgba(246, 160, 53, 0.42);
     box-shadow: 0 -14px 36px rgba(246, 160, 53, 0.08), 0 -22px 52px rgba(8, 6, 4, 0.48);
   }
+  body[data-event="herencia-viva"][data-tone="dark"] .fold-chamber {
+    border-top-color: rgba(157, 184, 131, 0.44);
+    box-shadow: 0 -14px 36px rgba(78, 94, 64, 0.16), 0 -22px 52px rgba(10, 12, 9, 0.44);
+  }
   body[data-palette="l4"] .fold-chamber {
     background-color: color-mix(in srgb, var(--bg) 76%, transparent);
     backdrop-filter: blur(26px);
@@ -314,6 +322,10 @@
     background: linear-gradient(180deg, rgba(46, 33, 21, 0.92) 0%, rgba(22, 18, 14, 0.96) 100%);
     color: rgba(244, 237, 226, 0.80);
   }
+  body[data-event="herencia-viva"][data-tone="dark"] .fold-lip {
+    background: linear-gradient(180deg, rgba(44, 56, 36, 0.94) 0%, rgba(20, 24, 17, 0.97) 100%);
+    color: rgba(237, 243, 236, 0.84);
+  }
   body[data-tone="light"] .fold-lip {
     background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 86%, #faf7ef) 0%, var(--bg) 100%);
     color: color-mix(in srgb, var(--ink) 78%, transparent);
@@ -341,6 +353,15 @@
   .fold-lip:hover .fold-lip__cta {
     background: rgba(246, 160, 53, 0.20);
     border-color: rgba(246, 160, 53, 0.72);
+  }
+  body[data-event="herencia-viva"][data-tone="dark"] .fold-lip__cta {
+    border-color: rgba(157, 184, 131, 0.46);
+    background: rgba(157, 184, 131, 0.12);
+    color: #edf3ec;
+  }
+  body[data-event="herencia-viva"][data-tone="dark"] .fold-lip:hover .fold-lip__cta {
+    background: rgba(157, 184, 131, 0.22);
+    border-color: rgba(157, 184, 131, 0.76);
   }
   body[data-tone="light"] .fold-lip:hover .fold-lip__cta {
     background: color-mix(in srgb, var(--ink) 12%, transparent);
@@ -464,8 +485,142 @@
     .pill-btn { padding: 6px 9px; font-size: 11px; gap: 4px; }
     #topNextBtn { max-width: 42vw; overflow: hidden; text-overflow: ellipsis; }
   }
+
+  /* =========================================================================
+     Event Film Loader — L06 Architectural Seam & Doors (Default) + L03 Ink-Fill
+     ========================================================================= */
+  body.is-film-loading .playing-mini,
+  body.is-film-loading .prog-seam,
+  body.is-film-loading .play-gate {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  .film-loader {
+    position: absolute; inset: 0; z-index: 30;
+    overflow: hidden; pointer-events: auto; user-select: none;
+    color: var(--fl-ink, #f4ede2);
+    --fl-bg: #070605;
+    --fl-ink: #f4ede2;
+    --fl-rule: rgba(244, 237, 226, 0.18);
+    --fl-accent: #f6a035;
+  }
+  .film-loader[hidden] { display: none !important; }
+  .film-loader.is-revealing { pointer-events: none; }
+
+  .fl-grain {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image: url('/landing-v3/img/noise.png');
+    background-size: 150px 150px;
+    opacity: 0.075; mix-blend-mode: screen;
+  }
+  .film-loader[data-light="1"] .fl-grain {
+    opacity: 0.042; mix-blend-mode: multiply;
+  }
+
+  /* Mode toggles */
+  .fl-mode { position: absolute; inset: 0; display: none; }
+  .film-loader[data-mode="l06"] .fl-mode--l06 { display: block; }
+  .film-loader[data-mode="l03"] .fl-mode--l03 { display: flex; align-items: center; justify-content: center; }
+
+  /* ── L06: Architectural Seam & Parting Doors (Default) ── */
+  .fl-door {
+    position: absolute; top: 0; bottom: 0; width: 50.4%;
+    overflow: hidden;
+    will-change: transform;
+    transition: transform 0.84s var(--ease-glide);
+  }
+  .fl-door--l { left: 0; }
+  .fl-door--r { right: 0; }
+  .fl-door__bg {
+    position: absolute; top: 0; bottom: 0; width: 200%;
+    background: var(--fl-bg);
+  }
+  .fl-door--l .fl-door__bg { left: 0; }
+  .fl-door--r .fl-door__bg { right: 0; }
+  .film-loader.is-revealing .fl-door--l { transform: translateX(-103%); }
+  .film-loader.is-revealing .fl-door--r { transform: translateX(103%); }
+
+  .fl-seam {
+    position: absolute; top: 15%; bottom: 15%; left: 50%; width: 1px; z-index: 4;
+    transform: translateX(-50%);
+    background: var(--fl-rule);
+    transition: opacity 0.28s ease;
+  }
+  .fl-seam__fill {
+    position: absolute; left: -0.5px; bottom: 0; width: 2px; height: 0%;
+    background: var(--fl-accent);
+    box-shadow: 0 0 14px var(--fl-accent);
+    will-change: height;
+  }
+  .film-loader.is-revealing .fl-seam { opacity: 0; }
+
+  .fl-flank {
+    position: absolute; top: 50%; z-index: 5;
+    transform: translateY(-50%);
+    pointer-events: none;
+    transition: opacity 0.34s ease, transform 0.44s var(--ease-out);
+  }
+  .fl-flank--r {
+    left: calc(50% + clamp(18px, 3vw, 40px));
+    text-align: left;
+  }
+  .fl-title {
+    margin: 0;
+    font: 300 clamp(21px, 3.8vw, 46px)/1.02 var(--serif);
+    letter-spacing: -0.025em;
+    max-width: 40vw;
+  }
+  .film-loader.is-revealing .fl-flank--r { opacity: 0; transform: translate(22px, -50%); }
+
+  /* ── L03: Gambetta Title Ink-Fill (?loader=l03) ── */
+  .fl-l03-bg {
+    position: absolute; inset: 0;
+    background: var(--fl-bg);
+    transition: opacity 0.68s var(--ease-out);
+  }
+  .fl-l03-wrap {
+    position: relative; z-index: 4;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    padding: 0 24px;
+    transition: opacity 0.42s ease, transform 0.52s var(--ease-out);
+  }
+  .fl-l03-stack { position: relative; display: inline-block; }
+  .fl-l03-word {
+    margin: 0; white-space: nowrap;
+    font: 300 clamp(36px, 8.2vw, 108px)/0.94 var(--serif);
+    letter-spacing: -0.03em;
+  }
+  .fl-l03-word--ghost { opacity: 0.16; }
+  .fl-l03-word--ink {
+    position: absolute; inset: 0;
+    clip-path: inset(0 100% 0 0);
+    will-change: clip-path;
+  }
+  .fl-l03-sub {
+    margin: 10px 0 0;
+    font: 300 italic clamp(14px, 1.8vw, 22px)/1.2 var(--serif);
+    opacity: 0.68;
+  }
+  .fl-l03-hair {
+    display: block; margin-top: 14px; width: 52px; height: 1px;
+    background: var(--fl-accent); opacity: 0.78;
+    transform: scaleX(0.18); will-change: transform;
+  }
+  .film-loader.is-revealing .fl-l03-wrap { opacity: 0; transform: translateY(-14px); }
+  .film-loader.is-revealing .fl-l03-bg { opacity: 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .film-loader { transition: opacity 0.35s ease; }
+    .film-loader.is-revealing { opacity: 0; }
+    .film-loader.is-revealing .fl-door--l,
+    .film-loader.is-revealing .fl-door--r { transform: none; }
+    .film-loader.is-revealing .fl-flank--l,
+    .film-loader.is-revealing .fl-flank--r { transform: translateY(-50%); }
+    .film-loader.is-revealing .fl-l03-wrap { transform: none; }
+  }
 </style>
-<style>.cinema-pill, .review-pill, #hud, #hudMin, .text-studio, .cue-lanes { visibility: hidden !important; pointer-events: none !important; }</style>
+<style>.cinema-pill, .review-pill, #hud, #hudMin, #mediumBadge, #cleanSound, #archLab, #mockLab, .lab-drawer, .text-studio, .cue-lanes { visibility: hidden !important; pointer-events: none !important; }</style>
 </head>
 <body data-concept="c00" data-palette="l1" data-play="ready" data-film-tone="dark" data-tone="dark">
 
@@ -488,7 +643,7 @@
   <div class="movie-sticky" id="movieSticky">
     <div class="movie-card" id="movieCard">
       <div class="still-fallback" id="stillFallback">
-        <img id="stillImg" src="/event-media/assets/iyuana/final-02.jpg" alt="">
+        <img id="stillImg" alt="">
         <div class="still-fallback__vig"></div>
         <div class="still-fallback__title">
           <span id="stKind">Film &amp; Photography Exhibition</span>
@@ -498,6 +653,93 @@
       </div>
 
       <iframe class="movie-iframe" id="movieIframe" title="3D Event Movie" allow="autoplay; fullscreen"></iframe>
+
+      <!-- Event Film Loader (L06 Architectural Seam & Doors default · L03 Gambetta Ink-Fill via ?loader=l03) -->
+      <div class="film-loader" id="filmLoader" data-mode="l06" data-light="0" aria-live="polite" aria-label="Loading exhibition film" hidden>
+        <div class="fl-mode fl-mode--l06">
+          <div class="fl-door fl-door--l"><div class="fl-door__bg"></div><div class="fl-grain"></div></div>
+          <div class="fl-door fl-door--r"><div class="fl-door__bg"></div><div class="fl-grain"></div></div>
+          <div class="fl-seam"><div class="fl-seam__fill" id="flSeamFill"></div></div>
+          <div class="fl-flank fl-flank--r"><h2 class="fl-title" id="flTitle">Iyuana</h2></div>
+        </div>
+        <div class="fl-mode fl-mode--l03">
+          <div class="fl-l03-bg"><div class="fl-grain"></div></div>
+          <div class="fl-l03-wrap">
+            <div class="fl-l03-stack">
+              <h2 class="fl-l03-word fl-l03-word--ghost" id="flInkGhost">Iyuana</h2>
+              <h2 class="fl-l03-word fl-l03-word--ink" id="flInkWord" aria-hidden="true">Iyuana</h2>
+            </div>
+            <p class="fl-l03-sub" id="flInkSub">El retorno de los Sueños</p>
+            <span class="fl-l03-hair" id="flInkHair"></span>
+          </div>
+        </div>
+      </div>
+      <script>
+        /* Synchronous 0ms boot paint matching each event's locked landing-page wall background */
+        (function () {
+          var q = new URLSearchParams(location.search);
+          var rawMode = (q.get('loader') || 'l06').toLowerCase();
+          var inGrid = false;
+          try { inGrid = q.get('hosted') !== '1' && window.parent !== window && window.parent.location.pathname.indexOf('/fold') !== -1; } catch (e) {}
+          if (q.get('still') === '1' || q.get('paused') === '1' || rawMode === '0' || rawMode === 'off' || inGrid) return;
+          var mode = rawMode === 'l03' ? 'l03' : 'l06';
+          var evMap = {
+            'iyuana': {
+              title: 'Iyuana', sub: 'El retorno de los Sueños',
+              bg: 'radial-gradient(ellipse 78% 72% at 54% 48%, rgba(116,87,68,0.72) 0%, rgba(74,52,38,0.52) 48%, rgba(15,13,11,0.96) 100%), #0f0d0b',
+              ink: '#f4ede2', rule: 'rgba(244,237,226,0.22)', accent: '#f6a035', light: '0'
+            },
+            'herencia-viva': {
+              title: 'Herencia Viva', sub: 'Threads of Memory',
+              bg: 'radial-gradient(ellipse 78% 72% at 54% 48%, rgba(78,94,64,0.76) 0%, rgba(50,56,36,0.54) 48%, rgba(14,13,11,0.96) 100%), #0e0d0b',
+              ink: '#edf3ec', rule: 'rgba(237,243,236,0.22)', accent: '#9db883', light: '0'
+            },
+            'ayazamana': {
+              title: 'Ayazamana', sub: 'Traditional Dance of Ecuador',
+              bg: 'radial-gradient(ellipse 78% 72% at 54% 48%, rgba(89,39,68,0.76) 0%, rgba(57,23,38,0.54) 48%, rgba(14,11,11,0.96) 100%), #0e0b0b',
+              ink: '#f4ece0', rule: 'rgba(244,236,224,0.22)', accent: '#f0d765', light: '0'
+            }
+          };
+          var t = evMap[q.get('event') || 'iyuana'] || evMap['iyuana'];
+          var el = document.getElementById('filmLoader');
+          if (!el) return;
+          el.dataset.mode = mode;
+          el.dataset.light = t.light;
+          el.style.setProperty('--fl-bg', t.bg);
+          el.style.setProperty('--fl-ink', t.ink);
+          el.style.setProperty('--fl-rule', t.rule);
+          el.style.setProperty('--fl-accent', t.accent);
+          document.getElementById('flTitle').textContent = t.title;
+          document.getElementById('flInkGhost').textContent = t.title;
+          document.getElementById('flInkWord').textContent = t.title;
+          document.getElementById('flInkSub').textContent = t.sub;
+          el.hidden = false;
+          document.body.classList.add('is-film-loading');
+          var seam = document.getElementById('flSeamFill');
+          var inkW = document.getElementById('flInkWord');
+          var inkH = document.getElementById('flInkHair');
+          var t0 = performance.now();
+          var bootRaf = 0;
+          window.__flBootP = 0.05;
+          function paintBoot(p) {
+            window.__flBootP = p;
+            if (seam) seam.style.height = (p * 100).toFixed(2) + '%';
+            if (inkW) inkW.style.clipPath = 'inset(0 ' + ((1 - p) * 100).toFixed(2) + '% 0 0)';
+            if (inkH) inkH.style.transform = 'scaleX(' + (0.18 + 0.82 * p).toFixed(3) + ')';
+          }
+          paintBoot(0.05);
+          function bootStep(now) {
+            var sec = (now - t0) / 1000;
+            paintBoot(Math.min(0.22, 0.05 + 0.17 * (1 - Math.exp(-sec / 0.9))));
+            bootRaf = requestAnimationFrame(bootStep);
+          }
+          bootRaf = requestAnimationFrame(bootStep);
+          window.__flBootStop = function () { cancelAnimationFrame(bootRaf); };
+          requestAnimationFrame(function () {
+            try { window.parent.postMessage({ source: 'film-loader', type: 'mounted', mode: mode }, '*'); } catch (e) {}
+          });
+        })();
+      </script>
 
       <!-- Play / Replay Gate -->
       <div class="play-gate">
@@ -546,8 +788,15 @@
 </main>
 
 <script type="module">
-  import { FOLD_EVENTS, CONCEPTS } from './data.js?v=20261123m';
-  import { mountFoldCarousel } from './fold-carousel-engine.js?v=20261123g';
+  import { FOLD_EVENTS, CONCEPTS } from './data.js?v=20261125g';
+  let mountFoldCarouselFn = null;
+  async function getMountFoldCarousel() {
+    if (!mountFoldCarouselFn) {
+      const mod = await import('./fold-carousel-engine.js?v=20261123g');
+      mountFoldCarouselFn = mod.mountFoldCarousel;
+    }
+    return mountFoldCarouselFn;
+  }
 
   const qs = new URLSearchParams(location.search);
   const useStill = qs.get('still') === '1';
@@ -803,6 +1052,7 @@
     const r = document.documentElement;
     const tone = surf.dark ? 'dark' : 'light';
 
+    document.body.dataset.event = ex.slug;
     document.body.dataset.concept = state.concept;
     document.body.dataset.palette = state.palette;
     document.body.dataset.filmTone = ex.roomTone;
@@ -888,7 +1138,7 @@
     const ex = getEx();
     const surf = resolveActiveSurface();
 
-    $('stillImg').src = ex.stillPlate;
+    if (useStill) $('stillImg').src = ex.stillPlate;
     $('stKind').textContent = ex.kind;
     $('stTitle').textContent = ex.title;
     $('stSub').textContent = ex.sub;
@@ -923,6 +1173,7 @@
       state.carouselApi = null;
     }
 
+    const mountFoldCarousel = await getMountFoldCarousel();
     state.carouselApi = await mountFoldCarousel({
       mountTarget: $('noteColCarousel'),
       event: ex.slug,
@@ -996,6 +1247,191 @@
   window.addEventListener('resize', updateScrollState);
 
   /* =========================================================================
+     Event Film Loader Controller (L06 Architectural Seam & Doors · L03 Ink-Fill)
+     ========================================================================= */
+  const rawLoaderParam = (qs.get('loader') || 'l06').toLowerCase();
+  const loaderDisabled = rawLoaderParam === '0' || rawLoaderParam === 'off';
+  const LOADER_THEMES = {
+    'iyuana': {
+      bg: 'radial-gradient(ellipse 78% 72% at 54% 48%, rgba(116,87,68,0.72) 0%, rgba(74,52,38,0.52) 48%, rgba(15,13,11,0.96) 100%), #0f0d0b',
+      ink: '#f4ede2', rule: 'rgba(244,237,226,0.22)', accent: '#f6a035', light: false,
+    },
+    'herencia-viva': {
+      bg: 'radial-gradient(ellipse 78% 72% at 54% 48%, rgba(78,94,64,0.76) 0%, rgba(50,56,36,0.54) 48%, rgba(14,13,11,0.96) 100%), #0e0d0b',
+      ink: '#edf3ec', rule: 'rgba(237,243,236,0.22)', accent: '#9db883', light: false,
+    },
+    'ayazamana': {
+      bg: 'radial-gradient(ellipse 78% 72% at 54% 48%, rgba(89,39,68,0.76) 0%, rgba(57,23,38,0.54) 48%, rgba(14,11,11,0.96) 100%), #0e0b0b',
+      ink: '#f4ece0', rule: 'rgba(244,236,224,0.22)', accent: '#f0d765', light: false,
+    },
+  };
+  const filmLoader = (() => {
+    const el = $('filmLoader');
+    const seamFill = $('flSeamFill');
+    const inkWord = $('flInkWord');
+    const inkHair = $('flInkHair');
+    let mode = rawLoaderParam === 'l03' ? 'l03' : 'l06';
+    let active = false;
+    let revealing = false;
+    let ifrLoadedAt = 0;
+    let startedAt = 0;
+    let readyAt = 0;
+    let curP = 0;
+    let lastTs = 0;
+    let rafId = 0;
+    let hideTimer = 0;
+
+    function paintProgress(p) {
+      const v = clamp(p, 0, 1);
+      if (seamFill) seamFill.style.height = `${(v * 100).toFixed(2)}%`;
+      if (inkWord) inkWord.style.clipPath = `inset(0 ${((1 - v) * 100).toFixed(2)}% 0 0)`;
+      if (inkHair) inkHair.style.transform = `scaleX(${(0.18 + 0.82 * v).toFixed(3)})`;
+    }
+
+    function applyTheme(ex) {
+      if (!el) return;
+      const th = LOADER_THEMES[ex.slug] || LOADER_THEMES['iyuana'];
+      el.dataset.mode = mode;
+      el.dataset.light = th.light ? '1' : '0';
+      el.style.setProperty('--fl-bg', th.bg);
+      el.style.setProperty('--fl-ink', th.ink);
+      el.style.setProperty('--fl-rule', th.rule);
+      el.style.setProperty('--fl-accent', th.accent);
+      $('flTitle').textContent = ex.title;
+      $('flInkGhost').textContent = ex.title;
+      $('flInkWord').textContent = ex.title;
+      $('flInkSub').textContent = ex.sub;
+    }
+
+    function stop() {
+      cancelAnimationFrame(rafId);
+      clearTimeout(hideTimer);
+      active = false;
+      revealing = false;
+      document.body.classList.remove('is-film-loading');
+      if (el) {
+        el.classList.remove('is-revealing');
+        el.hidden = true;
+      }
+    }
+
+    function triggerReveal() {
+      if (revealing || !el) return;
+      revealing = true;
+      paintProgress(1);
+      document.body.classList.remove('is-film-loading');
+      el.classList.add('is-revealing');
+      const durMs = reducedMotion ? 380 : (mode === 'l03' ? 720 : 880);
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => {
+        active = false;
+        revealing = false;
+        el.classList.remove('is-revealing');
+        el.hidden = true;
+      }, durMs);
+    }
+
+    function readFilmSignal(now) {
+      let sigP = 0;
+      let isReady = false;
+      try {
+        const cw = ifr.contentWindow;
+        const d = ifr.contentDocument;
+        const fl = cw && cw.__filmLoad;
+        if (fl && typeof fl.progress === 'number') {
+          sigP = clamp(fl.progress, 0, 1);
+          if (fl.ready) isReady = true;
+        } else if (ifrLoadedAt > 0 && d) {
+          // Compatibility fallback for films without __filmLoad (e.g. Town Hall revival)
+          const hasLoadingNode = !!d.getElementById('loading');
+          if (!hasLoadingNode && (state.curSec > 0.03 || (now - ifrLoadedAt) > 2200)) {
+            sigP = 1;
+            isReady = true;
+          } else {
+            sigP = hasLoadingNode ? 0.45 : 0.65;
+          }
+        }
+      } catch {}
+      if (state.curSec > 0.06) {
+        sigP = 1;
+        isReady = true;
+      }
+      if ((now - startedAt) > 15000) {
+        sigP = 1;
+        isReady = true;
+      }
+      return { sigP, isReady };
+    }
+
+    function tick(now) {
+      if (!active || revealing) return;
+      const dt = Math.min(0.08, Math.max(0.004, (now - lastTs) / 1000));
+      lastTs = now;
+      const elapsedSec = (now - startedAt) / 1000;
+      const { sigP, isReady } = readFilmSignal(now);
+
+      if (isReady && !readyAt) readyAt = now;
+      // Gentle asymptotic floor so progress stays visibly alive while network/GLB streams
+      const floorP = ifrLoadedAt > 0
+        ? Math.min(0.88, 0.22 + 0.66 * (1 - Math.exp(-elapsedSec / 2.6)))
+        : Math.min(0.24, 0.05 + 0.19 * (1 - Math.exp(-elapsedSec / 1.1)));
+      const targetP = readyAt ? 1.0 : Math.max(curP, floorP, sigP * 0.96);
+      const speed = readyAt ? 14.0 : 6.2;
+      curP += (targetP - curP) * Math.min(1, dt * speed);
+      paintProgress(curP);
+
+      const minHoldMet = elapsedSec >= 0.38;
+      if (readyAt && minHoldMet && (curP >= 0.985 || (now - readyAt) > 220)) {
+        triggerReveal();
+        return;
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function start(ex) {
+      if (!el || loaderDisabled || useStill || inLabGrid) { stop(); return; }
+      if (window.__flBootStop) { window.__flBootStop(); window.__flBootStop = null; }
+      cancelAnimationFrame(rafId);
+      clearTimeout(hideTimer);
+      applyTheme(ex);
+      active = true;
+      revealing = false;
+      ifrLoadedAt = 0;
+      startedAt = performance.now();
+      readyAt = 0;
+      curP = Math.max(0.05, Number(window.__flBootP) || 0.05);
+      window.__flBootP = 0;
+      lastTs = startedAt;
+      el.classList.remove('is-revealing');
+      el.hidden = false;
+      document.body.classList.add('is-film-loading');
+      paintProgress(curP);
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function markIframeLoaded() {
+      ifrLoadedAt = performance.now();
+    }
+
+    function setMode(nextMode) {
+      mode = String(nextMode || '').toLowerCase() === 'l03' ? 'l03' : 'l06';
+      if (el) el.dataset.mode = mode;
+      return mode;
+    }
+
+    return {
+      start,
+      stop,
+      markIframeLoaded,
+      setMode,
+      isActive: () => active && !revealing,
+      getState: () => ({ mode, active, revealing, progress: curP }),
+    };
+  })();
+  window.FilmLoader = filmLoader;
+  window.__setFilmLoaderMode = (m) => filmLoader.setMode(m);
+
+  /* =========================================================================
      Real 3D Movie Mount, Play/Pause (Click + Space), & Scrubbable Progress Bar
      ========================================================================= */
   const ifr = $('movieIframe');
@@ -1005,7 +1441,7 @@
       if (!d || !d.head || d.getElementById('fold-clean')) return;
       const st = d.createElement('style');
       st.id = 'fold-clean';
-      st.textContent = '.cinema-pill,.review-pill,#hud,#hudMin,.prog-bar,.scroll-cue,#head,.head,#visitor-sound,.visitor-sound,.tap-state{visibility:hidden!important;pointer-events:none!important;}';
+      st.textContent = '.cinema-pill,.review-pill,#hud,#hudMin,#mediumBadge,#cleanSound,#archLab,#mockLab,.lab-drawer,.prog-bar,.scroll-cue,#head,.head,#visitor-sound,.visitor-sound,.tap-state{visibility:hidden!important;pointer-events:none!important;}';
       d.head.appendChild(st);
     } catch {}
   }
@@ -1019,26 +1455,39 @@
     syncPlayUI();
 
     if (useStill) {
+      filmLoader.stop();
       ifr.style.display = 'none';
       $('stillFallback').style.opacity = '1';
       return;
     }
     if (state.mountedSlug === ex.slug) return;
     state.mountedSlug = ex.slug;
+    if (autoPlayFilm) filmLoader.start(ex);
+    else filmLoader.stop();
     ifr.classList.remove('is-loaded');
     ifr.style.display = 'block';
     const baseFilmUrl = ex.filmUrl;
+    const uFilm = new URL(baseFilmUrl, location.origin);
     if (autoPlayFilm) {
-      ifr.src = baseFilmUrl.includes('?') ? `${baseFilmUrl}&clean=1` : `${baseFilmUrl}?clean=1`;
+      uFilm.searchParams.set('clean', '1');
+      if (ex.slug === 'herencia-viva' && !uFilm.searchParams.has('autoplay')) uFilm.searchParams.set('autoplay', '1');
+      ifr.src = uFilm.pathname + uFilm.search;
     } else if (ex.slug === 'herencia-viva') {
-      ifr.src = baseFilmUrl.includes('?') ? `${baseFilmUrl}&freeze=1&t=0` : `${baseFilmUrl}?hud=0&freeze=1&t=0`;
+      uFilm.searchParams.set('hud', '0');
+      uFilm.searchParams.set('autoplay', '0');
+      uFilm.searchParams.set('freeze', '1');
+      uFilm.searchParams.set('t', '0');
+      uFilm.searchParams.set('clean', '1');
+      ifr.src = uFilm.pathname + uFilm.search;
     } else {
-      ifr.src = (ex.slug === 'iyuana' && !baseFilmUrl.includes('t=')) ? `${baseFilmUrl}?t=0` : baseFilmUrl;
+      if (ex.slug === 'iyuana' && !uFilm.searchParams.has('t')) uFilm.searchParams.set('t', '0');
+      ifr.src = uFilm.pathname + uFilm.search;
     }
     $('stillFallback').style.opacity = autoPlayFilm ? '0' : '1';
     ifr.onload = () => {
       dressFilm(ifr);
       ifr.classList.add('is-loaded');
+      filmLoader.markIframeLoaded();
       setTimeout(() => { if (!useStill) $('stillFallback').style.opacity = '0'; }, autoPlayFilm ? 40 : 260);
     };
   }
@@ -1082,7 +1531,7 @@
       if (state.playState === 'ended') {
         if (ctrl?.replayFilm) ctrl.replayFilm();
         else if (cw?.__R?.setT) { cw.__R.setT(0); cw.__R.play(); }
-        else (d.getElementById('btn-replay') || d.getElementById('btnReplay'))?.click();
+        else (d.getElementById('btn-replay') || d.getElementById('btnReplay') || d.getElementById('jWalk') || d.getElementById('play'))?.click();
         state.playState = 'playing';
       } else {
         if (ctrl?.togglePlay) {
@@ -1093,7 +1542,7 @@
           else cw.__R.play();
           state.playState = cw.__R.state().playing ? 'playing' : 'ready';
         } else {
-          (d.getElementById('btn-play') || d.getElementById('btnPlayPause'))?.click();
+          (d.getElementById('btn-play') || d.getElementById('btnPlayPause') || d.getElementById('play'))?.click();
           state.playState = state.playState === 'playing' ? 'ready' : 'playing';
         }
       }
@@ -1114,6 +1563,8 @@
       if (ctrl?.replayFilm) ctrl.replayFilm();
       else if (cw?.__R?.replay) cw.__R.replay();
       else if (cw?.__R?.setT) { cw.__R.setT(0); cw.__R.play(); }
+      else if (d?.getElementById('jWalk')) d.getElementById('jWalk').click();
+      else if (cw?.__seek) { cw.__seek(0); d?.getElementById('play')?.click(); }
       else (d?.getElementById('btn-replay') || d?.getElementById('btnReplay'))?.click();
       state.curSec = 0;
       state.playState = 'playing';
@@ -1129,7 +1580,7 @@
   let cardDown = null;
   $('movieCard').addEventListener('pointerdown', (e) => {
     if (e.button !== undefined && e.button !== 0) return;
-    if (e.target.closest('#progSeam, .playing-mini, .play-gate')) return;
+    if (e.target.closest('#progSeam, .playing-mini, .play-gate, #filmLoader')) return;
     cardDown = { x: e.clientX, y: e.clientY };
   });
   $('movieCard').addEventListener('pointerup', (e) => {
@@ -1166,6 +1617,12 @@
         } else if (cw?.__R?.setT) {
           cw.__R.setT(targetSec);
           if (shouldPlay && ratio < 0.992) cw.__R.resumeLive();
+        } else if (cw?.__seek && cw?.__TL?.TOTAL) {
+          cw.__seek(targetSec);
+          if (shouldPlay && ratio < 0.992) {
+            const pBtn = d?.getElementById('play');
+            if (pBtn && !pBtn.textContent.toLowerCase().includes('pause')) pBtn.click();
+          }
         } else {
           const sc = d?.getElementById('scrub');
           const pb = d?.getElementById('prog-bar');
@@ -1227,12 +1684,15 @@
         syncPlayUI();
         return;
       }
-      const tl = d.getElementById('time-lbl');
+      const tl = d.getElementById('time-lbl') || d.getElementById('t');
       const sc = d.getElementById('scrub');
-      const bp = d.getElementById('btn-play') || d.getElementById('btnPlayPause');
+      const bp = d.getElementById('btn-play') || d.getElementById('btnPlayPause') || d.getElementById('play');
       if (tl) {
         const m = tl.textContent.match(/([\d.]+)\s*s?\s*\/\s*([\d.]+)/);
         if (m) { state.curSec = parseFloat(m[1]); state.durSec = parseFloat(m[2]) || state.durSec; }
+      } else if (cw?.__TL?.TOTAL && sc) {
+        state.durSec = cw.__TL.TOTAL;
+        state.curSec = (parseFloat(sc.value) / parseFloat(sc.max || 1000)) * cw.__TL.TOTAL;
       } else if (sc) {
         state.curSec = parseFloat(sc.value) || 0;
         state.durSec = parseFloat(sc.max) || state.durSec;
@@ -1243,16 +1703,26 @@
     } catch {}
   }, 180);
 
-  // Whole-page ambient soundscapes for Iyuana & Ayazamana + Spacebar Play/Pause
+  // Whole-page ambient soundscapes for Iyuana, Herencia Viva & Ayazamana + Spacebar Play/Pause
   let iyuanaPageAudio = null;
+  let herenciaPageAudio = null;
   let ayazamanaPageAudio = null;
   let iyuanaLoading = false;
+  let herenciaLoading = false;
   let ayazamanaLoading = false;
   let sharedSoundMuted = false;
   const allowPageAudio = !inLabGrid && !useStill && qs.get('sound') !== '0';
   if (allowPageAudio) {
     window.__iyuanaAudioOwned = true;
+    window.__herenciaAudioOwned = true;
     window.__ayazamanaAudioOwned = true;
+  }
+
+  function currentPageAudio() {
+    if (state.eventSlug === 'iyuana') return iyuanaPageAudio;
+    if (state.eventSlug === 'herencia-viva') return herenciaPageAudio;
+    if (state.eventSlug === 'ayazamana') return ayazamanaPageAudio;
+    return null;
   }
 
   window.addEventListener('keydown', (e) => {
@@ -1265,10 +1735,11 @@
       e.preventDefault();
       togglePlay();
     } else if (e.code === 'KeyM' && allowPageAudio) {
-      const cur = state.eventSlug === 'iyuana' ? iyuanaPageAudio : (state.eventSlug === 'ayazamana' ? ayazamanaPageAudio : null);
+      const cur = currentPageAudio();
       if (cur) {
         sharedSoundMuted = !cur.toggle();
         if (iyuanaPageAudio) iyuanaPageAudio.setMuted(sharedSoundMuted);
+        if (herenciaPageAudio) herenciaPageAudio.setMuted(sharedSoundMuted);
         if (ayazamanaPageAudio) ayazamanaPageAudio.setMuted(sharedSoundMuted);
       }
     }
@@ -1277,7 +1748,7 @@
   function updateBottomSoundBtn() {
     const soundBtn = $('bottomSoundBtn');
     if (!soundBtn) return;
-    const cur = state.eventSlug === 'iyuana' ? iyuanaPageAudio : (state.eventSlug === 'ayazamana' ? ayazamanaPageAudio : null);
+    const cur = currentPageAudio();
     soundBtn.hidden = !cur;
     if (cur) {
       const st = cur.getState();
@@ -1289,10 +1760,11 @@
   if (bottomSoundBtnEl) {
     bottomSoundBtnEl.onclick = (e) => {
       e.stopPropagation();
-      const cur = state.eventSlug === 'iyuana' ? iyuanaPageAudio : (state.eventSlug === 'ayazamana' ? ayazamanaPageAudio : null);
+      const cur = currentPageAudio();
       if (!cur) return;
       sharedSoundMuted = !cur.toggle();
       if (iyuanaPageAudio) iyuanaPageAudio.setMuted(sharedSoundMuted);
+      if (herenciaPageAudio) herenciaPageAudio.setMuted(sharedSoundMuted);
       if (ayazamanaPageAudio) ayazamanaPageAudio.setMuted(sharedSoundMuted);
       updateBottomSoundBtn();
     };
@@ -1300,10 +1772,11 @@
 
   function syncPageAudioEvent() {
     if (iyuanaPageAudio) iyuanaPageAudio.setActiveEvent(state.eventSlug);
+    if (herenciaPageAudio) herenciaPageAudio.setActiveEvent(state.eventSlug);
     if (ayazamanaPageAudio) ayazamanaPageAudio.setActiveEvent(state.eventSlug);
     if (allowPageAudio && state.eventSlug === 'iyuana' && !iyuanaPageAudio && !iyuanaLoading) {
       iyuanaLoading = true;
-      import('/concepts/iyuana/ambient-audio.js?v=20261122g').then(({ createIyuanaAudio }) => {
+      import('/concepts/iyuana/ambient-audio.js?v=20261124m').then(({ createIyuanaAudio }) => {
         iyuanaPageAudio = createIyuanaAudio({ initialTrack: qs.get('sound') || 'chant', initialEnabled: !sharedSoundMuted });
         if (!iyuanaPageAudio) return;
         iyuanaPageAudio.setActiveEvent(state.eventSlug);
@@ -1311,9 +1784,19 @@
         updateBottomSoundBtn();
       }).catch(() => { iyuanaLoading = false; });
     }
+    if (allowPageAudio && state.eventSlug === 'herencia-viva' && !herenciaPageAudio && !herenciaLoading) {
+      herenciaLoading = true;
+      import('/herencia-hallway/audio/ambient-audio.js?v=20261124m').then(({ createHerenciaAudio }) => {
+        herenciaPageAudio = createHerenciaAudio({ initialTrack: qs.get('sound') || 'granados', initialEnabled: !sharedSoundMuted });
+        if (!herenciaPageAudio) return;
+        herenciaPageAudio.setActiveEvent(state.eventSlug);
+        herenciaPageAudio.onStateChange(() => updateBottomSoundBtn());
+        updateBottomSoundBtn();
+      }).catch(() => { herenciaLoading = false; });
+    }
     if (allowPageAudio && state.eventSlug === 'ayazamana' && !ayazamanaPageAudio && !ayazamanaLoading) {
       ayazamanaLoading = true;
-      import('/flushing-theater/ambient-audio.js?v=20261123c').then(({ createAyazamanaAudio }) => {
+      import('/flushing-theater/ambient-audio.js?v=20261124m').then(({ createAyazamanaAudio }) => {
         ayazamanaPageAudio = createAyazamanaAudio({ initialTrack: qs.get('sound') || 'sanjuanito', initialEnabled: !sharedSoundMuted });
         if (!ayazamanaPageAudio) return;
         ayazamanaPageAudio.setActiveEvent(state.eventSlug);
@@ -1328,7 +1811,7 @@
   window.StageHost = {
     setPausedForOverlay(paused) {
       if (paused && state.playState === 'playing') togglePlay();
-      const cur = state.eventSlug === 'iyuana' ? iyuanaPageAudio : (state.eventSlug === 'ayazamana' ? ayazamanaPageAudio : null);
+      const cur = currentPageAudio();
       if (cur && paused) cur.setActiveEvent('overlay-paused');
       else if (cur && !paused) cur.setActiveEvent(state.eventSlug);
     },
@@ -1392,11 +1875,11 @@
   });
 
   syncPageAudioEvent();
+  applyThemeTokens();
+  mountMovie();
   state.mediaItems = await loadManifest(state.eventSlug);
   const startIdx = qs.get('idx') ? clamp(+qs.get('idx') || 0, 0, Math.max(0, state.mediaItems.length - 1)) : 0;
-  applyThemeTokens();
   await mountSalonAndCarousel(startIdx);
-  mountMovie();
   if (qs.get('fs') === '1') state.carouselApi?.enterFullscreen();
   if (qs.get('view')) setTimeout(() => applyViewTarget(qs.get('view')), 80);
 </script>

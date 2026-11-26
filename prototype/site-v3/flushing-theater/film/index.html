@@ -403,7 +403,7 @@
     .text-studio { left: 12px; right: 12px; width: auto; top: 56px; max-height: 48vh; }
   }
 </style>
-<style>.cinema-pill, .review-pill, #hud, #hudMin, .text-studio, .cue-lanes { visibility: hidden !important; pointer-events: none !important; }</style>
+<style>.cinema-pill, .review-pill, #hud, #hudMin, #mediumBadge, #cleanSound, #archLab, #mockLab, .lab-drawer, .text-studio, .cue-lanes { visibility: hidden !important; pointer-events: none !important; }</style>
 </head>
 <body>
 
@@ -484,7 +484,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { TRAJECTORIES, DEFAULT_FILM_DURATION } from '../trajectories/paths.js?v=20261123c';
 import { addPavlosSeatRoseEasterEgg } from '../trajectories/rose.js';
 import { createTactileMaterialRig } from '../trajectories/tactile.js';
-import { AYAZAMANA_TRACKS, createAyazamanaAudio } from '../ambient-audio.js?v=20261123c';
+import { AYAZAMANA_TRACKS, createAyazamanaAudio } from '../ambient-audio.js?v=20261124m';
 import { skipUnlitLights } from '/shared/film-lights.js';
 skipUnlitLights(THREE);
 
@@ -1190,8 +1190,10 @@ for (const b of document.querySelectorAll('#review-pill button[data-fmt]')) {
   });
 }
 
+const filmLoadState = (window.__filmLoad = { progress: 0.08, ready: false });
 const loader = new GLTFLoader();
 loader.load('../assets/flushing-theater.glb', gltf => {
+  filmLoadState.progress = Math.max(filmLoadState.progress, 0.78);
   const root = gltf.scene;
   const floorOakShared = new Map();
 
@@ -1274,14 +1276,22 @@ loader.load('../assets/flushing-theater.glb', gltf => {
   batchRepeatedMeshesIntoInstanced(root);
   syncFormatButtons();
 
-  const startFilm = () => { sceneReady = true; needsRender = true; clock.getDelta(); };
+  const startFilm = () => {
+    sceneReady = true; needsRender = true; clock.getDelta();
+    requestAnimationFrame(() => { filmLoadState.progress = 1; filmLoadState.ready = true; });
+  };
   const warmTimes = []; for (let t = 0; t <= FILM_DURATION; t += 1.0) warmTimes.push(t);
   warmTimes.push(FILM_DURATION * 0.70, FILM_DURATION * 0.80, FILM_DURATION);
   needsRender = true;
+  filmLoadState.progress = Math.max(filmLoadState.progress, 0.85);
   import('/shared/film-warm.js')
     .then(({ warmFilm }) => warmFilm({ renderer, scene, camera, times: warmTimes, visit: applyMovieTime, first: filmTime }))
     .catch(() => {})
     .then(startFilm);
+}, (xhr) => {
+  if (xhr && xhr.total > 0) {
+    filmLoadState.progress = Math.max(filmLoadState.progress, 0.10 + 0.66 * Math.min(1, xhr.loaded / xhr.total));
+  }
 });
 
 // ---- 26.0s REAL-TIME CINEMA MOVIE + FULL IYUANA PLAYBACK / SCRUB / SCROLL PARITY ----

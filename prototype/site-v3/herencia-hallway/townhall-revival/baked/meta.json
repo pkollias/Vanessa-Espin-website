@@ -1,0 +1,80 @@
+{
+  "version": 9,
+  "has_fixture_maps": true,
+  "has_corner_ao": true,
+  "gain": 0.53872,
+  "scale": 5.25,
+  "floor_scale": 4.95,
+  "hall": {
+    "start": 3.7,
+    "arch": 20.0,
+    "width": 3.44,
+    "alcoveWidth": 2.48,
+    "archSpring": 2.96,
+    "archRise": 0.72,
+    "ceiling": 4.86,
+    "alcoveCeiling": 4.62,
+    "archFinish": "plaster",
+    "laylights": 0,
+    "vestRightWindow": true
+  },
+  "entrance": {
+    "style": "G12"
+  },
+  "doors": [
+    {
+      "id": "d1",
+      "wall": "L",
+      "s": 12.9,
+      "open": 0.0,
+      "swing": "in",
+      "transom": true
+    },
+    {
+      "id": "d3",
+      "wall": "R",
+      "s": 10.3,
+      "open": 0.0,
+      "swing": "in",
+      "transom": true
+    },
+    {
+      "id": "d4",
+      "wall": "R",
+      "s": 16.28,
+      "open": 0.0,
+      "swing": "in",
+      "transom": true
+    }
+  ],
+  "floor_rect": [
+    -2.02,
+    2.02,
+    3.4000000000000004,
+    24.220000000000002
+  ],
+  "ceil_rect": [
+    -1.77,
+    1.77,
+    3.64,
+    23.98
+  ],
+  "lay_rects": [],
+  "stand": {
+    "s": 8.65,
+    "x": 0.44,
+    "face": 168.0
+  },
+  "white_balance": [
+    1.0,
+    1.0,
+    1.0
+  ],
+  "wall_scale": 5.25,
+  "ceil_scale": 3.6,
+  "wall_fix_scale": 7.25,
+  "ceil_fix_scale": 0.65,
+  "floor_fix_scale": 0.65,
+  "fix_scale": 7.25,
+  "fix_floor_scale": 0.65
+}

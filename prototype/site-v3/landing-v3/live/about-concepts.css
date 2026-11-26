@@ -22,6 +22,8 @@
   position: fixed;
   inset: 0;
   z-index: 72;
+  max-width: 100vw;
+  overflow: hidden;
   color: var(--ab-parchment);
   font-family: var(--ab-sans);
   font-weight: 400;
@@ -1818,9 +1820,14 @@ body.is-entering:not(.in-film):not(.about-open) #aboutStage {
   position: absolute;
   inset: 0;
   z-index: 5;
+  width: 100%;
+  max-width: 100vw;
   pointer-events: auto;
+  overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
   background:
     radial-gradient(64% 58% at 22% 28%, rgba(86, 36, 20, 0.20) 0%, rgba(16, 14, 14, 0) 72%),
     radial-gradient(58% 64% at 78% 72%, rgba(96, 40, 22, 0.16) 0%, rgba(16, 14, 14, 0) 75%),
@@ -1838,7 +1845,7 @@ body.in-film #aboutStage[data-about="a9"] .a9m-stage {
 
 .a9m-stage-grain {
   position: fixed;
-  inset: -2rem;
+  inset: 0;
   z-index: 8;
   pointer-events: none;
   background-image: url(../img/noise.png);
@@ -1854,7 +1861,9 @@ body.in-film #aboutStage[data-about="a9"] .a9m-stage {
 .a9m-wrap {
   position: relative;
   z-index: 1;
+  width: 100%;
   max-width: 1180px;
+  overflow-x: clip;
   margin: 0 auto;
   padding: clamp(16px, 2.2vh, 26px) var(--gutter, clamp(20px, 3vw, 46px)) clamp(64px, 9vh, 104px);
 }
@@ -1992,6 +2001,8 @@ body.in-film #aboutStage[data-about="a9"] .a9m-stage {
 }
 
 .a9m-main {
+  min-width: 0;
+  width: 100%;
   max-width: 65ch;
   display: flex;
   flex-direction: column;
@@ -2276,9 +2287,12 @@ body.in-film #aboutStage[data-about="a9"] .a9m-stage {
 
 .a9m-honeypot {
   position: absolute;
-  left: -9999px;
+  left: 0;
+  top: 0;
   width: 1px;
   height: 1px;
+  clip-path: inset(50%);
+  overflow: hidden;
   opacity: 0;
   pointer-events: none;
 }
@@ -2387,6 +2401,11 @@ body.in-film #aboutStage[data-about="a9"] .a9m-stage {
 
 @media (max-width: 860px) {
   .a1-bay, .a2-bay, .a4-bay, .a8-bay, .a2-3d-caption { display: none; }
+  .a1-salon, .a2-float, .a3-monograph, .a4-alcove, .a5-stage, .a6-booth, .a7-desk, .a8-plinth, .a9m-stage {
+    overflow-x: hidden;
+    max-width: 100vw;
+    touch-action: pan-y;
+  }
   .a1-salon, .a2-float, .a4-alcove, .a8-plinth {
     width: 100vw;
     background: rgba(15, 12, 10, 0.96);
@@ -2400,16 +2419,31 @@ body.in-film #aboutStage[data-about="a9"] .a9m-stage {
   .a9m-stage {
     background-color: color-mix(in srgb, var(--bg) 94%, transparent);
   }
+  .a9m-wrap {
+    overflow-x: hidden;
+  }
   .a9m-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 28px;
   }
   .a9m-rail {
     position: static;
     max-width: min(260px, 68vw);
   }
+  .a9m-studio-card {
+    overflow: hidden;
+    padding: 26px 22px;
+  }
+  .a9m-studio-aura {
+    inset: -12px;
+  }
   .a9m-form-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* 16px inputs prevent iOS Safari from auto-zooming & unlocking horizontal panning on tap */
+  .a9m-field input,
+  .a9m-field textarea {
+    font-size: 16px;
   }
   .a2-mobile-portrait { display: block; }
   .a1-mat, .a4-portrait-card, .a5-portrait-frame, .a8-portrait-frame { max-width: min(216px, 58vw); }

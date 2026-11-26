@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { SITE, EXHIBITIONS, BIO, CONCEPTS, PORTALS, ABOUT_CONCEPTS, INTRO_CONCEPTS, COPY_MODES, SCROLL_CUES, COLOR_MODES, POSTER_SWATCHES, CARD_MOODS } from './data.js?v=20261123m';
-import { createAboutController } from './about-concepts.js?v=20261123h';
+import { SITE, EXHIBITIONS, BIO, CONCEPTS, PORTALS, ABOUT_CONCEPTS, INTRO_CONCEPTS, COPY_MODES, SCROLL_CUES, COLOR_MODES, POSTER_SWATCHES, CARD_MOODS } from './data.js?v=20261124m';
+import { createAboutController } from './about-concepts.js?v=20261124m';
 import { createIntroController } from './intro-concepts.js?v=20261123d';
 import { createScrollCueController } from './scroll-cues.js?v=20261123d';
 
@@ -1591,28 +1591,106 @@ const landingShell = $('#landingShell');
 let filmEndTimer = 0, filmPollTimer = 0, veilFadeTimer = 0;
 const prefetchedUrls = new Set();
 
+const IS_TOUCH_MOBILE = (
+  /iPhone|iPad|iPod|Android/i.test(navigator.userAgent || '') ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
+  (matchMedia('(pointer: coarse)').matches && innerWidth < 1024)
+);
+const EVENT_AUDIO_META = {
+  'iyuana':        { mobileKey: 'iyuana:chant',           bufKey: 'chant',                url: '/concepts/iyuana/assets/audio/forest-chant.m4a' },
+  'herencia-viva': { mobileKey: 'herencia-viva:granados', bufKey: 'herencia:granados',    url: '/herencia-hallway/audio/tracks/h10-granados-arabesca.m4a' },
+  'ayazamana':     { mobileKey: 'ayazamana:sanjuanito',   bufKey: 'ayazamana:sanjuanito', url: '/flushing-theater/assets/audio/sanjuanito-ecuador.m4a' },
+};
+
+function ensureAudioBridge() {
+  if (!window.__iyuanaAudioBridge) {
+    window.__iyuanaAudioBridge = { ctx: null, buffers: new Map(), mobileAudio: new Map() };
+  } else if (!window.__iyuanaAudioBridge.mobileAudio) {
+    window.__iyuanaAudioBridge.mobileAudio = new Map();
+  }
+  window.__herenciaAudioBridge = window.__iyuanaAudioBridge;
+  window.__ayazamanaAudioBridge = window.__iyuanaAudioBridge;
+  return window.__iyuanaAudioBridge;
+}
+ensureAudioBridge();
+
+function createMobileAudioEl(url, preloadMode = 'auto') {
+  const el = new Audio(url);
+  el.loop = true;
+  el.preload = preloadMode;
+  el.playsInline = true;
+  el.setAttribute('playsinline', '');
+  el.setAttribute('webkit-playsinline', '');
+  try { el.volume = 0.72; } catch {}
+  return el;
+}
+
 function primeEventAudioFromGesture(slug) {
-  if (slug !== 'iyuana' && slug !== 'ayazamana') return;
+  const meta = EVENT_AUDIO_META[slug];
+  if (!meta) return;
+  try {
+    if (navigator.audioSession && navigator.audioSession.type !== 'playback') {
+      navigator.audioSession.type = 'playback';
+    }
+  } catch {}
+  const bridge = ensureAudioBridge();
+  if (IS_TOUCH_MOBILE) {
+    for (const [k, otherEl] of bridge.mobileAudio.entries()) {
+      if (k !== meta.mobileKey && otherEl && !otherEl.paused) {
+        try { otherEl.pause(); } catch {}
+      }
+    }
+    let el = bridge.mobileAudio.get(meta.mobileKey);
+    if (!el) {
+      el = createMobileAudioEl(meta.url, 'auto');
+      bridge.mobileAudio.set(meta.mobileKey, el);
+    }
+    el.muted = false;
+    try { el.volume = 0.72; } catch {}
+    if (el.paused) {
+      const p = el.play();
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+    }
+    return;
+  }
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
   if (!AudioCtx) return;
-  if (!window.__iyuanaAudioBridge) {
-    window.__iyuanaAudioBridge = { ctx: new AudioCtx(), buffers: new Map() };
-  }
-  window.__ayazamanaAudioBridge = window.__iyuanaAudioBridge;
-  const bridge = window.__iyuanaAudioBridge;
-  if (bridge.ctx.state === 'suspended') {
+  if (!bridge.ctx) bridge.ctx = new AudioCtx();
+  if (bridge.ctx.state !== 'running') {
+    try {
+      const b = bridge.ctx.createBuffer(1, 1, 22050);
+      const s = bridge.ctx.createBufferSource();
+      s.buffer = b;
+      s.connect(bridge.ctx.destination);
+      s.start(0);
+    } catch {}
     bridge.ctx.resume().catch(() => {});
   }
-  const key = slug === 'iyuana' ? 'chant' : 'ayazamana:sanjuanito';
-  const url = slug === 'iyuana'
-    ? '/concepts/iyuana/assets/audio/forest-chant.m4a'
-    : '/flushing-theater/assets/audio/sanjuanito-ecuador.m4a';
-  if (!bridge.buffers.has(key)) {
-    const p = fetch(url)
+  if (!bridge.buffers.has(meta.bufKey)) {
+    const p = fetch(meta.url)
       .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(`HTTP ${r.status}`))))
       .then((arr) => bridge.ctx.decodeAudioData(arr));
-    bridge.buffers.set(key, p);
-    p.catch(() => bridge.buffers.delete(key));
+    bridge.buffers.set(meta.bufKey, p);
+    p.catch(() => bridge.buffers.delete(meta.bufKey));
+  }
+}
+
+function preloadNextEventAudio(slug) {
+  const meta = EVENT_AUDIO_META[slug];
+  if (!meta) return;
+  const bridge = ensureAudioBridge();
+  if (IS_TOUCH_MOBILE) {
+    if (!bridge.mobileAudio.has(meta.mobileKey)) {
+      bridge.mobileAudio.set(meta.mobileKey, createMobileAudioEl(meta.url, 'metadata'));
+    }
+    return;
+  }
+  if (bridge.ctx && !bridge.buffers.has(meta.bufKey)) {
+    const p = fetch(meta.url)
+      .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(`HTTP ${r.status}`))))
+      .then((arr) => bridge.ctx.decodeAudioData(arr));
+    bridge.buffers.set(meta.bufKey, p);
+    p.catch(() => bridge.buffers.delete(meta.bufKey));
   }
 }
 
@@ -1626,42 +1704,146 @@ function prefetchEvent(idx) {
   document.head.appendChild(link);
 }
 
+const BOOT_LOADER_THEMES = {
+  'iyuana': {
+    bg: 'radial-gradient(ellipse 78% 72% at 54% 48%, rgba(116,87,68,0.72) 0%, rgba(74,52,38,0.52) 48%, rgba(15,13,11,0.96) 100%), #0f0d0b',
+    ink: '#f4ede2', rule: 'rgba(244,237,226,0.22)', accent: '#f6a035', light: '0',
+    base: '#0f0d0b', mid: '#745744', deep: '#4a3426',
+  },
+  'herencia-viva': {
+    bg: 'radial-gradient(ellipse 78% 72% at 54% 48%, rgba(78,94,64,0.76) 0%, rgba(50,56,36,0.54) 48%, rgba(14,13,11,0.96) 100%), #0e0d0b',
+    ink: '#edf3ec', rule: 'rgba(237,243,236,0.22)', accent: '#9db883', light: '0',
+    base: '#0e0d0b', mid: '#4e5e40', deep: '#323824',
+  },
+  'ayazamana': {
+    bg: 'radial-gradient(ellipse 78% 72% at 54% 48%, rgba(89,39,68,0.76) 0%, rgba(57,23,38,0.54) 48%, rgba(14,11,11,0.96) 100%), #0e0b0b',
+    ink: '#f4ece0', rule: 'rgba(244,236,224,0.22)', accent: '#f0d765', light: '0',
+    base: '#0e0b0b', mid: '#592744', deep: '#391726',
+  },
+};
+let bootLoaderListener = null;
+
+function paintLandingWashRect(ctx, W, H, ex, alpha = 1) {
+  const th = BOOT_LOADER_THEMES[ex.slug] || BOOT_LOADER_THEMES['iyuana'];
+  ctx.save();
+  ctx.globalAlpha = clamp01(alpha);
+  ctx.fillStyle = th.base;
+  ctx.fillRect(0, 0, W, H);
+  const rx = W * 0.78, ry = H * 0.72;
+  ctx.save();
+  ctx.translate(W * 0.54, H * 0.48);
+  ctx.scale(1, ry / Math.max(1, rx));
+  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
+  const midRgb = hexToRgb(th.mid), deepRgb = hexToRgb(th.deep), baseRgb = hexToRgb(th.base);
+  g.addColorStop(0, rgbStr(midRgb, 0.74));
+  g.addColorStop(0.48, rgbStr(deepRgb, 0.53));
+  g.addColorStop(1, rgbStr(baseRgb, 0.96));
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(0, 0, rx, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+  ctx.restore();
+}
+
+function buildStageBootLoader(ex, mode) {
+  const th = BOOT_LOADER_THEMES[ex.slug] || BOOT_LOADER_THEMES['iyuana'];
+  const el = document.createElement('div');
+  el.className = 'stage-boot-loader';
+  el.dataset.light = th.light;
+  el.style.setProperty('--fl-bg', th.bg);
+  el.style.setProperty('--fl-ink', th.ink);
+  el.style.setProperty('--fl-rule', th.rule);
+  el.style.setProperty('--fl-accent', th.accent);
+  if (mode === 'l03') {
+    el.innerHTML = `<div class="stage-boot-loader__grain"></div><div class="stage-boot-loader__l03"><h2 class="stage-boot-loader__word">${ex.name}</h2><p class="stage-boot-loader__sub">${ex.sub}</p><span class="stage-boot-loader__hair"></span></div>`;
+  } else {
+    el.innerHTML = `<div class="stage-boot-loader__grain"></div><div class="stage-boot-loader__seam"><div class="stage-boot-loader__fill"></div></div><div class="stage-boot-loader__flank stage-boot-loader__flank--r"><h2 class="stage-boot-loader__title">${ex.name}</h2></div>`;
+  }
+  return el;
+}
+
 function mountFilmIframe(ex) {
   clearInterval(filmPollTimer);
   clearTimeout(filmEndTimer);
+  if (bootLoaderListener) {
+    window.removeEventListener('message', bootLoaderListener);
+    bootLoaderListener = null;
+  }
   resetFilmMedia();
   filmStage.innerHTML = '';
-  filmStage.style.background = ex.filmOpenBg;
+  const bootTheme = BOOT_LOADER_THEMES[ex.slug] || BOOT_LOADER_THEMES['iyuana'];
+  filmStage.style.background = bootTheme.base;
+  const loaderParam = params.get('loader');
+  const loaderDisabled = loaderParam === '0' || loaderParam === 'off';
+  const loaderMode = (loaderParam || 'l06').toLowerCase() === 'l03' ? 'l03' : 'l06';
+  let bootShell = null;
+  if (!loaderDisabled) {
+    bootShell = buildStageBootLoader(ex, loaderMode);
+    filmStage.appendChild(bootShell);
+  }
+
   const ifr = document.createElement('iframe');
-  ifr.src = ex.filmUrl;
+  if (loaderParam) {
+    const uStage = new URL(ex.filmUrl, location.href);
+    uStage.searchParams.set('loader', loaderParam);
+    ifr.src = uStage.pathname + uStage.search;
+  } else {
+    ifr.src = ex.filmUrl;
+  }
   ifr.title = `${ex.name} — Event Experience`;
   ifr.allow = 'autoplay; fullscreen';
   ifr.style.opacity = '0';
-  ifr.style.transition = 'opacity 0.28s ease';
+  ifr.style.transition = loaderDisabled ? 'opacity 0.28s ease' : 'none';
 
-  let revealed = false;
-  const showIframe = () => {
-    if (revealed || !state.inFilm) return;
-    revealed = true;
-    ifr.style.opacity = '1';
-    fxCanvasEl.style.transition = 'opacity 0.26s ease';
+  // Immediately clear the blank portal veil so the 0ms loader shell is visible right away
+  if (!loaderDisabled) {
+    fxCanvasEl.style.transition = 'opacity 0.14s ease';
     fxCanvasEl.style.opacity = '0';
     clearTimeout(veilFadeTimer);
     veilFadeTimer = setTimeout(() => {
       fxCtx.clearRect(0, 0, fxCanvasEl.width, fxCanvasEl.height);
       fxCanvasEl.style.transition = '';
       fxCanvasEl.style.opacity = '1';
-    }, 280);
+    }, 160);
+  }
+
+  let revealed = false;
+  const showIframe = () => {
+    if (revealed || !state.inFilm) return;
+    revealed = true;
+    if (bootLoaderListener) {
+      window.removeEventListener('message', bootLoaderListener);
+      bootLoaderListener = null;
+    }
+    ifr.style.opacity = '1';
+    if (bootShell) setTimeout(() => { bootShell?.remove(); bootShell = null; }, 60);
+    if (loaderDisabled) {
+      fxCanvasEl.style.transition = 'opacity 0.26s ease';
+      fxCanvasEl.style.opacity = '0';
+      clearTimeout(veilFadeTimer);
+      veilFadeTimer = setTimeout(() => {
+        fxCtx.clearRect(0, 0, fxCanvasEl.width, fxCanvasEl.height);
+        fxCanvasEl.style.transition = '';
+        fxCanvasEl.style.opacity = '1';
+      }, 280);
+    }
   };
-  ifr.addEventListener('load', () => { dressFilm(ifr); setTimeout(showIframe, 90); }, { once: true });
-  setTimeout(showIframe, 650);
+  bootLoaderListener = (ev) => {
+    if (ev.source === ifr.contentWindow && ev.data?.source === 'film-loader' && ev.data?.type === 'mounted') {
+      showIframe();
+    }
+  };
+  window.addEventListener('message', bootLoaderListener);
+  ifr.addEventListener('load', () => { dressFilm(ifr); showIframe(); }, { once: true });
+  setTimeout(showIframe, loaderDisabled ? 650 : 320);
 
   filmStage.appendChild(ifr);
   filmStage.setAttribute('aria-hidden', 'false');
 
   const nextIdx = (state.active + 1) % N;
   const nextEx = EXHIBITIONS[nextIdx];
-  primeEventAudioFromGesture(nextEx.slug);
+  preloadNextEventAudio(nextEx.slug);
   prefetchEvent(nextIdx);
   filmNext.textContent = `Next: ${nextEx.name} →`;
   filmNav.classList.remove('is-ended');
@@ -1694,7 +1876,16 @@ function unmountFilmIframe() {
   clearTimeout(filmEndTimer);
   clearInterval(filmPollTimer);
   clearTimeout(veilFadeTimer);
+  if (bootLoaderListener) {
+    window.removeEventListener('message', bootLoaderListener);
+    bootLoaderListener = null;
+  }
   resetFilmMedia();
+  if (window.__iyuanaAudioBridge?.mobileAudio) {
+    for (const el of window.__iyuanaAudioBridge.mobileAudio.values()) {
+      try { el.pause(); el.currentTime = 0; } catch {}
+    }
+  }
   const ifr = filmStage.querySelector('iframe');
   if (ifr) ifr.src = 'about:blank';
   filmStage.innerHTML = '';
@@ -1821,8 +2012,7 @@ function renderPortalFX(nowMs) {
       camera.lookAt(fx, fy, 0);
     }
     const veilA = smooth(0.28, 0.98, u);
-    fxCtx.fillStyle = rgbStr(bgRgb, veilA);
-    fxCtx.fillRect(0, 0, W, H);
+    paintLandingWashRect(fxCtx, W, H, ex, veilA);
   } else if (pa.kind === 'iris') {
     // P3 Spotlight Dim: Crisp spotlight narrows around poster into event's opening ground
     const rad = mix(maxR * 0.44, 0, Math.pow(e, 1.25));
@@ -1854,9 +2044,8 @@ function renderPortalFX(nowMs) {
   fxCtx.restore();
 
   if (u >= 1 && frozen === null) {
-    // Hold matching-colour veil on #portal-fx, halt landing WebGL loop (0 GPU contention!), and mount event iframe!
-    fxCtx.fillStyle = rgbStr(bgRgb, 1);
-    fxCtx.fillRect(0, 0, W, H);
+    // Hold matching landing-wash veil on #portal-fx, halt landing WebGL loop (0 GPU contention!), and mount event iframe!
+    paintLandingWashRect(fxCtx, W, H, ex, 1);
     filmStage.classList.remove('is-under');
     filmStage.classList.add('is-active');
     document.body.classList.remove('is-entering');
@@ -2341,6 +2530,16 @@ function finishDrag() {
 glCanvas.addEventListener('pointerup', finishDrag);
 glCanvas.addEventListener('pointercancel', finishDrag);
 glCanvas.addEventListener('pointerleave', () => { ptr.inside = false; state.hoveredSlot = -1; glCanvas.classList.remove('is-over'); });
+// iOS Safari WebKit requires touchend / click (not pointerup after setPointerCapture) as a trusted media-activation gesture
+const ensureCanvasEntryAudioOnGesture = () => {
+  if (state.portalAnim || state.inFilm) {
+    const idx = state.portalAnim ? state.portalAnim.idx : state.active;
+    const ex = EXHIBITIONS[mod(idx, N)];
+    if (ex) primeEventAudioFromGesture(ex.slug);
+  }
+};
+glCanvas.addEventListener('touchend', ensureCanvasEntryAudioOnGesture, { passive: true });
+glCanvas.addEventListener('click', ensureCanvasEntryAudioOnGesture);
 
 // Wheel: Linear 3-poster scroll (works right over the poster too!); one notch = one poster (0.51s glide)
 let wheelAcc = 0, lastWheel = -1e9, wheelLockedUntil = 0;
@@ -2369,7 +2568,13 @@ $('#filmAbout')?.addEventListener('click', () => {
   if (state.drawerOpen) closeAbout();
   else openAbout(state.aboutStyle);
 });
+$('#enterBtn')?.addEventListener('touchend', () => {
+  if (!state.inFilm && !state.portalAnim) primeEventAudioFromGesture(EXHIBITIONS[state.active]?.slug);
+}, { passive: true });
 $('#enterBtn')?.addEventListener('click', () => enterFilm(state.active, getCentredSlot()));
+$('#bsEnterBtn')?.addEventListener('touchend', () => {
+  if (!state.inFilm && !state.portalAnim) primeEventAudioFromGesture(EXHIBITIONS[state.active]?.slug);
+}, { passive: true });
 $('#bsEnterBtn')?.addEventListener('click', () => enterFilm(state.active, getCentredSlot()));
 $('#filmReturn').addEventListener('click', () => returnFromFilm());
 $('#filmNext')?.addEventListener('click', goToNextEventFromFilm);

@@ -213,7 +213,7 @@ function ensureStylesheet() {
   const link = document.createElement('link');
   link.id = 'about-concepts-css';
   link.rel = 'stylesheet';
-  link.href = 'about-concepts.css?v=20261122q';
+  link.href = 'about-concepts.css?v=20261124m';
   document.head.appendChild(link);
 }
 
