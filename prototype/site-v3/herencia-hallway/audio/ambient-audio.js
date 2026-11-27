@@ -40,10 +40,12 @@ export function createHerenciaAudio({ initialTrack = 'granados', initialEnabled 
   let ctx = null, gainNode = null, srcNode = null;
   let htmlAudio = null;
   let htmlAudioFromBridge = false;
+  const localMobileAudio = new Map();
   let loadToken = 0;
   let trackLoading = false;
   const bufferCache = new Map();
   const listeners = new Set();
+  const MOBILE_EVENTS = ['play', 'playing', 'pause', 'ended', 'error', 'abort'];
 
   function getParentAudioBridge() {
     try {
@@ -54,6 +56,18 @@ export function createHerenciaAudio({ initialTrack = 'granados', initialEnabled 
     return null;
   }
 
+  function isHealthyMobileAudio(el) {
+    try {
+      return Boolean(
+        el &&
+        el.ownerDocument &&
+        el.ownerDocument.defaultView &&
+        !el.error &&
+        el.networkState !== 3
+      );
+    } catch { return false; }
+  }
+
   function notify() {
     const state = getState();
     for (const fn of listeners) { try { fn(state); } catch {} }
@@ -61,7 +75,7 @@ export function createHerenciaAudio({ initialTrack = 'granados', initialEnabled 
 
   function getState() {
     if (IS_TOUCH_MOBILE) {
-      const isPlaying = Boolean(htmlAudio && !htmlAudio.paused && !htmlAudio.ended);
+      const isPlaying = Boolean(isHealthyMobileAudio(htmlAudio) && !htmlAudio.paused && !htmlAudio.ended);
       return {
         trackId,
         muted: userMuted,
@@ -82,12 +96,22 @@ export function createHerenciaAudio({ initialTrack = 'granados', initialEnabled 
     };
   }
 
+  function detachMobileAudioListeners(el) {
+    if (!el) return;
+    for (const ev of MOBILE_EVENTS) {
+      try { el.removeEventListener(ev, notify); } catch {}
+    }
+  }
+
   function bindMobileAudioEl(el, fromBridge) {
     if (htmlAudio !== el) {
-      if (htmlAudio) { try { htmlAudio.pause(); } catch {} }
+      if (htmlAudio) {
+        detachMobileAudioListeners(htmlAudio);
+        try { htmlAudio.pause(); } catch {}
+      }
       htmlAudio = el;
       htmlAudioFromBridge = !!fromBridge;
-      for (const ev of ['play', 'playing', 'pause', 'ended']) {
+      for (const ev of MOBILE_EVENTS) {
         htmlAudio.addEventListener(ev, notify);
       }
     }
@@ -105,45 +129,82 @@ export function createHerenciaAudio({ initialTrack = 'granados', initialEnabled 
     return el;
   }
 
+  function getOrCreateLocalMobileAudio(meta) {
+    let el = localMobileAudio.get(meta.id) || null;
+    if (!isHealthyMobileAudio(el)) {
+      if (el) { try { el.pause(); } catch {} }
+      el = makeLocalMobileAudio(meta);
+      localMobileAudio.set(meta.id, el);
+    }
+    return el;
+  }
+
   function ensureMobileAudio(id, forceLocal = false) {
     const meta = HERENCIA_TRACKS.find(t => t.id === id) || HERENCIA_TRACKS[0];
     const bridge = getParentAudioBridge();
     const mKey = `herencia-viva:${meta.id}`;
     const bridged = !forceLocal ? (bridge?.mobileAudio?.get(mKey) || null) : null;
-    if (bridged) {
+    if (bridged && isHealthyMobileAudio(bridged)) {
       return bindMobileAudioEl(bridged, true);
     }
-    const el = makeLocalMobileAudio(meta);
-    if (bridge?.mobileAudio) bridge.mobileAudio.set(mKey, el);
+    // Keep iframe-created <audio> strictly local — NEVER store an iframe-owned element in parent's bridge.mobileAudio,
+    // because destroying this iframe on navigation detaches its ownerDocument and permanently breaks re-entry playback!
+    const el = getOrCreateLocalMobileAudio(meta);
     return bindMobileAudioEl(el, false);
   }
 
-  function syncMobilePlayback(fromGesture = false) {
+  function pauseBridgedIfAny(id) {
+    const meta = HERENCIA_TRACKS.find(t => t.id === id) || HERENCIA_TRACKS[0];
+    const bridge = getParentAudioBridge();
+    const mKey = `herencia-viva:${meta.id}`;
+    const bridged = bridge?.mobileAudio?.get(mKey) || null;
+    if (bridged && bridged !== htmlAudio && !bridged.paused) {
+      try { bridged.pause(); } catch {}
+    }
+  }
+
+  function syncMobilePlayback(fromGesture = false, gestureDoc = document) {
     if (!IS_TOUCH_MOBILE) return;
     forcePlaybackSession();
-    const el = ensureMobileAudio(trackId);
+    const meta = HERENCIA_TRACKS.find(t => t.id === trackId) || HERENCIA_TRACKS[0];
+    const bridge = getParentAudioBridge();
+    const mKey = `herencia-viva:${meta.id}`;
+    const bridged = bridge?.mobileAudio?.get(mKey) || null;
+    const bridgedHealthy = isHealthyMobileAudio(bridged);
+
     if (userMuted || !eventActive || videoDucked) {
-      if (!el.paused) { try { el.pause(); } catch {} }
+      if (htmlAudio && !htmlAudio.paused) { try { htmlAudio.pause(); } catch {} }
+      if (bridged && !bridged.paused) { try { bridged.pause(); } catch {} }
       notify();
       return;
     }
+
+    // If the parent-owned bridged <audio> is already actively playing, attach seamlessly with 0ms interruption.
+    // If playback must start from a tap inside THIS iframe (gestureDoc === document) and the bridged element is paused
+    // and owned by the parent document, use our same-document local <audio> SYNCHRONOUSLY inside the tap handler —
+    // iOS WebKit rejects cross-document play() from an iframe gesture and drops gesture activation before .catch()!
+    const preferLocalForIframeGesture = Boolean(
+      fromGesture &&
+      gestureDoc === document &&
+      bridgedHealthy &&
+      bridged.ownerDocument !== document &&
+      (bridged.paused || bridged.ended)
+    );
+    if (preferLocalForIframeGesture) {
+      try { bridged.pause(); } catch {}
+    }
+    const el = ensureMobileAudio(trackId, preferLocalForIframeGesture);
+    if (!htmlAudioFromBridge) pauseBridgedIfAny(trackId);
+
+    el.preload = 'auto';
     el.muted = false;
     try { el.volume = Math.min(1, Math.max(0, baseGain)); } catch {}
-    if (el.paused) {
+    if (el.paused || el.ended) {
       const p = el.play();
       if (p && typeof p.then === 'function') {
-        p.then(notify).catch(() => {
-          // On iOS Safari reload, a parent-created <audio> can reject play() from an iframe gesture; fall back to local <audio>.
-          if (fromGesture && htmlAudioFromBridge && !userMuted && eventActive && !videoDucked) {
-            const localEl = ensureMobileAudio(trackId, true);
-            localEl.muted = false;
-            const p2 = localEl.play();
-            if (p2 && typeof p2.then === 'function') p2.then(notify).catch(notify);
-            else notify();
-            return;
-          }
-          notify();
-        });
+        p.then(notify).catch(notify);
+      } else {
+        notify();
       }
     } else {
       notify();
@@ -243,11 +304,11 @@ export function createHerenciaAudio({ initialTrack = 'granados', initialEnabled 
     notify();
   }
 
-  async function tryUnlock(fromGesture = false) {
+  async function tryUnlock(fromGesture = false, gestureDoc = document) {
     if (userMuted || !eventActive) return;
     forcePlaybackSession();
     if (IS_TOUCH_MOBILE) {
-      syncMobilePlayback(fromGesture);
+      syncMobilePlayback(fromGesture, gestureDoc);
       return;
     }
     ensureContext();
@@ -269,11 +330,11 @@ export function createHerenciaAudio({ initialTrack = 'granados', initialEnabled 
   const unlockEvents = ['touchend', 'pointerup', 'click', 'keydown'];
   const onGesture = (e) => {
     if (userMuted || !eventActive) return;
-    if (e?.target?.closest?.('#bottomSoundBtn, #cleanSound, #soundBtn, #soundWakePill, [data-sound-toggle]')) return;
+    if (e?.target?.closest?.('#bottomSoundBtn, #cleanSound, #soundBtn, #soundWakePill, [data-sound-toggle], #filmReturn, #filmAbout, #brandHome, #aboutBtn')) return;
     const st = getState();
     if (!st.playing) {
       lastGestureUnlockMs = performance.now();
-      tryUnlock(true);
+      tryUnlock(true, e?.target?.ownerDocument || document);
     }
   };
   for (const ev of unlockEvents) {
@@ -298,7 +359,16 @@ export function createHerenciaAudio({ initialTrack = 'granados', initialEnabled 
         }
       } catch {}
     }
-    if (htmlAudio) { try { htmlAudio.pause(); } catch {} }
+    const bridge = getParentAudioBridge();
+    const meta = HERENCIA_TRACKS.find(t => t.id === trackId) || HERENCIA_TRACKS[0];
+    const mKey = `herencia-viva:${meta.id}`;
+    detachMobileAudioListeners(htmlAudio);
+    for (const localEl of localMobileAudio.values()) {
+      try { localEl.pause(); } catch {}
+    }
+    if (htmlAudio && (!htmlAudioFromBridge || bridge?.activeMobileKey !== mKey)) {
+      try { htmlAudio.pause(); } catch {}
+    }
     stopSource();
     if (gainNode) { try { gainNode.disconnect(); } catch {} }
   });
@@ -320,8 +390,12 @@ export function createHerenciaAudio({ initialTrack = 'granados', initialEnabled 
 
   document.addEventListener('visibilitychange', () => {
     if (IS_TOUCH_MOBILE) {
-      if (document.hidden && htmlAudio) { try { htmlAudio.pause(); } catch {} }
-      else if (!document.hidden && !userMuted && eventActive) syncMobilePlayback();
+      if (document.hidden) {
+        if (htmlAudio) { try { htmlAudio.pause(); } catch {} }
+        pauseBridgedIfAny(trackId);
+      } else if (!userMuted && eventActive) {
+        syncMobilePlayback(false);
+      }
       return;
     }
     if (!ctx) return;
@@ -333,22 +407,22 @@ export function createHerenciaAudio({ initialTrack = 'granados', initialEnabled 
   });
 
   if (!userMuted && eventActive) {
-    tryUnlock();
+    tryUnlock(false);
   }
 
   return {
     getState,
-    unlock: () => tryUnlock(true),
+    unlock: (gestureDoc = document) => tryUnlock(true, gestureDoc),
     onStateChange(fn) { listeners.add(fn); fn(getState()); return () => listeners.delete(fn); },
     toggle() {
       const st = getState();
       if (!userMuted && (!st.playing || (lastGestureUnlockMs > 0 && performance.now() - lastGestureUnlockMs < 350))) {
         lastGestureUnlockMs = 0;
-        tryUnlock(true);
+        tryUnlock(true, document);
         return true;
       }
       userMuted = !userMuted;
-      if (!userMuted) tryUnlock(true);
+      if (!userMuted) tryUnlock(true, document);
       else {
         if (IS_TOUCH_MOBILE) syncMobilePlayback(false);
         else syncGain(0.35);
@@ -358,9 +432,9 @@ export function createHerenciaAudio({ initialTrack = 'granados', initialEnabled 
     },
     setMuted(m) {
       userMuted = !!m;
-      if (!userMuted) tryUnlock();
+      if (!userMuted) tryUnlock(false);
       else {
-        if (IS_TOUCH_MOBILE) syncMobilePlayback();
+        if (IS_TOUCH_MOBILE) syncMobilePlayback(false);
         else syncGain(0.35);
         notify();
       }
@@ -370,7 +444,7 @@ export function createHerenciaAudio({ initialTrack = 'granados', initialEnabled 
       trackId = newId;
       userMuted = false;
       if (IS_TOUCH_MOBILE) {
-        syncMobilePlayback();
+        syncMobilePlayback(true, document);
         return;
       }
       await startTrack(trackId, 0.7);

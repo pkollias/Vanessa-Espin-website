@@ -39,10 +39,12 @@ export function createIyuanaAudio({ initialTrack = 'chant', initialEnabled = tru
   let ctx = null, gainNode = null, srcNode = null;
   let htmlAudio = null;
   let htmlAudioFromBridge = false;
+  const localMobileAudio = new Map();
   let loadToken = 0;
   let trackLoading = false;
   const bufferCache = new Map();
   const listeners = new Set();
+  const MOBILE_EVENTS = ['play', 'playing', 'pause', 'ended', 'error', 'abort'];
 
   function getParentAudioBridge() {
     try {
@@ -53,6 +55,18 @@ export function createIyuanaAudio({ initialTrack = 'chant', initialEnabled = tru
     return null;
   }
 
+  function isHealthyMobileAudio(el) {
+    try {
+      return Boolean(
+        el &&
+        el.ownerDocument &&
+        el.ownerDocument.defaultView &&
+        !el.error &&
+        el.networkState !== 3
+      );
+    } catch { return false; }
+  }
+
   function notify() {
     const state = getState();
     for (const fn of listeners) { try { fn(state); } catch {} }
@@ -60,7 +74,7 @@ export function createIyuanaAudio({ initialTrack = 'chant', initialEnabled = tru
 
   function getState() {
     if (IS_TOUCH_MOBILE) {
-      const isPlaying = Boolean(htmlAudio && !htmlAudio.paused && !htmlAudio.ended);
+      const isPlaying = Boolean(isHealthyMobileAudio(htmlAudio) && !htmlAudio.paused && !htmlAudio.ended);
       return {
         trackId,
         muted: userMuted,
@@ -81,12 +95,22 @@ export function createIyuanaAudio({ initialTrack = 'chant', initialEnabled = tru
     };
   }
 
+  function detachMobileAudioListeners(el) {
+    if (!el) return;
+    for (const ev of MOBILE_EVENTS) {
+      try { el.removeEventListener(ev, notify); } catch {}
+    }
+  }
+
   function bindMobileAudioEl(el, fromBridge) {
     if (htmlAudio !== el) {
-      if (htmlAudio) { try { htmlAudio.pause(); } catch {} }
+      if (htmlAudio) {
+        detachMobileAudioListeners(htmlAudio);
+        try { htmlAudio.pause(); } catch {}
+      }
       htmlAudio = el;
       htmlAudioFromBridge = !!fromBridge;
-      for (const ev of ['play', 'playing', 'pause', 'ended']) {
+      for (const ev of MOBILE_EVENTS) {
         htmlAudio.addEventListener(ev, notify);
       }
     }
@@ -104,45 +128,77 @@ export function createIyuanaAudio({ initialTrack = 'chant', initialEnabled = tru
     return el;
   }
 
+  function getOrCreateLocalMobileAudio(meta) {
+    let el = localMobileAudio.get(meta.id) || null;
+    if (!isHealthyMobileAudio(el)) {
+      if (el) { try { el.pause(); } catch {} }
+      el = makeLocalMobileAudio(meta);
+      localMobileAudio.set(meta.id, el);
+    }
+    return el;
+  }
+
   // ---- Mobile Native Streaming HTMLAudioElement Engine (bypasses iPhone Silent switch & cross-iframe WebKit bugs)
   function ensureMobileAudio(id, forceLocal = false) {
     const meta = IYUANA_TRACKS.find(t => t.id === id) || IYUANA_TRACKS[0];
     const bridge = getParentAudioBridge();
     const mKey = `iyuana:${meta.id}`;
     const bridged = !forceLocal ? (bridge?.mobileAudio?.get(mKey) || null) : null;
-    if (bridged) {
+    if (bridged && isHealthyMobileAudio(bridged)) {
       return bindMobileAudioEl(bridged, true);
     }
-    const el = makeLocalMobileAudio(meta);
-    if (bridge?.mobileAudio) bridge.mobileAudio.set(mKey, el);
+    const el = getOrCreateLocalMobileAudio(meta);
     return bindMobileAudioEl(el, false);
   }
 
-  function syncMobilePlayback(fromGesture = false) {
+  function pauseBridgedIfAny(id) {
+    const meta = IYUANA_TRACKS.find(t => t.id === id) || IYUANA_TRACKS[0];
+    const bridge = getParentAudioBridge();
+    const mKey = `iyuana:${meta.id}`;
+    const bridged = bridge?.mobileAudio?.get(mKey) || null;
+    if (bridged && bridged !== htmlAudio && !bridged.paused) {
+      try { bridged.pause(); } catch {}
+    }
+  }
+
+  function syncMobilePlayback(fromGesture = false, gestureDoc = document) {
     if (!IS_TOUCH_MOBILE) return;
     forcePlaybackSession();
-    const el = ensureMobileAudio(trackId);
+    const meta = IYUANA_TRACKS.find(t => t.id === trackId) || IYUANA_TRACKS[0];
+    const bridge = getParentAudioBridge();
+    const mKey = `iyuana:${meta.id}`;
+    const bridged = bridge?.mobileAudio?.get(mKey) || null;
+    const bridgedHealthy = isHealthyMobileAudio(bridged);
+
     if (userMuted || !eventActive || videoDucked) {
-      if (!el.paused) { try { el.pause(); } catch {} }
+      if (htmlAudio && !htmlAudio.paused) { try { htmlAudio.pause(); } catch {} }
+      if (bridged && !bridged.paused) { try { bridged.pause(); } catch {} }
       notify();
       return;
     }
+
+    const preferLocalForIframeGesture = Boolean(
+      fromGesture &&
+      gestureDoc === document &&
+      bridgedHealthy &&
+      bridged.ownerDocument !== document &&
+      (bridged.paused || bridged.ended)
+    );
+    if (preferLocalForIframeGesture) {
+      try { bridged.pause(); } catch {}
+    }
+    const el = ensureMobileAudio(trackId, preferLocalForIframeGesture);
+    if (!htmlAudioFromBridge) pauseBridgedIfAny(trackId);
+
+    el.preload = 'auto';
     el.muted = false;
     try { el.volume = Math.min(1, Math.max(0, baseGain)); } catch {}
-    if (el.paused) {
+    if (el.paused || el.ended) {
       const p = el.play();
       if (p && typeof p.then === 'function') {
-        p.then(notify).catch(() => {
-          if (fromGesture && htmlAudioFromBridge && !userMuted && eventActive && !videoDucked) {
-            const localEl = ensureMobileAudio(trackId, true);
-            localEl.muted = false;
-            const p2 = localEl.play();
-            if (p2 && typeof p2.then === 'function') p2.then(notify).catch(notify);
-            else notify();
-            return;
-          }
-          notify();
-        });
+        p.then(notify).catch(notify);
+      } else {
+        notify();
       }
     } else {
       notify();
@@ -242,11 +298,11 @@ export function createIyuanaAudio({ initialTrack = 'chant', initialEnabled = tru
     notify();
   }
 
-  async function tryUnlock(fromGesture = false) {
+  async function tryUnlock(fromGesture = false, gestureDoc = document) {
     if (userMuted || !eventActive) return;
     forcePlaybackSession();
     if (IS_TOUCH_MOBILE) {
-      syncMobilePlayback(fromGesture);
+      syncMobilePlayback(fromGesture, gestureDoc);
       return;
     }
     ensureContext();
@@ -267,11 +323,11 @@ export function createIyuanaAudio({ initialTrack = 'chant', initialEnabled = tru
   const unlockEvents = ['touchend', 'pointerup', 'click', 'keydown'];
   const onGesture = (e) => {
     if (userMuted || !eventActive) return;
-    if (e?.target?.closest?.('#bottomSoundBtn, #cleanSound, #soundBtn, #soundWakePill, [data-sound-toggle]')) return;
+    if (e?.target?.closest?.('#bottomSoundBtn, #cleanSound, #soundBtn, #soundWakePill, [data-sound-toggle], #filmReturn, #filmAbout, #brandHome, #aboutBtn')) return;
     const st = getState();
     if (!st.playing) {
       lastGestureUnlockMs = performance.now();
-      tryUnlock(true);
+      tryUnlock(true, e?.target?.ownerDocument || document);
     }
   };
   for (const ev of unlockEvents) {
@@ -296,7 +352,16 @@ export function createIyuanaAudio({ initialTrack = 'chant', initialEnabled = tru
         }
       } catch {}
     }
-    if (htmlAudio) { try { htmlAudio.pause(); } catch {} }
+    const bridge = getParentAudioBridge();
+    const meta = IYUANA_TRACKS.find(t => t.id === trackId) || IYUANA_TRACKS[0];
+    const mKey = `iyuana:${meta.id}`;
+    detachMobileAudioListeners(htmlAudio);
+    for (const localEl of localMobileAudio.values()) {
+      try { localEl.pause(); } catch {}
+    }
+    if (htmlAudio && (!htmlAudioFromBridge || bridge?.activeMobileKey !== mKey)) {
+      try { htmlAudio.pause(); } catch {}
+    }
     stopSource();
     if (gainNode) { try { gainNode.disconnect(); } catch {} }
   });
@@ -308,7 +373,7 @@ export function createIyuanaAudio({ initialTrack = 'chant', initialEnabled = tru
     });
     if (anyUnmuted !== videoDucked) {
       videoDucked = anyUnmuted;
-      if (IS_TOUCH_MOBILE) syncMobilePlayback();
+      if (IS_TOUCH_MOBILE) syncMobilePlayback(false);
       else syncGain(0.35);
     }
   }
@@ -318,8 +383,12 @@ export function createIyuanaAudio({ initialTrack = 'chant', initialEnabled = tru
 
   document.addEventListener('visibilitychange', () => {
     if (IS_TOUCH_MOBILE) {
-      if (document.hidden && htmlAudio) { try { htmlAudio.pause(); } catch {} }
-      else if (!document.hidden && !userMuted && eventActive) syncMobilePlayback();
+      if (document.hidden) {
+        if (htmlAudio) { try { htmlAudio.pause(); } catch {} }
+        pauseBridgedIfAny(trackId);
+      } else if (!userMuted && eventActive) {
+        syncMobilePlayback(false);
+      }
       return;
     }
     if (!ctx) return;
@@ -331,23 +400,23 @@ export function createIyuanaAudio({ initialTrack = 'chant', initialEnabled = tru
   });
 
   if (!userMuted && eventActive) {
-    tryUnlock();
+    tryUnlock(false);
   }
 
   return {
     getState,
-    unlock: () => tryUnlock(true),
+    unlock: (gestureDoc = document) => tryUnlock(true, gestureDoc),
     onStateChange(fn) { listeners.add(fn); fn(getState()); return () => listeners.delete(fn); },
     toggle() {
       const st = getState();
       // Critical fix: if unmuted & waiting for gesture ("♪ Sound (Tap)"), tapping the button MUST unlock & play — never mute!
       if (!userMuted && (!st.playing || (lastGestureUnlockMs > 0 && performance.now() - lastGestureUnlockMs < 350))) {
         lastGestureUnlockMs = 0;
-        tryUnlock(true);
+        tryUnlock(true, document);
         return true;
       }
       userMuted = !userMuted;
-      if (!userMuted) tryUnlock(true);
+      if (!userMuted) tryUnlock(true, document);
       else {
         if (IS_TOUCH_MOBILE) syncMobilePlayback(false);
         else syncGain(0.35);
@@ -357,9 +426,9 @@ export function createIyuanaAudio({ initialTrack = 'chant', initialEnabled = tru
     },
     setMuted(m) {
       userMuted = !!m;
-      if (!userMuted) tryUnlock();
+      if (!userMuted) tryUnlock(false);
       else {
-        if (IS_TOUCH_MOBILE) syncMobilePlayback();
+        if (IS_TOUCH_MOBILE) syncMobilePlayback(false);
         else syncGain(0.35);
         notify();
       }
@@ -369,7 +438,7 @@ export function createIyuanaAudio({ initialTrack = 'chant', initialEnabled = tru
       trackId = newId;
       userMuted = false;
       if (IS_TOUCH_MOBILE) {
-        syncMobilePlayback();
+        syncMobilePlayback(true, document);
         return;
       }
       await startTrack(trackId, 0.9);

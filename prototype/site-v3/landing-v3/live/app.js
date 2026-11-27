@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { SITE, EXHIBITIONS, BIO, CONCEPTS, PORTALS, ABOUT_CONCEPTS, INTRO_CONCEPTS, COPY_MODES, SCROLL_CUES, COLOR_MODES, POSTER_SWATCHES, CARD_MOODS } from './data.js?v=20261126f';
+import { SITE, EXHIBITIONS, BIO, CONCEPTS, PORTALS, ABOUT_CONCEPTS, INTRO_CONCEPTS, COPY_MODES, SCROLL_CUES, COLOR_MODES, POSTER_SWATCHES, CARD_MOODS } from './data.js?v=20261127a';
 import { createAboutController } from './about-concepts.js?v=20261124m';
 import { createIntroController } from './intro-concepts.js?v=20261123d';
 import { createScrollCueController } from './scroll-cues.js?v=20261123d';
@@ -1604,7 +1604,7 @@ const EVENT_AUDIO_META = {
 
 function ensureAudioBridge() {
   if (!window.__iyuanaAudioBridge) {
-    window.__iyuanaAudioBridge = { ctx: null, buffers: new Map(), mobileAudio: new Map() };
+    window.__iyuanaAudioBridge = { ctx: null, buffers: new Map(), mobileAudio: new Map(), activeMobileKey: null };
   } else if (!window.__iyuanaAudioBridge.mobileAudio) {
     window.__iyuanaAudioBridge.mobileAudio = new Map();
   }
@@ -1613,6 +1613,18 @@ function ensureAudioBridge() {
   return window.__iyuanaAudioBridge;
 }
 ensureAudioBridge();
+
+function isUsableParentAudioEl(el) {
+  try {
+    return Boolean(
+      el &&
+      el.ownerDocument === document &&
+      el.ownerDocument.defaultView &&
+      !el.error &&
+      el.networkState !== HTMLMediaElement.NETWORK_NO_SOURCE
+    );
+  } catch { return false; }
+}
 
 function createMobileAudioEl(url, preloadMode = 'auto') {
   const el = new Audio(url);
@@ -1625,7 +1637,7 @@ function createMobileAudioEl(url, preloadMode = 'auto') {
   return el;
 }
 
-function primeEventAudioFromGesture(slug) {
+function primeEventAudioFromGesture(slug, { forcePlay = false } = {}) {
   const meta = EVENT_AUDIO_META[slug];
   if (!meta) return;
   try {
@@ -1637,19 +1649,26 @@ function primeEventAudioFromGesture(slug) {
   if (IS_TOUCH_MOBILE) {
     for (const [k, otherEl] of bridge.mobileAudio.entries()) {
       if (k !== meta.mobileKey && otherEl && !otherEl.paused) {
-        try { otherEl.pause(); } catch {}
+        try { otherEl.pause(); otherEl.__playResolved = false; } catch {}
       }
     }
     let el = bridge.mobileAudio.get(meta.mobileKey);
-    if (!el) {
+    if (!isUsableParentAudioEl(el)) {
+      if (el) { try { el.pause(); } catch {} }
       el = createMobileAudioEl(meta.url, 'auto');
       bridge.mobileAudio.set(meta.mobileKey, el);
     }
+    bridge.activeMobileKey = meta.mobileKey;
+    el.preload = 'auto';
     el.muted = false;
     try { el.volume = 0.72; } catch {}
-    if (el.paused) {
+    if (el.paused || el.ended || (forcePlay && !el.__playResolved)) {
       const p = el.play();
-      if (p && typeof p.catch === 'function') p.catch(() => {});
+      if (p && typeof p.then === 'function') {
+        p.then(() => { el.__playResolved = true; }).catch(() => { el.__playResolved = false; });
+      } else {
+        el.__playResolved = !el.paused;
+      }
     }
     return;
   }
@@ -1680,7 +1699,7 @@ function preloadNextEventAudio(slug) {
   if (!meta) return;
   const bridge = ensureAudioBridge();
   if (IS_TOUCH_MOBILE) {
-    if (!bridge.mobileAudio.has(meta.mobileKey)) {
+    if (!isUsableParentAudioEl(bridge.mobileAudio.get(meta.mobileKey))) {
       bridge.mobileAudio.set(meta.mobileKey, createMobileAudioEl(meta.url, 'metadata'));
     }
     return;
@@ -1881,9 +1900,16 @@ function unmountFilmIframe() {
     bootLoaderListener = null;
   }
   resetFilmMedia();
-  if (window.__iyuanaAudioBridge?.mobileAudio) {
-    for (const el of window.__iyuanaAudioBridge.mobileAudio.values()) {
-      try { el.pause(); el.currentTime = 0; } catch {}
+  if (window.__iyuanaAudioBridge) {
+    window.__iyuanaAudioBridge.activeMobileKey = null;
+    if (window.__iyuanaAudioBridge.mobileAudio) {
+      for (const el of window.__iyuanaAudioBridge.mobileAudio.values()) {
+        try {
+          el.pause();
+          el.__playResolved = false;
+          if (el.readyState >= 1) el.currentTime = 0;
+        } catch {}
+      }
     }
   }
   const ifr = filmStage.querySelector('iframe');
@@ -2100,14 +2126,21 @@ function openAbout(styleId = state.aboutStyle) {
   startLoop();
 }
 
-function closeAbout({ fromHistory = false } = {}) {
+function closeAbout({ fromHistory = false, skipAudioResume = false } = {}) {
   if (!state.drawerOpen && !(aboutCtrl && aboutCtrl.isOpen())) return;
   state.drawerOpen = false;
   document.body.classList.remove('about-open');
   if (!fromHistory) siteNav.about(false);
   if (aboutCtrl) aboutCtrl.close({ notify: false });
-  if (state.inFilm) {
-    try { filmFrame()?.contentWindow?.StageHost?.setPausedForOverlay?.(false); } catch {}
+  if (state.inFilm && !skipAudioResume) {
+    try {
+      const sh = filmFrame()?.contentWindow?.StageHost;
+      if (!sh?.isSoundMuted?.()) {
+        const ex = EXHIBITIONS[state.active];
+        if (ex) primeEventAudioFromGesture(ex.slug, { forcePlay: true });
+      }
+      sh?.setPausedForOverlay?.(false);
+    } catch {}
   }
   syncUrl();
   startLoop();
@@ -2458,7 +2491,9 @@ function hitTestSheets(clientX, clientY) {
 
 glCanvas.addEventListener('pointerdown', (e) => {
   if (state.inFilm || state.drawerOpen || state.portalAnim) return;
-  glCanvas.setPointerCapture(e.pointerId);
+  if (e.pointerType !== 'touch') {
+    try { glCanvas.setPointerCapture(e.pointerId); } catch {}
+  }
   const hitSlot = hitTestSheets(e.clientX, e.clientY);
   drag = {
     id: e.pointerId, x0: e.clientX, y0: e.clientY, moved: false,
@@ -2535,7 +2570,15 @@ const ensureCanvasEntryAudioOnGesture = () => {
   if (state.portalAnim || state.inFilm) {
     const idx = state.portalAnim ? state.portalAnim.idx : state.active;
     const ex = EXHIBITIONS[mod(idx, N)];
-    if (ex) primeEventAudioFromGesture(ex.slug);
+    if (ex) primeEventAudioFromGesture(ex.slug, { forcePlay: true });
+    return;
+  }
+  // If touchend fires BEFORE pointerup (WebKit iOS), prime audio right inside the trusted touchend when tapping the active poster!
+  if (drag && !drag.moved && drag.hitSlot >= 0) {
+    if (state.concept === 'c4' || drag.hitSlot === state.active) {
+      const ex = EXHIBITIONS[mod(drag.hitSlot, N)];
+      if (ex) primeEventAudioFromGesture(ex.slug, { forcePlay: true });
+    }
   }
 };
 glCanvas.addEventListener('touchend', ensureCanvasEntryAudioOnGesture, { passive: true });
@@ -2544,14 +2587,15 @@ glCanvas.addEventListener('click', ensureCanvasEntryAudioOnGesture);
 // On a direct hash reload (/#herencia-viva, /#iyuana, /#ayazamana — Ctrl+R or phone refresh),
 // glCanvas sits behind the filmStage iframe and browser autoplay blocks sound until a user gesture.
 // Unlock & prime parent-owned audio on the first tap/click/key anywhere without overriding user mute.
-const ensureReloadFilmAudioOnGesture = () => {
+const ensureReloadFilmAudioOnGesture = (e) => {
   if (!state.inFilm || state.drawerOpen) return;
+  if (e?.target?.closest?.('#filmReturn, #filmAbout, #brandHome, #aboutBtn')) return;
   try {
     const sh = filmFrame()?.contentWindow?.StageHost;
     if (sh?.isSoundMuted?.()) return;
     const ex = EXHIBITIONS[state.active];
-    if (ex) primeEventAudioFromGesture(ex.slug);
-    sh?.unlockAudio?.();
+    if (ex) primeEventAudioFromGesture(ex.slug, { forcePlay: true });
+    sh?.unlockAudio?.(document);
   } catch {}
 };
 for (const ev of ['touchend', 'pointerup', 'click', 'keydown']) {
@@ -2585,13 +2629,25 @@ $('#filmAbout')?.addEventListener('click', () => {
   if (state.drawerOpen) closeAbout();
   else openAbout(state.aboutStyle);
 });
-$('#enterBtn')?.addEventListener('touchend', () => {
-  if (!state.inFilm && !state.portalAnim) primeEventAudioFromGesture(EXHIBITIONS[state.active]?.slug);
-}, { passive: true });
+let touchPrimeGuard = 0;
+function primeEnterBtnTouch() {
+  if (state.inFilm || state.portalAnim) return;
+  const slug = EXHIBITIONS[state.active]?.slug;
+  if (!slug) return;
+  primeEventAudioFromGesture(slug, { forcePlay: true });
+  clearTimeout(touchPrimeGuard);
+  touchPrimeGuard = setTimeout(() => {
+    if (!state.inFilm && !state.portalAnim && window.__iyuanaAudioBridge?.mobileAudio) {
+      window.__iyuanaAudioBridge.activeMobileKey = null;
+      for (const el of window.__iyuanaAudioBridge.mobileAudio.values()) {
+        try { el.pause(); el.__playResolved = false; } catch {}
+      }
+    }
+  }, 450);
+}
+$('#enterBtn')?.addEventListener('touchend', primeEnterBtnTouch, { passive: true });
 $('#enterBtn')?.addEventListener('click', () => enterFilm(state.active, getCentredSlot()));
-$('#bsEnterBtn')?.addEventListener('touchend', () => {
-  if (!state.inFilm && !state.portalAnim) primeEventAudioFromGesture(EXHIBITIONS[state.active]?.slug);
-}, { passive: true });
+$('#bsEnterBtn')?.addEventListener('touchend', primeEnterBtnTouch, { passive: true });
 $('#bsEnterBtn')?.addEventListener('click', () => enterFilm(state.active, getCentredSlot()));
 $('#filmReturn').addEventListener('click', () => returnFromFilm());
 $('#filmNext')?.addEventListener('click', goToNextEventFromFilm);
@@ -2744,11 +2800,13 @@ async function boot() {
     getState: () => state,
     goToExhibition: (exIdx) => goToExhibition(exIdx),
     enterFilmFromAbout: (exIdx) => {
-      closeAbout();
+      const safeIdx = mod(exIdx, N);
+      const nextEx = EXHIBITIONS[safeIdx];
+      // Prime audio synchronously inside the tap/click gesture BEFORE closeAbout / setTimeout!
+      if (nextEx) primeEventAudioFromGesture(nextEx.slug, { forcePlay: true });
+      closeAbout({ skipAudioResume: true });
       if (state.inFilm) {
-        const nextEx = EXHIBITIONS[mod(exIdx, N)];
-        primeEventAudioFromGesture(nextEx.slug);
-        state.active = mod(exIdx, N);
+        state.active = safeIdx;
         state.target = state.active;
         state.p = state.active;
         syncExhibitionDOM(true);
@@ -2756,8 +2814,8 @@ async function boot() {
         siteNav.switched(nextEx.slug);
         mountFilmIframe(nextEx);
       } else {
-        goToExhibition(exIdx);
-        setTimeout(() => enterFilm(exIdx, getCentredSlot()), 60);
+        goToExhibition(safeIdx);
+        setTimeout(() => enterFilm(safeIdx, getCentredSlot()), 60);
       }
     },
     onCloseStateChange: (isOpen) => {
@@ -2765,7 +2823,14 @@ async function boot() {
       document.body.classList.toggle('about-open', isOpen);
       siteNav.about(isOpen);
       if (!isOpen && state.inFilm) {
-        try { filmFrame()?.contentWindow?.StageHost?.setPausedForOverlay?.(false); } catch {}
+        try {
+          const sh = filmFrame()?.contentWindow?.StageHost;
+          if (!sh?.isSoundMuted?.()) {
+            const ex = EXHIBITIONS[state.active];
+            if (ex) primeEventAudioFromGesture(ex.slug, { forcePlay: true });
+          }
+          sh?.setPausedForOverlay?.(false);
+        } catch {}
       }
       buildWorkbench();
       syncUrl();
