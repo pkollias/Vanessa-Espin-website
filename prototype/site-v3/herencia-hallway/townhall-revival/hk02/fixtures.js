@@ -9,6 +9,7 @@
 
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { SHARED_OUTSIDE_UNIFORMS, PROBE_CUBE_GLSL } from './outside-light.js?v=20261126v71';
 
 const lin = (r, g, b) => new THREE.Color().setRGB(r, g, b, THREE.LinearSRGBColorSpace);
 
@@ -944,32 +945,121 @@ export function buildTownHallFixtures({ hall = null, layout, D = null, artSize, 
     metalness: 0.04,
     envMapIntensity: 0.48,
   }));
+  ivoryMat.userData._toneUniformsBound = true;
+  ivoryMat.onBeforeCompile = (sh) => {
+    Object.assign(sh.uniforms, SHARED_OUTSIDE_UNIFORMS);
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vIvoryW;\nvarying vec3 vIvoryN;')
+      .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvIvoryW = (modelMatrix * vec4(transformed, 1.0)).xyz;\nvIvoryN = normalize(mat3(modelMatrix) * objectNormal);');
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', `#include <common>\nuniform vec4 uOutWeights;\nuniform float uOutStrength;\nuniform float uOutCyclesMix;\nvarying vec3 vIvoryW;\nvarying vec3 vIvoryN;\n${PROBE_CUBE_GLSL}`)
+      .replace('#include <lights_fragment_end>', `#include <lights_fragment_end>
+        if (uOutCyclesMix > 0.0005 && uHasProbeCube > 0.5) {
+          float kIvC = clamp(uOutCyclesMix, 0.0, 1.0);
+          vec3 pIv = sampleProbeCube(vIvoryW, normalize(vIvoryN));
+          vec3 ivMod = clamp(pIv * 0.62 + vec3(0.05), vec3(0.16), vec3(1.35));
+          reflectedLight.directDiffuse   *= mix(vec3(1.0), ivMod, kIvC);
+          reflectedLight.indirectDiffuse *= mix(vec3(1.0), ivMod, kIvC);
+        } else if (dot(uOutWeights, vec4(1.0)) > 0.0005 && uOutStrength > 0.0005) {
+          float kIv = clamp(dot(uOutWeights, vec4(1.0)) * uOutStrength, 0.0, 1.0);
+          float inAlcIv = smoothstep(19.90, 20.60, -vIvoryW.z);
+          float ivScale = mix(1.0, mix(0.56, 0.90, inAlcIv), kIv);
+          reflectedLight.directDiffuse   *= ivScale;
+          reflectedLight.indirectDiffuse *= ivScale;
+        }`);
+  };
   const plasterMat = trackMat(new THREE.MeshStandardMaterial({
     color: lin(0.92, 0.895, 0.845),
     roughness: 0.78,
     metalness: 0.0,
     envMapIntensity: 0.28,
   }));
-  const brassMat = trackMat(new THREE.MeshStandardMaterial({
+  plasterMat.userData._toneUniformsBound = true;
+  // Sculptural 3D Ceramic Sconce Half-Bowl Shading (0-LSB on V9; probe-lit + glowing upper rim on Cycles C02-C05!):
+  plasterMat.onBeforeCompile = (sh) => {
+    Object.assign(sh.uniforms, SHARED_OUTSIDE_UNIFORMS);
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vBowlW;\nvarying vec3 vBowlN;')
+      .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvBowlW = (modelMatrix * vec4(transformed, 1.0)).xyz;\nvBowlN = normalize(mat3(modelMatrix) * objectNormal);');
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', `#include <common>\nuniform vec4 uOutWeights;\nuniform float uOutStrength;\nuniform float uOutCyclesMix;\nuniform vec3 uSconceColorCorr, uSconceColorAlc;\nvarying vec3 vBowlW;\nvarying vec3 vBowlN;\n${PROBE_CUBE_GLSL}`)
+      .replace('#include <lights_fragment_end>', `#include <lights_fragment_end>
+        if (uOutCyclesMix > 0.0005 && uHasProbeCube > 0.5) {
+          // Cycle 4: Chromaticity-preserving luminance floor on probe-lit ceramic bowls (0 pink/lavender blue injection on C03!)
+          float kBC = clamp(uOutCyclesMix, 0.0, 1.0);
+          vec3 nB = normalize(vBowlN);
+          vec3 pB = sampleProbeCube(vBowlW + nB * 0.02, nB);
+          float bellyT = smoothstep(0.28, -0.70, nB.y);
+          float wSumP = max(1e-4, dot(uOutWeights, vec4(1.0)));
+          float c04Share = clamp(uOutWeights.z / wSumP, 0.0, 1.0);
+          float inAlcLip = smoothstep(19.90, 20.60, -vBowlW.z);
+          vec3 fallbackTint = mix(vec3(1.0, 0.94, 0.84), vec3(0.86, 0.94, 1.04), c04Share * inAlcLip);
+          float pLum = dot(pB, vec3(0.2126, 0.7152, 0.0722));
+          float minLum = mix(0.26, 0.42, inAlcLip);
+          vec3 pBowl = (pLum < minLum)
+            ? ((pLum > 1e-4) ? (pB * (mix(pLum, minLum, 0.72) / pLum)) : (fallbackTint * minLum))
+            : pB;
+          vec3 bowlLit = diffuseColor.rgb * (pBowl * mix(1.10, 0.74, bellyT));
+          float topLip = smoothstep(2.334, 2.362, vBowlW.y) * (1.0 - smoothstep(2.375, 2.42, vBowlW.y));
+          vec3 scColLip = mix(uSconceColorCorr, uSconceColorAlc, inAlcLip);
+          scColLip = mix(scColLip, vec3(0.58, 0.64, 0.70), c04Share * inAlcLip);
+          reflectedLight.directDiffuse    = mix(reflectedLight.directDiffuse, vec3(0.0), kBC);
+          reflectedLight.indirectDiffuse  = mix(reflectedLight.indirectDiffuse, bowlLit, kBC) + scColLip * (0.42 * topLip * kBC);
+          reflectedLight.indirectSpecular *= mix(1.0, 0.35, kBC);
+        } else if (dot(uOutWeights, vec4(1.0)) > 0.0005 && uOutStrength > 0.0005) {
+          float wSumB = max(1e-4, dot(uOutWeights, vec4(1.0)));
+          float kBowl = clamp(dot(uOutWeights, vec4(1.0)) * uOutStrength, 0.0, 1.0);
+          float inAlcB = smoothstep(19.90, 20.60, -vBowlW.z);
+          float foreB  = mix(0.82, 1.0, smoothstep(9.5, 18.0, -vBowlW.z));
+          vec3 nB = normalize(vBowlN);
+          // Outer/underside curve of the ceramic bowl sits in rich 3D counter-shadow (~30-46% sRGB), rising to a warm glowing upper lip!
+          float bellyT = smoothstep(0.32, -0.68, nB.y);
+          float bowlScale = mix(mix(0.78, 0.18, bellyT) * foreB, mix(0.86, 0.32, bellyT), inAlcB);
+          vec3 corrTintB = (uOutWeights.z * vec3(1.09, 1.00, 0.89)
+                          + uOutWeights.w * vec3(1.24, 1.01, 0.76)
+                          + uOutWeights.y * vec3(1.56, 0.92, 0.46)
+                          + uOutWeights.x * vec3(1.26, 0.99, 0.72)) / wSumB;
+          vec3 alcTintB  = (uOutWeights.z * vec3(0.92, 1.00, 1.07)
+                          + uOutWeights.w * vec3(1.18, 1.01, 0.82)
+                          + uOutWeights.y * vec3(1.48, 0.92, 0.48)
+                          + uOutWeights.x * vec3(1.20, 1.00, 0.78)) / wSumB;
+          vec3 bowlTint = mix(corrTintB, alcTintB, inAlcB) * bowlScale;
+          float topLip = smoothstep(2.334, 2.362, vBowlW.y) * (1.0 - smoothstep(2.375, 2.42, vBowlW.y));
+          vec3 lipFbCol = mix(vec3(0.62, 0.44, 0.24), vec3(0.56, 0.62, 0.68), clamp(uOutWeights.z / wSumB, 0.0, 1.0) * inAlcB);
+          reflectedLight.directDiffuse   *= mix(vec3(1.0), bowlTint, kBowl);
+          reflectedLight.indirectDiffuse *= mix(vec3(1.0), bowlTint, kBowl);
+          reflectedLight.indirectSpecular *= mix(1.0, 0.35, kBowl);
+          reflectedLight.indirectDiffuse += lipFbCol * (topLip * kBowl);
+        }`);
+  };
+  // B1: Every toneMapped:true material binds SHARED_OUTSIDE_UNIFORMS so scene.js CustomToneMapping uTmOutMix/uTmAgx* are always bound!
+  const bindToneUniforms = (mat) => {
+    mat.userData = { ...(mat.userData || {}), _toneUniformsBound: true };
+    mat.onBeforeCompile = (sh) => {
+      Object.assign(sh.uniforms, SHARED_OUTSIDE_UNIFORMS);
+    };
+    return mat;
+  };
+  const brassMat = bindToneUniforms(trackMat(new THREE.MeshStandardMaterial({
     color: lin(0.74, 0.48, 0.17),
     roughness: 0.24,
     metalness: 0.90,
     envMapIntensity: 0.78,
-  }));
-  const knurlBrassMat = trackMat(new THREE.MeshStandardMaterial({
+  })));
+  const knurlBrassMat = bindToneUniforms(trackMat(new THREE.MeshStandardMaterial({
     color: lin(0.72, 0.46, 0.16),
     roughness: 0.32,
     metalness: 0.88,
     bumpMap: knurlBumpTex,
     bumpScale: 0.0018,
     envMapIntensity: 0.75,
-  }));
-  const slotMat = trackMat(new THREE.MeshStandardMaterial({
+  })));
+  const slotMat = bindToneUniforms(trackMat(new THREE.MeshStandardMaterial({
     color: 0x0f0e0d,
     roughness: 0.86,
     metalness: 0.05,
     envMapIntensity: 0.08,
-  }));
+  })));
   const honeycombMat = trackMat(new THREE.MeshStandardMaterial({
     map: hexTex,
     emissiveMap: hexTex,
@@ -992,14 +1082,14 @@ export function buildTownHallFixtures({ hall = null, layout, D = null, artSize, 
     envMapIntensity: 0.25,
     toneMapped: true,
   }));
-  const plateMat = trackMat(new THREE.MeshStandardMaterial({
+  const plateMat = bindToneUniforms(trackMat(new THREE.MeshStandardMaterial({
     map: plateTex,
     bumpMap: plateBumpTex,
     bumpScale: 0.0085,
     roughness: 0.42,
     metalness: 0.02,
     envMapIntensity: 0.46,
-  }));
+  })));
   const opalineMat = trackMat(new THREE.MeshStandardMaterial({
     color: lin(0.82, 0.78, 0.70),
     map: opalTex,
@@ -1015,7 +1105,9 @@ export function buildTownHallFixtures({ hall = null, layout, D = null, artSize, 
   }));
   // Add subtle translucent glass rim darkening (`dot(N, V)`) so `S4` acorn globe silhouette & `S1` flutes read crisply against ivory plaster!
   for (const [gMat, rimFloor] of [[opalineMat, 0.78], [alabasterMat, 0.84]]) {
+    gMat.userData = { ...(gMat.userData || {}), _toneUniformsBound: true };
     gMat.onBeforeCompile = (sh) => {
+      Object.assign(sh.uniforms, SHARED_OUTSIDE_UNIFORMS);
       sh.fragmentShader = sh.fragmentShader.replace(
         '#include <emissivemap_fragment>',
         `#include <emissivemap_fragment>
@@ -1031,13 +1123,62 @@ export function buildTownHallFixtures({ hall = null, layout, D = null, artSize, 
     roughness: 0.4,
     toneMapped: false,
   }));
-  const floaterMat = trackMat(new THREE.MeshStandardMaterial({
+  plasterGlowMat.onBeforeCompile = (sh) => {
+    Object.assign(sh.uniforms, SHARED_OUTSIDE_UNIFORMS);
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vGlowW;')
+      .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvGlowW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', '#include <common>\nuniform vec4 uOutWeights;\nuniform float uOutStrength;\nvarying vec3 vGlowW;')
+      .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+        if (dot(uOutWeights, vec4(1.0)) > 0.0005 && uOutStrength > 0.0005) {
+          float wSumGl = max(1e-4, dot(uOutWeights, vec4(1.0)));
+          float kGl = clamp(dot(uOutWeights, vec4(1.0)) * uOutStrength, 0.0, 1.0);
+          float alcGl = smoothstep(19.90, 20.60, -vGlowW.z);
+          vec3 gl4 = mix(vec3(1.14, 1.05, 0.92), vec3(0.96, 1.13, 1.36), alcGl);
+          vec3 glTint = (uOutWeights.z * gl4
+                       + uOutWeights.w * vec3(1.14, 1.06, 0.94)
+                       + uOutWeights.y * vec3(1.24, 1.00, 0.76)
+                       + uOutWeights.x * vec3(1.18, 1.04, 0.86)) / wSumGl;
+          totalEmissiveRadiance *= mix(vec3(1.0), glTint * 0.92, kGl);
+        }`);
+  };
+  const floaterMat = bindToneUniforms(trackMat(new THREE.MeshStandardMaterial({
     color: lin(0.022, 0.018, 0.015),
     roughness: 0.34,
     metalness: 0.18,
     envMapIntensity: 0.40,
-  }));
-  const washBalancedMat = trackMat(new THREE.MeshBasicMaterial({
+  })));
+  const installWashDeYellow = (mat) => {
+    mat.userData = { ...(mat.userData || {}), _toneUniformsBound: true };
+    mat.onBeforeCompile = (sh) => {
+      Object.assign(sh.uniforms, SHARED_OUTSIDE_UNIFORMS);
+      sh.vertexShader = sh.vertexShader
+        .replace('#include <common>', '#include <common>\nvarying vec3 vWashW;')
+        .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvWashW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+      sh.fragmentShader = sh.fragmentShader
+        .replace('#include <common>', '#include <common>\nuniform vec4 uOutWeights;\nuniform float uOutStrength;\nuniform float uOutCyclesMix;\nvarying vec3 vWashW;')
+        .replace('#include <color_fragment>', `#include <color_fragment>
+          if (dot(uOutWeights, vec4(1.0)) > 0.0005 && uOutStrength > 0.0005) {
+            float wSumW = max(1e-4, dot(uOutWeights, vec4(1.0)));
+            float kWash = clamp(dot(uOutWeights, vec4(1.0)) * uOutStrength, 0.0, 1.0);
+            float alcW  = smoothstep(19.90, 20.60, -vWashW.z);
+            // Spatial C04 split (warm ~3050K halogen in corridor vs clean ~3800K ivory in alcove) + ~3100K champagne in C05 + ~2850K/2750K amber in C02/C03:
+            vec3 w4 = mix(vec3(1.16, 1.06, 0.90) * 0.50, vec3(0.95, 1.17, 1.58) * 0.42, alcW);
+            vec3 wTint = (uOutWeights.z * w4
+                        + uOutWeights.w * vec3(1.18, 1.05, 0.88) * 0.52
+                        + uOutWeights.y * vec3(1.30, 0.98, 0.66) * 0.60
+                        + uOutWeights.x * vec3(1.22, 1.02, 0.76) * 0.52) / wSumW;
+            diffuseColor.rgb *= mix(vec3(1.0), wTint, kWash);
+          }
+          // H2: Keep all 21 wash quads present & visible for P1 findWashQuads, smoothly dimming when physical Cycles B_sconce takes over:
+          if (uOutCyclesMix > 0.0005) {
+            diffuseColor.rgb *= mix(1.0, 0.15, clamp(uOutCyclesMix, 0.0, 1.0));
+          }`);
+    };
+    return mat;
+  };
+  const washBalancedMat = installWashDeYellow(trackMat(new THREE.MeshBasicMaterial({
     map: washBalancedTex,
     transparent: true,
     opacity: 0.28,
@@ -1046,8 +1187,8 @@ export function buildTownHallFixtures({ hall = null, layout, D = null, artSize, 
     polygonOffset: true,
     polygonOffsetFactor: -1,
     polygonOffsetUnits: -1,
-  }));
-  const washUplightMat = trackMat(new THREE.MeshBasicMaterial({
+  })));
+  const washUplightMat = installWashDeYellow(trackMat(new THREE.MeshBasicMaterial({
     map: washUplightTex,
     transparent: true,
     opacity: 0.28,
@@ -1056,8 +1197,8 @@ export function buildTownHallFixtures({ hall = null, layout, D = null, artSize, 
     polygonOffset: true,
     polygonOffsetFactor: -1,
     polygonOffsetUnits: -1,
-  }));
-  const shadowMat = trackMat(new THREE.MeshBasicMaterial({
+  })));
+  const shadowMat = bindToneUniforms(trackMat(new THREE.MeshBasicMaterial({
     map: shadowTex,
     transparent: true,
     opacity: 0.34,
@@ -1065,7 +1206,7 @@ export function buildTownHallFixtures({ hall = null, layout, D = null, artSize, 
     polygonOffset: true,
     polygonOffsetFactor: -2,
     polygonOffsetUnits: -2,
-  }));
+  })));
 
   // -------------------------------------------------------------------------
   // A. `groups.ceilingSpine` (Corridor + End-Alcove Dark-Slot Tracks & L/R Spots)

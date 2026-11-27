@@ -1,0 +1,400 @@
+{
+  "version": 1,
+  "codec": "rgbm_sqrt_g2",
+  "m_min": 0.0156862745,
+  "trim_vertex_order": [
+    {
+      "name": "room_props",
+      "count": 133207,
+      "offset": 0
+    },
+    {
+      "name": "room_doors",
+      "count": 6148,
+      "offset": 133207
+    },
+    {
+      "name": "room_end_leaf_L",
+      "count": 1988,
+      "offset": 139355
+    },
+    {
+      "name": "room_end_leaf_R",
+      "count": 1988,
+      "offset": 141343
+    }
+  ],
+  "trim_total_verts": 143331,
+  "probe_dims": [
+    12,
+    12,
+    48
+  ],
+  "probe_grid": {
+    "dims": [
+      12,
+      12,
+      48
+    ],
+    "bounds_x": [
+      -1.72,
+      1.72
+    ],
+    "bounds_y": [
+      0.0,
+      4.86
+    ],
+    "bounds_s": [
+      3.7,
+      23.92
+    ],
+    "tex_size": [
+      576,
+      72
+    ]
+  },
+  "bases": {
+    "sconce": {
+      "walls": {
+        "file": "sconce_walls.webp",
+        "size": [
+          512,
+          512
+        ],
+        "s_max": 8.0
+      },
+      "ceil": {
+        "file": "sconce_ceil.webp",
+        "size": [
+          128,
+          512
+        ],
+        "s_max": 6.0
+      },
+      "floor": {
+        "file": "sconce_floor.webp",
+        "size": [
+          128,
+          512
+        ],
+        "s_max": 6.0
+      },
+      "trim": {
+        "file": "sconce_trim.bin",
+        "s_max": 8.0
+      },
+      "probes": {
+        "file": "sconce_probes.webp",
+        "size": [
+          576,
+          72
+        ],
+        "s_max": 8.0
+      }
+    },
+    "c03": {
+      "walls": {
+        "file": "c03_walls.webp",
+        "size": [
+          512,
+          512
+        ],
+        "s_max": 23.0
+      },
+      "ceil": {
+        "file": "c03_ceil.webp",
+        "size": [
+          256,
+          512
+        ],
+        "s_max": 8.0
+      },
+      "floor": {
+        "file": "c03_floor.webp",
+        "size": [
+          256,
+          512
+        ],
+        "s_max": 45.0
+      },
+      "trim": {
+        "file": "c03_trim.bin",
+        "s_max": 33.0
+      },
+      "probes": {
+        "file": "c03_probes.webp",
+        "size": [
+          576,
+          72
+        ],
+        "s_max": 22.0
+      },
+      "ext_gain": 1.0,
+      "sconce_gain": 0.2935,
+      "sconce_tint_corr": [
+        1.0449,
+        0.8431,
+        0.5671
+      ],
+      "sconce_tint_alc": [
+        1.0206,
+        0.8594,
+        0.6171
+      ],
+      "agx_hybrid": 0.3933,
+      "agx_pow": 1.22,
+      "agx_sat": 1.28,
+      "exposure": 1.0,
+      "trim_probe_blend": 0.7,
+      "wall_albedo": [
+        0.9,
+        0.89,
+        0.86
+      ],
+      "tin_albedo": [
+        0.54,
+        0.52,
+        0.48
+      ],
+      "shadow_toe": [
+        0.00043,
+        0.00023,
+        -2e-05
+      ],
+      "tm_contrast": 1.2,
+      "dir_sun_rgb": [
+        7.3946,
+        4.4977,
+        0.9659
+      ]
+    },
+    "c04": {
+      "walls": {
+        "file": "c04_walls.webp",
+        "size": [
+          512,
+          512
+        ],
+        "s_max": 18.0
+      },
+      "ceil": {
+        "file": "c04_ceil.webp",
+        "size": [
+          256,
+          512
+        ],
+        "s_max": 8.0
+      },
+      "floor": {
+        "file": "c04_floor.webp",
+        "size": [
+          256,
+          512
+        ],
+        "s_max": 33.0
+      },
+      "trim": {
+        "file": "c04_trim.bin",
+        "s_max": 17.0
+      },
+      "probes": {
+        "file": "c04_probes.webp",
+        "size": [
+          576,
+          72
+        ],
+        "s_max": 14.0
+      },
+      "ext_gain": 1.0,
+      "sconce_gain": 0.329,
+      "sconce_tint_corr": [
+        1.0814,
+        0.921,
+        0.7193
+      ],
+      "sconce_tint_alc": [
+        1.05,
+        0.97,
+        0.85
+      ],
+      "agx_hybrid": 0.5,
+      "agx_pow": 1.22,
+      "agx_sat": 1.28,
+      "exposure": 1.0,
+      "trim_probe_blend": 0.7,
+      "wall_albedo": [
+        0.9,
+        0.89,
+        0.86
+      ],
+      "tin_albedo": [
+        0.54,
+        0.52,
+        0.48
+      ],
+      "shadow_toe": [
+        0.00011,
+        0.0002,
+        0.00029
+      ],
+      "tm_contrast": 1.08
+    },
+    "c05": {
+      "walls": {
+        "file": "c05_walls.webp",
+        "size": [
+          512,
+          512
+        ],
+        "s_max": 25.0
+      },
+      "ceil": {
+        "file": "c05_ceil.webp",
+        "size": [
+          256,
+          512
+        ],
+        "s_max": 8.0
+      },
+      "floor": {
+        "file": "c05_floor.webp",
+        "size": [
+          256,
+          512
+        ],
+        "s_max": 49.0
+      },
+      "trim": {
+        "file": "c05_trim.bin",
+        "s_max": 19.0
+      },
+      "probes": {
+        "file": "c05_probes.webp",
+        "size": [
+          576,
+          72
+        ],
+        "s_max": 14.0
+      },
+      "ext_gain": 1.0,
+      "sconce_gain": 0.3499,
+      "sconce_tint_corr": [
+        1.0554,
+        0.954,
+        0.758
+      ],
+      "sconce_tint_alc": [
+        1.0202,
+        0.9395,
+        0.8223
+      ],
+      "agx_hybrid": 0.4139,
+      "agx_pow": 1.22,
+      "agx_sat": 1.28,
+      "exposure": 1.0,
+      "trim_probe_blend": 0.7,
+      "wall_albedo": [
+        0.9,
+        0.89,
+        0.86
+      ],
+      "tin_albedo": [
+        0.54,
+        0.52,
+        0.48
+      ],
+      "shadow_toe": [
+        0.00042,
+        0.00032,
+        -9e-05
+      ],
+      "tm_contrast": 1.04
+    },
+    "c02": {
+      "walls": {
+        "file": "c02_walls.webp",
+        "size": [
+          512,
+          512
+        ],
+        "s_max": 14.0
+      },
+      "ceil": {
+        "file": "c02_ceil.webp",
+        "size": [
+          256,
+          512
+        ],
+        "s_max": 8.0
+      },
+      "floor": {
+        "file": "c02_floor.webp",
+        "size": [
+          256,
+          512
+        ],
+        "s_max": 24.0
+      },
+      "trim": {
+        "file": "c02_trim.bin",
+        "s_max": 14.0
+      },
+      "probes": {
+        "file": "c02_probes.webp",
+        "size": [
+          576,
+          72
+        ],
+        "s_max": 14.0
+      },
+      "ext_gain": 1.0,
+      "sconce_gain": 0.2409,
+      "sconce_tint_corr": [
+        1.0857,
+        0.8951,
+        0.6243
+      ],
+      "sconce_tint_alc": [
+        1.0397,
+        0.9399,
+        0.7787
+      ],
+      "agx_hybrid": 0.5,
+      "agx_pow": 1.22,
+      "agx_sat": 1.28,
+      "exposure": 1.0,
+      "trim_probe_blend": 0.7,
+      "wall_albedo": [
+        0.9,
+        0.89,
+        0.86
+      ],
+      "tin_albedo": [
+        0.54,
+        0.52,
+        0.48
+      ],
+      "shadow_toe": [
+        0.00042,
+        0.00023,
+        -2e-05
+      ],
+      "tm_contrast": 1.21,
+      "dir_sun_rgb": [
+        9.7795,
+        7.3563,
+        4.3259
+      ],
+      "dir_sun_rgb_br": [
+        7.9721,
+        6.1527,
+        2.666
+      ],
+      "sun_vec_br": [
+        0.2151,
+        0.57521,
+        0.78922
+      ]
+    }
+  }
+}

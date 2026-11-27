@@ -9,8 +9,9 @@
 //   5. Sconces Toggle (`Matte-Black Horizontal Bars ★` vs `GitHub 1862 Blackened-Iron & Brass Opaline Bells ★`) + Museum Gallery Cards
 
 import * as THREE from 'three';
-import { CATALOG, artSize } from './scene.js?v=20261126v38';
-import { computeIndoorLightRig, kelvinWarmthTint } from './fixtures.js?v=20261125v31';
+import { CATALOG, artSize } from './scene.js?v=20261126v71';
+import { computeIndoorLightRig, kelvinWarmthTint } from './fixtures.js?v=20261126v71';
+import { OUTSIDE_PRESETS, SHARED_OUTSIDE_UNIFORMS, PROBE_CUBE_GLSL, applyOutsidePresetValues, lerpOutsideModes, warmOutsideCpuImages, markOutsideCompositorDirty } from './outside-light.js?v=20261126v71';
 
 const lin = (r, g, b) => new THREE.Color().setRGB(r, g, b, THREE.LinearSRGBColorSpace);
 
@@ -333,20 +334,27 @@ export class HK02MockManager {
     this.texSunSky   = null;
     this.texSunShaft = null;
 
+    // B1: Bind SHARED_OUTSIDE_UNIFORMS on every toneMapped:true built-in material so CustomToneMapping uTmOutMix/uTmAgx* are always bound!
+    const bindTone = (mat) => {
+      mat.userData = { ...(mat.userData || {}), _toneUniformsBound: true };
+      mat.onBeforeCompile = (sh) => { Object.assign(sh.uniforms, SHARED_OUTSIDE_UNIFORMS); };
+      return mat;
+    };
+
     this.mats = {
-      matteBlack: new THREE.MeshStandardMaterial({
+      matteBlack: bindTone(new THREE.MeshStandardMaterial({
         color: lin(0.014, 0.013, 0.012), roughness: 0.42, metalness: 0.25, envMapIntensity: 0.55,
-      }),
-      opalineWarm: new THREE.MeshStandardMaterial({
+      })),
+      opalineWarm: bindTone(new THREE.MeshStandardMaterial({
         color: lin(1.0, 0.94, 0.82), emissive: lin(1.35, 1.02, 0.62), roughness: 0.22, metalness: 0.0,
-      }),
-      diffuserTube: new THREE.MeshBasicMaterial({
+      })),
+      diffuserTube: bindTone(new THREE.MeshBasicMaterial({
         color: lin(1.65, 1.32, 0.88),
-      }),
-      wallWashSprite: new THREE.MeshBasicMaterial({
+      })),
+      wallWashSprite: bindTone(new THREE.MeshBasicMaterial({
         map: makeBarWashTex(),
         transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0.25,
-      }),
+      })),
       winBackdrop: new THREE.MeshBasicMaterial({
         color: 0xfffaf0, toneMapped: false,
       }),
@@ -354,20 +362,20 @@ export class HK02MockManager {
         transparent: true, depthWrite: false,
         blending: THREE.AdditiveBlending, opacity: 0.052, side: THREE.DoubleSide, toneMapped: false,
       }),
-      winGlass: new THREE.MeshStandardMaterial({
+      winGlass: bindTone(new THREE.MeshStandardMaterial({
         color: 0xffffff, roughness: 0.06, metalness: 0.08, transparent: true, opacity: 0.14, envMapIntensity: 0.85, depthWrite: false,
-      }),
-      cardEdge: new THREE.MeshStandardMaterial({
+      })),
+      cardEdge: bindTone(new THREE.MeshStandardMaterial({
         color: lin(0.88, 0.85, 0.79), roughness: 0.78, envMapIntensity: 0.15,
-      }),
-      cardShadow: new THREE.MeshBasicMaterial({
+      })),
+      cardShadow: bindTone(new THREE.MeshBasicMaterial({
         map: softRectShadowTex(), transparent: true, opacity: 0.32, depthWrite: false,
         polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
-      }),
-      sconceShadow: new THREE.MeshBasicMaterial({
+      })),
+      sconceShadow: bindTone(new THREE.MeshBasicMaterial({
         map: softRectShadowTex(), transparent: true, opacity: 0.28, depthWrite: false,
         polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
-      }),
+      })),
     };
 
     // 1. Non-discarding corridor baseboard/chair-rail trim material (`winBaseTrim`)
@@ -382,8 +390,12 @@ export class HK02MockManager {
         uWinBay0: { value: new THREE.Vector4(0, -99, 0, 0) },
         uWinBay1: { value: new THREE.Vector4(0, -99, 0, 0) },
         uExtraH:  { value: 0.0 }, // window infill baseboards stay anchored at floor
+        // B2: Procedural BoxGeometry infill has no baked vertex radiosity -> sample 6-face Ambient Cube on Cycles!
+        uTrimRadMix:     { value: 0.0 },
+        uTrimProbeBlend: { value: 1.0 },
       };
       this.mats.winBaseTrim = baseTrim;
+      hall.registerV9RefMaterial?.(baseTrim);
 
       // Dedicated Sunlit Off-White Window & Perch Satin-Enamel Shader:
       // Catches warm exterior golden sunlight on upward perch slab (`N.y > 0.5`) & splayed jamb reveals,
@@ -408,7 +420,9 @@ export class HK02MockManager {
           uniform vec4 uFloorRect, uCeilRect;
           uniform vec3 uAlbedo;
           uniform float uFloorScale, uCeilScale, uBakeExp, uCeilH, uHalfW, uBevK, uContrastFix, uWinLightMode;
+          uniform float uOutCyclesMix, uInReflPass;
           varying vec3 vW, vN;
+          ${PROBE_CUBE_GLSL}
 
           vec3 sampleFloorGI(float x, float s) {
             float u = clamp((x - uFloorRect.x) / (uFloorRect.y - uFloorRect.x), 0.03, 0.97);
@@ -427,11 +441,20 @@ export class HK02MockManager {
             if (dot(nFlat, vN) < 0.0) nFlat = -nFlat;
             vec3 N = normalize(mix(vN, nFlat, 0.90));
 
-            float xSample = clamp(vW.x + N.x * 0.16, -(uHalfW - 0.18), uHalfW - 0.18);
-            float sSample = clamp(s, uFloorRect.z + 0.25, uFloorRect.w - 0.25);
-            vec3 flGI = clamp(sampleFloorGI(xSample, sSample), vec3(0.72, 0.70, 0.66), vec3(1.04, 1.00, 0.94));
-            vec3 clGI = clamp(sampleCeilGI(xSample, sSample), vec3(0.80, 0.78, 0.75), vec3(1.08, 1.05, 1.00));
-            vec3 envGI = mix(flGI, clGI, clamp(vW.y / 3.8, 0.0, 1.0));
+            float kCycW = clamp(uOutCyclesMix, 0.0, 1.0);
+            vec3 envGI = vec3(0.0);
+            // B2: Never sample evicted V9 floor/ceil maps once settled in Cycles (kCycW >= 0.9995)!
+            if (kCycW < 0.9995) {
+              float xSample = clamp(vW.x + N.x * 0.16, -(uHalfW - 0.18), uHalfW - 0.18);
+              float sSample = clamp(s, uFloorRect.z + 0.25, uFloorRect.w - 0.25);
+              vec3 flGI = clamp(sampleFloorGI(xSample, sSample), vec3(0.72, 0.70, 0.66), vec3(1.04, 1.00, 0.94));
+              vec3 clGI = clamp(sampleCeilGI(xSample, sSample), vec3(0.80, 0.78, 0.75), vec3(1.08, 1.05, 1.00));
+              envGI = mix(flGI, clGI, clamp(vW.y / 3.8, 0.0, 1.0));
+            }
+            if (kCycW > 0.0005) {
+              vec3 cycGI = (uHasProbeCube > 0.5) ? sampleProbeCube(vW, N) : vec3(0.86, 0.83, 0.78);
+              envGI = (kCycW >= 0.9995) ? cycGI : mix(envGI, cycGI, kCycW);
+            }
 
             // Deep reveal & exterior daylight bounce inside the window pocket (|x| > uHalfW - 0.02):
             float inReveal = smoothstep(uHalfW - 0.02, uHalfW + 0.18, abs(vW.x));
@@ -457,6 +480,10 @@ export class HK02MockManager {
             vec3 V = normalize(cameraPosition - vW);
             float coat = pow(1.0 - max(dot(N, V), 0.0), 3.6) * 0.065;
             c += c * coat;
+            if (uInReflPass > 0.5) {
+              float pkR = max(c.r, max(c.g, c.b));
+              c *= 1.0 / (1.0 + max(0.0, pkR - 0.85) * 0.90);
+            }
 
             gl_FragColor = vec4(c, 1.0);
             #include <tonemapping_fragment>
@@ -464,6 +491,7 @@ export class HK02MockManager {
           }
         `,
       });
+      hall.registerV9RefMaterial?.(this.mats.winPaintMat);
     } else {
       this.mats.winBaseTrim = hall.M.trim;
       this.mats.winPaintMat = hall.M.trim;
@@ -477,6 +505,7 @@ export class HK02MockManager {
         uDualUv: { value: 1.0 },
       };
       this.mats.winWallMat = ww;
+      hall.registerV9RefMaterial?.(ww);
     } else {
       this.mats.winWallMat = hall.M.wall;
     }
@@ -508,6 +537,9 @@ export class HK02MockManager {
       ceilShadowDepth: 1.80,      // 180% Ceiling Pattern Shadow Depth ★
       floorDark:   0.70,          // 70% Floor Blacks ★
       contrastFix: true,
+      outLight:    'v9',          // V9 · Locked Baseline ★ (options: 'v9', 'c04', 'c05', 'c03', 'c02')
+      outStrength: 1.00,          // 100% Outside Window Daylight strength
+      artPop:      0.00,          // 0% on V9; auto-set to 12-15% on C02-C05 so paintings stay vivid
     };
 
     this._builtWinKey = '';
@@ -885,10 +917,11 @@ export class HK02MockManager {
   // End-Alcove Side Window Cap (`x = +1.50, s = 20.30..23.92`) — stretches cleanly with `uExtraH` and syncs with `uWallGrade`!
   _buildAlcoveRightCap(D) {
     const grp = new THREE.Group();
-    const trimMat = this.hall.bakedTrimMat || this.hall.M.trim;
+    const trimMat = this.mats.winBaseTrim || this.hall.bakedTrimMat || this.hall.M.trim;
     const U = this.hall.bakedU;
     const capWallMat = new THREE.ShaderMaterial({
       uniforms: {
+        ...SHARED_OUTSIDE_UNIFORMS,
         uBakeExp:   U?.uBakeExp   || { value: 1.0 },
         uContrast:  U?.uContrastFix || { value: 1.0 },
         uWallGrade: U?.uWallGrade || { value: 1.0 },
@@ -1002,6 +1035,8 @@ export class HK02MockManager {
 
       const face = new THREE.Mesh(new THREE.PlaneGeometry(cw - 0.003, ch - 0.003), faceMat);
       face.position.z = 0.008;
+      face.userData.isGalleryCard = true;
+      face.userData.s = sCard;
       cardGrp.add(face);
 
       grp.add(cardGrp);
@@ -1270,8 +1305,66 @@ export class HK02MockManager {
     return grp;
   }
 
+  _syncGalleryCardLuminance() {
+    if (!this.groups?.cards) return;
+    const w = SHARED_OUTSIDE_UNIFORMS.uOutWeights.value;
+    const wSum = w.x + w.y + w.z + w.w;
+    const str = SHARED_OUTSIDE_UNIFORMS.uOutStrength.value;
+    const kOut = Math.max(0, Math.min(1, wSum * str));
+    this.groups.cards.traverse(o => {
+      if (!o.userData?.isGalleryCard || !o.material) return;
+      if (kOut <= 0.0005) {
+        o.material.color.setRGB(1, 1, 1);
+      } else {
+        const inAlc = o.userData.s > 20.0 ? 1.0 : 0.0;
+        const invW = 1.0 / Math.max(1e-4, wSum);
+        const corrG = (w.z * 0.48 + w.w * 0.60 + w.y * 0.49 + w.x * 0.52) * invW;
+        const baseG = inAlc ? 0.80 : corrG;
+        const tr = (w.z * 0.98 + w.w * 1.02 + w.y * 1.06 + w.x * 1.01) * invW;
+        const tg = (w.z * 0.99 + w.w * 0.99 + w.y * 0.90 + w.x * 0.98) * invW;
+        const tb = (w.z * 1.00 + w.w * 0.94 + w.y * 0.72 + w.x * 0.91) * invW;
+        o.material.color.setRGB(
+          1 + (baseG * tr - 1) * kOut,
+          1 + (baseG * tg - 1) * kOut,
+          1 + (baseG * tb - 1) * kOut
+        );
+      }
+    });
+  }
+
+  setOutsideLerp(modeA, modeB, u) {
+    const t = Math.max(0, Math.min(1, +u || 0));
+    lerpOutsideModes(modeA, modeB, t, this.hall.renderer, this.hall);
+    this.state.outStrength = SHARED_OUTSIDE_UNIFORMS.uOutStrength.value;
+    this.state.artPop      = SHARED_OUTSIDE_UNIFORMS.uArtPop.value;
+    if (t <= 0.0005) {
+      this.state.outLight = modeA;
+      this._outsideLerpActive = false;
+    } else if (t >= 0.9995) {
+      this.state.outLight = modeB;
+      this._outsideLerpActive = false;
+    } else {
+      this._outsideLerpActive = true;
+    }
+    if (this.hall.outsideOpticsGroup) {
+      const w = SHARED_OUTSIDE_UNIFORMS.uOutWeights.value;
+      this.hall.outsideOpticsGroup.visible = (w.x + w.y + w.z + w.w > 0.0005) && (this.state.outStrength > 0.0005);
+    }
+    this._syncGalleryCardLuminance();
+    markOutsideCompositorDirty();
+    this.hall.markReflDirty();
+  }
+
   applyState(patch = null) {
     if (patch) {
+      if (patch.outLight !== undefined) {
+        this._outsideLerpActive = false;
+        if (patch.outLight !== this.state.outLight) {
+          const op = OUTSIDE_PRESETS[patch.outLight] || OUTSIDE_PRESETS.v9;
+          if (patch.outStrength === undefined) this.state.outStrength = op.outStrength;
+          if (patch.artPop === undefined)      this.state.artPop      = op.artPop;
+        }
+      }
       Object.assign(this.state, patch);
       if (patch.ambientGain !== undefined && patch.indoorGain === undefined) {
         this.state.indoorGain = +patch.ambientGain;
@@ -1283,6 +1376,26 @@ export class HK02MockManager {
     const U = this.hall.bakedU;
     const baseCeil = this.hall.D.C || 4.86;
     const extraH = (+st.ceilHeight || baseCeil) - baseCeil;
+
+    // 0. Modular Outside Window Daylight Concepts (`V9` baseline vs `C02`, `C03`, `C04`, `C05`):
+    if (this._outsideLerpActive) {
+      SHARED_OUTSIDE_UNIFORMS.uOutStrength.value = st.outStrength ?? 1.00;
+      SHARED_OUTSIDE_UNIFORMS.uArtPop.value      = st.artPop ?? 0.00;
+      markOutsideCompositorDirty();
+    } else {
+      applyOutsidePresetValues(st.outLight || 'v9', {
+        outStrength: st.outStrength ?? 1.00,
+        artPop: st.artPop ?? 0.00,
+        renderer: this.hall.renderer,
+        hall: this.hall,
+      });
+    }
+    if (this.hall.outsideOpticsGroup) {
+      const w = SHARED_OUTSIDE_UNIFORMS.uOutWeights.value;
+      const optVis = (w.x + w.y + w.z + w.w > 0.0005) && (SHARED_OUTSIDE_UNIFORMS.uOutStrength.value > 0.0005);
+      this.hall.outsideOpticsGroup.visible = optVis;
+      if (optVis) warmOutsideCpuImages(this._outsideLerpActive ? null : st.outLight);
+    }
 
     // 1. Paint shade for doors, Bifora window, baseboards & optional side windows:
     const shade = WIN_PAINT_SHADES[st.winPaint] || WIN_PAINT_SHADES.pearl;
@@ -1416,10 +1529,12 @@ export class HK02MockManager {
     if (this.groups.noSkyCoffers) this.groups.noSkyCoffers.visible = !skyOn;
 
     if (this.groups.cards) this.groups.cards.visible = !!st.cards;
+    this._syncGalleryCardLuminance();
     if (this.groups.sconceBlackBar) this.groups.sconceBlackBar.visible = (st.sconces === 'black_bar');
     if (this.groups.sconceGithub)   this.groups.sconceGithub.visible   = (st.sconces === 'github_brass');
     if (this.groups.sconcePic)      this.groups.sconcePic.visible      = (st.sconces === 'pic_black' || isS4Bars);
 
+    markOutsideCompositorDirty();
     this.hall.markReflDirty();
   }
 }

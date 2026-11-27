@@ -272,8 +272,9 @@ body.in-stage .film-grain, body.cap-mode .film-grain { display:none !important; 
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
-import { HK02Hall, DEFAULT_LAYOUT, CLASSIC_HK02_LAYOUT, ARCH_FINISH_MODES, upgradeSavedLayoutIfPrePolish, cloneLayout, dims, wallX, makeArtMaterial, makeStripArtMaterial } from './hk02/scene.js?v=20261126v38';
-import { HK02MockManager } from './hk02/mocks.js?v=20261126v38';
+import { HK02Hall, DEFAULT_LAYOUT, CLASSIC_HK02_LAYOUT, ARCH_FINISH_MODES, upgradeSavedLayoutIfPrePolish, cloneLayout, dims, wallX, makeArtMaterial, makeStripArtMaterial } from './hk02/scene.js?v=20261126v71';
+import { HK02MockManager } from './hk02/mocks.js?v=20261126v71';
+import { SHARED_OUTSIDE_UNIFORMS, OUTSIDE_LIGHT_GLSL, lerpOutsideModes, warmOutsideCpuImages, waitOutsideCyclesReady, getOutsideCyclesDebugState } from './hk02/outside-light.js?v=20261126v71';
 import { buildTimeline, sm3, sm5, ramp, FLIGHT7_PACE } from './hk02/path.js?v=20261126v37';
 import { makePaintUniforms, ensurePaintAssets, syncPaintShields, installPaint } from './hk02/paint.js?v=20261126v37';
 import { createHerenciaLogoOpener } from './hk02/logo-opener.js?v=20261126v37';
@@ -490,29 +491,37 @@ function makeBlinkEyeMaterial(base, origWH, box, over) {
 
   const uRowIdx = { value: 0.0 };
   const mat = new THREE.ShaderMaterial({
-    uniforms: { tAtlas: { value: atlas }, uRowIdx },
+    uniforms: { tAtlas: { value: atlas }, uRowIdx, ...SHARED_OUTSIDE_UNIFORMS },
     polygonOffset: true,
     polygonOffsetFactor: -2,
     polygonOffsetUnits: -2,
     toneMapped: false,
     vertexShader: /* glsl */`
       varying vec2 vUv;
+      varying vec3 vArtW;
       void main() {
         vUv = uv;
+        vArtW = (modelMatrix * vec4(position, 1.0)).xyz;
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       }
     `,
     fragmentShader: /* glsl */`
-      uniform sampler2D tAtlas;
+      uniform sampler2D tAtlas, tLeafCookie;
       uniform float uRowIdx;
       varying vec2 vUv;
+      varying vec3 vArtW;
+      ${OUTSIDE_LIGHT_GLSL}
       void main() {
         float r = clamp(floor(uRowIdx + 0.5), 0.0, 6.0);
         float vLocal = clamp(vUv.y, 0.012, 0.988);
         float vAtlas = (6.0 - r + vLocal) / 7.0;
-        // WebGL2 SRGB8_ALPHA8 CanvasTexture already decodes sRGB -> linear on sample; apply exact makeArtMaterial pigment balance!
-        vec3 linCol = texture2D(tAtlas, vec2(clamp(vUv.x, 0.003, 0.997), vAtlas)).rgb * vec3(1.004, 1.000, 0.992);
-        gl_FragColor = vec4(clamp(linCol, 0.0, 1.0), 1.0);
+        // WebGL2 SRGB8_ALPHA8 CanvasTexture already decodes sRGB -> linear on sample; apply exact makeArtMaterial pigment & outside light balance!
+        vec3 baseLin = texture2D(tAtlas, vec2(clamp(vUv.x, 0.003, 0.997), vAtlas)).rgb * vec3(1.004, 1.000, 0.992);
+        if (dot(uOutWeights, vec4(1.0)) <= 0.0005 && uArtPop <= 0.0005) {
+          gl_FragColor = vec4(clamp(baseLin, 0.0, 1.0), 1.0);
+        } else {
+          gl_FragColor = vec4(evalOutsideArtColor(baseLin, vArtW, 0.0, tLeafCookie), 1.0);
+        }
         #include <colorspace_fragment>
       }
     `,
@@ -556,6 +565,7 @@ function makeTrackingEyeMaterial(base, origWH, box, over) {
       tAtlas:     { value: atlas },
       uGazeIdx,
       uIrisShift,
+      ...SHARED_OUTSIDE_UNIFORMS,
     },
     polygonOffset: true,
     polygonOffsetFactor: -2,
@@ -563,16 +573,20 @@ function makeTrackingEyeMaterial(base, origWH, box, over) {
     toneMapped: false,
     vertexShader: /* glsl */`
       varying vec2 vUv;
+      varying vec3 vArtW;
       void main() {
         vUv = uv;
+        vArtW = (modelMatrix * vec4(position, 1.0)).xyz;
         gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
       }
     `,
     fragmentShader: /* glsl */`
-      uniform sampler2D tAtlas;
+      uniform sampler2D tAtlas, tLeafCookie;
       uniform float uGazeIdx;
       uniform vec2 uIrisShift;
       varying vec2 vUv;
+      varying vec3 vArtW;
+      ${OUTSIDE_LIGHT_GLSL}
 
       float eyeApertureMask(vec2 uv) {
         // Exact sclera/iris apertures of 010 (542 x 90 plate); 0.0 on eyelids, nose bridge & border!
@@ -605,8 +619,12 @@ function makeTrackingEyeMaterial(base, origWH, box, over) {
                            * (smoothstep(0.135, 0.085, vUv.x) * step(0.055, vUv.x)
                             + smoothstep(0.755, 0.705, vUv.x) * step(0.680, vUv.x)) * mask;
         vec3 scleraWarm = mix(shiftedLin, vec3(0.74, 0.67, 0.60), canthusGuard * 0.72);
-        vec3 linCol = scleraWarm * vec3(1.004, 1.000, 0.992);
-        gl_FragColor = vec4(clamp(linCol, 0.0, 1.0), 1.0);
+        vec3 baseLin = scleraWarm * vec3(1.004, 1.000, 0.992);
+        if (dot(uOutWeights, vec4(1.0)) <= 0.0005 && uArtPop <= 0.0005) {
+          gl_FragColor = vec4(clamp(baseLin, 0.0, 1.0), 1.0);
+        } else {
+          gl_FragColor = vec4(evalOutsideArtColor(baseLin, vArtW, 0.0, tLeafCookie), 1.0);
+        }
         #include <colorspace_fragment>
       }
     `,
@@ -1082,6 +1100,10 @@ function applyResponsivePose(cam, rawPose) {
 function evaluate(t, clothSec = t) {
   camera.near = 0.04;
   if (hall.bakedU) hall.bakedU.uTime.value = clothSec;
+  SHARED_OUTSIDE_UNIFORMS.uOutTime.value = clothSec;
+  if (SHARED_OUTSIDE_UNIFORMS.uOutWeights.value.x > 0.001 && !Q.has('cap')) {
+    hall.markReflDirty();
+  }
   if (manualPose) {
     applyResponsivePose(camera, manualPose);
   } else {
@@ -1144,6 +1166,7 @@ function evaluate(t, clothSec = t) {
     lf.rotation.y = lf.userData.baseY + THREE.MathUtils.degToRad(80 * open) * (isPlain ? 1 : (isR ? 1 : -1));
   }
   hall.setEntranceOpen?.(open);
+  hall.setDynActorsActive?.(!manualPose && ((birdsOn && birds.some(b => b.carrier.visible)) || leafGroup.visible));
   PU.uPaintOrigin.value = a3 ? a3.s : L.cam.blink.s;
   const tPostBlink = t - (TL.T_BLINK + 0.56);
   PU.uPaintActive.value = (!manualPose && paintOn && tPostBlink > 0) ? 1 : (manualPose && paintOn ? 1 : 0);
@@ -1353,6 +1376,13 @@ for (const [idSl, stateKey] of [
     };
   }
 }
+const outMode = Q.has('out') ? Q.get('out') : 'c05';
+{
+  const outPatch = { outLight: outMode };
+  if (Q.has('outStr')) outPatch.outStrength = +Q.get('outStr');
+  if (Q.has('artPop')) outPatch.artPop      = +Q.get('artPop');
+  mockMgr.applyState(outPatch);
+}
 if (Q.has('mock') || Q.get('lab') === '1') {
   if (Q.has('mock')) {
     const mp = MOCK_PRESETS[Q.get('mock')] || MOCK_PRESETS.thDefault;
@@ -1466,11 +1496,13 @@ if (Q.has('cap')) await hall.warmTexturesStaggered();
 filmLoadState.progress = Math.max(filmLoadState.progress, 0.78);
 await Promise.all([
   hall.warmTexturesStaggered(),
+  outMode !== 'v9' ? Promise.all([warmOutsideCpuImages(outMode), waitOutsideCyclesReady()]) : null,
   logoOpener.warm(),
   ensureWomen(),
   clothsOn ? ensureBlueCloths() : null,
   birdsOn ? ensureBirds() : null,
 ]);
+hall.bindSceneToneUniforms?.();
 filmLoadState.progress = Math.max(filmLoadState.progress, 0.94);
 evaluate(t, t);
 hall.warmAllRenderPaths(camera, getWarmExtras());
